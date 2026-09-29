@@ -1,0 +1,60 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "rootDir": "src",
+    "outDir": "dist",
+    "tsBuildInfoFile": "dist/.tsbuildinfo",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ]
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "src/**/*.test.ts"
+  ],
+  "references": [
+    {
+      "path": "../../packages/editor-core"
+    },
+    {
+      "path": "../../packages/runtime"
+    },
+    {
+      "path": "../../packages/plugin-api"
+    },
+    {
+      "path": "../../packages/render-canvas2d"
+    },
+    {
+      "path": "../../packages/render-webgl"
+    },
+    {
+      "path": "../../packages/render-null"
+    },
+    {
+      "path": "../../packages/audio-webaudio"
+    },
+    {
+      "path": "../../packages/audio-null"
+    },
+    {
+      "path": "../../packages/input-browser"
+    },
+    {
+      "path": "../../packages/input-script"
+    },
+    {
+      "path": "../../packages/assets"
+    },
+    {
+      "path": "../../packages/project-store"
+    },
+    {
+      "path": "../../packages/save-store"
+    }
+  ]
+}

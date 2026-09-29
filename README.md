@@ -3,8 +3,9 @@
 ブラウザで動く RPGツクール風のゲーム制作ツールです。
 マップやイベントを作る **エディタ** と、作ったゲームを遊ぶ **プレイヤー（ランタイム）** で構成します。
 
-> **ステータス：設計フェーズ**
-> 実装コードはまだありません。設計は [`docs/`](./docs/) にあります。
+> **ステータス：M0（基盤）完了、M1 に着手前**
+> モノレポ・ビルド・テスト・依存ルール検査・CI が動きます。各パッケージは空（`test-utils` の `manualScheduler` と契約スイートの骨格、`runtime` の `Scheduler` ポートのみ）です。
+> 設計は [`docs/`](./docs/) にあります。
 
 ## 作るもの
 
@@ -101,7 +102,7 @@
 
 | # | 内容 | 目安 | 完了条件 |
 |---|---|---|---|
-| M0 | 基盤（モノレポ、CI、依存ルール lint） | 1〜2週 | 依存ルール違反を検出できる |
+| M0 ✅ | 基盤（モノレポ、CI、依存ルール lint） | 1〜2週 | 依存ルール違反を検出できる |
 | M1 | schema + core の骨格、式言語、基本コマンド | 2〜3週 | リプレイフィクスチャ 3 本が通る |
 | M2 | runtime + 最小プレイヤー | 2〜3週 | ブラウザでマップを歩き、メッセージが出る |
 | M3 | セーブ + メニュー | 1〜2週 | セーブ → リロード → ロードで同じ位置から再開できる |
@@ -112,13 +113,21 @@
 
 詳細は [`17-milestones.md`](./docs/17-milestones.md) にあります。
 
-## 開発コマンド（予定）
+## 開発
+
+必要なもの：Node.js 22 以上、pnpm 10（`corepack enable` で `packageManager` の版が使えます）。
 
 ```sh
+pnpm install
+pnpm build          # 全パッケージを tsc -b でビルド（パッケージごとの lib / 参照制約つき）
+pnpm typecheck      # テストを含む全体の型検査
 pnpm test           # 単体・プロパティ・契約・リプレイ・スナップショット（Node）
-pnpm test:browser   # Playwright（ピクセル差分、E2E）
-pnpm lint:deps      # 依存ルール検査
+pnpm test:browser   # Playwright（Chromium。ピクセル差分、E2E）
+pnpm lint:deps      # 依存ルール検査（dependency-cruiser + package.json 検査）
 ```
+
+依存ルールの許可関係は [`tools/dependency-rules.cjs`](./tools/dependency-rules.cjs) が単一情報源です。
+[`00-principles.md`](./docs/00-principles.md) の依存ルールを変えるときは、このファイルも同時に更新してください。
 
 ## ライセンス
 

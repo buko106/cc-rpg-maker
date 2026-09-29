@@ -1,0 +1,59 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./packages/schema"
+    },
+    {
+      "path": "./packages/core"
+    },
+    {
+      "path": "./packages/runtime"
+    },
+    {
+      "path": "./packages/render-canvas2d"
+    },
+    {
+      "path": "./packages/render-webgl"
+    },
+    {
+      "path": "./packages/render-null"
+    },
+    {
+      "path": "./packages/audio-webaudio"
+    },
+    {
+      "path": "./packages/audio-null"
+    },
+    {
+      "path": "./packages/input-browser"
+    },
+    {
+      "path": "./packages/input-script"
+    },
+    {
+      "path": "./packages/assets"
+    },
+    {
+      "path": "./packages/project-store"
+    },
+    {
+      "path": "./packages/save-store"
+    },
+    {
+      "path": "./packages/editor-core"
+    },
+    {
+      "path": "./packages/plugin-api"
+    },
+    {
+      "path": "./packages/test-utils"
+    },
+    {
+      "path": "./apps/editor-ui"
+    },
+    {
+      "path": "./apps/player"
+    }
+  ]
+}
