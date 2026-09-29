@@ -26,6 +26,14 @@ jobs:
       - run: pnpm lint:deps
       # 単体・プロパティ・契約・リプレイ・スナップショットに加え、カバレッジ閾値（schema / core）を検査する
       - run: pnpm test:coverage
+      # カバレッジを Codecov に送る。リポジトリの Secrets に CODECOV_TOKEN が必要。
+      # 送信の失敗（トークン未設定・Codecov 側の障害）で CI を落とさない。
+      - uses: codecov/codecov-action@v5
+        if: ${{ !cancelled() }}
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage/lcov.info
+          fail_ci_if_error: false
 
   # pnpm test:browser（Playwright、Chromium のみ）も PR 必須
   browser:

@@ -7,6 +7,8 @@ export default defineConfig({
     environment: "node",
     coverage: {
       provider: "v8",
+      // text: ログ表示、lcov: Codecov への送信用（coverage/lcov.info）
+      reporter: ["text", "lcov"],
       // 実装コードのみ。テスト・テストユーティリティ・型だけのファイルは除く。
       include: ["packages/*/src/**/*.ts"],
       exclude: ["**/*.test.ts", "packages/test-utils/**", "**/index.ts", "**/*.d.ts"],
