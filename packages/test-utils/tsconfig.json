@@ -16,7 +16,19 @@
   ],
   "references": [
     {
+      "path": "../../packages/assets"
+    },
+    {
+      "path": "../../packages/audio-null"
+    },
+    {
       "path": "../../packages/core"
+    },
+    {
+      "path": "../../packages/input-script"
+    },
+    {
+      "path": "../../packages/render-null"
     },
     {
       "path": "../../packages/runtime"

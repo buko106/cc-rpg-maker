@@ -9,17 +9,21 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@rpg/runtime": "workspace:*",
-    "@rpg/plugin-api": "workspace:*",
-    "@rpg/render-canvas2d": "workspace:*",
-    "@rpg/render-webgl": "workspace:*",
-    "@rpg/render-null": "workspace:*",
-    "@rpg/audio-webaudio": "workspace:*",
+    "@rpg/assets": "workspace:*",
     "@rpg/audio-null": "workspace:*",
+    "@rpg/audio-webaudio": "workspace:*",
     "@rpg/input-browser": "workspace:*",
     "@rpg/input-script": "workspace:*",
-    "@rpg/assets": "workspace:*",
+    "@rpg/plugin-api": "workspace:*",
     "@rpg/project-store": "workspace:*",
-    "@rpg/save-store": "workspace:*"
+    "@rpg/render-canvas2d": "workspace:*",
+    "@rpg/render-null": "workspace:*",
+    "@rpg/render-webgl": "workspace:*",
+    "@rpg/runtime": "workspace:*",
+    "@rpg/save-store": "workspace:*",
+    "@rpg/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "@rpg/test-utils": "workspace:*"
   }
 }

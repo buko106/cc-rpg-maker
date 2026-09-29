@@ -1,0 +1,154 @@
+{
+  "formatVersion": 1,
+  "meta": {
+    "id": "demo",
+    "title": "デモ：はじまりの村",
+    "createdAt": "2026-01-01T00:00:00Z",
+    "updatedAt": "2026-01-01T00:00:00Z"
+  },
+  "system": {
+    "startMap": "map_town",
+    "startX": 3,
+    "startY": 3,
+    "initialParty": [
+      "actor_hero"
+    ],
+    "tileSize": 32,
+    "screen": {
+      "width": 320,
+      "height": 256
+    },
+    "bgm": {},
+    "terms": {
+      "newGame": "ニューゲーム"
+    }
+  },
+  "maps": {
+    "map_town": {
+      "id": "map_town",
+      "name": "はじまりの村",
+      "order": 0
+    },
+    "map_house": {
+      "id": "map_house",
+      "name": "村人の家",
+      "order": 1
+    }
+  },
+  "tilesets": {
+    "ts_demo": {
+      "id": "ts_demo",
+      "name": "デモ",
+      "image": {
+        "asset": "b9b596c2f04468ac"
+      },
+      "passage": [
+        15,
+        15,
+        0,
+        15,
+        15,
+        15,
+        15
+      ]
+    }
+  },
+  "database": {
+    "actors": {
+      "actor_hero": {
+        "id": "actor_hero",
+        "name": "勇者",
+        "classId": "class_hero",
+        "initialLevel": 1,
+        "walk": {
+          "asset": "bb2e23b45d1f4d4d"
+        },
+        "equips": {}
+      }
+    },
+    "classes": {
+      "class_hero": {
+        "id": "class_hero",
+        "name": "戦士",
+        "skills": [],
+        "params": {
+          "mhp": {
+            "base": 100,
+            "growth": 10
+          },
+          "mmp": {
+            "base": 20,
+            "growth": 2
+          },
+          "atk": {
+            "base": 10,
+            "growth": 2
+          },
+          "def": {
+            "base": 10,
+            "growth": 2
+          },
+          "mat": {
+            "base": 10,
+            "growth": 2
+          },
+          "mdf": {
+            "base": 10,
+            "growth": 2
+          },
+          "agi": {
+            "base": 10,
+            "growth": 2
+          },
+          "luk": {
+            "base": 10,
+            "growth": 2
+          }
+        }
+      }
+    },
+    "skills": {},
+    "items": {},
+    "enemies": {},
+    "troops": {},
+    "commonEvents": {}
+  },
+  "assets": {
+    "entries": {
+      "b9b596c2f04468ac": {
+        "name": "tileset.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 797,
+        "width": 224,
+        "height": 32
+      },
+      "bb2e23b45d1f4d4d": {
+        "name": "hero.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 660,
+        "width": 96,
+        "height": 128
+      },
+      "0eefde69801856a9": {
+        "name": "npc.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 658,
+        "width": 96,
+        "height": 128
+      }
+    }
+  },
+  "switches": {
+    "sw_talked": {
+      "name": "村人と話した"
+    }
+  },
+  "variables": {
+    "var_talk_count": {
+      "name": "会話回数"
+    }
+  }
+}

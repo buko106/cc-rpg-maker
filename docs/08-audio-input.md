@@ -67,3 +67,10 @@ export function hold(button: Button, frames: number): InputFrame[]; // ヘルパ
 ## 完了条件
 - null/script 実装と契約テストが先に完成し、06 のハーネスで使える。
 - browser 実装が `apps/player` で動作する。
+
+## 実装メモ（M2 で確定した点）
+- **実装済み**：`audio-null`、`input-script`、`input-browser`（キーボード・ゲームパッド）。`audio-webaudio` は M4。**タッチ/ポインタ（仮想十字キー、`InputFrame.pointer`）は未実装**（後続）。
+- `NullAudioOut.calls` の要素は `{ method, args }`。`dispose` 自体は記録され、それ以降の呼び出しは記録されない。
+- `input-script`：`createScriptInput(frames?)` は `push` / `remaining` を持ち、`dispose` で残りを捨てる。`keys(...buttons)` は押下開始を含む 1 フレーム、`hold(button, n)` は最初のフレームだけ押下開始。
+- `input-browser`：`KeyMap` のキーは `KeyboardEvent.code`（`ArrowUp`、`KeyZ` など）。既定は 方向 = 矢印/WASD、決定 = Z/Enter/Space、キャンセル = X/Esc、メニュー = M、shift = Shift、pageup/down = PageUp/PageDown。割り当てたキーは `preventDefault` する（スクロール防止）。キーリピートは新しい押下として数えない。`poll` の間に押して離したボタンも、そのフレームは `pressed` かつ `triggered` に入る（不変条件 1 を保つ）。`blur` で押しっぱなしを解除する。ゲームパッドは `{ gamepad: true }` で有効（標準配置：A = 決定、B = キャンセル、Y = メニュー、LB/RB = pageup/down、十字キーとスティック）。
+- **契約テスト**：`inputSourceContract(name, make)` の `make` は `{ source, press(button), release(button) }`（デバイス入力を再現する操作口）を返す。`audioOutContract` は不変条件 2, 3 を検証する（不変条件 1 = BGM の多重再生防止は再生ノードが要るので webaudio のテストで）。

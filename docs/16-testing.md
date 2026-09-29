@@ -78,3 +78,9 @@ saveRepositoryContract("idb", () => createIdbSaveRepository({ ... }), { supports
 - `pnpm test:browser`：Playwright 層。PR 必須（並列、Chromium のみ。Firefox/WebKit は nightly）。
 - `pnpm lint:deps`：依存ルール検査。PR 必須。
 - カバレッジ閾値：`schema`/`core` 90%、その他 70%。
+
+## 実装メモ（M2 で確定した点）
+- 契約スイートは Renderer / AudioOut / InputSource / AssetBytesSource が実装済み（ProjectRepository / SaveRepository は骨格のまま）。契約テストの `make` の形はポートごとに異なる（InputSource は操作口 `InputDriver`、AssetBytesSource は登録内容つきの `BytesSourceFixture`）。`test-utils` はアダプタ型に依存しないよう、必要な形を構造的に定義している。
+- `runtimeHarness`（`createRuntimeHarness`）と、FrameSpec の要約 `summarizeFrame` を追加。
+- カバレッジ閾値：`schema` / `core` は 90%（branches 85%）、実装済みのその他のパッケージ（runtime・assets・render-null・render-canvas2d・audio-null・input-script・input-browser）は 70%。
+- ブラウザ層：`pnpm test:browser` は demo プロジェクトをビルドして静的サーバで配信する（`playwright.config.ts` の `webServer`）。

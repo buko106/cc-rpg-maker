@@ -132,3 +132,18 @@ export type UiNode =
 ## 完了条件
 - `apps/player` から起動してタイトル → マップ歩行 → メッセージ表示 → 戦闘 → セーブ → ロードが動く。
 - 上記テストが通る。
+
+## 実装メモ（M2 で確定した点）
+- **実装範囲**：ループ、マップシーンとメッセージの投影、Effect 分配、`requestMapData` の遅延ロード。`plugins` / `saves`（`SaveRepository`）/ 戦闘・メニュー・タイトルの投影は後続（M3〜M4）。`start()` は M2 ではタイトルを経ずにマップシーンから始まる。
+- **`RuntimeDeps`**：`plugins` と `saves` を除き、`onError(error)`（ループ中の未捕捉エラー。呼ばれるとループは止まる）を追加。`seed` 省略時は開始時の `scheduler.now()`。`Runtime` に `status`（`created | running | loading | stopped | failed`）を追加。
+- **`project(state, view, fx)` ではなく `projectFrame(state, view, fx?)`**（純粋関数）。`Runtime.project(state?)` はその薄いラッパ。`alpha`（ステップ間補間）は使わない：補間は `Character.realX/realY` が持っている。
+- **ループ**：`start()` が `lastNow = scheduler.now()` を置くので、最初のフレーム境界から 1 ステップ進む。ステップ数の上限は 15（`acc + 1e-6 >= STEP_MS` で浮動小数点誤差を許容）。ステップが無いフレームでは `input.poll()` を呼ばない（押下を失わない）。
+- **遅延ロード**：`requestMapData` を受けると `status = "loading"`（ステップも `poll` も止まる。描画は続く）。`frame()` はロードの完了まで待つ。失敗したら `onError` を呼んで `failed`。同時に 2 つ以上の要求は出ない（core が `transfer.requested` で一度だけ発行し、ロード中は止まるため）。
+- **Effect 分配**は `distributeEffect(effect, sinks)`（`effects.ts`）。未対応（`requestSave` / `requestLoad` / `plugin` / 未知の種類）は `logger.warn` に流れる（不変条件 5）。`screenShake` / `screenFlash` は `GameState` に入れない見た目だけの一時状態 `VisualFx`（`visual-fx.ts`）で、`step` ごとに 1 進む。
+- **`FrameSpec` の追加点**：タイルレイヤの `tileset` は画像が無いタイルセットで `null`。`UiNode.window` に `variant: "normal" | "dim"`、`UiNode.text` に色替えのある行用の `runs`。
+- **描画規約**：
+  - タイルセット画像：タイル ID `t`（1 始まり、0 = 空）は画像の `t` 番目のセル（左→右、上→下）。セル 0 は未使用。
+  - キャラクターシート：1 キャラ = 横 3 パターン × 縦 4 方向（下・左・右・上）、1 コマ = `tileSize` 四方。`index` 番目のキャラは（3 × tileSize）×（4 × tileSize）のブロックを左→右、上→下に数える（横のブロック数はマニフェストの `width` から）。歩行中は移動の前半・後半でパターン 0 / 2、止まっているときは 1。
+  - 描画順：タイルレイヤ（`z` = レイヤ番号）→ スプライト（`below` 100 → `same` 200 → `above` 300。各レイヤ内は y ソート、同じ高さならプレイヤーが最後）。タイルレイヤはすべてキャラクターの下（キャラクターより手前のタイルレイヤは後続）。
+- **メッセージ**：位置は `top` / `middle` / `bottom`（画面端から 4px の余白、高さは 4 行分 + 余白）、背景は `window`（枠付き）/ `dim` / `transparent`（文字だけ）。表示は先頭 4 行まで（ページ送り・選択肢は後続）。制御文字は `\V[変数ID]` `\N[アクターID]` `\C[色番号]` `\\`（`text-codec.ts`）。ID は文字列（`[A-Za-z0-9_-]`）で、数字ではない。
+- **テスト**：`test-utils` の `createRuntimeHarness({ project, seed?, deferMaps?, failMaps? })` が null / script / memory アダプタと手動スケジューラで開始済みの Runtime を作る（`play(...frames)`、`advanceFrames(n)`、`projectSource.release(id)`）。FrameSpec スナップショットは `summarizeFrame` でタイル配列を畳んで保存する。

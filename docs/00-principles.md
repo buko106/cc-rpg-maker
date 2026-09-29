@@ -41,7 +41,7 @@ save-store    → core（Snapshot 型のみ）
 editor-core   → schema, project-store（ポート型のみ）
 plugin-api    → core, runtime, editor-core（公開型のみ）
 editor-ui     → editor-core, runtime, plugin-api, 任意のアダプタ
-player        → runtime, plugin-api, 任意のアダプタ
+player        → runtime, plugin-api, schema（project.json の検証用）, 任意のアダプタ
 test-utils    → 任意（テスト専用）
 ```
 

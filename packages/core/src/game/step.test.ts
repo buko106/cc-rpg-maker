@@ -150,6 +150,15 @@ describe("talking to an event", () => {
     expect(s.message.text).toBe("また会ったね。");
   });
 
+  it("applies the page change in the same frame the event finishes, so an immediate 'ok' starts the new page", () => {
+    let s = press(nextToNpc, "ok"); // 1 回目の会話を開く
+    s = press(s, "ok"); // 閉じる。この step のうちにインタプリタが終わりスイッチが入る
+    expect(s.switches["sw_talked" as never]).toBe(true);
+    expect(s.map.events["ev_npc" as never]).toMatchObject({ pageIndex: 1 });
+    s = press(s, "ok"); // 次のフレームですぐ話しかけても、古いページは起動しない
+    expect(s.message.text).toBe("また会ったね。");
+  });
+
   it("does nothing when 'ok' is pressed facing empty ground", () => {
     const s = press(initialState(ctx, "x"), "ok");
     expect(s.interpreters).toHaveLength(0);

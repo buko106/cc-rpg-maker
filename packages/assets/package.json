@@ -10,5 +10,8 @@
   },
   "dependencies": {
     "@rpg/runtime": "workspace:*"
+  },
+  "devDependencies": {
+    "@rpg/test-utils": "workspace:*"
   }
 }

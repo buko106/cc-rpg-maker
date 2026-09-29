@@ -1,0 +1,162 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`projectFrame（マップシーン） > [snapshot] minimal の初期状態 1`] = `
+{
+  "camera": {
+    "x": 0,
+    "y": 0,
+  },
+  "layers": [
+    {
+      "height": 8,
+      "kind": "tiles",
+      "tileSize": 32,
+      "tiles": "80 tiles, 80 non-empty",
+      "tileset": null,
+      "width": 10,
+      "z": 0,
+    },
+    {
+      "height": 8,
+      "kind": "tiles",
+      "tileSize": 32,
+      "tiles": "80 tiles, 32 non-empty",
+      "tileset": null,
+      "width": 10,
+      "z": 1,
+    },
+    {
+      "kind": "sprites",
+      "sprites": [
+        {
+          "asset": "0123456789abcdef",
+          "sh": 32,
+          "sw": 32,
+          "sx": 32,
+          "sy": 0,
+          "x": 160,
+          "y": 64,
+        },
+      ],
+      "z": 200,
+    },
+  ],
+  "overlay": {
+    "fade": 0,
+    "shake": {
+      "dx": 0,
+      "dy": 0,
+    },
+    "tint": {
+      "a": 0,
+      "b": 0,
+      "g": 0,
+      "r": 0,
+    },
+  },
+  "size": {
+    "height": 256,
+    "width": 320,
+  },
+  "ui": [],
+}
+`;
+
+exports[`projectFrame（マップシーン） > [snapshot] transfer-demo の初期状態 1`] = `
+{
+  "camera": {
+    "x": 0,
+    "y": 0,
+  },
+  "layers": [
+    {
+      "height": 8,
+      "kind": "tiles",
+      "tileSize": 32,
+      "tiles": "80 tiles, 80 non-empty",
+      "tileset": null,
+      "width": 10,
+      "z": 0,
+    },
+    {
+      "height": 8,
+      "kind": "tiles",
+      "tileSize": 32,
+      "tiles": "80 tiles, 32 non-empty",
+      "tileset": null,
+      "width": 10,
+      "z": 1,
+    },
+    {
+      "kind": "sprites",
+      "sprites": [
+        {
+          "asset": "0123456789abcdef",
+          "sh": 32,
+          "sw": 32,
+          "sx": 32,
+          "sy": 0,
+          "x": 256,
+          "y": 32,
+        },
+      ],
+      "z": 200,
+    },
+  ],
+  "overlay": {
+    "fade": 0,
+    "shake": {
+      "dx": 0,
+      "dy": 0,
+    },
+    "tint": {
+      "a": 0,
+      "b": 0,
+      "g": 0,
+      "r": 0,
+    },
+  },
+  "size": {
+    "height": 256,
+    "width": 320,
+  },
+  "ui": [],
+}
+`;
+
+exports[`projectFrame（マップシーン） > [snapshot] 会話中（メッセージウィンドウ表示中）は UI ノードだけを見る 1`] = `
+{
+  "camera": {
+    "x": 0,
+    "y": 0,
+  },
+  "ui": [
+    {
+      "children": [
+        {
+          "color": {
+            "a": 1,
+            "b": 255,
+            "g": 255,
+            "r": 255,
+          },
+          "font": {
+            "family": "sans-serif",
+            "size": 16,
+          },
+          "kind": "text",
+          "text": "こんにちは！",
+          "x": 14,
+          "y": 154,
+        },
+      ],
+      "h": 108,
+      "kind": "window",
+      "variant": "normal",
+      "w": 312,
+      "x": 4,
+      "y": 144,
+    },
+  ],
+}
+`;

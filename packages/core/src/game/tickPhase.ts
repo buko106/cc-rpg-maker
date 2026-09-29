@@ -88,7 +88,7 @@ function advanceMovement(state: GameState, map: MapData): GameState {
 
 /**
  * 時間を 1 フレーム進める。順序：tick 加算 → イベントページ更新 → 自動実行/並列イベントの起動 →
- * インタプリタ実行 → 場所移動 → 移動の補間 → カメラ。
+ * インタプリタ実行 → イベントページ更新 → 場所移動 → 移動の補間 → カメラ。
  */
 export function handleTick(state: GameState, input: InputFrame, ctx: Ctx): StepResult {
   const effects: Effect[] = [];
@@ -103,6 +103,8 @@ export function handleTick(state: GameState, input: InputFrame, ctx: Ctx): StepR
   const ran = runInterpreters(s, input, ctx);
   s = ran.state;
   effects.push(...ran.effects);
+  // イベントが変えたスイッチ等を同じフレームのうちにページへ反映する（次のフレームの入力フェーズで古いページが起動しないように）
+  if (mapAtStart && s.map.mapId === mapAtStart.id) s = refreshEventPages(s, mapAtStart);
 
   if (s.scene.kind === "map") {
     const moved = applyTransfer(s, ctx);
