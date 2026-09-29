@@ -1,0 +1,20 @@
+{
+  "project": "fixtures/projects/v1/minimal",
+  "seed": "walk",
+  "inputs": [
+    { "hold": "right", "frames": 100 },
+    { "hold": "down", "frames": 40 },
+    { "wait": 20 }
+  ],
+  "expect": { "finalStateHash": "5c5b5c4cbcb1c7a65e76361dd032b5c33128eb93350a8d944ac6e34619124cc9", "effects": { "log": 0 } },
+  "assertions": [
+    { "atTick": 16, "path": "map.player.x", "equals": 3 },
+    { "atTick": 32, "path": "map.player.x", "equals": 4 },
+    { "atTick": 100, "path": "map.player.x", "equals": 4 },
+    { "atTick": 100, "path": "map.player.direction", "equals": "right" },
+    { "atTick": 100, "path": "interpreters", "equals": [] },
+    { "atTick": 160, "path": "map.player.y", "equals": 5 },
+    { "atTick": 160, "path": "map.player.moving", "equals": false },
+    { "atTick": 160, "path": "playtimeTicks", "equals": 160 }
+  ]
+}

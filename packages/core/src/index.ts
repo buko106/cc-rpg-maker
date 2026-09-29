@@ -5,5 +5,24 @@
  * ブラウザ API（DOM / タイマー / Math.random / Date.now）に依存しない。
  */
 export * from "./expression/index.js";
+export * from "./interpreter/index.js";
+export { computeCamera, activePage, activePageIndex, canPass, eventsToTrigger, moveCharacter, newCharacter, refreshEventPages } from "./map/index.js";
+export type { PassabilityCtx } from "./map/index.js";
+export { dispatch, initialState, paramAt, step } from "./game/index.js";
+export type { Action, InterpreterAction, StepResult } from "./game/index.js";
+export { createCtx } from "./ctx.js";
+export type { Ctx } from "./ctx.js";
+export { warn } from "./effects.js";
+export type { Effect, RGBA } from "./effects.js";
+export { emptyInput, inputFrame } from "./input.js";
+export type { Button, InputFrame } from "./input.js";
+export { createProjectView } from "./project-view.js";
+export type { ProjectView } from "./project-view.js";
 export { createRandom, restoreRandom } from "./random.js";
 export type { Clock, Random, RandomState } from "./random.js";
+export { fromSnapshot, migrateSnapshot, SNAPSHOT_VERSION, snapshotMigrations, stripTransient, toSnapshot } from "./snapshot.js";
+export type { SaveSnapshot, SerializedGameState, SnapshotError, SnapshotMigration } from "./snapshot.js";
+export { IDLE_MESSAGE, selfSwitchKey } from "./state.js";
+export type {
+  ActorState, BattleState, Character, EventRuntime, GameState, MapState, MessageState, PartyState, SceneState, TimerState,
+} from "./state.js";

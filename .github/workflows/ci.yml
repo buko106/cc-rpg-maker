@@ -24,7 +24,8 @@ jobs:
       - run: pnpm build
       - run: pnpm typecheck
       - run: pnpm lint:deps
-      - run: pnpm test
+      # 単体・プロパティ・契約・リプレイ・スナップショットに加え、カバレッジ閾値（schema / core）を検査する
+      - run: pnpm test:coverage
 
   # pnpm test:browser（Playwright、Chromium のみ）も PR 必須
   browser:

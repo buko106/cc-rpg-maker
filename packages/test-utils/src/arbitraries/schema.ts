@@ -15,7 +15,7 @@ const smallInt = fc.integer({ min: 0, max: 100 });
 const ratio = fc.integer({ min: 0, max: 100 }).map((n) => n / 100);
 const text = fc.string({ maxLength: 12 });
 const assetIdArb = fc.stringMatching(/^[0-9a-f]{16}$/);
-const isoDate = fc.date({ min: new Date("2000-01-01"), max: new Date("2100-01-01") }).map((d) => d.toISOString());
+const isoDate = fc.date({ min: new Date("2000-01-01"), max: new Date("2100-01-01"), noInvalidDate: true }).map((d) => d.toISOString());
 
 const jsonLeaf = fc.oneof(fc.string({ maxLength: 8 }), fc.integer(), fc.boolean(), fc.constant(null));
 const jsonValue: fc.Arbitrary<unknown> = fc.oneof(jsonLeaf, fc.array(jsonLeaf, { maxLength: 3 }));

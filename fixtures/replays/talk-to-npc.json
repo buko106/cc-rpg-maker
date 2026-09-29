@@ -1,0 +1,29 @@
+{
+  "project": "fixtures/projects/v1/minimal",
+  "seed": "talk",
+  "inputs": [
+    { "hold": "right", "frames": 100 },
+    { "press": "ok" },
+    { "wait": 5 },
+    { "press": "ok" },
+    { "wait": 5 },
+    { "press": "ok" },
+    { "wait": 5 },
+    { "press": "ok" },
+    { "wait": 5 }
+  ],
+  "expect": { "finalStateHash": "e7fd1bad34404ec3848c390e6ac33eb08fb1aefd388baaac9dbb5c47e443e09b", "effects": { "log": 0 } },
+  "assertions": [
+    { "atTick": 100, "path": "message.open", "equals": false },
+    { "atTick": 101, "path": "message.open", "equals": true },
+    { "atTick": 101, "path": "message.text", "equals": "こんにちは！" },
+    { "atTick": 106, "path": "message.open", "equals": true },
+    { "atTick": 107, "path": "message.open", "equals": false },
+    { "atTick": 107, "path": "switches.sw_talked", "equals": true },
+    { "atTick": 107, "path": "variables.var_talk_count", "equals": 1 },
+    { "atTick": 108, "path": "interpreters", "equals": [] },
+    { "atTick": 113, "path": "message.text", "equals": "また会ったね。" },
+    { "atTick": 119, "path": "variables.var_talk_count", "equals": 2 },
+    { "atTick": 119, "path": "map.events.ev_npc.pageIndex", "equals": 1 }
+  ]
+}

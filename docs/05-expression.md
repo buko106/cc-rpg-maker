@@ -77,3 +77,11 @@ export type Mutation = { kind: "setVar"; id: VariableId; value: number } | { kin
 ## 完了条件
 - 04 の `calcDamage` から利用され、戦闘テストが通る。
 - `03` の `ConditionalBranch` / `Script` から利用される。
+
+## 実装メモ（M1 で確定した点）
+- 文法は上記のとおり。`&&` `||` `!` `?:` の条件は**真偽値のみ**、算術は**数値のみ**（暗黙の型変換なし。`+` だけは片方が文字列なら連結）。不一致は `EvalError.kind === "typeMismatch"`。
+- 未定義の識別子は `unknownIdentifier`、ホワイトリスト外のメンバは `forbiddenMember`、関数名以外の呼び出しは `notCallable`。識別子・メンバの検索は `Object.hasOwn` で行い、`constructor` や `__proto__` には到達できない。
+- `registerFn` の関数は第 3 引数 `emit(mutation)` を受け取れる（副作用関数が変更操作を記録する）。`FormulaRegistry` に `get(name)` を追加。引数の不正は `FormulaError` を投げると評価器が `EvalError` に変換する。プラグイン関数が他の例外を投げても `functionError` になり、ゲームは止まらない。
+- `evaluate` が進めるのは `scope.rng`（`rand()` の消費）だけで、`vars` / `variable` / `switch` は変更しない。
+- ソースは最大 2000 文字、括弧・単項演算子のネストは最大 100（超えると `ParseError.reason` が `tooLong` / `tooDeep`）。手作りの極端に深い AST でスタックが溢れても `budget` エラーとして返る。
+- `ParseError` は `{ reason, message, pos, line, column }`。
