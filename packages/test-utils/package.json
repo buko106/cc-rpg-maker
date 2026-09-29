@@ -9,7 +9,11 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
+    "@rpg/assets": "workspace:*",
+    "@rpg/audio-null": "workspace:*",
     "@rpg/core": "workspace:*",
+    "@rpg/input-script": "workspace:*",
+    "@rpg/render-null": "workspace:*",
     "@rpg/runtime": "workspace:*",
     "@rpg/schema": "workspace:*"
   }

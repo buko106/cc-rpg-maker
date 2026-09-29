@@ -2,9 +2,8 @@
  * @rpg/test-utils — 共通テストユーティリティ（テスト専用）。
  *
  * 設計: docs/16-testing.md
- * M1 時点の内容: arbitraries（schema / state）、契約スイートの骨格、
- * harness（manualScheduler / interpreterHarness / replay / project / freeze）、fixtures ローダ。
- * runtimeHarness は M2 で追加する。
+ * M2 時点の内容: arbitraries（schema / state）、契約スイート（Renderer / AudioOut / InputSource / AssetBytesSource は実装済み、
+ * 残りは骨格）、harness（manualScheduler / interpreterHarness / replay / project / freeze / runtimeHarness / frame）、fixtures ローダ。
  */
 export * from "./contracts/index.js";
 export * from "./arbitraries/schema.js";
@@ -19,3 +18,6 @@ export { loadFixtureProject } from "./harness/project.js";
 export type { LoadedProject } from "./harness/project.js";
 export { expandInputs, getPath, hashState, listReplays, loadReplay, runReplay, stableStringify, updateReplayHash } from "./harness/replay.js";
 export type { ReplayFixture, ReplayInput, ReplayResult } from "./harness/replay.js";
+export { summarizeFrame } from "./harness/frame.js";
+export { createRuntimeHarness } from "./harness/runtimeHarness.js";
+export type { RuntimeHarness, RuntimeHarnessOptions, TestProjectSource } from "./harness/runtimeHarness.js";

@@ -1,0 +1,75 @@
+{
+  "id": "map_house",
+  "width": 10,
+  "height": 8,
+  "tileset": "ts_demo",
+  "layers": [
+    {
+      "name": "floor",
+      "tiles": [4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+    },
+    {
+      "name": "walls",
+      "tiles": [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 6, 2, 2, 2, 2]
+    }
+  ],
+  "events": {
+    "ev_elder": {
+      "id": "ev_elder",
+      "name": "おばあさん",
+      "x": 4,
+      "y": 3,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[1]ようこそ\\C[0]、わたしの家へ。\nゆっくりしていってね。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ],
+          "graphic": {
+            "asset": "0eefde69801856a9",
+            "index": 0,
+            "direction": "down"
+          }
+        }
+      ]
+    },
+    "ev_exit": {
+      "id": "ev_exit",
+      "name": "出口",
+      "x": 5,
+      "y": 7,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_town",
+                "x": 13,
+                "y": 3,
+                "dir": "down",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

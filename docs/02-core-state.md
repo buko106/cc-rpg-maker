@@ -187,3 +187,6 @@ export const snapshotMigrations: readonly { from: number; to: number; migrate(s:
 - **`Random`**：xoshiro128**（参照実装の既知ベクトルで検証）。`fork(label)` は元のシードとラベルだけで決まる。
 - `ProjectView` は `createProjectView(project, maps)` で作れる。`maps` は参照で保持され、後から追加すれば遅延ロードの完了として反映される。`createCtx(view)` は組み込みコマンドと式関数を登録済みの `Ctx` を返す。
 - 戦闘（`battle` の Action / `BattleState`）は M4。`BattleState` は型だけのプレースホルダ。
+
+## 実装メモ（M2 で確定した点）
+- **イベントページの更新は 1 フレームに 2 回**：フレームの頭と、インタプリタ実行の直後（イベントが変えたスイッチ・変数・セルフスイッチを同じフレームのうちにページへ反映する。次のフレームの入力フェーズで古いページが起動しないように）。

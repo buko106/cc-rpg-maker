@@ -16,6 +16,13 @@ export default defineConfig({
       thresholds: {
         "packages/schema/src/**": { statements: 90, branches: 85, functions: 90, lines: 90 },
         "packages/core/src/**": { statements: 90, branches: 85, functions: 90, lines: 90 },
+        // それ以外の実装済みパッケージは 70%（未実装のパッケージは対象外。実装したマイルストーンで追加する）
+        ...Object.fromEntries(
+          ["runtime", "assets", "render-null", "render-canvas2d", "audio-null", "input-script", "input-browser"].map((name) => [
+            `packages/${name}/src/**`,
+            { statements: 70, branches: 70, functions: 70, lines: 70 },
+          ]),
+        ),
       },
     },
   },

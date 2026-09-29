@@ -63,7 +63,7 @@ const ALLOWED = {
   "editor-core": ["schema", "project-store"],
   "plugin-api": ["core", "runtime", "editor-core"],
   "editor-ui": ["editor-core", "runtime", "plugin-api", ...ADAPTERS],
-  player: ["runtime", "plugin-api", ...ADAPTERS],
+  player: ["runtime", "plugin-api", "schema", ...ADAPTERS],
   "test-utils": "*",
 };
 

@@ -2,6 +2,11 @@
  * @rpg/assets — AssetSource ポートの実装、ローダ、キャッシュ。
  *
  * 設計: docs/09-assets.md
- * 実装マイルストーン: docs/17-milestones.md を参照（M0 時点では空）。
+ * M2 で実装済み：`memory` / `http` のバイト列ソースと、キャッシュ付き `AssetSource`。
+ * opfs / zip / embedded は後続（M7 のエクスポート、エディタ連携）。
  */
-export {};
+export { createAssetSource } from "./asset-source.js";
+export type { AssetSourceOptions, CachedAssetSource } from "./asset-source.js";
+export { assetExtension, createHttpBytesSource, createMemoryBytesSource } from "./bytes-source.js";
+export type { AssetBytesSource, HttpBytesSourceOptions, MemoryBytesSource } from "./bytes-source.js";
+export { hashAsset } from "./hash.js";

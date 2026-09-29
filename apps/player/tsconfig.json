@@ -18,25 +18,13 @@
   ],
   "references": [
     {
-      "path": "../../packages/runtime"
-    },
-    {
-      "path": "../../packages/plugin-api"
-    },
-    {
-      "path": "../../packages/render-canvas2d"
-    },
-    {
-      "path": "../../packages/render-webgl"
-    },
-    {
-      "path": "../../packages/render-null"
-    },
-    {
-      "path": "../../packages/audio-webaudio"
+      "path": "../../packages/assets"
     },
     {
       "path": "../../packages/audio-null"
+    },
+    {
+      "path": "../../packages/audio-webaudio"
     },
     {
       "path": "../../packages/input-browser"
@@ -45,13 +33,28 @@
       "path": "../../packages/input-script"
     },
     {
-      "path": "../../packages/assets"
+      "path": "../../packages/plugin-api"
     },
     {
       "path": "../../packages/project-store"
     },
     {
+      "path": "../../packages/render-canvas2d"
+    },
+    {
+      "path": "../../packages/render-null"
+    },
+    {
+      "path": "../../packages/render-webgl"
+    },
+    {
+      "path": "../../packages/runtime"
+    },
+    {
       "path": "../../packages/save-store"
+    },
+    {
+      "path": "../../packages/schema"
     }
   ]
 }

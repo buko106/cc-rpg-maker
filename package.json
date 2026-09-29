@@ -16,13 +16,15 @@
     "test:browser": "playwright test",
     "lint:deps": "depcruise packages apps --config .dependency-cruiser.cjs && node tools/check-manifests.mjs",
     "clean": "tsc -b --clean",
-    "test:coverage": "vitest run --coverage"
+    "test:coverage": "vitest run --coverage",
+    "demo": "node apps/player/scripts/build-web.mjs --project fixtures/projects/v1/demo && node tools/serve-static.mjs apps/player/dist-web 4173"
   },
   "devDependencies": {
     "@playwright/test": "~1.56.1",
     "@types/node": "^22.0.0",
     "@vitest/coverage-v8": "^4.1.11",
     "dependency-cruiser": "^17.0.0",
+    "esbuild": "^0.28.2",
     "fast-check": "^4.0.0",
     "typescript": "~5.9.0",
     "vitest": "^4.0.0"

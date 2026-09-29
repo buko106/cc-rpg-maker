@@ -53,3 +53,11 @@ export function createAssetSource(bytes: AssetBytesSource, manifest: AssetManife
 - `memory` + 契約テストが完成し、06/07 のテストで使える。
 - `http` と `embedded` が `apps/player` で動作する。
 - `opfs`, `zip` は 10 と連携して `apps/editor-ui` で動作する。
+
+## 実装メモ（M2 で確定した点）
+- **実装済み**：`hashAsset`、`AssetBytesSource`（`memory` / `http`）、`createAssetSource`（LRU キャッシュ・同時要求の合流・`preload` / `evict` / `stats`）。`opfs` / `zip` / `embedded` は後続（M5〜M6）。
+- `AssetError`（`kind`: `notFound` / `hashMismatch` / `decodeFailed` / `network`、`id`）は runtime が定義して export する（`AssetSource` の reject の型のため）。
+- `createHttpBytesSource(baseUrl, manifest, { fetch? })`：URL は `baseUrl/{id}.{ext}`。拡張子はマニフェストの `name` から（無ければ MIME から推測）。マニフェストに無い ID は通信せず `undefined`、404 も `undefined`、それ以外の失敗は reject。
+- `createAssetSource` の追加オプション：`decodeImage`（既定は `createImageBitmap`。Node のテストでは差し替える）。1 つで `maxCacheBytes` を超えるアセットはキャッシュしない。`verifyHash` の既定は false（`bootPlayer` も false。ID がそのままファイル名なので、エディタ側の取り込み時に検証する）。**pin（`preload` したものを退避させない）は未実装**。
+- 契約テスト：`assetBytesSourceContract(name, make)` の `make` は `{ source, entries, missingId }` を返す。
+- デモ用アセット（`fixtures/projects/v1/demo/assets/`）は `tools/make-demo-assets.mjs` で生成した PNG。ファイル名が内容ハッシュと一致することは `apps/player/src/demo-fixture.test.ts` で検証している。
