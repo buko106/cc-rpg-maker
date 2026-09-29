@@ -1,5 +1,6 @@
 // 各パッケージの package.json が、依存ルール（tools/dependency-rules.cjs）に反する
 // `@rpg/*` 依存を宣言していないかを検査する。
+// devDependencies はテスト用なので、test-utils も許可する。
 import { readdirSync, readFileSync, existsSync } from "node:fs";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -40,7 +41,7 @@ export function checkManifests(root) {
           const target = dep.slice("@rpg/".length);
           if (!NAMES.includes(target)) {
             errors.push(`${parent}/${name}: ${field} に未知のパッケージ ${dep}`);
-          } else if (!isAllowed(name, target)) {
+          } else if (!isAllowed(name, target, { test: field === "devDependencies" })) {
             errors.push(`${parent}/${name}: ${field} の ${dep} は依存ルールで許可されていない`);
           }
         }

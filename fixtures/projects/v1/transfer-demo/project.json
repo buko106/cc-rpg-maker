@@ -1,0 +1,124 @@
+{
+  "formatVersion": 1,
+  "meta": {
+    "id": "transfer-demo",
+    "title": "transfer-demo",
+    "createdAt": "2026-01-01T00:00:00Z",
+    "updatedAt": "2026-01-01T00:00:00Z"
+  },
+  "system": {
+    "startMap": "map_a",
+    "startX": 1,
+    "startY": 1,
+    "initialParty": [
+      "actor_hero"
+    ],
+    "tileSize": 32,
+    "screen": {
+      "width": 320,
+      "height": 256
+    },
+    "bgm": {},
+    "terms": {
+      "newGame": "ニューゲーム"
+    }
+  },
+  "maps": {
+    "map_a": {
+      "id": "map_a",
+      "name": "map_a",
+      "order": 0
+    },
+    "map_b": {
+      "id": "map_b",
+      "name": "map_b",
+      "order": 1
+    }
+  },
+  "tilesets": {
+    "ts_basic": {
+      "id": "ts_basic",
+      "name": "基本",
+      "passage": [15, 15, 0, 0]
+    }
+  },
+  "database": {
+    "actors": {
+      "actor_hero": {
+        "id": "actor_hero",
+        "name": "勇者",
+        "classId": "class_hero",
+        "initialLevel": 1,
+        "equips": {}
+      }
+    },
+    "classes": {
+      "class_hero": {
+        "id": "class_hero",
+        "name": "戦士",
+        "skills": [],
+        "params": {
+          "mhp": {
+            "base": 100,
+            "growth": 10
+          },
+          "mmp": {
+            "base": 20,
+            "growth": 2
+          },
+          "atk": {
+            "base": 10,
+            "growth": 2
+          },
+          "def": {
+            "base": 10,
+            "growth": 2
+          },
+          "mat": {
+            "base": 10,
+            "growth": 2
+          },
+          "mdf": {
+            "base": 10,
+            "growth": 2
+          },
+          "agi": {
+            "base": 10,
+            "growth": 2
+          },
+          "luk": {
+            "base": 10,
+            "growth": 2
+          }
+        }
+      }
+    },
+    "skills": {},
+    "items": {},
+    "enemies": {},
+    "troops": {},
+    "commonEvents": {}
+  },
+  "assets": {
+    "entries": {
+      "0123456789abcdef": {
+        "name": "hero.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 1024,
+        "width": 96,
+        "height": 128
+      }
+    }
+  },
+  "switches": {
+    "sw_entered": {
+      "name": "入室済み"
+    }
+  },
+  "variables": {
+    "var_visits": {
+      "name": "訪問回数"
+    }
+  }
+}

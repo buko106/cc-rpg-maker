@@ -131,6 +131,13 @@ importers:
       '@rpg/schema':
         specifier: workspace:*
         version: link:../schema
+      zod:
+        specifier: ^4.0.0
+        version: 4.6.5
+    devDependencies:
+      '@rpg/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
 
   packages/editor-core:
     dependencies:
@@ -204,13 +211,27 @@ importers:
         specifier: workspace:*
         version: link:../core
 
-  packages/schema: {}
+  packages/schema:
+    dependencies:
+      zod:
+        specifier: ^4.0.0
+        version: 4.6.5
+    devDependencies:
+      '@rpg/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
 
   packages/test-utils:
     dependencies:
+      '@rpg/core':
+        specifier: workspace:*
+        version: link:../core
       '@rpg/runtime':
         specifier: workspace:*
         version: link:../runtime
+      '@rpg/schema':
+        specifier: workspace:*
+        version: link:../schema
 
 packages:
 
@@ -830,6 +851,9 @@ packages:
     engines: {node: '>=8'}
     hasBin: true
 
+  zod@4.6.5:
+    resolution: {integrity: sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q==}
+
 snapshots:
 
   '@jridgewell/sourcemap-codec@1.6.0': {}
@@ -1291,3 +1315,5 @@ snapshots:
     dependencies:
       siginfo: 2.0.0
       stackback: 0.0.2
+
+  zod@4.6.5: {}

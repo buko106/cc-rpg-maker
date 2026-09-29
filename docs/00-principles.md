@@ -45,6 +45,8 @@ player        → runtime, plugin-api, 任意のアダプタ
 test-utils    → 任意（テスト専用）
 ```
 
+- 各パッケージの**テストファイル（`*.test.ts`）だけは、上記に加えて `test-utils` を import できる**（契約テスト・ハーネスを使うため）。`package.json` では `devDependencies` にのみ宣言する。プロダクションコードは `test-utils` を import してはならない。
+
 - 逆方向・横方向の import は `eslint-plugin-boundaries`（または `dependency-cruiser`）で禁止する。
 - `schema`, `core` の `tsconfig` は `lib: ["ES2022"]` のみ（`DOM` を含めない）。これにより DOM API への依存が型レベルで不可能になる。
 - ポート型は `packages/<name>/src/ports/*.ts` に置き、`index.ts` から re-export する。アダプタはこれのみを import する。

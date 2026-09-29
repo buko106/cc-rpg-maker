@@ -1,0 +1,114 @@
+{
+  "id": "map_start",
+  "width": 10,
+  "height": 8,
+  "tileset": "ts_basic",
+  "layers": [
+    {
+      "name": "ground",
+      "tiles": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    },
+    {
+      "name": "walls",
+      "tiles": [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+    }
+  ],
+  "events": {
+    "ev_npc": {
+      "id": "ev_npc",
+      "name": "村人",
+      "x": 5,
+      "y": 2,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "こんにちは！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_talked"
+                ],
+                "value": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_talk_count"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            }
+          ],
+          "graphic": {
+            "asset": "0123456789abcdef",
+            "index": 0,
+            "direction": "down"
+          }
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_talked",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "また会ったね。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_talk_count"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            }
+          ],
+          "graphic": {
+            "asset": "0123456789abcdef",
+            "index": 0,
+            "direction": "down"
+          }
+        }
+      ]
+    }
+  }
+}
