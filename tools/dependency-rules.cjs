@@ -69,9 +69,16 @@ const ALLOWED = {
 
 const NAMES = Object.keys(LOCATIONS);
 
-/** `from` が `to` を import してよいか。 */
-function isAllowed(from, to) {
+/** テストコード（`*.test.ts`）だけが、許可関係に加えて import してよいパッケージ。 */
+const TEST_SUPPORT = "test-utils";
+
+/**
+ * `from` が `to` を import してよいか。
+ * `test: true` はテストファイル（`*.test.ts`）からの import で、`test-utils` が追加で許可される。
+ */
+function isAllowed(from, to, { test = false } = {}) {
   if (from === to) return true;
+  if (test && to === TEST_SUPPORT) return true;
   const allowed = ALLOWED[from];
   return allowed === "*" || allowed.includes(to);
 }
@@ -82,4 +89,4 @@ function allowedOf(from) {
   return allowed === "*" ? NAMES.filter((n) => n !== from) : [...allowed];
 }
 
-module.exports = { LOCATIONS, ADAPTERS, ALLOWED, NAMES, isAllowed, allowedOf };
+module.exports = { LOCATIONS, ADAPTERS, ALLOWED, NAMES, TEST_SUPPORT, isAllowed, allowedOf };

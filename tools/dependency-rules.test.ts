@@ -46,9 +46,11 @@ describe("dependency rules (docs/00-principles.md §2)", () => {
     for (const from of NAMES) {
       for (const to of NAMES) {
         if (from === to) continue;
-        const file = `${LOCATIONS[from]}/${from}/src/to-${to}.ts`;
-        files[file] = `import { x } from "../../../${LOCATIONS[to]}/${to}/src/index";\nexport const y = x;\n`;
+        const target = `import { x } from "../../../${LOCATIONS[to]}/${to}/src/index";\nexport const y = x;\n`;
+        files[`${LOCATIONS[from]}/${from}/src/to-${to}.ts`] = target;
+        files[`${LOCATIONS[from]}/${from}/src/to-${to}.test.ts`] = target;
         if (!isAllowed(from, to)) expected.add(`${from} -> ${to}`);
+        if (!isAllowed(from, to, { test: true })) expected.add(`${from} (test) -> ${to}`);
       }
     }
 
@@ -56,7 +58,11 @@ describe("dependency rules (docs/00-principles.md §2)", () => {
     const actual = new Set(
       violations
         .filter((v) => v.rule.name.startsWith("package-deps-"))
-        .map((v) => `${v.rule.name.slice("package-deps-".length)} -> ${/^(?:packages|apps)\/([^/]+)\//.exec(v.to)?.[1]}`),
+        .map((v) => {
+          const to = /^(?:packages|apps)\/([^/]+)\//.exec(v.to)?.[1];
+          const from = v.rule.name.slice("package-deps-".length);
+          return from.endsWith("-tests") ? `${from.slice(0, -"-tests".length)} (test) -> ${to}` : `${from} -> ${to}`;
+        }),
     );
     expect(actual).toEqual(expected);
     // 循環（例: 相互に禁止された 2 パッケージ）は別ルールでも検出されるが、許可された関係だけのツリーでは出ない
@@ -116,6 +122,22 @@ describe("package manifests", () => {
 
   it("accepts the real repository", () => {
     expect(checkManifests(join(import.meta.dirname, ".."))).toEqual([]);
+  });
+
+  it("allows test-utils only as a devDependency", () => {
+    const dev = scaffold({
+      "packages/schema/package.json": JSON.stringify({ name: "@rpg/schema", devDependencies: { "@rpg/test-utils": "workspace:*" } }),
+    });
+    const prod = scaffold({
+      "packages/schema/package.json": JSON.stringify({ name: "@rpg/schema", dependencies: { "@rpg/test-utils": "workspace:*" } }),
+    });
+    try {
+      expect(checkManifests(dev)).toEqual([]);
+      expect(checkManifests(prod)).toEqual([expect.stringContaining("@rpg/test-utils")]);
+    } finally {
+      rmSync(dev, { recursive: true, force: true });
+      rmSync(prod, { recursive: true, force: true });
+    }
   });
 
   it("rejects a forbidden @rpg dependency", () => {

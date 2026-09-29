@@ -199,3 +199,13 @@ export function findDanglingRefs(...): RefTarget[];
 - 上記の公開インターフェースがすべてエクスポートされ、型テスト（`tsd` または `expectTypeOf`）が通る。
 - `fixtures/projects/v1/minimal.json`（マップ1枚・アクター1人・イベント1つ）が作成され、parse できる。
 - 依存ルール検査で `DOM` 参照ゼロ。
+
+## 実装メモ（M1 で確定した点）
+- **型は zod スキーマから導出**する（`z.infer`）。ID はブランド型、`Record<Id, T>` のキーは `[A-Za-z0-9_-]{1,64}`（`:` を含めない。セルフスイッチのキー `${MapId}:${EventId}:${key}` を曖昧さなく分解するため）。`AssetId` は `[0-9a-f]{16}`。
+- **未知のキーはエラー**（`z.strictObject`）。typo を検出し、不変条件 1（ラウンドトリップ）を成り立たせるため。
+- `newId(prefix, source?)` は `IdSource`（`now()` / `random()`）を任意で受け取る。省略時は `Date.now` と Web Crypto。
+- ドキュメントで未定義だった型の定義：`Tileset { id, name, image?, passage: number[] }`（`passage[tileId]` は通行可能方向のビットマスク：下=1, 左=2, 右=4, 上=8。範囲外は全方向可）、`ParamCurve = Record<Param, { base, growth }>`（レベル `L` で `base + growth*(L-1)`）、`Scope`、`SkillEffect`（`recoverHp` / `recoverMp` / `commonEvent`）、`Drop`、`TroopCondition`、`MoveRoute`、`EquipSlot`。
+- `RefTarget.kind` に `"class"` と `"tileset"` を追加（Actor→Class、Map→Tileset の参照を扱うため）。
+- `migrateTo` / `migrateMapTo` は `registry` 引数を取れる（テスト用）。実マイグレーションは v1 が最初なので空。
+- フィクスチャは `fixtures/projects/v1/<name>/{project.json, maps/*.json}`（フォルダ形式）。`minimal`（マップ1・アクター1・イベント1）と `transfer-demo`（2マップ）がある。
+- `MapData` は `events` の位置がマップ内であることも検証する。

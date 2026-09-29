@@ -175,3 +175,15 @@ export const snapshotMigrations: readonly { from: number; to: number; migrate(s:
 - `initialState` → 100 フレーム `step` してプレイヤーがマップ上を歩ける（`render-null` + `input-script` を使う統合テストで確認、06 と連携）。
 - Snapshot ラウンドトリップが通る。
 - リプレイフィクスチャ最低3本。
+
+## 実装メモ（M1 で確定した点）
+- **`step` の合成**：`dispatch(input)` → `dispatch(tick)` と同じ結果だが、`step` は同じ `InputFrame` を `CommandCtx.input` にも渡す（`dispatch(tick)` 単体では空入力）。M1 のコマンドは `input` を参照しないので結果は一致する（テストで検証）。
+- **`GameState` への追加**：`nextInterpreterId`（インタプリタ id の連番）。`MapState.name`（セーブのプレビュー用）。`MapState.transfer.requested`（`requestMapData` を一度だけ発行するため）。`MessageState` は常に全フィールドを持つ（`owner` = 表示中のインタプリタ id、`face` / `choices` は `null`）。
+- **`EventRuntime`** = `Character` + `id` / `pageIndex`（無効なら `null`）/ `trigger` / `priority`。有効ページの内容（`through`・`graphic`・`direction`）を毎フレーム写す。ページが無効なイベントは衝突も起動もしない。
+- **場所移動**：`transfer` を予約し、次の `tick` で適用する。移動先が未ロードなら `requestMapData` を一度だけ発行して待つ。`initialState` も開始マップが未ロードなら開始位置への場所移動を予約する。
+- **移動速度**：1 フレームに `2^speed / 256` タイル（speed 4 で 16 フレーム/タイル）。方向キーの同時押しは 下 > 左 > 右 > 上。
+- **イベント起動**：決定ボタンは「足元の（`same` 以外の）アクションイベント」→「目の前の `same` のアクションイベント」の順。接触イベントは、`same` は突き当たったとき、それ以外は足元に到着したときに起動する。自動実行は通常のインタプリタが動いていないときに起動し、ページが有効な間は繰り返す。並列処理は有効ページごとに 1 つ起動し、ページが無効になると止まる。
+- **`Snapshot`**：「一時状態」= 移動の補間中の位置（`realX/realY/moving`）。`toSnapshot` は目的のタイルに確定させて保存する（`stripTransient`）。`fromSnapshot` は zod で構造を検証し、壊れていれば `Err`。マイグレーションは `migrateSnapshot(snap, version, target?, registry?)`。
+- **`Random`**：xoshiro128**（参照実装の既知ベクトルで検証）。`fork(label)` は元のシードとラベルだけで決まる。
+- `ProjectView` は `createProjectView(project, maps)` で作れる。`maps` は参照で保持され、後から追加すれば遅延ロードの完了として反映される。`createCtx(view)` は組み込みコマンドと式関数を登録済みの `Ctx` を返す。
+- 戦闘（`battle` の Action / `BattleState`）は M4。`BattleState` は型だけのプレースホルダ。

@@ -1,0 +1,25 @@
+{
+  "project": "fixtures/projects/v1/transfer-demo",
+  "seed": "door",
+  "inputs": [
+    { "hold": "right", "frames": 128 },
+    { "wait": 2 },
+    { "press": "ok" },
+    { "wait": 40 },
+    { "press": "ok" },
+    { "wait": 5 }
+  ],
+  "expect": { "finalStateHash": "e86fe168db533a494c7e97c10ca76641636b21162beef619ecb2242266830f54", "effects": { "log": 0, "requestMapData": 0 } },
+  "assertions": [
+    { "atTick": 100, "path": "message.text", "equals": "扉を開ける…" },
+    { "atTick": 128, "path": "map.player.x", "equals": 7 },
+    { "atTick": 128, "path": "map.mapId", "equals": "map_a" },
+    { "atTick": 171, "path": "message.text", "equals": "初めて入る。" },
+    { "atTick": 171, "path": "variables.var_visits", "equals": 1 },
+    { "atTick": 177, "path": "map.mapId", "equals": "map_b" },
+    { "atTick": 177, "path": "map.player.x", "equals": 2 },
+    { "atTick": 177, "path": "map.player.y", "equals": 3 },
+    { "atTick": 177, "path": "switches.sw_entered", "equals": true },
+    { "atTick": 177, "path": "interpreters", "equals": [] }
+  ]
+}

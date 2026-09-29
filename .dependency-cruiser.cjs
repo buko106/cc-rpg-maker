@@ -2,20 +2,34 @@
  * 依存ルール検査の設定（docs/00-principles.md §2）。
  * パッケージ間の許可関係は tools/dependency-rules.cjs から生成する。
  */
-const { LOCATIONS, NAMES, allowedOf } = require("./tools/dependency-rules.cjs");
+const { LOCATIONS, NAMES, TEST_SUPPORT, allowedOf } = require("./tools/dependency-rules.cjs");
 
 const dir = (name) => `${LOCATIONS[name]}/${name}`;
 
-/** パッケージごとに「許可されていない他パッケージへの依存」を禁止するルール。 */
-const packageRules = NAMES.filter((name) => allowedOf(name).length < NAMES.length - 1).map((name) => {
-  const permitted = [name, ...allowedOf(name)].map((n) => `${dir(n)}/`).join("|");
-  return {
-    name: `package-deps-${name}`,
-    comment: `@rpg/${name} は docs/00-principles.md の依存ルールで許可されたパッケージ以外を import してはならない。`,
-    severity: "error",
-    from: { path: `^${dir(name)}/` },
-    to: { path: `^(packages|apps)/`, pathNot: `^(${permitted})` },
-  };
+const TEST_FILE = "\\.test\\.ts$";
+
+/**
+ * パッケージごとに「許可されていない他パッケージへの依存」を禁止するルール。
+ * テストファイル（*.test.ts）だけは、許可関係に加えて test-utils を import できる。
+ */
+const packageRules = NAMES.filter((name) => allowedOf(name).length < NAMES.length - 1).flatMap((name) => {
+  const permitted = (extra) => [name, ...allowedOf(name), ...extra].map((n) => `${dir(n)}/`).join("|");
+  return [
+    {
+      name: `package-deps-${name}`,
+      comment: `@rpg/${name} は docs/00-principles.md の依存ルールで許可されたパッケージ以外を import してはならない。`,
+      severity: "error",
+      from: { path: `^${dir(name)}/`, pathNot: TEST_FILE },
+      to: { path: `^(packages|apps)/`, pathNot: `^(${permitted([])})` },
+    },
+    {
+      name: `package-deps-${name}-tests`,
+      comment: `@rpg/${name} のテストは、許可されたパッケージと ${TEST_SUPPORT} 以外を import してはならない。`,
+      severity: "error",
+      from: { path: `^${dir(name)}/.*${TEST_FILE}` },
+      to: { path: `^(packages|apps)/`, pathNot: `^(${permitted([TEST_SUPPORT])})` },
+    },
+  ];
 });
 
 module.exports = {

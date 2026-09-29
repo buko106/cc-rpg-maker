@@ -135,3 +135,14 @@ export function runInterpreters(state: GameState, input: InputFrame, ctx: Ctx): 
 ## 完了条件
 - 組み込みコマンドがすべて登録され、`fixtures/projects/v1/commands-smoke.json`（全コマンドを1回ずつ使うイベント）がエラーなく完走する。
 - 上記テストが通る。
+
+## 実装メモ（M1 で確定した点）
+- **M1 で実装済みのコマンド**：`ShowText` / `ControlSwitches` / `ControlVariables` / `ConditionalBranch`（+ 内部用 `Else` / `EndBranch`）/ `Wait` / `TransferPlayer`。残りは M6。
+- **待機**：`wait` を返したコマンドは `pc` を進めない。解除は `resume`（省略時は `wait.kind` に応じた既定処理）が判定し、`next` を返すと `pc + 1` へ進む。`frames` の `left` は毎フレーム 1 減り、`left <= 1` のフレームで解除される（`Wait N` は N フレーム後に続きを実行）。
+- **`CommandResult.setBranch`**（追加）：`interp.branch` への書き込み。`ConditionalBranch` が選ばれた側（真 = 0、偽 = 1）を `branch[indent]` に書き、`Else` はそれを見て本体を実行するか `EndBranch` まで飛ぶ。
+- **`skipBlock`**：同じ indent の次の `Else` / `EndBranch` に `pc` を移す（その命令は実行される）。見つからなければインタプリタを終了する。
+- **`ShowText`**：他のインタプリタがメッセージを出している間は 1 フレーム待って再試行する。閉じられるのは決定/キャンセル（入力フェーズ）。
+- **`ControlVariables`**：`div` は切り捨て除算、`div` / `mod` の除数が 0 のときは変数を変えない（MV 互換）。式オペランドが評価できなければ警告を出して変更しない。
+- **`ConditionalBranch`** の条件は式（文字列）か構造化条件（`switch` / `variable`）。式が評価できない・真偽値でないときは警告を出して偽として扱う。
+- **1 フレームの命令数の上限**（`MAX_COMMANDS_PER_FRAME = 1000`）はインタプリタごと。超えると警告を出して打ち切り、次のフレームで続ける。
+- `normal` は同時に 1 つ。`startInterpreter` は、すでに動いていれば何もしない。

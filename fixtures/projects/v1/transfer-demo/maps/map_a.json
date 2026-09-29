@@ -1,0 +1,125 @@
+{
+  "id": "map_a",
+  "width": 10,
+  "height": 8,
+  "tileset": "ts_basic",
+  "layers": [
+    {
+      "name": "ground",
+      "tiles": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    },
+    {
+      "name": "walls",
+      "tiles": [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
+    }
+  ],
+  "events": {
+    "ev_door": {
+      "id": "ev_door",
+      "name": "扉",
+      "x": 8,
+      "y": 1,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "扉を開ける…",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "Wait",
+              "params": {
+                "frames": 20
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_visits"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "v(\"var_visits\") >= 2"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "二度目だ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "初めて入る。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_entered"
+                ],
+                "value": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_b",
+                "x": 2,
+                "y": 3,
+                "dir": "down",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ],
+          "graphic": {
+            "asset": "0123456789abcdef",
+            "index": 0,
+            "direction": "down"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -9,6 +9,10 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@rpg/schema": "workspace:*"
+    "@rpg/schema": "workspace:*",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@rpg/test-utils": "workspace:*"
   }
 }
