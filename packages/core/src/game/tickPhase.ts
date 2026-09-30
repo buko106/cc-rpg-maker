@@ -101,14 +101,15 @@ function advanceMovement(state: GameState, map: MapData): GameState {
 }
 
 /**
- * 時間を 1 フレーム進める。タイトル・ゲームオーバーの間は `tick`、メニューではプレイ時間も進む。戦闘中は `battleTick`。順序：tick 加算 → イベントページ更新 → 自動実行/並列イベントの起動 →
+ * 時間を 1 フレーム進める。タイトル・ゲームオーバーの間は `tick`、メニューとショップではプレイ時間も進む。戦闘中は `battleTick`。順序：tick 加算 → イベントページ更新 → 自動実行/並列イベントの起動 →
  * インタプリタ実行 → イベントページ更新 → 場所移動 → 移動の補間 → カメラ。
  */
 export function handleTick(state: GameState, input: InputFrame, ctx: Ctx): StepResult {
   const effects: Effect[] = [];
   // タイトル・メニューの間は世界が止まる（時間だけ進む。プレイ時間はメニュー中も数える）
   if (state.scene.kind === "title") return { state: { ...state, tick: state.tick + 1 }, effects };
-  if (state.scene.kind === "menu") return { state: { ...state, tick: state.tick + 1, playtimeTicks: state.playtimeTicks + 1 }, effects };
+  // ショップも同じ（`ShopProcessing` を待つインタプリタは、ショップを閉じるまで動かない）
+  if (state.scene.kind === "menu" || state.scene.kind === "shop") return { state: { ...state, tick: state.tick + 1, playtimeTicks: state.playtimeTicks + 1 }, effects };
   if (state.scene.kind === "gameover") return { state: { ...state, tick: state.tick + 1 }, effects };
   // 戦闘中はマップの世界（イベント・移動・並列処理）が止まる。BattleProcessing を待つインタプリタも戦闘が終わるまで動かない。
   if (state.scene.kind === "battle") return battleTick({ ...state, tick: state.tick + 1, playtimeTicks: state.playtimeTicks + 1 }, ctx);

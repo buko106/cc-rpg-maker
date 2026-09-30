@@ -114,6 +114,7 @@ const waitSchema = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("choice") }),
   z.strictObject({ kind: z.literal("move"), who: z.string() }),
   z.strictObject({ kind: z.literal("battle") }),
+  z.strictObject({ kind: z.literal("shop") }),
   z.strictObject({ kind: z.literal("transfer") }),
   z.strictObject({ kind: z.literal("child"), id: z.string() }),
 ]);

@@ -40,7 +40,7 @@ export interface Clock { now(): number; }                        // ms。core内
 export interface GameState {
   readonly tick: number;                // 1/60 秒単位の経過フレーム
   readonly rng: RandomState;
-  readonly scene: SceneState;           // どのシーンにいるか（map / battle / menu / title / gameover）
+  readonly scene: SceneState;           // どのシーンにいるか（map / battle / menu / shop / title / gameover）
   readonly map: MapState;
   readonly party: PartyState;
   readonly actors: Record<ActorId, ActorState>;
@@ -213,3 +213,4 @@ export const snapshotMigrations: readonly { from: number; to: number; migrate(s:
 - **メッセージ表示中の入力**（`game/messageInput.ts`）：選択肢は上下でカーソル（循環）・決定で選ぶ・キャンセルは持ち主のインタプリタの `locals.choiceCancel`（整数）があればその番号を選ぶ。数値入力は左右で桁、上下で数字（0〜9 を循環）、決定で確定。文章は決定/キャンセルで閉じる。答えは持ち主の `locals.answer` に書いてメッセージを閉じ、コマンドの `resume` がそれを読んで続きへ進む（`CommandResult.setLocals` で消す）。
 - **タイマー**：`timers = { active, ticks }` の `ticks` は残りフレーム。マップシーンの `tick` ごとに 1 減り、0 になったら `active` が偽になる（メニューや戦闘の間は止まる）。
 - **`initialState` / `titleState` / `gainExp`** は `Ctx` 全体ではなく `Pick<Ctx, "project">` を受け取る（`ReturnToTitle` など、コマンドから呼ぶため）。
+- **`SceneState` に `shop`**：`{ kind: "shop"; goods; canSell; owner; screen: "command" | "buy" | "sell"; cursor; quantity? }`（`ShopScene`）。`ShopProcessing`（03）が開き、閉じるとマップに戻る。入力は `game/shop.ts`、`handleTick` はメニューと同じく `tick` とプレイ時間だけを進める。`stripTransient` はマップに戻す。`WaitState` に `{ kind: "shop" }` を追加した。

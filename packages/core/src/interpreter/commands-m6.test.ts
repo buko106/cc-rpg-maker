@@ -7,7 +7,7 @@ import { emptyInput, inputFrame } from "../input.js";
 import type { Button, InputFrame } from "../input.js";
 import { initialState } from "../game/index.js";
 import { BUILTIN_COMMANDS } from "./builtins.js";
-import { startInterpreter } from "./run.js";
+import { runInterpreters, startInterpreter } from "./run.js";
 import { step } from "../game/index.js";
 import type { GameState } from "../state.js";
 
@@ -197,7 +197,7 @@ describe("選択肢と入力", () => {
   /** メッセージが開いているフレームに、順に 1 回ずつボタンを押す。 */
   const script = (buttons: Button[][]) => {
     let i = 0;
-    return (_frame: number, s: GameState): InputFrame => (s.message.open && i < buttons.length ? press(...buttons[i++]!) : emptyInput());
+    return (_frame: number, s: GameState): InputFrame => ((s.message.open || s.scene.kind === "shop") && i < buttons.length ? press(...buttons[i++]!) : emptyInput());
   };
 
   it("ShowChoices: the cursor selects the branch (down, ok → second)", () => {
@@ -257,17 +257,37 @@ describe("選択肢と入力", () => {
     expect(v(run([cmd("SelectItem", { variable: "it" })], { state: held, input: script([["cancel"]]) }).state, "it")).toBe(0);
   });
 
-  it("ShopProcessing: buys one at a time within the gold, then leaves with cancel", () => {
+  it("ShopProcessing: opens the shop scene, waits while it is open, and continues once it is closed", () => {
     const base = { ...fresh(), party: { ...fresh().party, gold: 25 } };
-    const r = run([cmd("ShopProcessing", { goods: ["item_potion"] })], { state: base, input: script([["ok"], ["ok"], ["ok"], ["cancel"]]) });
-    expect(r.finished).toBe(true);
-    expect(r.state.party.gold).toBe(5);
-    expect(r.state.party.items).toEqual({ item_potion: 2 }); // 3 回目は買えない
+    const cmds = [cmd("ShopProcessing", { goods: ["item_potion", "item_nope"] }), cmd("ControlSwitches", { ids: ["after"], value: true })];
+    // 開いている間は先に進まない
+    const open = run(cmds, { state: base, maxFrames: 5 });
+    expect(open.finished).toBe(false);
+    expect(open.state.scene).toMatchObject({ kind: "shop", goods: ["item_potion"], canSell: true, screen: "command", owner: open.state.interpreters[0]?.id });
+    expect(sw(open.state, "after")).toBeUndefined();
+    // 購入 → 一覧 → 数量を 2 に → 確定（ポーション 10G × 2）→ 一覧に戻る → コマンドに戻る → やめる
+    const bought = run(cmds, { state: base, input: script([["ok"], ["ok"], ["up"], ["ok"], ["cancel"], ["cancel"]]) });
+    expect(bought.finished).toBe(true);
+    expect(sw(bought.state, "after")).toBe(true);
+    expect(bought.state.scene).toEqual({ kind: "map" });
+    expect(bought.state.party.gold).toBe(5);
+    expect(bought.state.party.items).toEqual({ item_potion: 2 });
     // 「やめる」を選んでも終わる
-    const leave = run([cmd("ShopProcessing", { goods: ["item_potion"] })], { state: base, input: script([["down"], ["ok"]]) });
+    const leave = run([cmd("ShopProcessing", { goods: ["item_potion"], canSell: false })], { state: base, input: script([["down"], ["ok"]]) });
     expect(leave.finished).toBe(true);
     expect(leave.state.party.gold).toBe(25);
     expect(warnings(run([cmd("ShopProcessing", { goods: ["item_nope"] })]).effects)).toHaveLength(1);
+  });
+
+  it("ShopProcessing: only opens from the map scene, and waits for a message window that is still open", () => {
+    const title = startInterpreter({ ...fresh(), scene: { kind: "title", screen: "main", cursor: 0 } }, { kind: "plugin", name: "t" }, [cmd("ShopProcessing", { goods: ["item_potion"] })], "normal");
+    const refused = runInterpreters(title, emptyInput(), ctx); // 通常の step ではタイトル中にインタプリタは動かないので、直接回す
+    expect(warnings(refused.effects)).toHaveLength(1);
+    expect(refused.state.scene.kind).toBe("title");
+    const busy = { ...fresh(), message: { ...fresh().message, open: true, owner: "other", text: "…" } };
+    const waiting = run([cmd("ShopProcessing", { goods: ["item_potion"] })], { state: busy, maxFrames: 3, input: () => emptyInput() });
+    expect(waiting.state.scene.kind).toBe("map");
+    expect(waiting.finished).toBe(false);
   });
 });
 
@@ -431,11 +451,11 @@ describe("commands-smoke（全コマンドを 1 回ずつ使うイベント）",
   });
 
   it("the main smoke event runs to completion without any warning", () => {
+    const shopKeys: Button[] = ["ok", "ok", "ok", "cancel", "cancel"]; // 購入 → ポーション → 1 個 → 確定 → 一覧から戻る → やめる
     let shop = 0;
     const input = (_frame: number, s: GameState): InputFrame => {
-      if (!s.message.open) return emptyInput();
-      if (s.message.choices?.includes("やめる")) return ++shop === 1 ? press("ok") : press("cancel");
-      return press("ok");
+      if (s.scene.kind === "shop") return press(shopKeys[shop++] ?? "cancel");
+      return s.message.open ? press("ok") : emptyInput();
     };
     const state = startInterpreter(fresh(), { kind: "mapEvent", mapId: map.id, eventId: "ev_smoke" as never, page: 0 }, eventCommands("ev_smoke"), "normal");
     const r = runCommands([], { ctx, state, input, maxFrames: 2000 });

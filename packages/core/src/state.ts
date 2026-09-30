@@ -5,6 +5,8 @@ import type { RandomState } from "./random.js";
 
 export type TitleScreen = "main" | "continue";
 export type MenuScreen = "main" | "item" | "status" | "save" | "load";
+/** ショップの画面：コマンド（購入/売却/やめる）→ 商品の一覧（`buy`）または所持品の一覧（`sell`）。 */
+export type ShopScreen = "command" | "buy" | "sell";
 
 /**
  * セーブ/ロード画面の確認ダイアログ（上書き・進行の破棄）。`cursor` は 0 = はい / 1 = いいえ（誤操作しにくいよう「いいえ」から始める）。
@@ -17,6 +19,20 @@ export interface MenuConfirm {
 }
 
 /**
+ * ショップ画面（`ShopProcessing` が開く）。商品・売却の可否・呼び出したインタプリタ（`owner`）を持ち、閉じるとマップに戻ってそのインタプリタが再開する。
+ * `quantity` は一覧で品物を選んだあとの数量の選択中だけある。
+ */
+export interface ShopScene {
+  readonly kind: "shop";
+  readonly goods: readonly ItemId[];
+  readonly canSell: boolean;
+  readonly owner: string;
+  readonly screen: ShopScreen;
+  readonly cursor: number;
+  readonly quantity?: number;
+}
+
+/**
  * どのシーンにいるか。タイトルとメニューの UI 状態（画面・カーソル）は GameState の一部なので、
  * UI 操作も入力列から再現できる（リプレイ可能）。
  */
@@ -24,6 +40,7 @@ export type SceneState =
   | { readonly kind: "map" }
   | { readonly kind: "title"; readonly screen: TitleScreen; readonly cursor: number }
   | { readonly kind: "menu"; readonly screen: MenuScreen; readonly cursor: number; readonly confirm?: MenuConfirm }
+  | ShopScene
   | { readonly kind: "battle" | "gameover" };
 
 /** 移動できるもの（プレイヤー・イベント・フォロワー）。タイル座標。 */

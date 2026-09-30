@@ -1,0 +1,240 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`projectFrame（ショップ） > [snapshot] コマンド画面：購入・売却・やめると所持金、商品の一覧（値段と所持数） 1`] = `
+{
+  "size": {
+    "height": 256,
+    "width": 320,
+  },
+  "ui": [
+    {
+      "children": [],
+      "h": 256,
+      "kind": "window",
+      "variant": "dim",
+      "w": 320,
+      "x": 0,
+      "y": 0,
+    },
+    {
+      "children": [
+        {
+          "color": {
+            "a": 1,
+            "b": 255,
+            "g": 255,
+            "r": 255,
+          },
+          "font": {
+            "family": "sans-serif",
+            "size": 16,
+          },
+          "kind": "text",
+          "text": "購入する",
+          "x": 16,
+          "y": 18,
+        },
+        {
+          "color": {
+            "a": 1,
+            "b": 255,
+            "g": 255,
+            "r": 255,
+          },
+          "font": {
+            "family": "sans-serif",
+            "size": 16,
+          },
+          "kind": "text",
+          "text": "売却する",
+          "x": 112,
+          "y": 18,
+        },
+        {
+          "color": {
+            "a": 1,
+            "b": 255,
+            "g": 255,
+            "r": 255,
+          },
+          "font": {
+            "family": "sans-serif",
+            "size": 16,
+          },
+          "kind": "text",
+          "text": "やめる",
+          "x": 208,
+          "y": 18,
+        },
+        {
+          "blink": false,
+          "h": 24,
+          "kind": "cursor",
+          "w": 96,
+          "x": 12,
+          "y": 16,
+        },
+      ],
+      "h": 40,
+      "kind": "window",
+      "variant": "normal",
+      "w": 304,
+      "x": 8,
+      "y": 8,
+    },
+    {
+      "children": [
+        {
+          "color": {
+            "a": 1,
+            "b": 255,
+            "g": 255,
+            "r": 255,
+          },
+          "font": {
+            "family": "sans-serif",
+            "size": 16,
+          },
+          "kind": "text",
+          "text": "ポーション",
+          "x": 16,
+          "y": 66,
+        },
+        {
+          "align": "right",
+          "color": {
+            "a": 1,
+            "b": 255,
+            "g": 255,
+            "r": 255,
+          },
+          "font": {
+            "family": "sans-serif",
+            "size": 16,
+          },
+          "kind": "text",
+          "text": "所持 3",
+          "x": 228,
+          "y": 66,
+        },
+        {
+          "align": "right",
+          "color": {
+            "a": 1,
+            "b": 255,
+            "g": 255,
+            "r": 255,
+          },
+          "font": {
+            "family": "sans-serif",
+            "size": 16,
+          },
+          "kind": "text",
+          "text": "10G",
+          "x": 304,
+          "y": 66,
+        },
+        {
+          "color": {
+            "a": 1,
+            "b": 255,
+            "g": 255,
+            "r": 255,
+          },
+          "font": {
+            "family": "sans-serif",
+            "size": 16,
+          },
+          "kind": "text",
+          "text": "古い鍵",
+          "x": 16,
+          "y": 90,
+        },
+        {
+          "align": "right",
+          "color": {
+            "a": 1,
+            "b": 255,
+            "g": 255,
+            "r": 255,
+          },
+          "font": {
+            "family": "sans-serif",
+            "size": 16,
+          },
+          "kind": "text",
+          "text": "所持 0",
+          "x": 228,
+          "y": 90,
+        },
+        {
+          "align": "right",
+          "color": {
+            "a": 1,
+            "b": 255,
+            "g": 255,
+            "r": 255,
+          },
+          "font": {
+            "family": "sans-serif",
+            "size": 16,
+          },
+          "kind": "text",
+          "text": "0G",
+          "x": 304,
+          "y": 90,
+        },
+      ],
+      "h": 144,
+      "kind": "window",
+      "variant": "normal",
+      "w": 304,
+      "x": 8,
+      "y": 56,
+    },
+    {
+      "children": [
+        {
+          "color": {
+            "a": 1,
+            "b": 160,
+            "g": 255,
+            "r": 255,
+          },
+          "font": {
+            "family": "sans-serif",
+            "size": 16,
+          },
+          "kind": "text",
+          "text": "所持金",
+          "x": 16,
+          "y": 218,
+        },
+        {
+          "align": "right",
+          "color": {
+            "a": 1,
+            "b": 255,
+            "g": 255,
+            "r": 255,
+          },
+          "font": {
+            "family": "sans-serif",
+            "size": 16,
+          },
+          "kind": "text",
+          "text": "25G",
+          "x": 304,
+          "y": 218,
+        },
+      ],
+      "h": 40,
+      "kind": "window",
+      "variant": "normal",
+      "w": 304,
+      "x": 8,
+      "y": 208,
+    },
+  ],
+}
+`;

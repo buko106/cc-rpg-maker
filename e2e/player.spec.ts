@@ -8,7 +8,7 @@ import type { Page } from "@playwright/test";
 
 interface State {
   tick: number;
-  scene: { kind: string; screen?: string; cursor?: number; confirm?: { kind: string; slot: number; cursor: number } };
+  scene: { kind: string; screen?: string; cursor?: number; quantity?: number; confirm?: { kind: string; slot: number; cursor: number } };
   map: { mapId: string; name: string; player: { x: number; y: number; moving: boolean } };
   message: { open: boolean; text: string };
   variables: Record<string, number>;
@@ -446,4 +446,52 @@ test("町のネコとヒヨコが勝手に歩き回る（ページの moveRoute�
   const seen = await at("ev_cat");
   await page.waitForFunction(`(() => { const e = window.__rpg.getState().map.events["ev_cat"]; return e.x !== ${seen.x} || e.y !== ${seen.y}; })()`);
   await page.locator("canvas").screenshot({ path: "test-results/town-animals.png" });
+});
+
+test("商人に話しかけるとショップ画面が開き、購入・売却してやめると会話に戻る", async ({ page }) => {
+  await open(page);
+  await hold(page, "ArrowDown", "s.map.player.y >= 5");
+  await press(page, "ArrowLeft"); // 商人（2,5）に突き当たって向く
+
+  // 初めては 100G もらう（ページの切り替え）。2 回目からショップを開く
+  await press(page, "Enter");
+  await page.waitForFunction(() => window.__rpg.getState().message.open);
+  await press(page, "Enter");
+  await page.waitForFunction(() => window.__rpg.getState().party.gold === 100 && !window.__rpg.getState().message.open);
+  await press(page, "Enter");
+  await page.waitForFunction(() => window.__rpg.getState().message.open);
+  await press(page, "Enter"); // 「何にする？」を閉じるとショップが開く
+  await page.waitForFunction(() => window.__rpg.getState().scene.kind === "shop");
+  expect((await state(page)).scene).toMatchObject({ screen: "command", cursor: 0 });
+  await press(page, "m"); // メニューは開かない
+  expect((await state(page)).scene.kind).toBe("shop");
+  await page.locator("canvas").screenshot({ path: "test-results/player-shop-command.png" });
+
+  // 購入：ポーション（20G）を 2 個
+  await press(page, "Enter");
+  expect((await state(page)).scene).toMatchObject({ screen: "buy", cursor: 0 });
+  await press(page, "Enter");
+  await press(page, "ArrowUp");
+  expect((await state(page)).scene).toMatchObject({ screen: "buy", quantity: 2 });
+  await page.locator("canvas").screenshot({ path: "test-results/player-shop-quantity.png" });
+  await press(page, "Enter");
+  expect((await state(page)).party).toEqual({ gold: 60, members: ["actor_hero"], items: { item_potion: 2 } });
+
+  // 売却：1 個（売値は半分の 10G）
+  await press(page, "Escape");
+  await press(page, "ArrowRight");
+  await press(page, "Enter");
+  expect((await state(page)).scene).toMatchObject({ screen: "sell", cursor: 0 });
+  await press(page, "Enter");
+  await press(page, "Enter");
+  expect((await state(page)).party).toMatchObject({ gold: 70, items: { item_potion: 1 } });
+
+  // やめる → 「また来てね！」→ マップに戻る
+  await press(page, "Escape");
+  await press(page, "ArrowRight");
+  await press(page, "Enter");
+  await page.waitForFunction(() => window.__rpg.getState().scene.kind === "map" && window.__rpg.getState().message.open);
+  await press(page, "Enter");
+  await page.waitForFunction(() => !window.__rpg.getState().message.open);
+  expect((await state(page)).party.gold).toBe(70);
 });

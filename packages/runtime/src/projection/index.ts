@@ -6,6 +6,7 @@ import { projectBattle, projectGameOver } from "./battle.js";
 import { projectMapLayers } from "./map-scene.js";
 import { projectMenu } from "./menu.js";
 import { projectMessage } from "./message.js";
+import { projectShop } from "./shop.js";
 import { projectTitle } from "./title.js";
 import { term } from "./terms.js";
 import { NO_UI, textNode, windowNode } from "./ui.js";
@@ -25,7 +26,7 @@ function projectNotice(view: ProjectView, ui: UiContext, screen: { width: number
 
 /**
  * `GameState` → `FrameSpec`。純粋関数（同じ入力なら deep-equal な出力）。
- * マップシーン（とメッセージ）、タイトル、メニュー、戦闘、ゲームオーバーを投影する。
+ * マップシーン（とメッセージ）、タイトル、メニュー、ショップ、戦闘、ゲームオーバーを投影する。
  * `ui` は GameState の外にある情報（保存済みスロット一覧・お知らせ）。
  */
 export function projectFrame(state: GameState, view: ProjectView, fx: VisualFx = NO_FX, ui: UiContext = NO_UI): FrameSpec {
@@ -37,6 +38,11 @@ export function projectFrame(state: GameState, view: ProjectView, fx: VisualFx =
     // メニューはマップの上に重ねる（背景にマップが見える）
     const under = projectFrame({ ...state, scene: { kind: "map" } }, view, fx);
     return { ...under, ui: [{ kind: "window", x: 0, y: 0, w: size.width, h: size.height, variant: "dim", children: [] }, ...projectMenu(state, view, size, ui), ...projectNotice(view, ui, size)] };
+  }
+  if (state.scene.kind === "shop") {
+    // ショップもマップの上に重ねる（メニューと同じ）
+    const under = projectFrame({ ...state, scene: { kind: "map" } }, view, fx);
+    return { ...under, ui: [{ kind: "window", x: 0, y: 0, w: size.width, h: size.height, variant: "dim", children: [] }, ...projectShop(state, view, size)] };
   }
   if (state.scene.kind === "battle") {
     // 戦闘はマップの地形を背景にして（キャラクターは描かず、暗くして）重ねる
@@ -61,6 +67,7 @@ export function projectFrame(state: GameState, view: ProjectView, fx: VisualFx =
 export { projectMapLayers } from "./map-scene.js";
 export { projectMessage } from "./message.js";
 export { projectMenu } from "./menu.js";
+export { projectShop } from "./shop.js";
 export { BATTLE_LOG_LINES, projectBattle, projectGameOver } from "./battle.js";
 export { formatLogEntry } from "./battle-log.js";
 export { projectTitle } from "./title.js";

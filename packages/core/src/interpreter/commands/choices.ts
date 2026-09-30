@@ -2,6 +2,7 @@ import { itemIdSchema, nonNegativeInt, variableIdSchema } from "@rpg/schema";
 import type { ItemId } from "@rpg/schema";
 import { z } from "zod";
 import { warn } from "../../effects.js";
+import { openShop } from "../../game/shop.js";
 import type { GameState, MessageState } from "../../state.js";
 import { defineCommand } from "../handler.js";
 import type { CommandCtx, CommandResult } from "../handler.js";
@@ -114,49 +115,31 @@ export const selectItem = defineCommand({
   },
 });
 
-const shopLines = (c: CommandCtx, goods: readonly ItemId[]): string[] => [
-  ...goods.map((id) => `${c.project.item(id)?.name ?? id}　${c.project.item(id)?.price ?? 0}G`),
-  "やめる",
-];
-
 /**
- * 商品を並べて買わせる（メッセージ欄の選択肢で、所持金の範囲で 1 個ずつ買う）。「やめる」またはキャンセルで終わる。
- * 存在しないアイテムは並べない。
+ * ショップ画面（`scene.kind === "shop"`）を開き、閉じるまで待つ。購入・売却（`canSell`）は画面の中で行う（`game/shop.ts`）。
+ * 存在しないアイテムは並べない。マップ以外のシーンでは警告してスキップする。
+ * 他のインタプリタがメッセージ欄を使っている間は、1 フレーム待って再試行する。
+ * セーブから復元したとき（ショップの状態は保存されない）は、マップに戻っているのでそのまま続く。
  */
 export const shopProcessing = defineCommand({
   code: "ShopProcessing",
-  params: z.strictObject({ goods: z.array(itemIdSchema).min(1) }),
+  params: z.strictObject({ goods: z.array(itemIdSchema).min(1), canSell: z.boolean().default(true) }),
   meta: {
     label: "ショップの処理",
     category: "ゲーム進行",
-    describe: (p, view) => `ショップ：${p.goods.map((g) => view.project.database.items[g]?.name ?? g).join("、")}`,
+    describe: (p, view) => `ショップ：${p.goods.map((g) => view.project.database.items[g]?.name ?? g).join("、")}${p.canSell ? "" : "（購入のみ）"}`,
     refs: (p) => p.goods.map((id) => ({ kind: "item" as const, id })),
   },
   run(p, c) {
+    if (c.state.scene.kind !== "map") return { effects: [warn(`ShopProcessing: マップ以外（${c.state.scene.kind}）ではショップを開けない`)] };
     const goods = p.goods.filter((id) => c.project.item(id) !== undefined);
     if (goods.length === 0) return { effects: [warn("ShopProcessing: 商品が 1 つも存在しない")] };
-    const state = openWindow(c, { text: `所持金 ${c.state.party.gold}G`, choices: shopLines(c, goods), cursor: 0 });
-    if (state === undefined) return RETRY;
-    return { state, control: WAIT_CHOICE, setLocals: { ...CLEAR, choiceCancel: goods.length, choiceIds: goods } };
+    if (c.state.message.open) return RETRY;
+    return { state: openShop(c.state, goods, p.canSell, c.interp.id), control: { kind: "wait", wait: { kind: "shop" } } };
   },
-  resume(p, c) {
-    if (c.interp.wait.kind === "frames") return { control: { kind: "jump", pc: c.interp.pc } };
-    const answer = answerOf(c);
-    if (answer === undefined && stillOpen(c)) return { control: WAIT_CHOICE };
-    const goods = p.goods.filter((id) => c.project.item(id) !== undefined);
-    const item = answer === undefined ? undefined : c.project.item(goods[answer] as ItemId);
-    if (answer === undefined || item === undefined) return { setLocals: CLEAR }; // やめる / キャンセル / 復元
-    const bought = c.state.party.gold >= item.price;
-    const party = bought
-      ? { ...c.state.party, gold: c.state.party.gold - item.price, items: { ...c.state.party.items, [item.id]: (c.state.party.items[item.id] ?? 0) + 1 } }
-      : c.state.party;
-    const base = { ...c.state, party };
-    const reopened = openWindow({ ...c, state: base }, {
-      text: bought ? `${item.name}を買った　所持金 ${party.gold}G` : `お金が足りない　所持金 ${party.gold}G`,
-      choices: shopLines(c, goods),
-      cursor: answer,
-    });
-    if (reopened === undefined) return { control: WAIT_CHOICE };
-    return { state: reopened, control: WAIT_CHOICE, setLocals: { answer: undefined } };
+  resume(_p, c) {
+    if (c.interp.wait.kind === "frames") return { control: { kind: "jump", pc: c.interp.pc } }; // メッセージ欄が空くのを待っていた：もう一度開こうとする
+    // ショップ（や、途中でゲームオーバー/タイトルに移ったあと）の間は待つ。マップに戻ったら終わり
+    return c.state.scene.kind === "map" ? {} : { control: { kind: "wait", wait: c.interp.wait } };
   },
 });

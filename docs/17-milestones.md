@@ -41,14 +41,14 @@
 - 03：組み込みコマンド全実装（`commands-smoke.json`）。
 - 15：エクスポータ（フォルダ・単一 HTML）。10：`exportZip`/`importZip`。
 - **完了条件**：エディタで作ったゲームを配布物にして別オリジンで遊べる。
-- **状況**：完了（`e2e/export.spec.ts`）。エクスポータは `@rpg/exporter`（15）。専用のショップ画面・`opfs` / `fsa`・`renderer: "webgl"` / Service Worker は後続（M7 以降。03・15 の実装メモ）。
+- **状況**：完了（`e2e/export.spec.ts`）。エクスポータは `@rpg/exporter`（15）。`opfs` / `fsa`・`renderer: "webgl"` / Service Worker は後続（M7 以降。03・15 の実装メモ）。専用のショップ画面はその後に実装した（03・06 の実装メモ）。
 
 ## M7: プラグイン・WebGL・仕上げ（2〜3週）
 - 14：`PluginHost`、サンプルプラグイン 2 本。
 - 07：`render-webgl` + ピクセル差分テスト。
 - 10：`fsa` アダプタ。15：Service Worker オフライン化。
 - **完了条件**：プラグインが両アプリで動き、WebGL/Canvas2D が同等出力。
-- **状況**：完了。`e2e/plugins.spec.ts`（プラグインがエディタのテストプレイと書き出したゲームの両方で動く）、`e2e/render.spec.ts`（WebGL と Canvas2D の差が 1% 以内）。`formatVersion` は 2（`system.plugins`）に上がり、最初の実マイグレーションが入った。プラグインの実行時ロード・専用のショップ画面は後続（14・03 の実装メモ）。ページの `moveRoute`（自律移動）はその後に実装した（03・13 の実装メモ）。
+- **状況**：完了。`e2e/plugins.spec.ts`（プラグインがエディタのテストプレイと書き出したゲームの両方で動く）、`e2e/render.spec.ts`（WebGL と Canvas2D の差が 1% 以内）。`formatVersion` は 2（`system.plugins`）に上がり、最初の実マイグレーションが入った。プラグインの実行時ロードは後続（14 の実装メモ）。専用のショップ画面（`ShopProcessing` が開く購入・売却の画面）はその後に実装した（03・06 の実装メモ）。ページの `moveRoute`（自律移動）はその後に実装した（03・13 の実装メモ）。
 
 ## 後続候補（スコープ外）
 - ランタイムの Web Worker 化（決定論設計により後付け可能）。

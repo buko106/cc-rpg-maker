@@ -8,6 +8,7 @@ export type WaitState =
   | { readonly kind: "choice" }
   | { readonly kind: "move"; readonly who: string }
   | { readonly kind: "battle" }
+  | { readonly kind: "shop" }
   | { readonly kind: "transfer" }
   | { readonly kind: "child"; readonly id: string };
 

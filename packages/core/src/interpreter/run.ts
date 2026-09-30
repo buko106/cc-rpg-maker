@@ -95,6 +95,7 @@ function defaultResume(c: CommandCtx): CommandResult {
       return c.state.interpreters.some((i) => i.id === wait.id) ? stay : {};
     case "move":
     case "battle":
+    case "shop":
       // この待機の発行元は M1 には無い。詰まらないよう、警告して解除する。
       return { effects: [warn(`未対応の待機 "${wait.kind}" を解除した（${c.interp.id}）`)] };
   }
