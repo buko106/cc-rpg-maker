@@ -9,6 +9,7 @@ import { useFormContext, useSession } from "../hooks.js";
 import { describeSchema } from "../schema-form/introspect.js";
 import { defaultValue } from "../schema-form/values.js";
 import { applyOps } from "../command-templates.js";
+import { nextId } from "../next-id.js";
 import { CommandList } from "./CommandList.js";
 import { Dialog } from "./Dialog.js";
 import { useExecute } from "./useExecute.js";
@@ -34,14 +35,7 @@ const TABLES: readonly TableConfig[] = [
   { key: "commonEvents", label: "コモンイベント", prefix: "ce", schema: commonEventSchema, initial: { name: "新しいコモンイベント" } },
 ];
 
-/** `prefix_001` 形式で、まだ使われていない ID。 */
-export function nextId(prefix: string, taken: Iterable<string>): string {
-  const used = new Set(taken);
-  for (let n = 1; ; n++) {
-    const id = `${prefix}_${String(n).padStart(3, "0")}`;
-    if (!used.has(id)) return id;
-  }
-}
+export { nextId };
 
 /** コマンド列フィールドの編集ウィジェット（コモンイベント・敵グループのページ）。 */
 function renderCommands(commands: EventCommand[], onChange: (next: EventCommand[]) => void): ReactElement {

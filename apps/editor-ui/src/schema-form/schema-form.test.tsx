@@ -34,10 +34,10 @@ const refOptions: FormContext["refOptions"] = (ref) => {
 };
 const ctx: FormContext = { refOptions, checkFormula: (s) => (s.includes("!!") ? "構文エラー" : undefined) };
 
-function Harness({ schema, initial, onValue }: { schema: z.ZodType; initial?: unknown; onValue?: (v: unknown) => void }) {
+function Harness({ schema, initial, onValue, context = ctx }: { schema: z.ZodType; initial?: unknown; onValue?: (v: unknown) => void; context?: FormContext }) {
   const spec = describeSchema(schema);
   const [value, setValue] = useState<unknown>(initial ?? defaultValue(spec, refOptions));
-  return <SchemaForm spec={spec} value={value} ctx={ctx} label="" onChange={(v) => { setValue(v); onValue?.(v); }} />;
+  return <SchemaForm spec={spec} value={value} ctx={context} label="" onChange={(v) => { setValue(v); onValue?.(v); }} />;
 }
 
 describe("describeSchema", () => {
@@ -74,6 +74,25 @@ describe("describeSchema", () => {
     expect(byKey["d"]?.spec).toMatchObject({ kind: "union", discriminator: "kind" });
     expect(byKey["any"]?.spec).toEqual({ kind: "unknown" });
   });
+
+  it("エディタ向けのメタデータ：列挙の表示名（labels）と、新しく作るときの初期値（initial）", () => {
+    const schema = z.strictObject({
+      op: z.enum(["set", "add"]).meta({ labels: { set: "代入", add: "加算" } }),
+      on: z.boolean().meta({ initial: true }),
+      wrapped: z.array(z.string()).min(1).meta({ initial: ["はい"] }).optional(),
+    });
+    const spec = describeSchema(schema);
+    if (spec.kind !== "object") throw new Error("object のはず");
+    const byKey = Object.fromEntries(spec.fields.map((f) => [f.key, f]));
+    expect(byKey["op"]?.spec).toEqual({ kind: "enum", values: ["set", "add"], labels: { set: "代入", add: "加算" } });
+    expect(byKey["on"]).toMatchObject({ initial: true, spec: { kind: "boolean" } });
+    expect(byKey["wrapped"]).toMatchObject({ optional: true, initial: ["はい"] });
+  });
+
+  it("リテラルと列挙だけのユニオンは、1 つの選択肢の一覧にまとめる", () => {
+    expect(describeSchema(z.union([z.enum(["down", "up"]), z.literal("retain")]))).toEqual({ kind: "choice", values: ["down", "up", "retain"] });
+    expect(describeSchema(z.union([z.enum(["down", "up"]), z.enum(["random"])]))).toEqual({ kind: "choice", values: ["down", "up", "random"] });
+  });
 });
 
 describe("defaultValue / matchOption", () => {
@@ -85,6 +104,12 @@ describe("defaultValue / matchOption", () => {
     // .default() の値は、列挙の先頭より優先される
     const withDefault = z.strictObject({ p: z.enum(["top", "bottom"]).default("bottom"), q: z.number().default(7) });
     expect(defaultValue(describeSchema(withDefault), refOptions)).toEqual({ p: "bottom", q: 7 });
+    // メタデータの initial は .default() や型ごとの既定より優先され、毎回別の値（複製）になる
+    const withInitial = z.strictObject({ on: z.boolean().meta({ initial: true }), choices: z.array(z.string()).min(1).meta({ initial: ["はい", "いいえ"] }), p: z.enum(["a", "b"]).default("a").meta({ initial: "b" }) });
+    const first = defaultValue(describeSchema(withInitial), refOptions) as { choices: string[] };
+    expect(first).toEqual({ on: true, choices: ["はい", "いいえ"], p: "b" });
+    first.choices.push("x");
+    expect(defaultValue(describeSchema(withInitial), refOptions)).toMatchObject({ choices: ["はい", "いいえ"] });
     const deep: z.ZodType = z.lazy(() => z.strictObject({ next: deep }));
     expect(defaultValue(describeSchema(deep), refOptions)).toBeUndefined(); // lazy は unknown
   });
@@ -129,12 +154,12 @@ describe("データベースとシステムのフォーム", () => {
 describe("ウィジェット", () => {
   it("文字列・数値・真偽・列挙を編集できる（数値は空欄で NaN）", () => {
     let last: unknown;
-    render(<Harness schema={z.strictObject({ s: z.string(), n: z.number(), b: z.boolean(), e: z.enum(["top", "bottom"]) })} onValue={(v) => (last = v)} />);
+    render(<Harness schema={z.strictObject({ s: z.string(), n: z.number(), flag: z.boolean(), e: z.enum(["top", "bottom"]) })} onValue={(v) => (last = v)} />);
     fireEvent.change(screen.getByLabelText("s"), { target: { value: "hi" } });
     fireEvent.change(screen.getByLabelText("n"), { target: { value: "12" } });
-    fireEvent.click(screen.getByLabelText("b"));
+    fireEvent.click(screen.getByLabelText("flag"));
     fireEvent.change(screen.getByLabelText("e"), { target: { value: "bottom" } });
-    expect(last).toEqual({ s: "hi", n: 12, b: true, e: "bottom" });
+    expect(last).toEqual({ s: "hi", n: 12, flag: true, e: "bottom" });
     fireEvent.change(screen.getByLabelText("n"), { target: { value: "" } });
     expect(last).toMatchObject({ n: Number.NaN });
   });
@@ -236,6 +261,60 @@ describe("ウィジェット", () => {
     expect(screen.getByLabelText("c n")).toBeTruthy();
     fireEvent.change(screen.getByLabelText("cの種類"), { target: { value: "0" } });
     expect(last).toEqual({ c: "" });
+  });
+
+  it("列挙はスキーマの labels、なければ共通の表示名で出す", () => {
+    render(<Harness schema={z.strictObject({ op: z.enum(["set", "top"]).meta({ labels: { set: "代入（＝）" } }) })} />);
+    const select = screen.getByLabelText("演算") as HTMLSelectElement;
+    expect([...select.options].map((o) => o.text)).toEqual(["代入（＝）", "上"]);
+  });
+
+  it("union の種類の見出し：リテラルはその表示名、ID は種類の名前、ただの文字列は「直接入力」", () => {
+    render(<Harness schema={z.strictObject({ target: z.union([z.literal("party"), z.string().meta({ ref: "actor" }), z.string(), z.number()]) })} initial={{ target: "party" }} />);
+    const kinds = screen.getByLabelText("対象の種類") as HTMLSelectElement;
+    expect([...kinds.options].map((o) => o.text)).toEqual(["パーティ全員", "アクター", "直接入力", "数値"]);
+  });
+
+  describe("ID 欄でその場で作る（newRef）", () => {
+    const created: string[] = [];
+    const withNewRef: FormContext = {
+      ...ctx,
+      newRef: (ref) => (ref === "switch" ? { noun: "スイッチ", create: (name) => (name === "失敗" ? undefined : (created.push(name), `sw_${created.length}`)) } : undefined),
+    };
+
+    it("「＋ 新しいスイッチ…」を選ぶと名前の欄が出て、作ったものが選ばれる", () => {
+      created.length = 0;
+      let last: unknown;
+      render(<Harness schema={z.strictObject({ id: z.string().meta({ ref: "switch" }) })} initial={{ id: "" }} context={withNewRef} onValue={(v) => (last = v)} />);
+      const select = screen.getByLabelText("ID") as HTMLSelectElement;
+      expect([...select.options].map((o) => o.text)).toEqual(["（選択してください）", "A", "＋ 新しいスイッチ…"]);
+      fireEvent.change(select, { target: { value: ":new" } });
+      expect(last).toBeUndefined(); // 選んだだけでは値は変わらない
+      const name = screen.getByLabelText("新しいスイッチの名前");
+      expect(document.activeElement).toBe(name);
+      fireEvent.change(name, { target: { value: "  扉を開けた " } });
+      fireEvent.submit(name.closest("form")!);
+      expect(created).toEqual(["扉を開けた"]);
+      expect(last).toEqual({ id: "sw_1" });
+      expect(screen.queryByLabelText("新しいスイッチの名前")).toBeNull();
+    });
+
+    it("作れなかったら欄は残る。Esc や「やめる」で閉じ、値は変わらない。作れない種類には出さない", () => {
+      created.length = 0;
+      let last: unknown;
+      render(<Harness schema={z.strictObject({ id: z.string().meta({ ref: "switch" }), actor: z.string().meta({ ref: "actor" }) })} initial={{ id: "sw_a", actor: "actor_hero" }} context={withNewRef} onValue={(v) => (last = v)} />);
+      fireEvent.change(screen.getByLabelText("ID"), { target: { value: ":new" } });
+      fireEvent.change(screen.getByLabelText("新しいスイッチの名前"), { target: { value: "失敗" } });
+      fireEvent.click(screen.getByRole("button", { name: "作成" }));
+      expect(screen.getByLabelText("新しいスイッチの名前")).toBeTruthy();
+      fireEvent.keyDown(screen.getByLabelText("新しいスイッチの名前"), { key: "Escape" });
+      expect(screen.queryByLabelText("新しいスイッチの名前")).toBeNull();
+      fireEvent.change(screen.getByLabelText("ID"), { target: { value: ":new" } });
+      fireEvent.click(screen.getByRole("button", { name: "やめる" }));
+      expect(screen.queryByLabelText("新しいスイッチの名前")).toBeNull();
+      expect(last).toBeUndefined();
+      expect([...(screen.getByLabelText("アクター") as HTMLSelectElement).options].map((o) => o.text)).not.toContain("＋ 新しいアクター…");
+    });
   });
 
   it("unknown な型は JSON で編集できる（壊れた JSON は無視）", () => {

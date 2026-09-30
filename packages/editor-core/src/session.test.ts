@@ -179,6 +179,73 @@ describe("coalesce", () => {
   });
 });
 
+describe("groupWithNext（下準備の編集を次の編集とまとめる）", () => {
+  const EV = "ev_g" as EventId;
+  const withEvent = (s: EditorSession): void => {
+    expect(s.execute(cmd.createEvent(M1, 1, 1, EV)).ok).toBe(true);
+    expect(s.execute(cmd.insertCommands(M1, EV, 0, 0, [eventCommand("ControlSwitches", { ids: [""], value: true })])).ok).toBe(true);
+  };
+  const choose = (id: string) => cmd.replaceCommand(M1, EV, 0, 0, eventCommand("ControlSwitches", { ids: [id], value: true }));
+
+  it("直後の編集と 1 回の Undo にまとまる（名前は後の編集のもの）。Redo で両方やり直す", () => {
+    let t = 0;
+    const s = createEditorSession({ repo, doc, commands: registry, now: () => t });
+    withEvent(s);
+    t += COALESCE_MS + 1;
+    const before = s.doc;
+    expect(s.execute(cmd.setSwitchName("sw_001" as never, "扉を開けた"), { groupWithNext: true }).ok).toBe(true);
+    t += 10;
+    expect(s.execute(choose("sw_001")).ok).toBe(true);
+    const after = s.doc;
+    expect(s.undoLabel).toBe("コマンドの変更");
+    s.undo();
+    expect(s.doc.project.switches).toEqual(before.project.switches);
+    expect(s.doc.maps[M1]).toEqual(before.maps[M1]);
+    s.redo();
+    expect(s.doc.project.switches).toEqual(after.project.switches);
+    expect(s.doc.maps[M1]!.events[EV]!.pages[0]!.commands[0]!.params).toEqual({ ids: ["sw_001"], value: true });
+    // まとめるのは 1 回だけ：その次の編集は別の Undo
+    t += 10;
+    s.execute(cmd.setEventName(M1, EV, "扉"));
+    s.undo();
+    expect(s.doc.project.switches).toHaveProperty("sw_001");
+  });
+
+  it("下準備そのものは、直前の同じ種類の編集にまとめない", () => {
+    let t = 0;
+    const s = createEditorSession({ repo, doc, commands: registry, now: () => t });
+    withEvent(s);
+    t += COALESCE_MS + 1;
+    s.execute(cmd.setEventName(M1, EV, "a"));
+    t += 10;
+    s.execute(cmd.setEventName(M1, EV, "b"), { groupWithNext: true }); // 普通なら "a" とまとまる
+    t += 10;
+    s.execute(choose("sw_x"));
+    s.undo(); // 下準備と次の編集だけが戻る
+    expect(s.doc.maps[M1]!.events[EV]!.name).toBe("a");
+    expect(s.doc.maps[M1]!.events[EV]!.pages[0]!.commands[0]!.params).toEqual({ ids: [""], value: true });
+  });
+
+  it("続く編集が無い・間が空いた・Undo をはさんだときは、それぞれ単独の Undo", () => {
+    let t = 0;
+    const s = createEditorSession({ repo, doc, commands: registry, now: () => t });
+    withEvent(s);
+    t += COALESCE_MS + 1;
+    s.execute(cmd.setSwitchName("sw_001" as never, "a"), { groupWithNext: true });
+    t += COALESCE_MS + 1;
+    s.execute(choose("sw_001"));
+    s.undo();
+    expect(s.doc.project.switches).toHaveProperty("sw_001"); // 作ったスイッチは残る
+
+    s.execute(cmd.setSwitchName("sw_002" as never, "b"), { groupWithNext: true });
+    s.undo();
+    expect(s.doc.project.switches).not.toHaveProperty("sw_002");
+    s.execute(choose("sw_001")); // Undo のあとはまとめない
+    s.undo();
+    expect(s.doc.project.switches).toHaveProperty("sw_001");
+  });
+});
+
 describe("削除と参照", () => {
   const withActorUse = (s: EditorSession): void => {
     // 初期パーティがアクターを参照している

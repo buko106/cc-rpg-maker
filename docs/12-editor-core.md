@@ -60,7 +60,7 @@ export const cmd = {
 ```ts
 export interface EditorSession {
   readonly doc: ProjectDocument;
-  readonly ui: EditorUiState;         // { currentMap, currentLayer, tool, tile, selection, zoom, clipboard }
+  readonly ui: EditorUiState;         // { currentMap, currentLayer, tool, tile, selection, zoom, clipboard, recentCommands }
   readonly dirty: boolean;
   readonly canUndo: boolean; readonly canRedo: boolean;
 
@@ -120,3 +120,7 @@ export interface Diagnostic { severity: "error" | "warning"; code: string; messa
 ## 実装メモ（イベントのコピー＆ペースト）
 - **`cmd.pasteEvent(mapId, source, x, y, id?)`**：`source`（`MapEvent`）を JSON として複製し、新しい ID（省略時は採番）で `(x, y)` に置く。名前とページはそのまま。別のマップにも貼れる。範囲外は `invalid`、ID の重複と**そのセルに別のイベントがある**ときは `duplicate`（重なるとクリックで選べなくなるため。`createEvent` / `moveEvent` は今のところ重なりを許すが、貼り付けだけは断る）。
 - **クリップボードは `EditorUiState.clipboard`**：コピー時点のイベントのスナップショット（文書には保存しない。Undo の対象でもない）。元のイベントを後で編集・削除しても貼れる中身は変わらない。切り取りは「`clipboard` に入れる + `deleteEvent`」。OS のクリップボードは使わない（別のプロジェクト・別のタブへは貼れない）。
+
+## 実装メモ（イベント入力の手間を減らす）
+- **`execute(c, { groupWithNext: true })`**：「次の編集の下準備」。直後（`COALESCE_MS` 以内、間に Undo / Redo をはさまない）に実行した編集と 1 回の Undo にまとめる（履歴のエントリは `batch([下準備, 次の編集])`、元に戻すは逆順）。続く編集が無ければ単独の Undo のまま。まとめるのは 1 回だけで、`coalesce` よりも優先する。エディタは、フォームの中でスイッチ・変数をその場で作ってそのまま選ぶときに使う（13）。
+- **`EditorUiState.recentCommands`**：最近追加したイベントコマンドの code（新しい順・重複なし・`RECENT_COMMANDS_LIMIT` = 6 件。`withRecentCommand`）。文書には保存しない。

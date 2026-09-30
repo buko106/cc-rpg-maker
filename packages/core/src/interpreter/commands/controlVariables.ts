@@ -3,7 +3,8 @@ import type { RefTarget } from "@rpg/schema";
 import { z } from "zod";
 import { warn } from "../../effects.js";
 import { defineCommand } from "../handler.js";
-import { variableIds } from "./params.js";
+import type { ProjectView } from "../../project-view.js";
+import { variableIds, variableName } from "./params.js";
 
 const operand = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("constant"), value: z.number() }),
@@ -14,7 +15,7 @@ const operand = z.discriminatedUnion("kind", [
 
 const params = z.strictObject({
   ids: variableIds,
-  op: z.enum(["set", "add", "sub", "mul", "div", "mod"]),
+  op: z.enum(["set", "add", "sub", "mul", "div", "mod"]).meta({ labels: { set: "代入（＝）", add: "加算（＋）", sub: "減算（－）", mul: "乗算（×）", div: "除算（÷）", mod: "剰余（％）" } }),
   operand,
 });
 
@@ -28,7 +29,7 @@ export const controlVariables = defineCommand({
   meta: {
     label: "変数の操作",
     category: "ゲーム進行",
-    describe: (p) => `変数 ${p.ids.join(", ")} ${OP_LABEL[p.op]} ${describeOperand(p.operand)}`,
+    describe: (p, view) => `変数 ${p.ids.map((id) => variableName(view, id)).join(", ")} ${OP_LABEL[p.op]} ${describeOperand(p.operand, view)}`,
     refs: (p) => {
       const refs: RefTarget[] = p.ids.map((id) => ({ kind: "variable", id }));
       if (p.operand.kind === "variable") refs.push({ kind: "variable", id: p.operand.id });
@@ -86,10 +87,10 @@ function apply(op: z.output<typeof params>["op"], current: number, operand: numb
 
 const OP_LABEL = { set: "＝", add: "＋", sub: "－", mul: "×", div: "÷", mod: "％" } as const;
 
-function describeOperand(o: z.output<typeof params>["operand"]): string {
+function describeOperand(o: z.output<typeof params>["operand"], view: ProjectView): string {
   switch (o.kind) {
     case "constant": return String(o.value);
-    case "variable": return `変数 ${o.id}`;
+    case "variable": return `変数 ${variableName(view, o.id)}`;
     case "random": return `乱数 ${o.min}〜${o.max}`;
     case "expr": return `式 ${o.expr}`;
   }

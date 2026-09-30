@@ -13,9 +13,10 @@ export const mapMetaSchema = z.strictObject({
 export type MapMeta = z.infer<typeof mapMetaSchema>;
 
 export const pageConditionSchema = z.discriminatedUnion("kind", [
-  z.strictObject({ kind: z.literal("switch"), id: switchIdSchema, value: z.boolean() }),
+  // `initial` はエディタで新しく作るときの初期値（検証には影響しない）
+  z.strictObject({ kind: z.literal("switch"), id: switchIdSchema, value: z.boolean().meta({ initial: true }) }),
   z.strictObject({ kind: z.literal("variable"), id: variableIdSchema, op: z.enum([">=", "==", "<="]), value: z.number() }),
-  z.strictObject({ kind: z.literal("selfSwitch"), key: z.enum(["A", "B", "C", "D"]), value: z.boolean() }),
+  z.strictObject({ kind: z.literal("selfSwitch"), key: z.enum(["A", "B", "C", "D"]), value: z.boolean().meta({ initial: true }) }),
   z.strictObject({ kind: z.literal("item"), id: itemIdSchema }),
   z.strictObject({ kind: z.literal("actor"), id: actorIdSchema }),
 ]);

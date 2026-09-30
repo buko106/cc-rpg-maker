@@ -34,11 +34,15 @@ const CLEAR = { answer: undefined, choiceCancel: undefined, choiceIds: undefined
  */
 export const showChoices = defineCommand({
   code: "ShowChoices",
-  params: z.strictObject({ choices: z.array(z.string()).min(1), cancel: z.union([z.literal("disallow"), nonNegativeInt]).default("disallow") }),
+  params: z.strictObject({
+    choices: z.array(z.string()).min(1).meta({ initial: ["はい", "いいえ"] }),
+    cancel: z.union([z.literal("disallow"), nonNegativeInt]).default("disallow"),
+  }),
   meta: {
     label: "選択肢の表示",
     category: "メッセージ",
     describe: (p) => `選択肢：${p.choices.join(" / ")}`,
+    branchLabel: (p, index) => `[${p.choices[index] ?? `選択肢 ${index + 1}`}] のとき`,
     refs: () => [],
   },
   run(p, c) {

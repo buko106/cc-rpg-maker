@@ -55,6 +55,8 @@ export interface CommandHandler<P = unknown> {
     readonly category: string;
     /** イベントリストの1行表示 */
     describe(p: P, view: ProjectView): string;
+    /** 分岐を持つコマンドの、`index` 番目の分岐（`ChoiceBranch`）の行に出す見出し（例：「[はい] のとき」「勝ったとき」）。 */
+    branchLabel?(p: P, index: number): string;
     /** 参照整合性チェック用（schema の `collectRefs` に渡す） */
     refs(p: P): RefTarget[];
   };

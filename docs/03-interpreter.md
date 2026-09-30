@@ -41,6 +41,7 @@ export interface CommandHandler<P = unknown> {
   readonly meta: {
     label: string; category: string;         // エディタ表示用
     describe(p: P, view: ProjectView): string;   // イベントリストの1行表示
+    branchLabel?(p: P, index: number): string;   // 分岐を持つコマンドの、index 番目の ChoiceBranch の行の見出し（「[はい] のとき」など）
     refs(p: P): RefTarget[];                 // 参照整合性チェック用（01 の collectRefs に渡す）
   };
   /** 命令を実行する。純関数。 */

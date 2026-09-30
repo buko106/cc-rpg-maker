@@ -8,9 +8,10 @@ export type FieldSpec =
   | { kind: "string"; ref?: string; assetKind?: string; multiline?: boolean; formula?: boolean }
   | { kind: "number"; int: boolean; min?: number; max?: number }
   | { kind: "boolean" }
-  | { kind: "enum"; values: string[] }
+  /** `labels` はスキーマのメタデータ（`.meta({ labels })`）の、値ごとの表示名。 */
+  | { kind: "enum"; values: string[]; labels?: Readonly<Record<string, string>> }
   | { kind: "literal"; value: string | number | boolean }
-  /** リテラルだけのユニオン（例：16 | 32 | 48）。選択肢から選ぶ。 */
+  /** リテラルと列挙だけのユニオン（例：16 | 32 | 48、向き | "retain"）。1 つの選択肢の一覧から選ぶ。 */
   | { kind: "choice"; values: (string | number | boolean)[] }
   | { kind: "object"; fields: ObjectField[] }
   | { kind: "array"; item: FieldSpec; min: number }
@@ -31,6 +32,8 @@ export interface ObjectField {
   hasDefault: boolean;
   /** `.default()` の値（新しく追加するときの初期値に使う） */
   default?: unknown;
+  /** スキーマのメタデータ（`.meta({ initial })`）：エディタで新しく作るときの初期値。検証には影響しない。 */
+  initial?: unknown;
 }
 
 /** zod の内部表現（`_zod.def`）を読むための最小の型。 */
@@ -106,8 +109,14 @@ export function describeSchema(schema: ZodType): FieldSpec {
       return { kind: "number", ...numberBounds(def) };
     case "boolean":
       return { kind: "boolean" };
-    case "enum":
-      return { kind: "enum", values: Object.values(def.entries ?? {}).map(String) };
+    case "enum": {
+      const labels = meta["labels"];
+      return {
+        kind: "enum",
+        values: Object.values(def.entries ?? {}).map(String),
+        ...(typeof labels === "object" && labels !== null ? { labels: labels as Record<string, string> } : {}),
+      };
+    }
     case "literal": {
       const value = def.values?.[0];
       return typeof value === "string" || typeof value === "number" || typeof value === "boolean" ? { kind: "literal", value } : { kind: "unknown" };
@@ -117,7 +126,15 @@ export function describeSchema(schema: ZodType): FieldSpec {
         kind: "object",
         fields: Object.entries(def.shape ?? {}).map(([key, s]) => {
           const u = unwrap(s);
-          return { key, spec: describeSchema(s), optional: u.optional, hasDefault: u.hasDefault, ...(u.default === undefined ? {} : { default: u.default }) };
+          const initial = metaOf(s)["initial"] ?? metaOf(u.inner)["initial"];
+          return {
+            key,
+            spec: describeSchema(s),
+            optional: u.optional,
+            hasDefault: u.hasDefault,
+            ...(u.default === undefined ? {} : { default: u.default }),
+            ...(initial === undefined ? {} : { initial }),
+          };
         }),
       };
     case "array": {
@@ -135,8 +152,9 @@ export function describeSchema(schema: ZodType): FieldSpec {
     }
     case "union": {
       const options = (def.options ?? []).map(describeSchema);
-      if (options.length > 0 && options.every((o) => o.kind === "literal")) {
-        return { kind: "choice", values: options.map((o) => (o as Extract<FieldSpec, { kind: "literal" }>).value) };
+      // リテラルと列挙だけなら、種類を選ばせずに 1 つの一覧にまとめる（例：向き | "retain"）
+      if (options.length > 0 && options.every((o) => o.kind === "literal" || o.kind === "enum")) {
+        return { kind: "choice", values: options.flatMap((o) => (o.kind === "literal" ? [o.value] : o.kind === "enum" ? o.values : [])) };
       }
       return { kind: "union", options, ...(def.discriminator === undefined ? {} : { discriminator: def.discriminator }) };
     }

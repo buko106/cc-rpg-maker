@@ -1,4 +1,5 @@
 import type { FieldSpec } from "./introspect.js";
+import { refLabel } from "./labels.js";
 
 /** 「ID を選ぶ」ウィジェットの選択肢を返す口。 */
 export interface RefOptions {
@@ -10,7 +11,8 @@ export type Json = null | boolean | number | string | Json[] | { [key: string]: 
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
 
 /**
- * 新しく追加する値の既定。ID 欄は選択肢の先頭（無ければ空文字）、配列は最小の長さぶん、union は先頭の選択肢。
+ * 新しく追加する値の既定。スキーマのメタデータに `initial` があればそれ、`.default()` があればその値。
+ * それ以外は、ID 欄は選択肢の先頭（無ければ空文字）、配列は最小の長さぶん、union は先頭の選択肢。
  * 検証を通る値になるとは限らない（空の ID など）。通るかどうかは zod が決める。
  */
 export function defaultValue(spec: FieldSpec, refOptions: RefOptions, depth = 0): unknown {
@@ -32,7 +34,8 @@ export function defaultValue(spec: FieldSpec, refOptions: RefOptions, depth = 0)
       const out: Record<string, unknown> = {};
       for (const f of spec.fields) {
         if (f.optional) continue;
-        out[f.key] = f.hasDefault && f.default !== undefined ? f.default : defaultValue(f.spec, refOptions, depth + 1);
+        out[f.key] =
+          f.initial !== undefined ? (JSON.parse(JSON.stringify(f.initial)) as unknown) : f.hasDefault && f.default !== undefined ? f.default : defaultValue(f.spec, refOptions, depth + 1);
       }
       return out;
     }
@@ -85,14 +88,15 @@ function matches(spec: FieldSpec, value: unknown): boolean {
   }
 }
 
-/** union の選択肢の見出し。 */
+/** union の選択肢の見出し（呼び出し側で `optionLabelOf` を通す）。 */
 export function optionLabel(spec: FieldSpec, index: number): string {
   if (spec.kind === "object") {
     const tag = spec.fields.find((f) => f.spec.kind === "literal");
     if (tag !== undefined && tag.spec.kind === "literal") return String(tag.spec.value);
     return "構造";
   }
-  if (spec.kind === "string") return spec.formula ? "式" : "文字列";
+  if (spec.kind === "literal") return String(spec.value);
+  if (spec.kind === "string") return spec.formula ? "式" : spec.ref !== undefined ? refLabel(spec.ref) : "直接入力";
   if (spec.kind === "number") return "数値";
   if (spec.kind === "boolean") return "真偽";
   return `選択肢 ${index + 1}`;

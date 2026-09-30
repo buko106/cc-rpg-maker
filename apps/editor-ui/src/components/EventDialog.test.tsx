@@ -65,15 +65,16 @@ describe("EventDialog", () => {
     expect(page().commands.map((c) => c.code)).toEqual(["BattleProcessing", "ChoiceBranch", "ChoiceBranch", "ChoiceBranch", "EndBranch"]);
   });
 
-  it("選択肢の表示は ChoiceBranch と EndBranch が付き、選択肢を増減すると分岐も 1 回の Undo で増減する", () => {
+  it("選択肢の表示は「はい / いいえ」で始まり、ChoiceBranch と EndBranch が付く。選択肢を増減すると分岐も 1 回の Undo で増減する", () => {
     addCommand("選択肢の表示");
-    expect(page().commands.map((c) => c.code)).toEqual(["ShowChoices", "ChoiceBranch", "EndBranch"]);
-    fireEvent.click(screen.getByRole("button", { name: /^＋ 選択肢を追加$/ }));
     expect(page().commands.map((c) => c.code)).toEqual(["ShowChoices", "ChoiceBranch", "ChoiceBranch", "EndBranch"]);
-    expect((page().commands[0]!.params["choices"] as string[]).length).toBe(2);
+    expect(page().commands[0]!.params).toMatchObject({ choices: ["はい", "いいえ"] });
+    fireEvent.click(screen.getByRole("button", { name: /^＋ 選択肢を追加$/ }));
+    expect(page().commands.map((c) => c.code)).toEqual(["ShowChoices", "ChoiceBranch", "ChoiceBranch", "ChoiceBranch", "EndBranch"]);
+    expect((page().commands[0]!.params["choices"] as string[]).length).toBe(3);
     act(() => t.session.undo());
-    expect(page().commands.map((c) => c.code)).toEqual(["ShowChoices", "ChoiceBranch", "EndBranch"]);
-    expect(page().commands.map((c) => c.params).at(0)).toMatchObject({ choices: [""] });
+    expect(page().commands.map((c) => c.code)).toEqual(["ShowChoices", "ChoiceBranch", "ChoiceBranch", "EndBranch"]);
+    expect(page().commands.map((c) => c.params).at(0)).toMatchObject({ choices: ["はい", "いいえ"] });
   });
 
   it("ループは EndLoop と一緒に入り、ループごと消える。MoveStep は選べない", () => {
@@ -122,17 +123,17 @@ describe("EventDialog", () => {
   it("ページの設定（起動条件・すり抜け・優先度・出現条件）を編集すると setEventPage になる", () => {
     fireEvent.change(screen.getByLabelText("起動条件"), { target: { value: "touch" } });
     expect(page().trigger).toBe("touch");
-    fireEvent.click(screen.getByLabelText("through"));
+    fireEvent.click(screen.getByLabelText("すり抜け"));
     expect(page().through).toBe(true);
-    fireEvent.change(screen.getByLabelText("priority"), { target: { value: "above" } });
+    fireEvent.change(screen.getByLabelText("プライオリティ"), { target: { value: "above" } });
     expect(page().priority).toBe("above");
 
     act(() => void t.session.execute(cmd.setSwitchName("sw_a" as never, "スイッチA")));
-    fireEvent.click(screen.getByText("＋ conditionsを追加"));
-    expect(page().conditions).toEqual([{ kind: "switch", id: "sw_a", value: false }]);
-    fireEvent.change(screen.getByLabelText("conditions 1の種類"), { target: { value: "2" } });
-    expect(page().conditions[0]).toMatchObject({ kind: "selfSwitch" });
-    fireEvent.click(screen.getByLabelText("conditions 1 を削除"));
+    fireEvent.click(screen.getByText("＋ 出現条件を追加"));
+    expect(page().conditions).toEqual([{ kind: "switch", id: "sw_a", value: true }]);
+    fireEvent.change(screen.getByLabelText("出現条件 1の種類"), { target: { value: "2" } });
+    expect(page().conditions[0]).toMatchObject({ kind: "selfSwitch", key: "A", value: true });
+    fireEvent.click(screen.getByLabelText("出現条件 1 を削除"));
     expect(page().conditions).toEqual([]);
     // 設定はコマンドを壊さない
     expect(page().commands).toEqual([]);
@@ -181,6 +182,118 @@ describe("EventDialog", () => {
     fireEvent.click(screen.getByRole("option", { name: /Mystery/ }));
     fireEvent.click(screen.getByRole("button", { name: "編集" }));
     expect(screen.getByRole("alert").textContent).toContain("未知のコマンド Mystery");
+  });
+
+  it("分岐の行は、中身の分かる見出しで出る（選択肢の文言・戦闘の結果）", () => {
+    addCommand("選択肢の表示");
+    const rows = (): (string | null)[] => within(screen.getByRole("listbox", { name: "イベントコマンド" })).getAllByRole("option").map((o) => o.textContent);
+    expect(rows()).toEqual(["選択肢：はい / いいえ", "[はい] のとき", "[いいえ] のとき", "分岐終了"]);
+    fireEvent.change(screen.getByRole("textbox", { name: "選択肢 1" }), { target: { value: "泊まる" } });
+    expect(screen.getByRole("option", { name: "[泊まる] のとき" })).toBeTruthy();
+    fireEvent.click(screen.getByRole("option", { name: "分岐終了" }));
+    act(() => void t.session.execute(cmd.insertCommands(M1, EV, 0, 4, [{ code: "BattleProcessing", params: { troop: "tr_x" }, indent: 0 }, ...[0, 1, 2].map((index) => ({ code: "ChoiceBranch", params: { index }, indent: 0 })), { code: "EndBranch", params: {}, indent: 0 }])));
+    expect(rows().slice(5, 8)).toEqual(["勝ったとき", "逃げたとき", "負けたとき"]);
+  });
+
+  it("追加したコマンドは有効な初期値で入り、設定の最初の欄にフォーカスが移る", () => {
+    addCommand("文章の表示");
+    expect(document.activeElement).toBe(screen.getByLabelText("本文"));
+    addCommand("条件分岐");
+    expect(page().commands[1]).toMatchObject({ code: "ConditionalBranch", params: { condition: { kind: "switch", id: "", value: true } } });
+    expect(document.activeElement).toBe(screen.getByLabelText("条件の種類"));
+    addCommand("選択肢の表示");
+    const first = screen.getByRole("textbox", { name: "選択肢 1" }) as HTMLInputElement;
+    expect(document.activeElement).toBe(first);
+    expect([first.selectionStart, first.selectionEnd]).toEqual([0, 2]); // 「はい」を選択して、すぐ打ち替えられる
+  });
+
+  it("コマンドの追加：文字で絞り込み、Enter で先頭を追加する。追加したものは「最近使ったもの」に出る", () => {
+    fireEvent.click(screen.getByRole("button", { name: "コマンドを追加…" }));
+    const picker = screen.getByRole("dialog", { name: "コマンドの追加" });
+    const search = within(picker).getByLabelText("コマンドを絞り込む");
+    expect(document.activeElement).toBe(search);
+    expect(within(picker).queryByRole("region", { name: "最近使ったもの" })).toBeNull();
+    fireEvent.change(search, { target: { value: "ウェイ" } });
+    expect(within(picker).getAllByRole("button").map((b) => b.textContent)).toEqual(["×", "ウェイト"]);
+    fireEvent.keyDown(search, { key: "Enter", keyCode: 229, isComposing: true }); // 変換の確定では追加しない
+    expect(page().commands).toEqual([]);
+    fireEvent.keyDown(search, { key: "Enter" });
+    expect(page().commands.map((c) => c.code)).toEqual(["Wait"]);
+    expect(screen.queryByRole("dialog", { name: "コマンドの追加" })).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "コマンドを追加…" }));
+    const again = screen.getByRole("dialog", { name: "コマンドの追加" });
+    fireEvent.change(within(again).getByLabelText("コマンドを絞り込む"), { target: { value: "存在しない" } });
+    expect(within(again).getByText("「存在しない」に当てはまるコマンドはありません。")).toBeTruthy();
+    fireEvent.change(within(again).getByLabelText("コマンドを絞り込む"), { target: { value: "" } });
+    fireEvent.click(within(within(again).getByRole("region", { name: "最近使ったもの" })).getByRole("button", { name: "最近使った ウェイト" }));
+    expect(page().commands.map((c) => c.code)).toEqual(["Wait", "Wait"]);
+    expect(t.session.ui.recentCommands).toEqual(["Wait"]);
+  });
+
+  it("文章をすぐ追加：Enter で「文章の表示」が入り、続けると後ろに並ぶ。Shift+Enter・変換中の Enter では入らない。空行で分かれる", () => {
+    const quick = screen.getByLabelText("文章をすぐ追加");
+    fireEvent.change(quick, { target: { value: "こんにちは" } });
+    fireEvent.keyDown(quick, { key: "Enter", shiftKey: true });
+    fireEvent.keyDown(quick, { key: "Enter", isComposing: true });
+    expect(page().commands).toEqual([]);
+    fireEvent.keyDown(quick, { key: "Enter" });
+    expect(page().commands).toEqual([{ code: "ShowText", params: { text: "こんにちは", position: "bottom", background: "window" }, indent: 0 }]);
+    expect((quick as HTMLTextAreaElement).value).toBe("");
+    fireEvent.change(quick, { target: { value: "2つ目\n2行目\n\n3つ目" } });
+    fireEvent.click(screen.getByRole("button", { name: "文章を追加" }));
+    expect(page().commands.map((c) => c.params["text"])).toEqual(["こんにちは", "2つ目\n2行目", "3つ目"]);
+    expect(screen.getByRole("option", { name: "文章：3つ目" }).getAttribute("aria-selected")).toBe("true");
+    // 入力欄の中の Delete などは、行の操作にならない
+    fireEvent.keyDown(quick, { key: "Delete" });
+    expect(page().commands).toHaveLength(3);
+    // 1 回の追加は 1 回の Undo
+    act(() => t.session.undo());
+    expect(page().commands).toHaveLength(1);
+  });
+
+  it("文章をすぐ追加：分岐の開始行を選んでいれば、分岐の中に入る", () => {
+    addCommand("条件分岐");
+    fireEvent.click(screen.getByRole("button", { name: "編集を閉じる" }));
+    fireEvent.change(screen.getByLabelText("文章をすぐ追加"), { target: { value: "中" } });
+    fireEvent.keyDown(screen.getByLabelText("文章をすぐ追加"), { key: "Enter" });
+    expect(page().commands.map((c) => [c.code, c.indent])).toEqual([["ConditionalBranch", 0], ["ShowText", 1], ["Else", 0], ["EndBranch", 0]]);
+  });
+
+  it("スイッチをその場で作って選べる。作成と選択は 1 回の Undo で戻る", () => {
+    addCommand("スイッチの操作");
+    expect(page().commands[0]!.params).toEqual({ ids: [""], value: true });
+    fireEvent.change(screen.getByRole("combobox", { name: "対象 1" }), { target: { value: ":new" } });
+    fireEvent.change(screen.getByLabelText("新しいスイッチの名前"), { target: { value: "扉を開けた" } });
+    fireEvent.click(screen.getByRole("button", { name: "作成" }));
+    expect(t.session.doc.project.switches).toEqual({ sw_001: { name: "扉を開けた" } });
+    expect(page().commands[0]!.params).toEqual({ ids: ["sw_001"], value: true });
+    expect(screen.getByRole("option", { name: "スイッチ 扉を開けた = ON" })).toBeTruthy();
+    act(() => t.session.undo());
+    expect(t.session.doc.project.switches).toEqual({});
+    expect(page().commands[0]!.params).toEqual({ ids: [""], value: true });
+    act(() => t.session.redo());
+    expect(t.session.doc.project.switches).toEqual({ sw_001: { name: "扉を開けた" } });
+    expect(page().commands[0]!.params).toEqual({ ids: ["sw_001"], value: true });
+  });
+
+  it("入力の問題は、フォームと同じ呼び名の場所と「未設定です」で出る", () => {
+    fireEvent.click(screen.getByText("＋ 出現条件を追加"));
+    expect(screen.getByRole("alert", { name: "入力の問題" }).textContent).toBe("出現条件 1 ID：未設定です");
+    addCommand("ウェイト");
+    fireEvent.change(screen.getByLabelText("フレーム数"), { target: { value: "-1" } });
+    expect(within(screen.getByLabelText("コマンドの設定")).getByRole("alert", { name: "入力の問題" }).textContent).toMatch(/^フレーム数：/);
+  });
+
+  it("出現条件の変数もその場で作れる（空いている連番）", () => {
+    act(() => void t.session.execute(cmd.setVariableName("var_001" as never, "既存")));
+    fireEvent.click(screen.getByText("＋ 出現条件を追加"));
+    fireEvent.change(screen.getByLabelText("出現条件 1の種類"), { target: { value: "1" } });
+    fireEvent.change(screen.getByLabelText("出現条件 1 ID"), { target: { value: ":new" } });
+    fireEvent.change(screen.getByLabelText("新しい変数の名前"), { target: { value: "所持数" } });
+    fireEvent.submit(screen.getByLabelText("新しい変数の名前").closest("form")!);
+    expect(t.session.doc.project.variables).toMatchObject({ var_002: { name: "所持数" } });
+    expect(page().conditions[0]).toMatchObject({ kind: "variable", id: "var_002" });
   });
 
   it("実行に失敗すると、メッセージを出す", () => {
