@@ -48,7 +48,7 @@
 - 07：`render-webgl` + ピクセル差分テスト。
 - 10：`fsa` アダプタ。15：Service Worker オフライン化。
 - **完了条件**：プラグインが両アプリで動き、WebGL/Canvas2D が同等出力。
-- **状況**：完了。`e2e/plugins.spec.ts`（プラグインがエディタのテストプレイと書き出したゲームの両方で動く）、`e2e/render.spec.ts`（WebGL と Canvas2D の差が 1% 以内）。`formatVersion` は 2（`system.plugins`）に上がり、最初の実マイグレーションが入った。フォルダを選ぶ保存先の UI・プラグインの実行時ロード・ページの `moveRoute`・専用のショップ画面は後続（14・10・03 の実装メモ）。
+- **状況**：完了。`e2e/plugins.spec.ts`（プラグインがエディタのテストプレイと書き出したゲームの両方で動く）、`e2e/render.spec.ts`（WebGL と Canvas2D の差が 1% 以内）。`formatVersion` は 2（`system.plugins`）に上がり、最初の実マイグレーションが入った。プラグインの実行時ロード・ページの `moveRoute`・専用のショップ画面は後続（14・10・03 の実装メモ）。
 
 ## 後続候補（スコープ外）
 - ランタイムの Web Worker 化（決定論設計により後付け可能）。

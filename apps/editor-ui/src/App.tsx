@@ -11,13 +11,25 @@ import type { EditorEnv } from "./hooks.js";
 /** 自動保存までの待ち時間。 */
 export const AUTOSAVE_MS = 1000;
 
+/** プロジェクトの保存先（ProjectRepository と、画面に出す名前）。 */
+export interface Storage {
+  repo: ProjectRepository;
+  label: string;
+}
+
 export interface AppProps {
   env: EditorEnv;
   repo: ProjectRepository;
+  /** 一覧に出す、いまの保存先の名前。 */
+  storageLabel?: string;
+  /** 保存先のフォルダを利用者に選ばせる（呼ぶのはクリックの中。選ばずに閉じたら reject してよい）。無ければ切り替えボタンを出さない。 */
+  pickFolder?: () => Promise<Storage>;
 }
 
 /** ルート：プロジェクト一覧 ↔ エディタ。 */
-export function App({ env, repo }: AppProps): ReactElement {
+export function App({ env, repo: initialRepo, storageLabel = "ブラウザ内", pickFolder }: AppProps): ReactElement {
+  const [storage, setStorage] = useState<Storage>({ repo: initialRepo, label: storageLabel });
+  const repo = storage.repo;
   const [session, setSession] = useState<EditorSession | undefined>();
 
   // セッションを閉じるときは、自動保存のタイマーを止めて、未保存の分を保存する
@@ -44,7 +56,7 @@ export function App({ env, repo }: AppProps): ReactElement {
     <EnvContext.Provider value={env}>
       <RepoContext.Provider value={repo}>
         {session === undefined ? (
-          <ProjectList repo={repo} onOpen={open} />
+          <ProjectList repo={repo} onOpen={open} storageLabel={storage.label} {...(pickFolder === undefined ? {} : { onPickFolder: () => pickFolder().then(setStorage) })} />
         ) : (
           <SessionContext.Provider value={session}>
             <Shell onExit={exit} />

@@ -74,4 +74,4 @@
 ## 実装メモ（M7 で確定した点）
 - **プラグイン**：システム設定に「プラグイン」タブ（ビルドに入っているプラグインの有効/無効、設定の JSON、入っていないプラグインの一覧と外す操作、読み込めなかったプラグインの表示）。`EditorEnv` は `PluginEnv`（`pluginCatalog` / `pluginDiagnostics` / `pluginForms` / `pluginFailures` / `createExtensions`）を持つ。`createBrowserEnv()` は非同期になった（プラグインの `register` が非同期でもよいため）。詳しくは 14。
 - **書き出しダイアログ**に描画方式（自動 / WebGL / Canvas2D）とオフライン対応（フォルダ形式のみ）を追加。
-- **保存先**：`?storage=opfs`（OPFS）。フォルダを選ぶ UI は未実装。
+- **保存先**：既定は IndexedDB、`?storage=opfs` で OPFS。File System Access API があるブラウザでは、プロジェクト一覧の「保存先：…」の横の「フォルダを選ぶ…」で利用者のフォルダに切り替えられる（`App` の `pickFolder` / `storageLabel`。選ぶのをやめた `AbortError` は無視し、他の失敗はメッセージに出す）。選んだフォルダはそのタブの間だけ有効で、リロードすると既定の保存先に戻る（`FileSystemDirectoryHandle` の永続化と権限の再確認は未実装）。`e2e/folder.spec.ts` は `showDirectoryPicker` を OPFS のフォルダを返すスタブにして確かめる。
