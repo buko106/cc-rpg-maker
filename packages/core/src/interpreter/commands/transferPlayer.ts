@@ -3,13 +3,16 @@ import { z } from "zod";
 import { warn } from "../../effects.js";
 import { defineCommand } from "../handler.js";
 
-const params = z.strictObject({
-  mapId: mapIdSchema,
-  x: nonNegativeInt,
-  y: nonNegativeInt,
-  dir: z.union([directionSchema, z.literal("retain")]).default("retain"),
-  fade: z.enum(["black", "white", "none"]).default("black"),
-});
+// `location` はエディタ用のメタデータ：mapId / x / y をマップのクリックで選べる（検証には影響しない）
+const params = z
+  .strictObject({
+    mapId: mapIdSchema,
+    x: nonNegativeInt,
+    y: nonNegativeInt,
+    dir: z.union([directionSchema, z.literal("retain")]).default("retain"),
+    fade: z.enum(["black", "white", "none"]).default("black"),
+  })
+  .meta({ location: true });
 
 /**
  * プレイヤーを別のマップ（または同じマップの別の位置）へ移動する。

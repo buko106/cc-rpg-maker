@@ -123,10 +123,12 @@ export interface OverlayModel {
   grid: boolean;
   events: { id: EventId; x: number; y: number; name: string; selected: boolean }[];
   hover: Cell | undefined;
+  /** 選んでいる位置（場所の選択の移動先など）。太い枠で示す */
+  marker?: Cell | undefined;
   mapId: MapId;
 }
 
-export function overlayModel(project: Project, map: MapData, opts: { selected: EventId | undefined; hover: Cell | undefined; grid: boolean }): OverlayModel {
+export function overlayModel(project: Project, map: MapData, opts: { selected: EventId | undefined; hover: Cell | undefined; grid: boolean; marker?: Cell | undefined }): OverlayModel {
   const tileSize = project.system.tileSize;
   return {
     mapId: map.id,
@@ -136,6 +138,7 @@ export function overlayModel(project: Project, map: MapData, opts: { selected: E
     grid: opts.grid,
     events: Object.values(map.events).map((e) => ({ id: e.id, x: e.x, y: e.y, name: e.name, selected: e.id === opts.selected })),
     hover: opts.hover,
+    ...(opts.marker === undefined ? {} : { marker: opts.marker }),
   };
 }
 
@@ -180,5 +183,17 @@ export function drawOverlay(ctx: OverlayContext, model: OverlayModel): void {
     ctx.strokeRect(ev.x * ts + 1.5, ev.y * ts + 1.5, ts - 3, ts - 3);
     ctx.fillStyle = "#fff";
     ctx.fillText(ev.name, ev.x * ts + 3, ev.y * ts + 3);
+  }
+  if (model.marker !== undefined) {
+    const { x, y } = model.marker;
+    // どのタイルの上でも見えるように、黒の縁取りに黄色の枠
+    ctx.fillStyle = "rgba(255,221,0,0.35)";
+    ctx.fillRect(x * ts, y * ts, ts, ts);
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 5;
+    ctx.strokeRect(x * ts + 2.5, y * ts + 2.5, ts - 5, ts - 5);
+    ctx.strokeStyle = "rgb(255,221,0)";
+    ctx.lineWidth = 3;
+    ctx.strokeRect(x * ts + 2.5, y * ts + 2.5, ts - 5, ts - 5);
   }
 }

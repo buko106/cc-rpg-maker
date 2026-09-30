@@ -200,6 +200,7 @@ const OPTION_LABELS: Readonly<Record<string, string>> = {
   all: "すべて",
   expr: "式",
   item: "アイテム",
+  gold: "お金",
   actor: "アクター",
   ">=": "以上",
   "==": "等しい",

@@ -109,6 +109,18 @@ describe("SystemDialog", () => {
     expect(t.session.doc.project.system.tileSize).toBe(48);
   });
 
+  it("開始位置は、開始マップのプレビューをクリックしても選べる", () => {
+    vi.spyOn(HTMLCanvasElement.prototype, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 480, right: 640, bottom: 480, x: 0, y: 0, toJSON: () => ({}) });
+    open();
+    const picker = screen.getByRole("application", { name: /マップ「MAP001」をクリックして位置を選ぶ/ });
+    fireEvent.pointerDown(picker, { clientX: 3 * 32 + 16, clientY: 9 * 32 + 16, button: 0, pointerId: 1 });
+    expect(t.session.doc.project.system).toMatchObject({ startMap: M1, startX: 3, startY: 9 });
+    fireEvent.pointerDown(picker, { clientX: 3 * 32 + 16, clientY: 9 * 32 + 16, button: 2, pointerId: 1 }); // 右ボタンは無視
+    fireEvent.pointerDown(picker, { clientX: 700, clientY: 9 * 32 + 16, button: 0, pointerId: 1 }); // マップの外も無視
+    expect(t.session.doc.project.system).toMatchObject({ startX: 3, startY: 9 });
+    vi.restoreAllMocks();
+  });
+
   it("スイッチの追加・名前変更・削除。使われていれば確認する。変数も同様", () => {
     open();
     fireEvent.click(screen.getByRole("tab", { name: "スイッチ" }));

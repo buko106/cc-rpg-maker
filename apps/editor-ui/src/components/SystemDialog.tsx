@@ -4,7 +4,8 @@ import type { SwitchId, SystemSettings, VariableId } from "@rpg/schema";
 import { useState } from "react";
 import type { ReactElement } from "react";
 import { FormEditor } from "../form-editor.js";
-import { useEnv, useFormContext, useSession } from "../hooks.js";
+import { useFormContext } from "../form-context.js";
+import { useEnv, useSession } from "../hooks.js";
 import { Dialog } from "./Dialog.js";
 import { useExecute } from "./useExecute.js";
 

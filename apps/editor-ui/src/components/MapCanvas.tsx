@@ -1,19 +1,22 @@
 import { cmd } from "@rpg/editor-core";
 import { newId } from "@rpg/schema";
 import type { EventId } from "@rpg/schema";
-import type { AssetSource, Renderer } from "@rpg/runtime";
-import { useEffect, useMemo, useRef, useState } from "react";
+import type { EventTemplate } from "@rpg/editor-core";
+import { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent, PointerEvent, ReactElement } from "react";
-import { useEnv, useSession } from "../hooks.js";
-import { assetsOf, cellAt, cellsOnLine, drawOverlay, eventAt, overlayModel, projectMapForEditor } from "../map/project-map.js";
+import { useEnv, useEventTemplates, useSession } from "../hooks.js";
+import { cellAt, cellsOnLine, drawOverlay, eventAt, overlayModel } from "../map/project-map.js";
 import type { Cell } from "../map/project-map.js";
+import { useMapRenderer } from "../map/use-map-renderer.js";
+import { EventTemplateDialog } from "./EventTemplateDialog.js";
 import { useExecute } from "./useExecute.js";
 
 type Stroke = { kind: "paint"; last: Cell } | { kind: "drag"; eventId: EventId; at: Cell };
 
 /**
  * マップキャンバス。下のキャンバスに `Renderer`（ゲームと同じ描画）でマップを描き、上のキャンバスにグリッド・イベント枠を重ねる。
- * 操作はすべて EditorCommand（`paintTiles` / `fillTiles` / `createEvent` / `moveEvent` / `deleteEvent`）として `session.execute` に渡す。
+ * 操作はすべて EditorCommand（`paintTiles` / `fillTiles` / `createEvent` / `createEventFromTemplate` / `moveEvent` / `deleteEvent`）として `session.execute` に渡す。
+ * 「置くイベント」でひな形を選んでいると、空いたセルではひな形の入力ダイアログ（`EventTemplateDialog`）を出す。
  * キーボード：矢印でセルを移動、Enter でツールを適用、O でイベントを開く、Delete で選択中のイベントを削除、
  * Ctrl/⌘ + C・X・V で選択中のイベントのコピー・切り取り・貼り付け（貼り付け先はカーソルのあるセル）。
  */
@@ -23,12 +26,13 @@ export function MapCanvas({ grid, onOpenEvent }: { grid: boolean; onOpenEvent: (
   const { run, dialog, error } = useExecute();
   const baseRef = useRef<HTMLCanvasElement>(null);
   const overlayRef = useRef<HTMLCanvasElement>(null);
-  const engine = useRef<{ renderer: Renderer; assets: AssetSource; ready: boolean; loaded: Set<string>; lastFrame?: ReturnType<typeof projectMapForEditor> } | undefined>(undefined);
   const stroke = useRef<Stroke | undefined>(undefined);
   const [hover, setHover] = useState<Cell | undefined>();
   /** 最後にカーソルがあったセル（ボタンから貼るときの貼り付け先。キャンバスの外へ出ても残る） */
   const lastCell = useRef<Cell | undefined>(undefined);
-  const [readyTick, setReadyTick] = useState(0);
+  const templates = useEventTemplates();
+  /** ひな形の入力を待っているセル（「置くイベント」でひな形を選んでいるとき） */
+  const [placing, setPlacing] = useState<{ template: EventTemplate; cell: Cell } | undefined>();
 
   const { ui, doc } = session;
   const map = ui.currentMap === undefined ? undefined : doc.maps[ui.currentMap];
@@ -36,44 +40,7 @@ export function MapCanvas({ grid, onOpenEvent }: { grid: boolean; onOpenEvent: (
   const width = (map?.width ?? 1) * tileSize;
   const height = (map?.height ?? 1) * tileSize;
 
-  // Renderer はセッションが変わるまで使い回す
-  useEffect(() => {
-    const canvas = baseRef.current;
-    if (canvas === null) return;
-    const assets = env.createAssets(session);
-    const renderer = env.createRenderer(canvas);
-    const state = { renderer, assets, ready: false, loaded: new Set<string>() };
-    engine.current = state;
-    void renderer.init({ width, height, assets }).then(() => {
-      state.ready = true;
-      setReadyTick((n) => n + 1); // 初期化が終わったので描く
-    });
-    return () => {
-      engine.current = undefined;
-      renderer.dispose();
-    };
-    // Renderer の作り直しはセッションの切り替え時だけ（サイズは下の effect で追随する）
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [session, env]);
-
-  // マップの内容が変わったときだけ、Renderer で描き直す（ホバーの移動では描き直さない）
-  const frame = useMemo(() => (map === undefined ? undefined : projectMapForEditor(doc.project, map)), [doc.project, map]);
-  useEffect(() => {
-    const state = engine.current;
-    if (state === undefined || !state.ready || frame === undefined) return;
-    state.renderer.resize(width, height);
-    state.lastFrame = frame;
-    state.renderer.render(frame);
-    // 画像の読み込みが終わったら、もう一度描く（Renderer は未ロードの画像を次のフレームから描く）
-    for (const id of assetsOf(frame)) {
-      if (state.loaded.has(id)) continue;
-      state.loaded.add(id);
-      state.assets.loadImage(id).then(
-        () => requestAnimationFrame(() => engine.current === state && state.lastFrame !== undefined && state.renderer.render(state.lastFrame)),
-        () => state.loaded.delete(id),
-      );
-    }
-  }, [frame, width, height, readyTick]);
+  useMapRenderer(baseRef, session, env, doc.project, map);
 
   // グリッド・イベント枠・選択・ホバーのオーバーレイ
   useEffect(() => {
@@ -135,6 +102,12 @@ export function MapCanvas({ grid, onOpenEvent }: { grid: boolean; onOpenEvent: (
         }
         if (ui.tool === "select") {
           session.setUi({ selection: { kind: "none" } });
+          return undefined;
+        }
+        // ひな形を選んでいれば、入力のダイアログを出す（置くのは「作成」のとき）
+        const template = templates.find((t) => t.id === ui.eventTemplate);
+        if (template !== undefined) {
+          setPlacing({ template, cell });
           return undefined;
         }
         const id = newId<"EventId">("ev");
@@ -247,6 +220,9 @@ export function MapCanvas({ grid, onOpenEvent }: { grid: boolean; onOpenEvent: (
       <p className="muted status-line" aria-live="polite">
         {hover === undefined ? "" : `(${hover.x}, ${hover.y})`}
       </p>
+      {placing !== undefined && ui.currentMap !== undefined && (
+        <EventTemplateDialog template={placing.template} mapId={ui.currentMap} cell={placing.cell} onClose={() => setPlacing(undefined)} onOpenEvent={onOpenEvent} />
+      )}
       {dialog}
     </div>
   );

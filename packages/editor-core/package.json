@@ -11,7 +11,8 @@
   "dependencies": {
     "@rpg/core": "workspace:*",
     "@rpg/project-store": "workspace:*",
-    "@rpg/schema": "workspace:*"
+    "@rpg/schema": "workspace:*",
+    "zod": "^4.0.0"
   },
   "devDependencies": {
     "@rpg/test-utils": "workspace:*"
