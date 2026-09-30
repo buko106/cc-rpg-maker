@@ -113,6 +113,26 @@ describe("ページの moveRoute（自律移動）", () => {
     expect(at(s, "a").y).toBe(0);
   });
 
+  it("skippable でないルートは、通れるまで待ち続ける。とうせんぼされても、解けたら同じ往復に戻る（ずれていかない）", () => {
+    const { ctx } = setup(event("chick", 4, 5, page({ moveRoute: route([{ kind: "move", dir: "right" }, { kind: "move", dir: "left" }], { repeat: true }) })));
+    const blockedAt = (s: GameState): GameState => ({ ...s, map: { ...s.map, player: { ...s.map.player, x: 5, y: 5 } } });
+    let s = blockedAt(initialState(ctx, "s"));
+    for (let i = 0; i < 400; i++) {
+      const r = step(blockedAt(s), emptyInput(), ctx);
+      s = r.state;
+      expect(warns(r.effects)).toEqual([]);
+    }
+    expect(at(s, "chick")).toMatchObject({ x: 4, y: 5 }); // 右へ行けないまま待っている
+    // プレイヤーがどいたら、右へ 1 歩、左へ 1 歩、を続ける（右へ追いやられない）
+    const xs = new Set<number>();
+    s = { ...s, map: { ...s.map, player: { ...s.map.player, x: 1, y: 1 } } };
+    for (let i = 0; i < 400; i++) {
+      s = step(s, emptyInput(), ctx).state;
+      xs.add(at(s, "chick").x);
+    }
+    expect([...xs].sort()).toEqual([4, 5]);
+  });
+
   it("プレイヤーの居るタイルには入らない。through や下のプライオリティなら入れる", () => {
     const { ctx } = setup();
     const start = initialState(ctx, "s");

@@ -27,7 +27,7 @@
     { "press": "ok" },
     { "wait": 60 }
   ],
-  "expect": { "finalStateHash": "b32472f640ee0b359facc351e2ba57542eca34e1aa8771b9a47c51004bf166c5", "effects": { "playBgm": 1, "stopBgm": 2, "log": 0 } },
+  "expect": { "finalStateHash": "c0733da1b58b7e6ac47e853f74062a12a43c1030fd5c692da3f5d3952c17f46c", "effects": { "playBgm": 1, "stopBgm": 2, "log": 0 } },
   "assertions": [
     { "atTick": 200, "path": "message.text", "equals": "スライムが あらわれた！" },
     { "atTick": 206, "path": "scene.kind", "equals": "battle" },

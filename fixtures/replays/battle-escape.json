@@ -22,7 +22,7 @@
     { "press": "ok" },
     { "wait": 30 }
   ],
-  "expect": { "finalStateHash": "a2222ece51c3f5734c6e415dda3c7ad4cef6ad2e371f325be0d9608ab3cf0a0c", "effects": { "playBgm": 1, "stopBgm": 2, "log": 0 } },
+  "expect": { "finalStateHash": "0948f74f598f511c5e052e304bae916de2a4647f16ae612038bdf595397a059f", "effects": { "playBgm": 1, "stopBgm": 2, "log": 0 } },
   "assertions": [
     { "atTick": 206, "path": "scene.kind", "equals": "battle" },
     { "atTick": 213, "path": "battle.phase", "equals": "resolve" },

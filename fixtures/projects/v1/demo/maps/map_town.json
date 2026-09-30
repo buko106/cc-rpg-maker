@@ -307,7 +307,7 @@
           },
           "moveRoute": {
             "repeat": true,
-            "skippable": true,
+            "skippable": false,
             "steps": [
               {
                 "kind": "move",

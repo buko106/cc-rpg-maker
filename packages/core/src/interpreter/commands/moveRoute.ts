@@ -114,9 +114,11 @@ export const moveStep = defineCommand({
         const blocked = moved.x === ch.x && moved.y === ch.y;
         const next = withCharacter(c.state, p.who, moved);
         if (!blocked) return { state: next, control: { kind: "wait", wait: { kind: "move", who: p.who } } };
+        // 自律移動で `skippable` でないルートは、通れるようになるまで待ち続ける（あきらめると、相対的な歩みの列がずれていく）
+        if (p.auto && !p.skippable) return { state: next, control: { kind: "wait", wait: { kind: "frames", left: 1 } }, setLocals: { retry: true } };
         const waited = typeof c.interp.locals["blocked"] === "number" ? (c.interp.locals["blocked"] as number) : 0;
         if (p.skippable || waited >= MAX_BLOCKED_FRAMES) {
-          return { state: next, setLocals: { blocked: undefined }, ...(p.skippable || p.auto ? {} : { effects: [warn(`MoveStep: ${p.who} が ${dir} に進めないのであきらめた`)] }) };
+          return { state: next, setLocals: { blocked: undefined }, ...(p.skippable ? {} : { effects: [warn(`MoveStep: ${p.who} が ${dir} に進めないのであきらめた`)] }) };
         }
         return { state: next, control: { kind: "wait", wait: { kind: "frames", left: 1 } }, setLocals: { retry: true, blocked: waited + 1 } };
       }
