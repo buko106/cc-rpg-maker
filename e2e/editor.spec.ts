@@ -118,3 +118,25 @@ test("データベースにアクターを追加し、参照されているア�
   await page.getByRole("button", { name: "キャンセル" }).click();
   await expect(page.getByRole("list", { name: "アクターの一覧" }).getByRole("button")).toHaveCount(2);
 });
+
+test("イベントの自律移動：ページで「自律移動する」を入れると、テストプレイで勝手に歩き回る", async ({ page }) => {
+  await createProject(page, "自律移動");
+  await page.getByRole("radio", { name: "イベント" }).click();
+  const spot = await cellCenter(page, 10, 8);
+  await page.mouse.click(spot.x, spot.y);
+  await page.getByRole("button", { name: "イベントを編集…" }).click();
+  await page.getByRole("checkbox", { name: /自律移動する/ }).check();
+  expect(await editor(page, (s) => Object.values(Object.values(s.doc.maps)[0]!.events)[0])).toMatchObject({ x: 10, y: 8, pages: [{ moveRoute: { repeat: true, steps: [{ kind: "move", dir: "random" }, { kind: "wait" }] } }] });
+  await page.getByRole("button", { name: /^イベント：.*を閉じる$/ }).click();
+
+  await page.getByRole("button", { name: "テストプレイ", exact: true }).click();
+  await page.waitForFunction(() => window.__rpgPlaytest !== undefined && window.__rpgPlaytest.getState().scene.kind === "title");
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(() => window.__rpgPlaytest.getState().scene.kind === "map");
+  // 数秒のうちに、開始位置から動く（ランダムに歩く）
+  await page.waitForFunction(
+    "Object.values(window.__rpgPlaytest.getState().map.events).some((e) => e.x !== 10 || e.y !== 8)",
+    undefined,
+    { timeout: 15000 },
+  );
+});

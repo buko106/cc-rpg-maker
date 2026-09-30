@@ -138,6 +138,25 @@ describe("EventDialog", () => {
     expect(page().commands).toEqual([]);
   });
 
+  it("自律移動：入れると初期ルートが付き、手順を編集でき、外すと moveRoute が消える。Undo で戻せる", () => {
+    expect(page().moveRoute).toBeUndefined();
+    const box = screen.getByRole("checkbox", { name: /自律移動する/ });
+    fireEvent.click(box);
+    expect(page().moveRoute).toEqual({ repeat: true, skippable: true, steps: [{ kind: "move", dir: "random" }, { kind: "wait", frames: 60 }] });
+    fireEvent.click(screen.getByLabelText("繰り返す"));
+    expect(page().moveRoute?.repeat).toBe(false);
+    // ページの他の設定を変えても、ルートは残る
+    fireEvent.change(screen.getByLabelText("起動条件"), { target: { value: "touch" } });
+    expect(page()).toMatchObject({ trigger: "touch", moveRoute: { repeat: false } });
+    fireEvent.click(screen.getByRole("checkbox", { name: /自律移動する/ }));
+    expect(page().moveRoute).toBeUndefined();
+    expect(page().trigger).toBe("touch");
+    // 続けて編集した分は 1 回の Undo にまとまる（setEventPage の coalesce）
+    act(() => void t.session.undo());
+    expect(page().moveRoute).toBeUndefined();
+    expect(page().trigger).toBe("action");
+  });
+
   it("グラフィックを設定して、外すと page から消える", () => {
     fireEvent.click(screen.getByLabelText("グラフィックを設定"));
     expect(page().graphic).toMatchObject({ index: 0, direction: "up" });
