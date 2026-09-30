@@ -153,6 +153,30 @@
             "value": 50
           }
         ]
+      },
+      "item_hipotion": {
+        "id": "item_hipotion",
+        "name": "ハイポーション",
+        "kind": "consumable",
+        "price": 80,
+        "effects": [
+          {
+            "kind": "recoverHp",
+            "value": 150
+          }
+        ]
+      },
+      "item_ether": {
+        "id": "item_ether",
+        "name": "エーテル",
+        "kind": "consumable",
+        "price": 100,
+        "effects": [
+          {
+            "kind": "recoverMp",
+            "value": 30
+          }
+        ]
       }
     },
     "enemies": {

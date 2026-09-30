@@ -13,6 +13,7 @@ import { handleTick } from "./tickPhase.js";
 export type { Action, InterpreterAction, StepResult } from "./actions.js";
 export { paramAt } from "../params.js";
 export { initialState, titleState } from "./initial.js";
+export { isSellable, maxBuyQuantity, openShop, sellableItemIds, sellPrice, SHOP_ITEM_LIMIT, shopCommands, shopListIds } from "./shop.js";
 export { MENU_ITEMS, menuItemIds, SAVE_SLOT_COUNT, SAVE_SLOT_FIRST, TITLE_ITEMS } from "./scenes.js";
 
 /**

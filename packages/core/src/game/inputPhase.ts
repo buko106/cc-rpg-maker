@@ -7,6 +7,7 @@ import type { EventRuntime, GameState } from "../state.js";
 import type { StepResult } from "./actions.js";
 import { battleInput } from "../battle/index.js";
 import { handleMessageInput } from "./messageInput.js";
+import { handleShopInput } from "./shop.js";
 import { handleGameoverInput, handleMenuInput, handleTitleInput, openMenu } from "./uiPhase.js";
 
 /** 通行フラグを持たないタイルセット（未定義のタイルセットを参照したマップ用）。 */
@@ -49,7 +50,7 @@ function directionOf(input: InputFrame): Direction | undefined {
 
 /**
  * 入力フレームを処理する（時間は進めない）。
- * - タイトル・メニュー・ゲームオーバー：`uiPhase.ts`。戦闘：`battle/flow.ts`。
+ * - タイトル・メニュー・ゲームオーバー：`uiPhase.ts`。ショップ：`shop.ts`。戦闘：`battle/flow.ts`。
  * - メッセージ表示中：決定/キャンセルで閉じる。
  * - イベント実行中・場所移動の予約中・移動中：プレイヤーは操作できない。
  * - メニュー/キャンセル：メニューを開く。決定：目の前/足元のアクションイベントを起動。方向キー：1タイル移動を開始（通れなければ向きだけ変わり、
@@ -61,6 +62,7 @@ export function handleInput(state: GameState, input: InputFrame, ctx: Ctx): Step
   if (state.scene.kind === "menu") return handleMenuInput(state, input);
   if (state.scene.kind === "battle") return battleInput(state, input, ctx);
   if (state.scene.kind === "gameover") return handleGameoverInput(state, input, ctx);
+  if (state.scene.kind === "shop") return handleShopInput(state, input, ctx);
   if (state.scene.kind !== "map") return idle;
 
   if (state.message.open) return handleMessageInput(state, input);

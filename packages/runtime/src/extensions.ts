@@ -2,7 +2,7 @@ import type { Action, Ctx, Effect, GameState } from "@rpg/core";
 import type { FrameSpec } from "./frame-spec.js";
 import type { AudioOut } from "./ports/audio.js";
 
-/** `GameState.scene.kind`（タイトル・マップ・メニュー・戦闘・ゲームオーバー）。 */
+/** `GameState.scene.kind`（タイトル・マップ・メニュー・ショップ・戦闘・ゲームオーバー）。 */
 export type SceneKind = GameState["scene"]["kind"];
 
 /** `plugin` Effect の受け口に渡される、ランタイムへの窓口。 */

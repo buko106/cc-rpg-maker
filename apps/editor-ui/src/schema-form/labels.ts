@@ -35,6 +35,7 @@ const FIELD_LABELS: Readonly<Record<string, string>> = {
   variable: "変数",
   digits: "桁数",
   goods: "商品",
+  canSell: "売却できる",
   amount: "量",
   target: "対象",
   actor: "アクター",

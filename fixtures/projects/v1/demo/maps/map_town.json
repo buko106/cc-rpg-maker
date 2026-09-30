@@ -356,6 +356,104 @@
           ]
         }
       ]
+    },
+    "ev_merchant": {
+      "id": "ev_merchant",
+      "name": "商人",
+      "x": 2,
+      "y": 5,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "0eefde69801856a9",
+            "index": 0,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "いらっしゃい！ ここは \\C[2]よろず屋\\C[0] だよ。\n初めてのお客さんには \\C[6]100G\\C[0] をあげよう。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChangeGold",
+              "params": {
+                "op": "gain",
+                "amount": {
+                  "kind": "constant",
+                  "value": 100
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSelfSwitch",
+              "params": {
+                "key": "A",
+                "value": true
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "selfSwitch",
+              "key": "A",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "0eefde69801856a9",
+            "index": 0,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "いらっしゃい！ 何にする？",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShopProcessing",
+              "params": {
+                "goods": [
+                  "item_potion",
+                  "item_hipotion",
+                  "item_ether"
+                ],
+                "canSell": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "また来てね！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
     }
   }
 }

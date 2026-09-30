@@ -11,7 +11,7 @@ export type { Runtime, RuntimeDeps, RuntimeStatus } from "./runtime.js";
 export type { EffectApi, RuntimeExtensions, SceneKind } from "./extensions.js";
 export { distributeEffect } from "./effects.js";
 export type { EffectSinks } from "./effects.js";
-export { BATTLE_LOG_LINES, formatLogEntry, NO_UI, projectBattle, projectFrame, projectGameOver, projectMapLayers, projectMenu, projectMessage, projectTitle, term } from "./projection/index.js";
+export { BATTLE_LOG_LINES, formatLogEntry, NO_UI, projectBattle, projectFrame, projectGameOver, projectMapLayers, projectMenu, projectMessage, projectShop, projectTitle, term } from "./projection/index.js";
 export type { NoticeKey, TermKey, UiContext } from "./projection/index.js";
 export { expandText } from "./text-codec.js";
 export type { ColoredText, TextEnv } from "./text-codec.js";
