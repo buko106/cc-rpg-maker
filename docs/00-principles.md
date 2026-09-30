@@ -41,8 +41,9 @@ exporter      → schema, project-store（ポート型・ZIP）
 save-store    → core（Snapshot 型・マイグレーション）, runtime（ポート型のみ）
 editor-core   → schema, core（CommandRegistry のメタデータ参照のみ）, project-store（ポート型のみ）
 plugin-api    → core, runtime, editor-core（公開型のみ）
-editor-ui     → editor-core, runtime, plugin-api, schema, core（CommandRegistry のメタデータ参照のみ）, exporter, 任意のアダプタ
-player        → runtime, plugin-api, schema（project.json の検証用）, 任意のアダプタ
+plugin-samples → plugin-api（サンプルプラグイン。第三者のプラグインと同じ立場）
+editor-ui     → editor-core, runtime, plugin-api, plugin-samples, schema, core（CommandRegistry のメタデータ参照のみ）, exporter, 任意のアダプタ
+player        → runtime, plugin-api, plugin-samples, schema（project.json の検証用）, 任意のアダプタ
 test-utils    → 任意（テスト専用）
 ```
 

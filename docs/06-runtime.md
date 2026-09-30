@@ -168,3 +168,7 @@ export type UiNode =
 ## 実装メモ（M6 で確定した点）
 - **`VisualFx` に色調と暗転を追加**：`screenTint`（`from` → `color` へ線形に変わり、終わってもそのまま保たれる。`a = 0` に戻ると消える）と `screenFade`（暗転は `to = 0`（明転）を指示するまで保たれる）。どちらも `fxOverlay` が `Overlay.tint` / `Overlay.fade` にする。セーブ・リプレイの対象外（ロードすると消える）。
 - **投影**：選択肢（見出し `text` の下に縦に並べ、カーソルを重ねる。多いときはカーソルが見える範囲だけ）、数値入力（桁ごとの数字と、編集中の桁のカーソル。画面中央）、タイマー（右上に `m:ss`）。ショップも選択肢の窓を使う。
+
+## 実装メモ（M7 で確定した点）
+- **`RuntimeDeps.extensions?: RuntimeExtensions`**（`extensions.ts`）：`setup(ctx)`（`Ctx` を作った直後に呼ばれ、コマンド・式関数の登録や戦闘ルールの差し替えをして、使う `Ctx` を返す）、`onPluginEffect(effect, api)`（`plugin` Effect の受け口。`EffectApi` = `{ audio, dispatch, state }`）、`afterProject(scene, frame, state)`（`FrameSpec` の後処理）。どれも省略可能で、何も渡さなければ拡張なしと同じ挙動。`@rpg/plugin-api` の `toRuntimeExtensions` が、読み込んだプラグインの登録内容から作る（14）。
+- `EffectSinks` に `plugin(effect)` を足した：受け口が無ければ `logger.warn`、受け口が例外を投げても警告して続ける。投影の後処理が例外を投げたら、拡張なしの `FrameSpec` を使う（ゲームを止めない）。
