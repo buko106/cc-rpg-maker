@@ -97,3 +97,6 @@ IndexedDB キー：`[projectId, slot]`。localStorage キー：`${prefix}:${proj
 - **`createSaveRepository`**：最初の操作で IndexedDB（`indexedDB` を渡せる）を開いてみて、失敗したら localStorage（`storage` を渡せる。読み書きを試して確認）、どちらも使えなければ「書き込みは `io`、`listSlots` は空、`read` は `io`」のリポジトリになる（メモリに黙って逃がさない）。
 - **契約テスト**：`saveRepositoryContract(name, make)`（test-utils）。`make` は `SaveRepositoryFixture { open(opts), tamper(projectId, slot) }`（同じ保存先を別の設定で開き直す・保存済みの payload を checksum そのままに書き換える）を返す。`memory` / `localStorage`（test-utils の `createMemoryStorage()`、jsdom は使わない）/ `indexedDB`（`fake-indexeddb`）で不変条件 1〜5 と互換判定（projectHash・newerVersion）・`projectId` ごとの分離・取り込みの拒否を検証する。固有のテスト（キー形式、`quota` の注入、環境検出とフォールバック）は `save-store/src/index.test.ts`。
 - **未実装**：オートセーブ（スロット 0）、`fixtures/saves/v{old}/*.rpgsave`（マイグレーションは v1 しか無いので、マイグレーションが無い version は `corrupted` になることだけ確認）、gzip（`envelope: 2`）、`saveScope` は player 側で DB 名・キーの接頭辞に反映するのみ。
+
+## 実装メモ（M4 で確定した点）
+- セーブされる状態から `battle` を除いた（戦闘中はセーブできない）。`SerializedGameState` の `scene` はマップのみで、`title` / `menu` / `battle` / `gameover` は `stripTransient` がマップに戻す。`SNAPSHOT_VERSION` は 1 のまま（検証スキーマは変わっていない）。

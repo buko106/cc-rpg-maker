@@ -197,3 +197,9 @@ export const snapshotMigrations: readonly { from: number; to: number; migrate(s:
 - **メニュー**：マップ上で「プレイヤーが止まっていて、メッセージ・通常インタプリタ・場所移動が無い」ときに `menu` または `cancel` で開く。`main` の 4 コマンドから、`item`（所持数 1 以上を ID 順。M3 では使えない）／`status`（上下または pageup/pagedown でメンバー切り替え）／`save`・`load`（決定で `requestSave` / `requestLoad { slot: 1 + cursor }`。画面は開いたまま）。キャンセルは一つ前の画面（`main` ならマップ）へ、`menu` ボタンは一度に閉じる。カーソルは押下開始（`triggered`）だけで動く（押しっぱなしのリピートは無い）。
 - **世界は止まる**：タイトル・メニューの間は `handleTick` が `tick`（メニューでは `playtimeTicks` も）だけ進め、移動・イベント・並列処理は動かない（不変条件 3 は保たれる）。
 - **Snapshot**：セーブされるのはマップシーンだけ。`stripTransient` は `title` / `menu` のシーンを `{ kind: "map" }` に戻す（メニューからセーブしても、ロードするとマップから再開する）。`fromSnapshot` の検証スキーマも `scene` は `map` のみ（`battle` は M4 で追加）。`dispatch({ type: "loadSnapshot" })` は成功すると状態を丸ごと置き換え、場所移動の予約が残っていれば `requested` を `false` に戻す（マップが未ロードでも `requestMapData` を出し直せるように）。失敗（`Err`）は状態を変えず `log` の warn だけを返す。
+
+## 実装メモ（M4 で確定した点）
+- **`BattleState`** は `battle/state.ts` で定義し（04）、`GameState.battle` は戦闘中（`scene.kind === "battle"`）だけ存在する。`SceneState` の `battle` / `gameover` に中身はない。
+- **`Ctx`** の型は `ctx-types.ts` に分けた（`ctx.ts` は `createCtx` と再エクスポート）。`createCtx` が組み込みコマンドを import し、そのコマンド（`BattleProcessing`）が戦闘を import するので、戦闘が `ctx.ts` から型を import すると循環になるため。`Ctx` に任意の `battleRules?` を追加。`paramAt` は `params.ts` に移した（公開は従来どおり）。`ProjectView` に `state(id)` を追加。
+- **入力・時間経過**：`handleInput` はシーンが `battle` なら `battleInput`、`gameover` なら決定/キャンセルでタイトルへ（`tick` は数え続ける）。`handleTick` は `gameover` では `tick` だけ、`battle` では `tick` と `playtimeTicks` を進めて `battleTick`（マップの世界は動かない）。
+- **`stripTransient`** はタイトル・メニュー・戦闘・ゲームオーバーの状態をマップに戻し、`battle` を落とす（`SerializedGameState` は `battle` を除いたもの）。

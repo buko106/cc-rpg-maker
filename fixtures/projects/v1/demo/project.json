@@ -18,9 +18,20 @@
       "width": 320,
       "height": 256
     },
-    "bgm": {},
+    "bgm": {
+      "battle": {
+        "asset": "87073bd84cdaced6",
+        "volume": 0.6,
+        "pitch": 1,
+        "loop": true
+      }
+    },
     "terms": {
-      "newGame": "ニューゲーム"
+      "newGame": "ニューゲーム",
+      "attack": "攻撃",
+      "skill": "スキル",
+      "guard": "防御",
+      "escape": "逃げる"
     }
   },
   "maps": {
@@ -70,7 +81,12 @@
       "class_hero": {
         "id": "class_hero",
         "name": "戦士",
-        "skills": [],
+        "skills": [
+          {
+            "level": 1,
+            "skill": "sk_fire"
+          }
+        ],
         "params": {
           "mhp": {
             "base": 100,
@@ -107,10 +123,103 @@
         }
       }
     },
-    "skills": {},
-    "items": {},
-    "enemies": {},
-    "troops": {},
+    "skills": {
+      "sk_fire": {
+        "id": "sk_fire",
+        "name": "ファイア",
+        "mpCost": 3,
+        "scope": "one-enemy",
+        "formula": "a.mat * 4 - b.mdf * 2",
+        "effects": []
+      },
+      "sk_bite": {
+        "id": "sk_bite",
+        "name": "体当たり",
+        "mpCost": 0,
+        "scope": "one-enemy",
+        "formula": "a.atk * 2 - b.def",
+        "effects": []
+      }
+    },
+    "items": {
+      "item_potion": {
+        "id": "item_potion",
+        "name": "ポーション",
+        "kind": "consumable",
+        "price": 20,
+        "effects": [
+          {
+            "kind": "recoverHp",
+            "value": 50
+          }
+        ]
+      }
+    },
+    "enemies": {
+      "en_slime": {
+        "id": "en_slime",
+        "name": "スライム",
+        "graphic": {
+          "asset": "54bc63c07507e5c4"
+        },
+        "params": {
+          "mhp": 40,
+          "mmp": 0,
+          "atk": 8,
+          "def": 3,
+          "mat": 0,
+          "mdf": 2,
+          "agi": 4,
+          "luk": 3
+        },
+        "actions": [
+          {
+            "skill": "sk_bite",
+            "rating": 5
+          }
+        ],
+        "drops": [
+          {
+            "item": "item_potion",
+            "rate": 1
+          }
+        ],
+        "exp": 12,
+        "gold": 8
+      }
+    },
+    "troops": {
+      "tr_slime": {
+        "id": "tr_slime",
+        "name": "スライム",
+        "members": [
+          {
+            "enemy": "en_slime",
+            "x": 165,
+            "y": 130
+          }
+        ],
+        "pages": []
+      },
+      "tr_slimes": {
+        "id": "tr_slimes",
+        "name": "スライム×2",
+        "members": [
+          {
+            "enemy": "en_slime",
+            "x": 165,
+            "y": 130
+          },
+          {
+            "enemy": "en_slime",
+            "x": 250,
+            "y": 130
+          }
+        ],
+        "pages": []
+      }
+    },
+    "states": {},
     "commonEvents": {}
   },
   "assets": {
@@ -138,12 +247,37 @@
         "size": 658,
         "width": 96,
         "height": 128
+      },
+      "54bc63c07507e5c4": {
+        "name": "slime.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 270,
+        "width": 64,
+        "height": 48
+      },
+      "0c4fa5c6a7e06cb7": {
+        "name": "slime_walk.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 456,
+        "width": 96,
+        "height": 128
+      },
+      "87073bd84cdaced6": {
+        "name": "battle.wav",
+        "kind": "audio",
+        "mime": "audio/wav",
+        "size": 70604
       }
     }
   },
   "switches": {
     "sw_talked": {
       "name": "村人と話した"
+    },
+    "sw_slime_defeated": {
+      "name": "スライムを倒した"
     }
   },
   "variables": {

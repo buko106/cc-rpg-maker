@@ -209,3 +209,8 @@ export function findDanglingRefs(...): RefTarget[];
 - `migrateTo` / `migrateMapTo` は `registry` 引数を取れる（テスト用）。実マイグレーションは v1 が最初なので空。
 - フィクスチャは `fixtures/projects/v1/<name>/{project.json, maps/*.json}`（フォルダ形式）。`minimal`（マップ1・アクター1・イベント1）と `transfer-demo`（2マップ）がある。
 - `MapData` は `events` の位置がマップ内であることも検証する。
+
+## 実装メモ（M4 で確定した点）
+- **`Database.states`**（新規・必須）：`State { id, name, restriction: "none" | "cannotAct", turns, paramRates, hpRegen }`。`turns` は継続ターン数（0 は戦闘が終わるまで）、`paramRates` はパラメータの倍率（`Partial<Record<Param, number>>`、0 以上）、`hpRegen` はターン終了時の最大 HP に対する増減の割合（-1〜1。負で毒）。ID は `StateId`。参照の種類に `state` を追加。
+- **`SkillEffect`** に `addState { state, chance }`（`chance` は 0〜1）、`removeState { state }`、`buff { param, level }`（`param` は `atk def mat mdf agi luk`、`level` は -2〜+2 の整数）を追加。`Enemy.graphic?: AssetRef`（戦闘画面の絵。省略時は名前の箱）を追加。`collectRefs` はこれらの参照（状態・絵）も拾う。
+- 形式バージョンは 1 のまま（公開前なので）。`fixtures/projects/v1/*/project.json` に `"states": {}` を足した。

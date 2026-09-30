@@ -24,6 +24,9 @@ const cases: [EventCommand, string, unknown[]][] = [
   [cmd("EndBranch"), "分岐終了", []],
   [cmd("Wait", { frames: 30 }), "ウェイト：30フレーム", []],
   [cmd("TransferPlayer", { mapId: "map_b", x: 2, y: 3 }), "場所移動：map_b (2, 3)", [{ kind: "map", id: "map_b" }]],
+  [cmd("ChoiceBranch", { index: 1 }), "分岐 1", []],
+  [cmd("BattleProcessing", { troop: "tr_x" }), "戦闘の処理：tr_x", [{ kind: "troop", id: "tr_x" }]],
+  [cmd("BattleProcessing", { troop: "tr_x", canEscape: false, canLose: true }), "戦闘の処理：tr_x（逃走不可）（敗北可）", [{ kind: "troop", id: "tr_x" }]],
 ];
 
 describe("builtin command metadata", () => {
@@ -51,6 +54,8 @@ describe("builtin command metadata", () => {
       EndBranch: {},
       Wait: { frames: 0 },
       TransferPlayer: { mapId: "map_a", x: 0, y: 0 },
+      ChoiceBranch: { index: 0 },
+      BattleProcessing: { troop: "tr_x" },
     };
     expect(Object.keys(minimal).sort()).toEqual(ctx.commands.list().map((h) => h.code).sort());
     for (const h of ctx.commands.list()) {
@@ -63,5 +68,6 @@ describe("builtin command metadata", () => {
   it("applies documented defaults", () => {
     expect(ctx.commands.get("ShowText")!.params.parse({ text: "x" })).toEqual({ text: "x", position: "bottom", background: "window" });
     expect(ctx.commands.get("TransferPlayer")!.params.parse({ mapId: "m", x: 0, y: 0 })).toMatchObject({ dir: "retain", fade: "black" });
+    expect(ctx.commands.get("BattleProcessing")!.params.parse({ troop: "t" })).toEqual({ troop: "t", canEscape: true, canLose: false });
   });
 });

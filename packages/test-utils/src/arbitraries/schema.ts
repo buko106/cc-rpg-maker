@@ -202,6 +202,7 @@ export const projectArb: fc.Arbitrary<Project> = fc
           }),
         ),
         troops: fc.constant({}),
+        states: fc.constant({}),
         commonEvents: fc.constant({}),
       }),
       assets: fc.dictionary(assetIdArb, fc.record({ name: text, kind: fc.constantFrom("image", "audio", "font", "data" as const), mime: fc.constant("image/png"), size: smallInt }), {

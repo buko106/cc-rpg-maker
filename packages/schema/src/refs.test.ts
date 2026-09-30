@@ -100,10 +100,11 @@ describe("collectRefs: every reference site", () => {
       database: {
         actors: { actor_hero: { ...project.database.actors["actor_hero" as never]!, walk: { asset: "d".repeat(16) as never } } } as never,
         classes: project.database.classes,
-        skills: { sk: { id: "sk", name: "s", mpCost: 0, scope: "self", formula: "1", animation: { asset: "e".repeat(16) }, effects: [{ kind: "commonEvent", id: "ce_x" }] } } as never,
-        items: { it: { id: "it", name: "i", kind: "consumable", price: 0, effects: [{ kind: "commonEvent", id: "ce_y" }, { kind: "recoverHp", value: 1 }] } } as never,
-        enemies: { en: { id: "en", name: "e", params: { mhp: 1, mmp: 1, atk: 1, def: 1, mat: 1, mdf: 1, agi: 1, luk: 1 }, actions: [{ skill: "sk_x", rating: 1 }], drops: [{ item: "it_x", rate: 1 }], exp: 0, gold: 0 } } as never,
+        skills: { sk: { id: "sk", name: "s", mpCost: 0, scope: "self", formula: "1", animation: { asset: "e".repeat(16) }, effects: [{ kind: "commonEvent", id: "ce_x" }, { kind: "addState", state: "st_x", chance: 1 }, { kind: "buff", param: "atk", level: 1 }] } } as never,
+        items: { it: { id: "it", name: "i", kind: "consumable", price: 0, effects: [{ kind: "commonEvent", id: "ce_y" }, { kind: "recoverHp", value: 1 }, { kind: "removeState", state: "st_y" }] } } as never,
+        enemies: { en: { id: "en", name: "e", params: { mhp: 1, mmp: 1, atk: 1, def: 1, mat: 1, mdf: 1, agi: 1, luk: 1 }, graphic: { asset: "9".repeat(16) }, actions: [{ skill: "sk_x", rating: 1 }], drops: [{ item: "it_x", rate: 1 }], exp: 0, gold: 0 } } as never,
         troops: { tr: { id: "tr", name: "t", members: [{ enemy: "en_x", x: 0, y: 0 }], pages: [{ condition: { kind: "switch", id: "sw_x" }, commands: [{ code: "TransferPlayer", params: { mapId: "m_tr" }, indent: 0 }] }, { condition: { kind: "always" }, commands: [] }] } } as never,
+        states: {},
         commonEvents: { ce: { id: "ce", name: "c", trigger: "autorun", switch: "sw_ce", commands: [{ code: "TransferPlayer", params: { mapId: "m_ce" }, indent: 0 }] } } as never,
       },
     };
@@ -129,7 +130,7 @@ describe("collectRefs: every reference site", () => {
       [
         `asset:${A}`, "map:m_parent", "asset:" + "b".repeat(16), "asset:" + "c".repeat(16), "asset:" + "d".repeat(16), "asset:" + "e".repeat(16), "asset:" + "f".repeat(16),
         "commonEvent:ce_x", "commonEvent:ce_y", "skill:sk_x", "item:it_x", "enemy:en_x", "switch:sw_x", "map:m_tr", "switch:sw_ce", "map:m_ce",
-        "troop:tr_x", "item:it_c", "actor:ac_c",
+        "troop:tr_x", "item:it_c", "actor:ac_c", "state:st_x", "state:st_y", "asset:" + "9".repeat(16),
       ].sort(),
     );
   });

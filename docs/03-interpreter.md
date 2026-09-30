@@ -146,3 +146,9 @@ export function runInterpreters(state: GameState, input: InputFrame, ctx: Ctx): 
 - **`ConditionalBranch`** の条件は式（文字列）か構造化条件（`switch` / `variable`）。式が評価できない・真偽値でないときは警告を出して偽として扱う。
 - **1 フレームの命令数の上限**（`MAX_COMMANDS_PER_FRAME = 1000`）はインタプリタごと。超えると警告を出して打ち切り、次のフレームで続ける。
 - `normal` は同時に 1 つ。`startInterpreter` は、すでに動いていれば何もしない。
+
+## 実装メモ（M4 で確定した点）
+- **追加したコマンド**：`BattleProcessing { troop, canEscape = true, canLose = false }` と `ChoiceBranch { index }`。
+- **`BattleProcessing`**：マップシーンで、トループが存在するときだけ戦闘を始める（`startBattle`）。`system.bgm.battle` があれば `playBgm`（フェード 300ms）を発行し、`wait: battle` で待つ。`resume` は戦闘中（`scene` が `map` でない間）待ち続け、マップに戻ったら `locals.battleResult`（`leaveBattle` が書く）から分岐番号を決めて `branch[indent]` に書き（勝利 0 / 逃走 1 / 敗北 2。中断・結果なしは逃走と同じ 1）、次の命令へ進む。ゲームオーバーになったときはインタプリタが戻らない。
+- **`ChoiceBranch`**：`branch[indent] === index` のときだけ続く本体を実行し、違えば `skipBlock`。`skipBlock` の飛び先（`BLOCK_ENDS`）に `ChoiceBranch` を加えたので、本体の終わりで次の `ChoiceBranch` に着いても、選ばれていなければ次の `ChoiceBranch` / `EndBranch` へ飛ぶ。イベントは `BattleProcessing` の後に `ChoiceBranch 0`（勝利）→ `ChoiceBranch 1`（逃走）→ `ChoiceBranch 2`（敗北）→ `EndBranch`（本体は 1 段深い indent）と並べる。将来の `ShowChoices` の分岐にも使う。
+- 戦闘中は `runInterpreters` を呼ばない（マップの並列イベントも止まる）ので、待機中のインタプリタの `pc` は変わらない。

@@ -3,6 +3,7 @@ import type { Page } from "@playwright/test";
 
 // M2 の完了条件：ブラウザでマップを歩き、イベントに話しかけてメッセージが出る。
 // M3 の完了条件：セーブ → リロード → ロードで同じ位置から再開する。
+// M4 の完了条件：ブラウザで戦闘できる（話しかけて戦闘 → 勝利/逃走 → マップに戻って続きのイベント）。
 // demo プロジェクト（fixtures/projects/v1/demo）をフォルダ形式で配信して確かめる。
 
 interface State {
@@ -11,10 +12,14 @@ interface State {
   map: { mapId: string; name: string; player: { x: number; y: number; moving: boolean } };
   message: { open: boolean; text: string };
   variables: Record<string, number>;
+  switches: Record<string, boolean>;
+  party: { gold: number; items: Record<string, number> };
+  battle?: { phase: string; turn: number; wait: number; enemies: Record<string, { hp: number; name: string }>; result: { outcome: string } | null };
 }
 declare global {
   interface Window {
-    __rpg: { getState(): State; status: string; settled(): Promise<void> };
+    __rpg: { getState(): State; status: string; settled(): Promise<void>; onEffect(cb: (e: { kind: string }) => void): () => void };
+    __effects?: string[];
   }
 }
 
@@ -257,4 +262,132 @@ test("メニューのロードで、保存した位置に戻る。空のスロ�
   await page.evaluate(() => window.__rpg.settled());
   await page.waitForFunction(() => window.__rpg.getState().scene.kind === "map");
   expect((await state(page)).map.player).toMatchObject({ x: 4, y: 3 });
+});
+
+// ---- 戦闘（M4） ----
+
+/** スライム (11,8) の真上 (11,7) まで歩いて、下向きで立つ。 */
+async function walkToSlime(page: Page): Promise<void> {
+  await hold(page, "ArrowDown", "s.map.player.y === 6");
+  await hold(page, "ArrowRight", "s.map.player.x === 11");
+  await hold(page, "ArrowDown", "s.map.player.y === 7");
+}
+
+/** 話しかけて戦闘を始める（メッセージを閉じると戦闘に入る）。戦闘中に届いた Effect の記録も始める。 */
+async function startSlimeBattle(page: Page): Promise<void> {
+  await page.evaluate(() => {
+    window.__effects = [];
+    window.__rpg.onEffect((e) => window.__effects!.push(e.kind));
+  });
+  await walkToSlime(page);
+  await press(page, "Enter");
+  await page.waitForFunction(() => window.__rpg.getState().message.open);
+  expect((await state(page)).message.text).toBe("スライムが あらわれた！");
+  await press(page, "Enter");
+  await page.waitForFunction(() => window.__rpg.getState().scene.kind === "battle" && window.__rpg.getState().battle!.phase === "input");
+}
+
+/** 戦闘が終わってマップに戻るまで、入力フェーズで `commands` を押し、結果表示は決定で送る。 */
+async function playBattle(page: Page, commands: string[]): Promise<void> {
+  for (let i = 0; i < 60; i++) {
+    const s = await state(page);
+    if (s.scene.kind !== "battle") return;
+    const b = s.battle!;
+    if (b.phase === "input") for (const key of commands) await press(page, key);
+    else if (b.phase !== "resolve" && b.wait <= 0) await press(page, "Enter");
+    else await page.waitForTimeout(60);
+  }
+  throw new Error("戦闘が終わらなかった");
+}
+
+test("スライムに話しかけて戦闘になり、攻撃で倒すとマップに戻って続きのイベントが進む", async ({ page }) => {
+  const errors: string[] = [];
+  page.on("pageerror", (e) => errors.push(e.message));
+  page.on("console", (m) => m.type() === "error" && errors.push(m.text()));
+  await open(page);
+  await startSlimeBattle(page);
+
+  const first = await state(page);
+  expect(first.battle).toMatchObject({ phase: "input", turn: 1 });
+  expect(Object.values(first.battle!.enemies).map((e) => e.name)).toEqual(["スライム"]);
+
+  // 戦闘画面：暗くしたマップの上に、スライム（緑の絵）とウィンドウ・白い文字が描かれる
+  await page.waitForTimeout(150);
+  const [gr, gg, gb] = await pixel(page, 165, 135); // スライムの体 (中心 (165,130))
+  expect(gg).toBeGreaterThan(gr! + 40);
+  expect(gg).toBeGreaterThan(gb! + 20);
+  const [br, , bb] = await pixel(page, 20, 240); // 下端のウィンドウ（濃い青）
+  expect(bb).toBeGreaterThan(br! + 20);
+  const white = await page.evaluate(() => {
+    const d = (document.querySelector("canvas") as HTMLCanvasElement).getContext("2d")!.getImageData(8, 8, 304, 68).data; // 上のログ
+    let n = 0;
+    for (let i = 0; i < d.length; i += 4) if (d[i]! > 230 && d[i + 1]! > 230 && d[i + 2]! > 230) n++;
+    return n;
+  });
+  expect(white).toBeGreaterThan(60);
+  await page.screenshot({ path: "test-results/player-battle.png" });
+
+  // 「攻撃」→ 対象（スライム）を、倒すまで繰り返す
+  await playBattle(page, ["Enter", "Enter"]);
+  await page.waitForFunction(() => window.__rpg.getState().message.open);
+  expect((await state(page)).message.text).toBe("スライムを やっつけた！");
+  await press(page, "Enter");
+  await page.waitForFunction(() => !window.__rpg.getState().message.open);
+
+  const after = await state(page);
+  expect(after.scene.kind).toBe("map");
+  expect(after.battle).toBeUndefined();
+  expect(after.switches["sw_slime_defeated"]).toBe(true);
+  expect(after.party).toMatchObject({ gold: 8, items: { item_potion: 1 } });
+  expect(await page.evaluate(() => window.__effects)).toEqual(expect.arrayContaining(["playBgm", "stopBgm"]));
+
+  // 倒した後は 2 ページ目（何も起きない）。もう戦闘にならない。
+  await press(page, "Enter");
+  await page.waitForTimeout(200);
+  expect((await state(page)).scene.kind).toBe("map");
+  expect(errors).toEqual([]);
+});
+
+test("戦闘から逃げると、スライムは残ってもう一度戦える", async ({ page }) => {
+  await open(page);
+  await startSlimeBattle(page);
+
+  await press(page, "ArrowUp"); // 先頭から上 = 末尾の「逃げる」
+  await press(page, "Enter");
+  await playBattle(page, []);
+  await page.waitForFunction(() => window.__rpg.getState().message.open);
+  expect((await state(page)).message.text).toBe("うまく にげきれた。");
+  await press(page, "Enter");
+  await page.waitForFunction(() => !window.__rpg.getState().message.open);
+
+  const after = await state(page);
+  expect(after.scene.kind).toBe("map");
+  expect(after.switches["sw_slime_defeated"]).toBeUndefined();
+  expect(after.party.gold).toBe(0);
+
+  // もう一度話しかけると、また戦闘になる
+  await press(page, "Enter");
+  await page.waitForFunction(() => window.__rpg.getState().message.open);
+  await press(page, "Enter");
+  await page.waitForFunction(() => window.__rpg.getState().scene.kind === "battle");
+});
+
+test("戦闘中はメニューが開かず、スキル（ファイア）で戦える", async ({ page }) => {
+  await open(page);
+  await startSlimeBattle(page);
+  await press(page, "m");
+  expect((await state(page)).scene.kind).toBe("battle");
+
+  await press(page, "ArrowDown"); // スキル
+  await press(page, "Enter");
+  await press(page, "Enter"); // ファイア
+  await press(page, "Enter"); // 対象
+  await page.waitForFunction(() => {
+    const b = window.__rpg.getState().battle;
+    return b !== undefined && (b.turn >= 2 || b.phase === "victory") && b.phase !== "resolve";
+  });
+  const s = await state(page);
+  // ファイア: mat 10*4 - mdf 2*2 = 36 ±10%（MP 3 を消費）
+  expect(Object.values(s.battle!.enemies)[0]!.hp).toBeLessThanOrEqual(40 - 32);
+  await page.screenshot({ path: "test-results/player-battle-skill.png" });
 });

@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { emptyInput, initialState, inputFrame, step } from "@rpg/core";
+import { emptyInput, initialState, inputFrame, step, titleState } from "@rpg/core";
 import type { Button, Effect, GameState, InputFrame } from "@rpg/core";
 import { FIXTURES_ROOT } from "../fixtures.js";
 import { loadFixtureProject } from "./project.js";
@@ -19,6 +19,8 @@ export interface ReplayFixture {
   /** 例 `fixtures/projects/v1/minimal` */
   project: string;
   seed: string;
+  /** `true` ならタイトル画面から始める（先頭の入力でニューゲームを選ぶ）。省略時はマップから。 */
+  title?: boolean;
   inputs: ReplayInput[];
   expect: {
     finalStateHash?: string;
@@ -81,7 +83,7 @@ export function runReplay(fixture: ReplayFixture): ReplayResult {
   if (match === null) throw new Error(`replay: project のパスが不正: ${fixture.project}`);
   const { ctx } = loadFixtureProject(match[2]!, Number(match[1]));
 
-  let state = initialState(ctx, fixture.seed);
+  let state = fixture.title === true ? titleState(ctx, fixture.seed) : initialState(ctx, fixture.seed);
   const effects: Effect[] = [];
   const effectCounts: Record<string, number> = {};
   const assertionFailures: string[] = [];

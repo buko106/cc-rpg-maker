@@ -1,9 +1,9 @@
-import type { Ctx } from "../ctx.js";
+import type { Ctx } from "../ctx-types.js";
 import type { Effect } from "../effects.js";
 import type { InputFrame } from "../input.js";
 import type { GameState, MenuScreen, SceneState } from "../state.js";
 import type { StepResult } from "./actions.js";
-import { initialState } from "./initial.js";
+import { initialState, titleState } from "./initial.js";
 import { MENU_ITEMS, menuItemIds, SAVE_SLOT_COUNT, SAVE_SLOT_FIRST, TITLE_ITEMS } from "./scenes.js";
 
 /** 0..count-1 を循環するカーソル移動。 */
@@ -90,3 +90,10 @@ export function handleMenuInput(state: GameState, input: InputFrame): StepResult
 
 /** マップからメニューを開く。 */
 export const openMenu = (state: GameState): StepResult => withScene(state, { kind: "menu", screen: "main", cursor: 0 });
+
+/** ゲームオーバー画面：決定/キャンセルでタイトルに戻る（`tick` は数え続ける）。 */
+export function handleGameoverInput(state: GameState, input: InputFrame, ctx: Ctx): StepResult {
+  if (state.scene.kind !== "gameover") return { state, effects: [] };
+  if (!input.triggered.has("ok") && !input.triggered.has("cancel")) return { state, effects: [] };
+  return { state: { ...titleState(ctx, state.rng.seed), tick: state.tick }, effects: [{ kind: "stopBgm", fadeMs: 500 }] };
+}

@@ -97,6 +97,7 @@
     "items": {},
     "enemies": {},
     "troops": {},
+    "states": {},
     "commonEvents": {}
   },
   "assets": {

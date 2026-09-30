@@ -2,6 +2,7 @@ import type { GameState, ProjectView } from "@rpg/core";
 import type { FrameSpec } from "../frame-spec.js";
 import { fxOverlay, NO_FX } from "../visual-fx.js";
 import type { VisualFx } from "../visual-fx.js";
+import { projectBattle, projectGameOver } from "./battle.js";
 import { projectMapLayers } from "./map-scene.js";
 import { projectMenu } from "./menu.js";
 import { projectMessage } from "./message.js";
@@ -23,7 +24,7 @@ function projectNotice(view: ProjectView, ui: UiContext, screen: { width: number
 
 /**
  * `GameState` → `FrameSpec`。純粋関数（同じ入力なら deep-equal な出力）。
- * マップシーン（とメッセージ）、タイトル、メニューを投影する。戦闘のシーンは空の画面になる（M4）。
+ * マップシーン（とメッセージ）、タイトル、メニュー、戦闘、ゲームオーバーを投影する。
  * `ui` は GameState の外にある情報（保存済みスロット一覧・お知らせ）。
  */
 export function projectFrame(state: GameState, view: ProjectView, fx: VisualFx = NO_FX, ui: UiContext = NO_UI): FrameSpec {
@@ -36,7 +37,12 @@ export function projectFrame(state: GameState, view: ProjectView, fx: VisualFx =
     const under = projectFrame({ ...state, scene: { kind: "map" } }, view, fx);
     return { ...under, ui: [{ kind: "window", x: 0, y: 0, w: size.width, h: size.height, variant: "dim", children: [] }, ...projectMenu(state, view, size, ui), ...projectNotice(view, ui, size)] };
   }
-  if (state.scene.kind !== "map") return { size: screen, camera: { x: 0, y: 0 }, layers: [], overlay, ui: [] };
+  if (state.scene.kind === "battle") {
+    // 戦闘はマップの地形を背景にして（キャラクターは描かず、暗くして）重ねる
+    const under = projectFrame({ ...state, scene: { kind: "map" } }, view, fx);
+    return { ...under, layers: under.layers.filter((l) => l.kind === "tiles"), ui: projectBattle(state, view, size) };
+  }
+  if (state.scene.kind === "gameover") return { size, camera: { x: 0, y: 0 }, layers: [], overlay, ui: projectGameOver(view, size) };
 
   const { tileSize, layers } = projectMapLayers(state, view);
   return {
@@ -51,6 +57,8 @@ export function projectFrame(state: GameState, view: ProjectView, fx: VisualFx =
 export { projectMapLayers } from "./map-scene.js";
 export { projectMessage } from "./message.js";
 export { projectMenu } from "./menu.js";
+export { BATTLE_LOG_LINES, projectBattle, projectGameOver } from "./battle.js";
+export { formatLogEntry } from "./battle-log.js";
 export { projectTitle } from "./title.js";
 export { NO_UI } from "./ui.js";
 export type { UiContext } from "./ui.js";

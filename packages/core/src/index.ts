@@ -4,6 +4,7 @@
  * 設計: docs/02-core-state.md, docs/03-interpreter.md, docs/04-battle.md, docs/05-expression.md
  * ブラウザ API（DOM / タイマー / Math.random / Date.now）に依存しない。
  */
+export * from "./battle/index.js";
 export * from "./expression/index.js";
 export * from "./interpreter/index.js";
 export { computeCamera, activePage, activePageIndex, canPass, eventsToTrigger, moveCharacter, newCharacter, refreshEventPages } from "./map/index.js";
@@ -24,5 +25,5 @@ export { fromSnapshot, migrateSnapshot, SNAPSHOT_VERSION, snapshotMigrations, st
 export type { SaveSnapshot, SerializedGameState, SnapshotError, SnapshotMigration } from "./snapshot.js";
 export { IDLE_MESSAGE, selfSwitchKey } from "./state.js";
 export type {
-  ActorState, BattleState, Character, EventRuntime, GameState, MapState, MenuScreen, MessageState, PartyState, SceneState, TimerState, TitleScreen,
+  ActorState, Character, EventRuntime, GameState, MapState, MenuScreen, MessageState, PartyState, SceneState, TimerState, TitleScreen,
 } from "./state.js";

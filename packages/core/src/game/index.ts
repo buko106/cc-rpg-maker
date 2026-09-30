@@ -11,7 +11,8 @@ import { handleInput } from "./inputPhase.js";
 import { handleTick } from "./tickPhase.js";
 
 export type { Action, InterpreterAction, StepResult } from "./actions.js";
-export { initialState, paramAt, titleState } from "./initial.js";
+export { paramAt } from "../params.js";
+export { initialState, titleState } from "./initial.js";
 export { MENU_ITEMS, menuItemIds, SAVE_SLOT_COUNT, SAVE_SLOT_FIRST, TITLE_ITEMS } from "./scenes.js";
 
 /**

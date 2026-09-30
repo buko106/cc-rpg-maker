@@ -1,15 +1,10 @@
-import type { Actor, Class, MapData, Param } from "@rpg/schema";
-import type { Ctx } from "../ctx.js";
+import type { Actor, Class, MapData } from "@rpg/schema";
+import type { Ctx } from "../ctx-types.js";
 import { computeCamera, initialEventRuntimes, newCharacter, refreshEventPages } from "../map/index.js";
+import { paramAt } from "../params.js";
 import { createRandom } from "../random.js";
 import { IDLE_MESSAGE } from "../state.js";
 import type { ActorState, GameState, MapState } from "../state.js";
-
-/** レベル `level` でのパラメータ値。`base + growth * (level - 1)` の切り捨て。 */
-export function paramAt(cls: Class | undefined, param: Param, level: number): number {
-  const curve = cls?.params[param];
-  return curve === undefined ? 0 : Math.floor(curve.base + curve.growth * (level - 1));
-}
 
 function initialActor(actor: Actor, cls: Class | undefined): ActorState {
   return {

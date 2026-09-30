@@ -1,10 +1,10 @@
 import { createAssetSource, createHttpBytesSource } from "@rpg/assets";
-import { createNullAudioOut } from "@rpg/audio-null";
 import { createBrowserInput } from "@rpg/input-browser";
 import { createCanvas2dRenderer } from "@rpg/render-canvas2d";
 import { createRuntime } from "@rpg/runtime";
 import type { Logger, Runtime } from "@rpg/runtime";
 import { createSaveRepository } from "@rpg/save-store";
+import { createPlayerAudio } from "./audio.js";
 import { createHttpProjectSource } from "./http-project-source.js";
 import { collectStartAssets } from "./preload.js";
 import { createRafScheduler } from "./raf-scheduler.js";
@@ -59,9 +59,14 @@ export async function bootPlayer(root: HTMLElement, config: PlayerConfig): Promi
     document.title = project.meta.title;
 
     const assetsUrl = config.assetsUrl ?? new URL("../assets/", projectUrl).href;
-    const assets = createAssetSource(createHttpBytesSource(assetsUrl, project.assets), project.assets);
+    const playerAudio = createPlayerAudio();
+    const assets = createAssetSource(createHttpBytesSource(assetsUrl, project.assets), project.assets, {
+      ...(playerAudio.decodeAudio === undefined ? {} : { decodeAudio: playerAudio.decodeAudio }),
+    });
     const startMap = await projectSource.mapData(project.system.startMap);
-    await assets.preload(collectStartAssets(project, startMap), (done, total) => screens.loading(`読み込み中… ${done}/${total}`));
+    // 音を出せない環境では音声アセットは読み込まない（デコードできず、起動が止まってしまうため）
+    const preloadIds = collectStartAssets(project, startMap).filter((id) => playerAudio.decodeAudio !== undefined || project.assets.entries[id]?.kind !== "audio");
+    await assets.preload(preloadIds, (done, total) => screens.loading(`読み込み中… ${done}/${total}`));
 
     // セーブは project.meta.id ごとに分かれる。同じオリジンで複数のゲームを配るときは saveScope で保存先自体を分ける
     const scope = config.saveScope === undefined ? "" : `-${config.saveScope}`;
@@ -73,19 +78,22 @@ export async function bootPlayer(root: HTMLElement, config: PlayerConfig): Promi
     });
 
     const input = createBrowserInput(window, { gamepad: true });
+    const logger = consoleLogger(debug);
+    const audio = playerAudio.connect(assets, logger);
     const runtime = createRuntime({
       scheduler: createRafScheduler(),
       renderer: createCanvas2dRenderer(canvas, { pixelated: true }),
-      audio: createNullAudioOut(), // 音は M4（audio-webaudio）
+      audio,
       input,
       assets,
       projectSource,
       saves,
       clock: Date.now,
       seed: String(Date.now()),
-      logger: consoleLogger(debug),
+      logger,
       onError: (e) => {
         input.dispose();
+        audio.dispose();
         screens.error(e, debug);
       },
     });

@@ -80,6 +80,7 @@ export const ProjectSchema = z
       ["database.items", p.database.items],
       ["database.enemies", p.database.enemies],
       ["database.troops", p.database.troops],
+      ["database.states", p.database.states],
       ["database.commonEvents", p.database.commonEvents],
     ];
     for (const [table, records] of tables) {

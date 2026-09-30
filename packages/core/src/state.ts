@@ -1,4 +1,5 @@
 import type { ActorId, AssetId, AssetRef, Direction, EventId, EventPage, ItemId, MapId, SwitchId, VariableId } from "@rpg/schema";
+import type { BattleState } from "./battle/state.js";
 import type { InterpreterState } from "./interpreter/state.js";
 import type { RandomState } from "./random.js";
 
@@ -92,9 +93,6 @@ export interface TimerState {
   readonly ticks: number;
 }
 
-/** 戦闘の状態。M4（docs/04-battle.md）で定義する。それまでは常に存在しない。 */
-export type BattleState = Readonly<Record<string, unknown>>;
-
 export interface GameState {
   /** 1/60 秒単位の経過フレーム。`step` ごとにちょうど 1 増える。 */
   readonly tick: number;
@@ -110,6 +108,7 @@ export interface GameState {
   readonly interpreters: readonly InterpreterState[];
   /** 次に発行するインタプリタ id の連番。 */
   readonly nextInterpreterId: number;
+  /** 戦闘中（`scene.kind === "battle"`）だけ存在する。詳細は docs/04-battle.md。 */
   readonly battle?: BattleState;
   readonly message: MessageState;
   readonly timers: TimerState;

@@ -1,4 +1,5 @@
 import type { EventCommand } from "./command.js";
+import type { SkillEffect } from "./database.js";
 import type { MapId } from "./ids.js";
 import type { MapData } from "./map.js";
 import type { Project } from "./project.js";
@@ -12,6 +13,7 @@ export type RefKind =
   | "troop"
   | "map"
   | "commonEvent"
+  | "state"
   | "asset"
   | "switch"
   | "variable"
@@ -44,8 +46,11 @@ export function collectRefs(p: Project, maps: Record<MapId, MapData>, resolveCom
       for (const to of resolveCommandRefs(c)) add(`${from}/command:${i}`, to);
     });
   };
-  const addSkillEffects = (from: string, effects: readonly { kind: string; id?: string }[]): void => {
-    for (const e of effects) if (e.kind === "commonEvent" && e.id !== undefined) add(from, t("commonEvent", e.id));
+  const addSkillEffects = (from: string, effects: readonly SkillEffect[]): void => {
+    for (const e of effects) {
+      if (e.kind === "commonEvent") add(from, t("commonEvent", e.id));
+      else if (e.kind === "addState" || e.kind === "removeState") add(from, t("state", e.state));
+    }
   };
 
   const { system, database: db } = p;
@@ -75,6 +80,7 @@ export function collectRefs(p: Project, maps: Record<MapId, MapData>, resolveCom
   for (const i of Object.values(db.items)) addSkillEffects(`database.items.${i.id}`, i.effects);
   for (const e of Object.values(db.enemies)) {
     const from = `database.enemies.${e.id}`;
+    if (e.graphic) add(from, t("asset", e.graphic.asset));
     for (const act of e.actions) add(from, t("skill", act.skill));
     for (const d of e.drops) add(from, t("item", d.item));
   }
@@ -124,6 +130,7 @@ function exists(p: Project, target: RefTarget): boolean {
     case "enemy": return has(p.database.enemies);
     case "troop": return has(p.database.troops);
     case "commonEvent": return has(p.database.commonEvents);
+    case "state": return has(p.database.states);
     case "map": return has(p.maps);
     case "tileset": return has(p.tilesets);
     case "asset": return has(p.assets.entries);
