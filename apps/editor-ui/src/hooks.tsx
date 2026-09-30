@@ -2,6 +2,8 @@ import { createContext, useContext, useMemo, useSyncExternalStore } from "react"
 import type { CommandRegistry } from "@rpg/core";
 import { parse } from "@rpg/core";
 import type { EditorSession } from "@rpg/editor-core";
+import type { PlayerBundle } from "@rpg/exporter";
+import type { ProjectRepository } from "@rpg/project-store";
 import type { AssetSource, Renderer } from "@rpg/runtime";
 import type { ComponentType } from "react";
 import type { FormContext } from "./schema-form/SchemaForm.js";
@@ -23,15 +25,27 @@ export interface EditorEnv {
   createRenderer(canvas: HTMLCanvasElement): Renderer;
   createAssets(session: EditorSession): AssetSource;
   startPlaytest(session: EditorSession, canvas: HTMLCanvasElement, start?: PlaytestStart): Promise<Playtest>;
+  /** プレイヤー本体（`player.js`）を取る。配布物に同梱する。 */
+  loadPlayerBundle(): Promise<PlayerBundle>;
+  /** 書き出したファイルを利用者に渡す（ブラウザではダウンロードさせる）。 */
+  saveFile(name: string, bytes: Uint8Array<ArrayBuffer>, mime: string): void;
 }
 
 export const EnvContext = createContext<EditorEnv | null>(null);
 export const SessionContext = createContext<EditorSession | null>(null);
+export const RepoContext = createContext<ProjectRepository | null>(null);
 
 export function useEnv(): EditorEnv {
   const env = useContext(EnvContext);
   if (env === null) throw new Error("EnvContext の外で使われた");
   return env;
+}
+
+/** プロジェクトの保存先（配布物の書き出しなど、セッションの外から読むときに使う）。 */
+export function useRepo(): ProjectRepository {
+  const repo = useContext(RepoContext);
+  if (repo === null) throw new Error("RepoContext の外で使われた");
+  return repo;
 }
 
 /** セッションを読む。変更のたびに再描画される。 */

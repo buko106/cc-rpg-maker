@@ -67,3 +67,6 @@ export function createAssetSource(bytes: AssetBytesSource, manifest: AssetManife
 - どちらも `assetBytesSourceContract` を通す（`opfs` はフォルダのふりをする最小のフェイクで検証。実ブラウザの OPFS は M6 以降の E2E で確かめる）。
 - エディタは `ProjectAssetStore.bytesSource()`（10）を `createAssetSource` に渡して画像を読む。マニフェストは `session.doc.project.assets` を常に読む形（getter）で渡すので、アセットの登録が増減しても `AssetSource` を作り直さない。`verifyHash: true`。
 - `tsconfig` の `lib` に `DOM.AsyncIterable` を追加した（`FileSystemDirectoryHandle.entries()`）。
+
+## 実装メモ（M6 で確定した点）
+- **`createEmbeddedBytesSource(assets: Record<AssetId, string>)`**：base64 で埋め込まれたアセット（単一 HTML の配布物）を読む。デコードは `getBytes` のたびに行い、新しい `ArrayBuffer` を返す。通信しない。`assetExtension`（フォルダ形式の URL の拡張子）は、エクスポータが付けるファイル名と同じ規則で、`apps/player` のテストで `@rpg/project-store` の `extensionOf` と突き合わせている。

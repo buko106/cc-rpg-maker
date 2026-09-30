@@ -100,3 +100,10 @@ IndexedDB はオブジェクトストア `projects`, `maps`（key: `[projectId, 
 - **`create`** は `createTemplate`（草原 20×15 のマップ 1 枚、勇者 1 人と職業、タイルセット `ts_default`、歩行グラフィック、開始位置 (5,5)、画面 480×320）から作る。画像は demo のものを `tools/make-template-assets.mjs` で `template-assets.ts` に base64 で埋め込んだ。`fixtures/projects/v1/template` は置いていない（コードで生成する）。
 - **アセット**：`put` は内容ハッシュ（sha256 先頭 16 桁）を ID にし、PNG / GIF / JPEG のヘッダから幅・高さを読む（DOM に頼らない）。マニフェストへの登録は `registerAsset`（12）の仕事。`hashAsset`（09）と同じ定義を project-store 内にも持つ（project-store は schema にしか依存できないため）。プロジェクトを保存し直しても、使われなくなったアセットのバイト列は消さない（ガベージコレクションは未実装）。
 - **未対応**：マイグレーション後の保存し直しの分岐は、現状 `migrations` が空でテストできていない（最初のマイグレーションを足すときに、旧バージョンのフィクスチャ `fixtures/projects/v{old}/` と一緒にテストする）。
+
+## 実装メモ（M6 で確定した点）
+- **`exportZip(id)` / `importZip(zip)` をポートに追加**。ポート型に DOM を持ち込まないため、`Blob` ではなく**バイト列**（`Uint8Array` / `ArrayBuffer`）で受け渡す（UI は `new Blob([bytes])` で包む）。`exportZip` は存在しない ID で `notFound` を返すので `Result<..., ProjectStoreError>` を返す。どちらも共通の `createRepository` に実装したので、`memory` / `idb` の両方で契約テストを通る。
+- **ZIP のレイアウト**：ルート直下に `project.json` / `maps/<MapId>.json` / `assets/<AssetId>.<ext>` / `meta.json`（`{ revision, updatedAt, formatVersion }`）。書き出しは無圧縮（store）、読み込みは store と deflate。`importZip` は 1 段のフォルダの下にあるレイアウトも読む。
+- **`importZip` の検証**：`project.json` を `parseProject`（マイグレーション込み）、マップを `parseMapData` で検証し、壊れた ZIP・JSON・マップの欠落・未来の `formatVersion`（`newer-format`）は `schema` エラー。アセットはマニフェストに載っているものだけを取り込み、**内容ハッシュ（sha256 先頭 16 桁）が ID と一致しなければ `schema` エラー**。バイト列の無いアセットは、マニフェストだけ取り込む。取り込んだプロジェクトは**新しい ID**・`revision` 1・`updatedAt` は取り込み時刻。途中で失敗したら、書きかけのアセットも残さない（`removeProject`）。
+- ZIP の読み書き（`zip.ts`）は `@rpg/assets` の `zip.ts` と同じ形式のコピー（project-store は schema にしか依存できないため。`hashAsset` と同じ扱い）。
+- **未対応**：古い `formatVersion` の ZIP の import（`migrations` がまだ空なので、テストする対象が無い。最初のマイグレーションを足すときに `fixtures/projects/v{old}/*.zip` と一緒にテストする）、`opfs` / `fsa`（M7）。

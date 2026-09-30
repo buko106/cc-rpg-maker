@@ -98,3 +98,9 @@ saveRepositoryContract("idb", () => createIdbSaveRepository({ ... }), { supports
 - **性質テスト**：`editorCommandArb(doc)`（test-utils）。生成器は `fc.filter` を使わず、先に候補を絞る（フィルタの述語が満たされないと無限に再試行して固まる）。
 - **カバレッジ閾値**：`project-store` と `editor-core` を 70% の対象に追加（apps は対象外）。
 - **E2E**：`pnpm test:browser` はプレイヤー（:4173、demo 付き）とエディタ（:4174）の 2 つの静的サーバを起動する。エディタの E2E は各テストの前に IndexedDB を消す。
+
+## 実装メモ（M6 で確定した点）
+- **`commands-smoke`**：`fixtures/projects/v1/commands-smoke/` の全イベントが、レジストリの全コマンドを使い、`ev_smoke` は警告なしに完走する（03）。ネストした `Loop` × `ConditionalBranch` の終了性は fast-check。
+- **ZIP**：`projectRepositoryContract` に、書き出しのレイアウト・ラウンドトリップ（ID だけが新しい）・入れ子フォルダ・壊れた ZIP/JSON/マップ欠落・`newer-format`・アセットの改ざん・マニフェスト外のファイル・バイト列の無いアセットを追加した。
+- **エクスポータ**：`packages/exporter` を 70% のカバレッジ対象に追加。フォルダ形式の構造・単一 HTML の外部参照なし・`</script>` のエスケープ・警告をテストする。プレイヤーの取り決め（アセットの拡張子）は `apps/player` のテストで突き合わせる。
+- **E2E**：`e2e/export.spec.ts` を追加（別オリジン + `file://` + リクエスト 0 件）。`Window` の型宣言は E2E の各ファイルで衝突する（型チェックは 1 つのプログラム）ので、新しい E2E ではページ内の式を文字列で評価する。

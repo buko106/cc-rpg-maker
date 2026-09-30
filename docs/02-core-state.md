@@ -113,6 +113,8 @@ export type Effect =
   | { kind: "stopBgm"; fadeMs?: number }
   | { kind: "screenShake"; power: number; durationTicks: number }
   | { kind: "screenFlash"; color: RGBA; durationTicks: number }
+  | { kind: "screenTint"; color: RGBA; durationTicks: number }   // M6：色調（a = 0 で元に戻る）
+  | { kind: "screenFade"; to: 0 | 1; durationTicks: number }      // M6：暗転（1）/ 明転（0）。暗転は明転を指示するまで続く
   | { kind: "requestSave"; slot?: number }
   | { kind: "requestLoad"; slot?: number }
   | { kind: "requestMapData"; mapId: MapId }   // 遅延ロード。runtime が Ctx に供給してから再開
@@ -203,3 +205,9 @@ export const snapshotMigrations: readonly { from: number; to: number; migrate(s:
 - **`Ctx`** の型は `ctx-types.ts` に分けた（`ctx.ts` は `createCtx` と再エクスポート）。`createCtx` が組み込みコマンドを import し、そのコマンド（`BattleProcessing`）が戦闘を import するので、戦闘が `ctx.ts` から型を import すると循環になるため。`Ctx` に任意の `battleRules?` を追加。`paramAt` は `params.ts` に移した（公開は従来どおり）。`ProjectView` に `state(id)` を追加。
 - **入力・時間経過**：`handleInput` はシーンが `battle` なら `battleInput`、`gameover` なら決定/キャンセルでタイトルへ（`tick` は数え続ける）。`handleTick` は `gameover` では `tick` だけ、`battle` では `tick` と `playtimeTicks` を進めて `battleTick`（マップの世界は動かない）。
 - **`stripTransient`** はタイトル・メニュー・戦闘・ゲームオーバーの状態をマップに戻し、`battle` を落とす（`SerializedGameState` は `battle` を除いたもの）。
+
+## 実装メモ（M6 で確定した点）
+- **`MessageState` の追加**：`cursor?: number`（選択肢のカーソル、または数値入力で編集中の桁）と `numberInput?: { digits, value }`（数値入力）。どちらも選択肢・数値入力のときだけ存在する省略可能なフィールドにした（普通の文章のときは付かないので、既存のリプレイのハッシュも変わらない）。`choices` が非 null のときは `text` が見出しになる。セーブのスキーマ（`snapshot.ts`）も省略可能で、古いセーブがそのまま読める。
+- **メッセージ表示中の入力**（`game/messageInput.ts`）：選択肢は上下でカーソル（循環）・決定で選ぶ・キャンセルは持ち主のインタプリタの `locals.choiceCancel`（整数）があればその番号を選ぶ。数値入力は左右で桁、上下で数字（0〜9 を循環）、決定で確定。文章は決定/キャンセルで閉じる。答えは持ち主の `locals.answer` に書いてメッセージを閉じ、コマンドの `resume` がそれを読んで続きへ進む（`CommandResult.setLocals` で消す）。
+- **タイマー**：`timers = { active, ticks }` の `ticks` は残りフレーム。マップシーンの `tick` ごとに 1 減り、0 になったら `active` が偽になる（メニューや戦闘の間は止まる）。
+- **`initialState` / `titleState` / `gainExp`** は `Ctx` 全体ではなく `Pick<Ctx, "project">` を受け取る（`ReturnToTitle` など、コマンドから呼ぶため）。
