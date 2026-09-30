@@ -6,7 +6,7 @@
  */
 export { App, AUTOSAVE_MS } from "./App.js";
 export type { AppProps } from "./App.js";
-export { EnvContext, SessionContext, useEnv, useFormContext, useSession } from "./hooks.js";
+export { EnvContext, RepoContext, SessionContext, useEnv, useFormContext, useRepo, useSession } from "./hooks.js";
 export type { CommandFormOverrideProps, EditorEnv } from "./hooks.js";
 export { startPlaytest } from "./playtest.js";
 export type { Playtest, PlaytestDeps, PlaytestStart } from "./playtest.js";

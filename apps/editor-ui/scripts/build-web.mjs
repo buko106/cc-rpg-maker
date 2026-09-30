@@ -5,6 +5,7 @@
  *   node apps/editor-ui/scripts/build-web.mjs [--out <dir>]
  *
  * 出力: <out>/index.html, editor.js, editor.css（プロジェクトの保存先はブラウザの IndexedDB）
+ *       <out>/player/player.js（配布物に同梱するプレイヤー本体。「配布物を書き出す」が読む）
  */
 import { cpSync, mkdirSync, rmSync } from "node:fs";
 import { join, resolve } from "node:path";
@@ -29,6 +30,16 @@ await build({
   sourcemap: true,
   minify: false,
   define: { "process.env.NODE_ENV": '"production"' },
+  logLevel: "warning",
+});
+// 配布物に同梱するプレイヤー本体（apps/player の main.ts をそのままバンドルしたもの）
+await build({
+  entryPoints: [join(root, "..", "player", "src", "main.ts")],
+  outfile: join(out, "player", "player.js"),
+  bundle: true,
+  format: "esm",
+  target: "es2022",
+  minify: true,
   logLevel: "warning",
 });
 cpSync(join(root, "static", "index.html"), join(out, "index.html"));

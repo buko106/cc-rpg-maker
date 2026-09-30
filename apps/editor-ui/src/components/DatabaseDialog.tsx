@@ -8,6 +8,7 @@ import { FormEditor } from "../form-editor.js";
 import { useFormContext, useSession } from "../hooks.js";
 import { describeSchema } from "../schema-form/introspect.js";
 import { defaultValue } from "../schema-form/values.js";
+import { applyOps } from "../command-templates.js";
 import { CommandList } from "./CommandList.js";
 import { Dialog } from "./Dialog.js";
 import { useExecute } from "./useExecute.js";
@@ -45,12 +46,7 @@ export function nextId(prefix: string, taken: Iterable<string>): string {
 /** コマンド列フィールドの編集ウィジェット（コモンイベント・敵グループのページ）。 */
 function renderCommands(commands: EventCommand[], onChange: (next: EventCommand[]) => void): ReactElement {
   return (
-    <CommandList
-      commands={commands}
-      onInsert={(at, inserted) => onChange([...commands.slice(0, at), ...inserted, ...commands.slice(at)])}
-      onRemove={(at, count) => onChange([...commands.slice(0, at), ...commands.slice(at + count)])}
-      onReplace={(at, command) => onChange(commands.map((c, i) => (i === at ? command : c)))}
-    />
+    <CommandList commands={commands} onEdit={(ops) => onChange(applyOps(commands, ops))} />
   );
 }
 

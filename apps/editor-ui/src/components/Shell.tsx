@@ -7,6 +7,7 @@ import { AssetBrowser } from "./AssetBrowser.js";
 import { DatabaseDialog } from "./DatabaseDialog.js";
 import { DiagnosticsPanel } from "./DiagnosticsPanel.js";
 import { EventDialog } from "./EventDialog.js";
+import { ExportDialog } from "./ExportDialog.js";
 import { MapCanvas } from "./MapCanvas.js";
 import { MapTree } from "./MapTree.js";
 import { PlaytestPanel } from "./PlaytestPanel.js";
@@ -14,7 +15,7 @@ import { SystemDialog } from "./SystemDialog.js";
 import { TilePalette } from "./TilePalette.js";
 import { ToolBar } from "./ToolBar.js";
 
-type Dialog = { kind: "database" | "system" | "assets" | "diagnostics" } | { kind: "event"; mapId: MapId; eventId: EventId } | { kind: "playtest"; start?: PlaytestStart };
+type Dialog = { kind: "database" | "system" | "assets" | "diagnostics" | "export" } | { kind: "event"; mapId: MapId; eventId: EventId } | { kind: "playtest"; start?: PlaytestStart };
 
 function saveText(session: ReturnType<typeof useSession>): string {
   const s = session.saveStatus;
@@ -79,6 +80,7 @@ export function Shell({ onExit }: { onExit: () => void }): ReactElement {
         <button type="button" onClick={() => setDialog({ kind: "system" })}>システム</button>
         <button type="button" onClick={() => setDialog({ kind: "assets" })}>アセット</button>
         <button type="button" onClick={() => setDialog({ kind: "diagnostics" })}>診断</button>
+        <button type="button" onClick={() => setDialog({ kind: "export" })}>配布物を書き出す…</button>
         <button type="button" className="primary" onClick={() => void session.save()}>保存</button>
         <span role="status" className={status.kind === "error" || status.kind === "conflict" ? "save-status error" : "save-status"}>{saveText(session)}</span>
         {status.kind === "conflict" && (
@@ -120,6 +122,7 @@ export function Shell({ onExit }: { onExit: () => void }): ReactElement {
 
       {dialog?.kind === "database" && <DatabaseDialog onClose={() => setDialog(undefined)} />}
       {dialog?.kind === "system" && <SystemDialog onClose={() => setDialog(undefined)} />}
+      {dialog?.kind === "export" && <ExportDialog onClose={() => setDialog(undefined)} />}
       {dialog?.kind === "assets" && <AssetBrowser onClose={() => setDialog(undefined)} />}
       {dialog?.kind === "diagnostics" && <DiagnosticsPanel onClose={() => setDialog(undefined)} onOpenEvent={(mapId, eventId) => setDialog({ kind: "event", mapId, eventId })} />}
       {dialog?.kind === "event" && <EventDialog mapId={dialog.mapId} eventId={dialog.eventId} onClose={() => setDialog(undefined)} />}

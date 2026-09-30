@@ -60,4 +60,15 @@ export interface ProjectRepository {
   save(doc: ProjectDocument, opts?: SaveOptions): Promise<Result<{ revision: number }, ProjectStoreError>>;
   remove(id: string): Promise<void>;
   assets(id: string): ProjectAssetStore;
+  /**
+   * プロジェクト全体（project.json・maps/・assets/・meta.json）を 1 つの ZIP（無圧縮）にする。
+   * ポート型に DOM を持ち込まないので `Blob` ではなくバイト列で返す（UI は `new Blob([bytes])` で包む）。
+   */
+  exportZip(id: string): Promise<Result<Uint8Array<ArrayBuffer>, ProjectStoreError>>;
+  /**
+   * `exportZip` で作った（または同じレイアウトの）ZIP から、**新しい ID の**プロジェクトを作る。
+   * ルート直下でも、1 段のフォルダの下でもよい。アセットはハッシュ（ID）を検証し、不一致は `schema` エラー。
+   * 古い `formatVersion` は現行に変換して保存する。
+   */
+  importZip(zip: Uint8Array | ArrayBuffer): Promise<Result<ProjectMeta, ProjectStoreError>>;
 }

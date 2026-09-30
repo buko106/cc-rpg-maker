@@ -46,3 +46,44 @@ describe("VisualFx", () => {
     expect(b.shake).toEqual({ power: 9, total: 4, left: 4 });
   });
 });
+
+describe("VisualFx: 色調と暗転", () => {
+  const blue = { r: 0, g: 0, b: 200, a: 0.5 };
+  it("色調は線形に変わり、終わってもそのまま保たれる。a = 0 に戻すと消える", () => {
+    let fx = applyFxEffect(NO_FX, { kind: "screenTint", color: blue, durationTicks: 4 });
+    const alphas: number[] = [];
+    for (let i = 0; i < 4; i++) {
+      alphas.push(fxOverlay(fx).tint.a);
+      fx = tickFx(fx);
+    }
+    expect(alphas).toEqual([0, 0.125, 0.25, 0.375]);
+    expect(fxOverlay(fx).tint).toEqual(blue);
+    fx = tickFx(fx);
+    expect(fxOverlay(fx).tint).toEqual(blue);
+    // 元に戻す：現在の色から a = 0 へ
+    fx = applyFxEffect(fx, { kind: "screenTint", color: { r: 0, g: 0, b: 0, a: 0 }, durationTicks: 2 });
+    expect(fxOverlay(fx).tint).toEqual(blue);
+    fx = tickFx(tickFx(tickFx(fx)));
+    expect(fx.tint).toBeUndefined();
+    expect(fxOverlay(fx).tint.a).toBe(0);
+  });
+
+  it("暗転は明転を指示するまで保たれ、明転が終わると消える", () => {
+    let fx = applyFxEffect(NO_FX, { kind: "screenFade", to: 1, durationTicks: 2 });
+    expect(fxOverlay(fx).fade).toBe(0);
+    fx = tickFx(fx);
+    expect(fxOverlay(fx).fade).toBe(0.5);
+    fx = tickFx(tickFx(tickFx(fx)));
+    expect(fxOverlay(fx).fade).toBe(1);
+    fx = applyFxEffect(fx, { kind: "screenFade", to: 0, durationTicks: 2 });
+    fx = tickFx(fx);
+    expect(fxOverlay(fx).fade).toBe(0.5);
+    fx = tickFx(tickFx(fx));
+    expect(fx.fade).toBeUndefined();
+  });
+
+  it("長さ 0 なら即座に切り替わる", () => {
+    expect(fxOverlay(applyFxEffect(NO_FX, { kind: "screenFade", to: 1, durationTicks: 0 })).fade).toBe(1);
+    expect(fxOverlay(applyFxEffect(NO_FX, { kind: "screenTint", color: blue, durationTicks: 0 })).tint).toEqual(blue);
+  });
+});

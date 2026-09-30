@@ -164,3 +164,7 @@ export type UiNode =
 - **文言**：`system.terms` が優先、無ければ既定（`projection/terms.ts`）。戦闘のコマンド（`attack skill guard escape`）とログの文言（`battleAppear`, `actionAttack`, `damage`, `defeated`, `rewards`, `levelUp` …）を追加。ログの文言は `{name}` `{amount}` のような穴を持つ（`fill`）。
 - **Effect**：新しい種類は無い。`BattleProcessing` の `playBgm`、戦闘の終わりの `stopBgm`、味方がダメージを受けたときの `screenShake` は既存の分配で届く。runtime 自体のコードは変わらない（投影だけ）。
 - **テスト**：`projection/battle.test.ts`（スナップショット 2 つ、レイアウト、ログの文言の表、ポップアップ、対象カーソル）、`battle-runtime.test.ts`（Runtime を通した BGM・描画・勝利・ゲームオーバー → タイトル）。`runtime.test.ts` のリプレイ一致テストは `title: true` のリプレイも通る。
+
+## 実装メモ（M6 で確定した点）
+- **`VisualFx` に色調と暗転を追加**：`screenTint`（`from` → `color` へ線形に変わり、終わってもそのまま保たれる。`a = 0` に戻ると消える）と `screenFade`（暗転は `to = 0`（明転）を指示するまで保たれる）。どちらも `fxOverlay` が `Overlay.tint` / `Overlay.fade` にする。セーブ・リプレイの対象外（ロードすると消える）。
+- **投影**：選択肢（見出し `text` の下に縦に並べ、カーソルを重ねる。多いときはカーソルが見える範囲だけ）、数値入力（桁ごとの数字と、編集中の桁のカーソル。画面中央）、タイマー（右上に `m:ss`）。ショップも選択肢の窓を使う。

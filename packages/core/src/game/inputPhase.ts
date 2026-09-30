@@ -4,9 +4,9 @@ import type { InputFrame } from "../input.js";
 import { startInterpreter } from "../interpreter/index.js";
 import { DIRECTION_VECTOR, moveCharacter, REVERSE } from "../map/index.js";
 import type { EventRuntime, GameState } from "../state.js";
-import { IDLE_MESSAGE } from "../state.js";
 import type { StepResult } from "./actions.js";
 import { battleInput } from "../battle/index.js";
+import { handleMessageInput } from "./messageInput.js";
 import { handleGameoverInput, handleMenuInput, handleTitleInput, openMenu } from "./uiPhase.js";
 
 /** 通行フラグを持たないタイルセット（未定義のタイルセットを参照したマップ用）。 */
@@ -63,10 +63,7 @@ export function handleInput(state: GameState, input: InputFrame, ctx: Ctx): Step
   if (state.scene.kind === "gameover") return handleGameoverInput(state, input, ctx);
   if (state.scene.kind !== "map") return idle;
 
-  if (state.message.open) {
-    const dismiss = input.triggered.has("ok") || input.triggered.has("cancel");
-    return dismiss ? { state: { ...state, message: IDLE_MESSAGE }, effects: [] } : idle;
-  }
+  if (state.message.open) return handleMessageInput(state, input);
   if (hasNormalInterpreter(state) || state.map.transfer !== undefined || state.map.player.moving) return idle;
 
   const map = ctx.project.map(state.map.mapId);

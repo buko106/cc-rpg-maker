@@ -1,22 +1,26 @@
-import { createAssetSource, createHttpBytesSource } from "@rpg/assets";
+import { createAssetSource, createEmbeddedBytesSource, createHttpBytesSource } from "@rpg/assets";
 import { createBrowserInput } from "@rpg/input-browser";
 import { createCanvas2dRenderer } from "@rpg/render-canvas2d";
 import { createRuntime } from "@rpg/runtime";
 import type { Logger, Runtime } from "@rpg/runtime";
 import { createSaveRepository } from "@rpg/save-store";
 import { createPlayerAudio } from "./audio.js";
+import { createEmbeddedProjectSource } from "./embedded-project-source.js";
+import type { EmbeddedData } from "./embedded-project-source.js";
 import { createHttpProjectSource } from "./http-project-source.js";
 import { collectStartAssets } from "./preload.js";
 import { createRafScheduler } from "./raf-scheduler.js";
 import { createScreens } from "./screens.js";
 
 /**
- * プレイヤーの設定。M2 ではフォルダ形式（`project/` + `assets/`）のみ。
- * 単一 HTML（`embedded`）、`renderer`（webgl）、`plugins` は後続のマイルストーンで追加する。
+ * プレイヤーの設定。フォルダ形式（`projectUrl`：`project/` + `assets/`）か、単一 HTML（`embedded`）のどちらか。
+ * `renderer`（webgl）と `plugins` は M7 で追加する。
  */
 export interface PlayerConfig {
-  /** `project.json` の URL（ページからの相対でよい）。例 `project/project.json` */
-  projectUrl: string;
+  /** フォルダ形式：`project.json` の URL（ページからの相対でよい）。例 `project/project.json` */
+  projectUrl?: string;
+  /** 単一 HTML：埋め込まれたゲーム一式。指定すると通信しない（`projectUrl` は無視される）。 */
+  embedded?: EmbeddedData;
   /** アセットのフォルダの URL。既定は `projectUrl` の隣の `../assets/`。 */
   assetsUrl?: string;
   /** エラー画面にスタックを表示し、ログを console に出す。 */
@@ -51,16 +55,20 @@ export async function bootPlayer(root: HTMLElement, config: PlayerConfig): Promi
 
   try {
     screens.loading("読み込み中…");
-    const projectUrl = new URL(config.projectUrl, document.baseURI).href;
-    const projectSource = createHttpProjectSource(projectUrl);
+    if (config.embedded === undefined && config.projectUrl === undefined) throw new Error("projectUrl か embedded のどちらかが必要");
+    const projectUrl = config.projectUrl === undefined ? undefined : new URL(config.projectUrl, document.baseURI).href;
+    const projectSource = config.embedded !== undefined ? createEmbeddedProjectSource(config.embedded) : createHttpProjectSource(projectUrl!);
     const project = await projectSource.project();
     const { width, height } = project.system.screen;
     canvas.style.cssText = `display:block;margin:0 auto;width:${width * ZOOM}px;max-width:100%;height:auto;aspect-ratio:${width}/${height};image-rendering:pixelated;background:#000`;
     document.title = project.meta.title;
 
-    const assetsUrl = config.assetsUrl ?? new URL("../assets/", projectUrl).href;
+    const bytes =
+      config.embedded !== undefined
+        ? createEmbeddedBytesSource(config.embedded.assets)
+        : createHttpBytesSource(config.assetsUrl ?? new URL("../assets/", projectUrl).href, project.assets);
     const playerAudio = createPlayerAudio();
-    const assets = createAssetSource(createHttpBytesSource(assetsUrl, project.assets), project.assets, {
+    const assets = createAssetSource(bytes, project.assets, {
       ...(playerAudio.decodeAudio === undefined ? {} : { decodeAudio: playerAudio.decodeAudio }),
     });
     const startMap = await projectSource.mapData(project.system.startMap);

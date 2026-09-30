@@ -41,6 +41,7 @@
 - 03：組み込みコマンド全実装（`commands-smoke.json`）。
 - 15：エクスポータ（フォルダ・単一 HTML）。10：`exportZip`/`importZip`。
 - **完了条件**：エディタで作ったゲームを配布物にして別オリジンで遊べる。
+- **状況**：完了（`e2e/export.spec.ts`）。エクスポータは `@rpg/exporter`（15）。ページの `moveRoute`（自律移動）・専用のショップ画面・`opfs` / `fsa`・`renderer: "webgl"` / Service Worker は後続（M7 以降。03・15 の実装メモ）。
 
 ## M7: プラグイン・WebGL・仕上げ（2〜3週）
 - 14：`PluginHost`、サンプルプラグイン 2 本。

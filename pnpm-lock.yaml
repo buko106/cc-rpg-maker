@@ -53,6 +53,9 @@ importers:
       '@rpg/editor-core':
         specifier: workspace:*
         version: link:../../packages/editor-core
+      '@rpg/exporter':
+        specifier: workspace:*
+        version: link:../../packages/exporter
       '@rpg/input-browser':
         specifier: workspace:*
         version: link:../../packages/input-browser
@@ -206,6 +209,19 @@ importers:
       '@rpg/core':
         specifier: workspace:*
         version: link:../core
+      '@rpg/project-store':
+        specifier: workspace:*
+        version: link:../project-store
+      '@rpg/schema':
+        specifier: workspace:*
+        version: link:../schema
+    devDependencies:
+      '@rpg/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
+
+  packages/exporter:
+    dependencies:
       '@rpg/project-store':
         specifier: workspace:*
         version: link:../project-store

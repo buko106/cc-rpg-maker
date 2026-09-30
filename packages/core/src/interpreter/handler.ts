@@ -1,7 +1,7 @@
 import type { EventCommand, RefTarget, Result, SchemaIssue } from "@rpg/schema";
 import type { z } from "zod";
 import type { Effect } from "../effects.js";
-import type { EvalError, Value } from "../expression/index.js";
+import type { EvalError, Mutation, Value } from "../expression/index.js";
 import type { InputFrame } from "../input.js";
 import type { ProjectView } from "../project-view.js";
 import type { Random } from "../random.js";
@@ -18,6 +18,8 @@ export interface CommandCtx {
   /** 05 の式を `condition` モードで評価する。`scope` は `a`, `b` などの識別子。 */
   readonly eval: (expr: string, scope?: Record<string, Value>) => Result<Value, EvalError>;
   readonly input: InputFrame;
+  /** 05 の式を `script` モードで評価する（副作用関数が使える）。状態は変えず、変更操作を返す。 */
+  readonly script: (expr: string) => Result<{ value: Value; mutations: Mutation[] }, EvalError>;
 }
 
 export type CommandControl =
@@ -40,6 +42,8 @@ export interface CommandResult {
   readonly control?: CommandControl;
   /** `interp.branch` への書き込み（indent → 分岐番号）。 */
   readonly setBranch?: Readonly<Record<number, number>>;
+  /** `interp.locals` への書き込み。値が `undefined` のキーは取り除く。 */
+  readonly setLocals?: Readonly<Record<string, unknown>>;
 }
 
 export interface CommandHandler<P = unknown> {

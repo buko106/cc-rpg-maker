@@ -23,7 +23,7 @@ const refOptions: FormContext["refOptions"] = (ref) => {
     enemy: project.database.enemies,
     troop: project.database.troops,
     state: project.database.states,
-    commonEvent: project.database.commonEvents,
+    commonEvent: { ce_a: { name: "A" }, ...project.database.commonEvents },
     map: project.maps,
     tileset: project.tilesets,
     switch: { sw_a: { name: "A" } },
@@ -142,7 +142,7 @@ describe("ウィジェット", () => {
   it("ID 欄は選択肢から選び、存在しない ID はそのまま見える", () => {
     let last: unknown;
     render(<Harness schema={z.strictObject({ actor: z.string().meta({ ref: "actor" }) })} initial={{ actor: "gone" }} onValue={(v) => (last = v)} />);
-    const select = screen.getByLabelText("actor") as HTMLSelectElement;
+    const select = screen.getByLabelText("アクター") as HTMLSelectElement;
     expect(select.value).toBe("gone");
     expect(within(select).getByText("gone（存在しない）")).toBeTruthy();
     fireEvent.change(select, { target: { value: "actor_hero" } });

@@ -64,3 +64,9 @@
 - **キーボード・確認**：Ctrl+Z / Ctrl+Shift+Z（Ctrl+Y）/ Ctrl+S はどの画面でも `session` に届く（テストプレイ中はゲームに任せる）。未保存のまま閉じようとすると `beforeunload` で確認。ダイアログは Esc で閉じ、開いたら中の最初の操作部品にフォーカスして、閉じたら戻す。削除で参照が残るときは影響範囲つきの確認を出す。
 - **テスト**：フォーム生成（組み込みコマンド全部で描画でき、既定値が `params` の zod を通る）、各画面のコンポーネントテスト（jsdom + Testing Library。`EditorSession` はモックせず、メモリのリポジトリの本物を使う）、`projectMapForEditor` / ヒットテスト / オーバーレイ、`startPlaytest`、E2E（`e2e/editor.spec.ts`：作成 → ドラッグで描画 → Undo/Redo → イベント作成と ShowText → 保存 → リロード → テストプレイでメッセージ、自動保存、データベースと削除の確認）。jsdom に無い `PointerEvent` / `Blob.arrayBuffer` / Canvas の `getContext` は `test-env.tsx` で補う。テストで `session` を直接操作するときは `act()` で包む。
 - **未対応**：移動ルートの編集（対応するコマンドが M6）、テストプレイの音、タイルセットの追加・画像差し替え、アセットの一括インポート（ZIP は M6）、イベントの複製・コピー&ペースト、矩形選択ツール、キャンバスのスクロール位置を保った拡大、`doc` への代入を禁じる lint ルール（UI は `session.execute` 以外で文書を書き換えない — テストで確認）。
+
+## 実装メモ（M6 で確定した点）
+- **配布物の書き出し**（`ExportDialog`）：メニューバーの「配布物を書き出す…」。形式（フォルダ形式の ZIP / 単一 HTML）と「JSON を圧縮する」を選び、書き出す前に `session.save()` で未保存の変更を保存する（保存できなければ書き出さない）。`@rpg/exporter` の `exportGame` を、ストアの内容（`RepoContext` の `repo`）から呼ぶ。`EditorEnv` に `loadPlayerBundle()`（ブラウザでは同じオリジンの `player/player.js` を fetch）と `saveFile(name, bytes, mime)`（ダウンロード）を足した。エディタのビルド（`build-web.mjs`）は `apps/player` の `main.ts` を `dist-web/player/player.js` にもバンドルする。
+- **コマンドリスト**：props を `onEdit(ops: CommandOp[])` に一本化した（挿入・削除・差し替えの列。複数なら `cmd.batch` で 1 回の Undo にまとめる）。`Loop` は `EndLoop` と、`ShowChoices` は選択肢の数だけの `ChoiceBranch` と `EndBranch` と一緒に入る。選択肢の数を増減すると、対になる `ChoiceBranch` も増減する（減らすときは余った分岐を本体ごと消す）。`Loop` の直後はループの中に入り、`Loop` / `ShowChoices` は丸ごと消える。`EndLoop` / `MoveStep`（内部用）は単独では追加も削除もできない。
+- **移動ルートの編集**は、`SetMoveRoute` コマンドの標準フォーム（手順の配列。種類を選ぶ）で行う。専用のエディタは無い。ページの `moveRoute` は core が未対応のため、UI にも出していない。
+- **未対応**：テストプレイの音、タイルセットの追加・画像差し替え、アセットの一括インポート（ZIP の import は project-store にあるが、UI からはまだ呼べない）、イベントの複製・コピー&ペースト、矩形選択、キャンバスのスクロール位置を保った拡大。

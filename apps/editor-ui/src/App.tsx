@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import type { ReactElement } from "react";
 import { ProjectList } from "./components/ProjectList.js";
 import { Shell } from "./components/Shell.js";
-import { EnvContext, SessionContext } from "./hooks.js";
+import { EnvContext, RepoContext, SessionContext } from "./hooks.js";
 import type { EditorEnv } from "./hooks.js";
 
 /** 自動保存までの待ち時間。 */
@@ -42,13 +42,15 @@ export function App({ env, repo }: AppProps): ReactElement {
 
   return (
     <EnvContext.Provider value={env}>
-      {session === undefined ? (
-        <ProjectList repo={repo} onOpen={open} />
-      ) : (
-        <SessionContext.Provider value={session}>
-          <Shell onExit={exit} />
-        </SessionContext.Provider>
-      )}
+      <RepoContext.Provider value={repo}>
+        {session === undefined ? (
+          <ProjectList repo={repo} onOpen={open} />
+        ) : (
+          <SessionContext.Provider value={session}>
+            <Shell onExit={exit} />
+          </SessionContext.Provider>
+        )}
+      </RepoContext.Provider>
     </EnvContext.Provider>
   );
 }

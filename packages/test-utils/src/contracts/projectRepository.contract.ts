@@ -1,3 +1,4 @@
+import { readZip, writeZip } from "@rpg/project-store";
 import { describe, expect, it } from "vitest";
 import type { MapData, MapId } from "@rpg/schema";
 import type { ProjectDocument, ProjectRepository } from "@rpg/project-store";
@@ -185,6 +186,153 @@ export function projectRepositoryContract(name: string, make: ContractFactory<Pr
       await new Promise((r) => setTimeout(r, 5));
       await repo.save(a);
       expect((await repo.list()).map((m) => m.id)).toEqual([a.project.meta.id, b.project.meta.id]);
+    });
+
+    describe("ZIP の書き出しと読み込み", () => {
+      /** ZIP の中身を `名前 → バイト列` で取り出す。 */
+      const entries = async (zip: Uint8Array): Promise<Map<string, Uint8Array>> => readZip(zip);
+      const prepared = async (repo: ProjectRepository): Promise<{ doc: ProjectDocument; assetId: string }> => {
+        const doc = await repo.create("ZIP のゲーム");
+        const put = await repo.assets(doc.project.meta.id).put(pngBytes(), "hero.png", "image");
+        const edited = withMap({ ...doc, project: { ...doc.project, assets: { entries: { ...doc.project.assets.entries, [put.id]: put.entry } } } }, "map_002", 5);
+        await repo.save(edited);
+        return { doc: { ...edited, revision: 2 }, assetId: put.id };
+      };
+
+      it("exportZip は project.json・maps/・assets/・meta.json のレイアウトで書き出す", async () => {
+        const repo = await make();
+        const { doc, assetId } = await prepared(repo);
+        const r = await repo.exportZip(doc.project.meta.id);
+        expect(r.ok).toBe(true);
+        if (!r.ok) return;
+        const files = await entries(r.value);
+        expect([...files.keys()].sort()).toEqual(
+          ["assets/" + assetId + ".png", ...Object.keys(doc.project.assets.entries).filter((id) => id !== assetId).map((id) => `assets/${id}.png`), "maps/map_001.json", "maps/map_002.json", "meta.json", "project.json"].sort(),
+        );
+        const project = JSON.parse(new TextDecoder().decode(files.get("project.json")!)) as { meta: { id: string; title: string } };
+        expect(project.meta).toMatchObject({ id: doc.project.meta.id, title: "ZIP のゲーム" });
+        const meta = JSON.parse(new TextDecoder().decode(files.get("meta.json")!)) as { revision: number; formatVersion: number };
+        expect(meta).toMatchObject({ revision: 2, formatVersion: doc.project.formatVersion });
+        expect(new Uint8Array(files.get(`assets/${assetId}.png`)!)).toEqual(new Uint8Array(pngBytes()));
+      });
+
+      it("[inv-3] importZip(exportZip(id)) は、ID だけが新しい等価なプロジェクトを作る（アセットも）", async () => {
+        const repo = await make();
+        const { doc, assetId } = await prepared(repo);
+        const zip = await repo.exportZip(doc.project.meta.id);
+        expect(zip.ok).toBe(true);
+        if (!zip.ok) return;
+        const imported = await repo.importZip(zip.value);
+        expect(imported.ok).toBe(true);
+        if (!imported.ok) return;
+        expect(imported.value.id).not.toBe(doc.project.meta.id);
+        expect(imported.value.title).toBe("ZIP のゲーム");
+
+        const loaded = await repo.load(imported.value.id);
+        expect(loaded.ok).toBe(true);
+        if (!loaded.ok) return;
+        expect(loaded.value.revision).toBe(1);
+        expect(loaded.value.maps).toEqual(doc.maps);
+        expect({ ...loaded.value.project, meta: { ...loaded.value.project.meta, id: "", updatedAt: "" } }).toEqual({ ...doc.project, meta: { ...doc.project.meta, id: "", updatedAt: "" } });
+        expect(new Uint8Array((await repo.assets(imported.value.id).get(assetId as never))!)).toEqual(new Uint8Array(pngBytes()));
+        // 元のプロジェクトはそのまま
+        expect((await repo.list()).map((m) => m.id).sort()).toEqual([doc.project.meta.id, imported.value.id].sort());
+        const original = await repo.load(doc.project.meta.id);
+        expect(original.ok && original.value).toEqual(doc);
+      });
+
+      it("exportZip は存在しないプロジェクトで notFound", async () => {
+        const repo = await make();
+        expect(await repo.exportZip("nothing")).toEqual({ ok: false, error: { kind: "notFound" } });
+      });
+
+      it("importZip は 1 段のフォルダの下にあるレイアウトも読める。ArrayBuffer でもよい", async () => {
+        const repo = await make();
+        const { doc } = await prepared(repo);
+        const zip = await repo.exportZip(doc.project.meta.id);
+        if (!zip.ok) throw new Error("export に失敗");
+        const files = [...(await entries(zip.value))].map(([name, bytes]) => ({ name: `my-game/${name}`, bytes }));
+        const nested = writeZip(files);
+        const imported = await repo.importZip(nested.buffer);
+        expect(imported.ok).toBe(true);
+      });
+
+      it("importZip は ZIP でないもの・project.json が無いもの・JSON が壊れたもの・マップが欠けたものを schema エラーにする", async () => {
+        const repo = await make();
+        const { doc } = await prepared(repo);
+        const zip = await repo.exportZip(doc.project.meta.id);
+        if (!zip.ok) throw new Error("export に失敗");
+        const files = [...(await entries(zip.value))].map(([name, bytes]) => ({ name, bytes }));
+        const enc = (s: string) => new TextEncoder().encode(s);
+        const without = (name: string) => files.filter((f) => f.name !== name);
+        const replaced = (name: string, text: string) => files.map((f) => (f.name === name ? { name, bytes: enc(text) } : f));
+
+        const cases: [string, Uint8Array | ArrayBuffer, string][] = [
+          ["ZIP ではない", enc("not a zip at all"), "zip"],
+          ["project.json が無い", writeZip(without("project.json")), "project.json"],
+          ["project.json が壊れている", writeZip(replaced("project.json", "{oops")), "project.json"],
+          ["マップが欠けている", writeZip(without("maps/map_002.json")), "maps/map_002.json"],
+          ["マップが壊れている", writeZip(replaced("maps/map_001.json", "nope")), "maps/map_001.json"],
+        ];
+        for (const [label, bytes, path] of cases) {
+          const r = await repo.importZip(bytes);
+          expect(r.ok, label).toBe(false);
+          if (r.ok) continue;
+          expect(r.error.kind, label).toBe("schema");
+          if (r.error.kind === "schema" && r.error.error.kind === "invalid") expect(r.error.error.issues[0]?.path, label).toBe(path);
+        }
+        // 新しいプロジェクトは何も作られていない
+        expect((await repo.list()).map((m) => m.id)).toEqual([doc.project.meta.id]);
+      });
+
+      it("importZip は project.json の内容が不正なら schema エラーにし、未来の formatVersion は newer-format", async () => {
+        const repo = await make();
+        const { doc } = await prepared(repo);
+        const zip = await repo.exportZip(doc.project.meta.id);
+        if (!zip.ok) throw new Error("export に失敗");
+        const files = [...(await entries(zip.value))].map(([name, bytes]) => ({ name, bytes }));
+        const project = JSON.parse(new TextDecoder().decode(files.find((f) => f.name === "project.json")!.bytes)) as Record<string, unknown>;
+        const withProject = (p: unknown) => writeZip(files.map((f) => (f.name === "project.json" ? { name: f.name, bytes: new TextEncoder().encode(JSON.stringify(p)) } : f)));
+
+        const invalid = await repo.importZip(withProject({ ...project, system: "broken" }));
+        expect(!invalid.ok && invalid.error.kind).toBe("schema");
+        const newer = await repo.importZip(withProject({ ...project, formatVersion: 9999 }));
+        expect(!newer.ok && newer.error.kind === "schema" && newer.error.error.kind).toBe("newer-format");
+      });
+
+      it("importZip はアセットの内容が ID（内容ハッシュ）と一致しないと schema エラー。マニフェストに無いファイルは取り込まない", async () => {
+        const repo = await make();
+        const { doc, assetId } = await prepared(repo);
+        const zip = await repo.exportZip(doc.project.meta.id);
+        if (!zip.ok) throw new Error("export に失敗");
+        const files = [...(await entries(zip.value))].map(([name, bytes]) => ({ name, bytes }));
+
+        const tampered = writeZip(files.map((f) => (f.name === `assets/${assetId}.png` ? { name: f.name, bytes: new Uint8Array([1, 2, 3]) } : f)));
+        const bad = await repo.importZip(tampered);
+        expect(!bad.ok && bad.error.kind).toBe("schema");
+        if (!bad.ok && bad.error.kind === "schema" && bad.error.error.kind === "invalid") expect(bad.error.error.issues[0]?.path).toBe(`assets/${assetId}`);
+        expect((await repo.list()).map((m) => m.id)).toEqual([doc.project.meta.id]);
+
+        const stray = writeZip([...files, { name: "assets/0000000000000000.png", bytes: new Uint8Array([9, 9]) }, { name: "readme.txt", bytes: new Uint8Array([1]) }]);
+        const ok = await repo.importZip(stray);
+        expect(ok.ok).toBe(true);
+        if (!ok.ok) return;
+        expect(await repo.assets(ok.value.id).get("0000000000000000" as never)).toBeUndefined();
+      });
+
+      it("マニフェストにあるがバイト列が無いアセットは、そのまま（バイト列なしで）取り込む", async () => {
+        const repo = await make();
+        const { doc, assetId } = await prepared(repo);
+        const zip = await repo.exportZip(doc.project.meta.id);
+        if (!zip.ok) throw new Error("export に失敗");
+        const files = [...(await entries(zip.value))].filter(([name]) => name !== `assets/${assetId}.png`).map(([name, bytes]) => ({ name, bytes }));
+        const r = await repo.importZip(writeZip(files));
+        expect(r.ok).toBe(true);
+        if (!r.ok) return;
+        expect(await repo.assets(r.value.id).get(assetId as never)).toBeUndefined();
+        const loaded = await repo.load(r.value.id);
+        expect(loaded.ok && loaded.value.project.assets.entries[assetId as never]).toBeDefined();
+      });
     });
   });
 }

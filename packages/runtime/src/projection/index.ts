@@ -9,6 +9,7 @@ import { projectMessage } from "./message.js";
 import { projectTitle } from "./title.js";
 import { term } from "./terms.js";
 import { NO_UI, textNode, windowNode } from "./ui.js";
+import { projectTimer } from "./timer.js";
 import type { UiContext } from "./ui.js";
 import type { UiNode } from "../frame-spec.js";
 
@@ -50,7 +51,10 @@ export function projectFrame(state: GameState, view: ProjectView, fx: VisualFx =
     camera: { x: Math.round(state.map.camera.x * tileSize), y: Math.round(state.map.camera.y * tileSize) },
     layers,
     overlay,
-    ui: projectMessage(state, (id) => (Object.hasOwn(state.actors, id) ? state.actors[id as keyof typeof state.actors]?.name : undefined), screen),
+    ui: [
+      ...projectTimer(state, screen),
+      ...projectMessage(state, (id) => (Object.hasOwn(state.actors, id) ? state.actors[id as keyof typeof state.actors]?.name : undefined), screen),
+    ],
   };
 }
 

@@ -151,6 +151,8 @@ const serializedStateSchema = z.strictObject({
     position: z.enum(["top", "middle", "bottom"]),
     background: z.enum(["window", "dim", "transparent"]),
     choices: z.array(z.string()).nullable(),
+    cursor: nonNegativeInt.optional(),
+    numberInput: z.strictObject({ digits: z.number().int().min(1).max(9), value: nonNegativeInt }).optional(),
   }),
   timers: z.strictObject({ active: z.boolean(), ticks: nonNegativeInt }),
   playtimeTicks: nonNegativeInt,

@@ -70,3 +70,25 @@ export function base64ToBytes(base64: string): ArrayBuffer {
   for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
   return out.buffer;
 }
+
+const EXTENSION_BY_MIME: Readonly<Record<string, string>> = {
+  "image/png": "png",
+  "image/jpeg": "jpg",
+  "image/webp": "webp",
+  "image/gif": "gif",
+  "audio/ogg": "ogg",
+  "audio/mpeg": "mp3",
+  "audio/wav": "wav",
+  "audio/mp4": "m4a",
+  "application/json": "json",
+};
+
+/**
+ * アセットを書き出すときの拡張子（`.png` など）。名前の拡張子（英数字 1〜8 文字）を優先し、無ければ MIME から、それも無ければ `.bin`。
+ * プレイヤーが `assets/<id>.<ext>` を取りに行くときの規則（`@rpg/assets` の `assetExtension`）と同じでなければならない
+ * （`apps/player` のテストで突き合わせている）。
+ */
+export function extensionOf(entry: { name?: string; mime?: string }): string {
+  const fromName = /\.([A-Za-z0-9]{1,8})$/.exec(entry.name ?? "")?.[1];
+  return `.${fromName?.toLowerCase() ?? EXTENSION_BY_MIME[entry.mime ?? ""] ?? "bin"}`;
+}

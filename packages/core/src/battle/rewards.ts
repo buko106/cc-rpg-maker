@@ -14,7 +14,7 @@ export interface LevelUp {
 }
 
 /** 経験値を加えてレベルを上げる。上がった分だけ最大 HP/MP が増え、その差を現在値にも足す（戦闘不能なら足さない）。 */
-export function gainExp(ctx: Ctx, actor: ActorState, exp: number): { actor: ActorState; levelUps: LevelUp[] } {
+export function gainExp(ctx: Pick<Ctx, "project">, actor: ActorState, exp: number): { actor: ActorState; levelUps: LevelUp[] } {
   const total = actor.exp + exp;
   let level = actor.level;
   while (level < LEVEL_MAX && total >= expToReach(level + 1)) level++;

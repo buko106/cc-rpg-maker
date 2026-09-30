@@ -1,0 +1,240 @@
+{
+  "formatVersion": 1,
+  "meta": {
+    "id": "commands-smoke",
+    "title": "commands-smoke",
+    "createdAt": "2026-01-01T00:00:00Z",
+    "updatedAt": "2026-01-01T00:00:00Z"
+  },
+  "system": {
+    "startMap": "map_start",
+    "startX": 2,
+    "startY": 2,
+    "initialParty": [
+      "actor_hero"
+    ],
+    "tileSize": 32,
+    "screen": {
+      "width": 320,
+      "height": 256
+    },
+    "bgm": {},
+    "terms": {
+      "newGame": "ニューゲーム"
+    }
+  },
+  "maps": {
+    "map_start": {
+      "id": "map_start",
+      "name": "スモーク",
+      "order": 0
+    }
+  },
+  "tilesets": {
+    "ts_basic": {
+      "id": "ts_basic",
+      "name": "基本",
+      "passage": [
+        15,
+        15,
+        0,
+        0
+      ]
+    }
+  },
+  "database": {
+    "actors": {
+      "actor_hero": {
+        "id": "actor_hero",
+        "name": "勇者",
+        "classId": "class_hero",
+        "initialLevel": 1,
+        "equips": {}
+      },
+      "actor_mage": {
+        "id": "actor_mage",
+        "name": "魔法使い",
+        "classId": "class_hero",
+        "initialLevel": 1,
+        "equips": {}
+      }
+    },
+    "classes": {
+      "class_hero": {
+        "id": "class_hero",
+        "name": "戦士",
+        "skills": [],
+        "params": {
+          "mhp": {
+            "base": 100,
+            "growth": 10
+          },
+          "mmp": {
+            "base": 20,
+            "growth": 2
+          },
+          "atk": {
+            "base": 10,
+            "growth": 2
+          },
+          "def": {
+            "base": 10,
+            "growth": 2
+          },
+          "mat": {
+            "base": 10,
+            "growth": 2
+          },
+          "mdf": {
+            "base": 10,
+            "growth": 2
+          },
+          "agi": {
+            "base": 10,
+            "growth": 2
+          },
+          "luk": {
+            "base": 10,
+            "growth": 2
+          }
+        }
+      }
+    },
+    "skills": {
+      "sk_bite": {
+        "id": "sk_bite",
+        "name": "体当たり",
+        "mpCost": 0,
+        "scope": "one-enemy",
+        "formula": "a.atk * 2 - b.def",
+        "effects": []
+      }
+    },
+    "items": {
+      "item_key": {
+        "id": "item_key",
+        "name": "古い鍵",
+        "kind": "key",
+        "price": 0,
+        "effects": []
+      },
+      "item_potion": {
+        "id": "item_potion",
+        "name": "ポーション",
+        "kind": "consumable",
+        "price": 10,
+        "effects": [
+          {
+            "kind": "recoverHp",
+            "value": 30
+          }
+        ]
+      }
+    },
+    "enemies": {
+      "en_slime": {
+        "id": "en_slime",
+        "name": "スライム",
+        "params": {
+          "mhp": 40,
+          "mmp": 0,
+          "atk": 8,
+          "def": 3,
+          "mat": 0,
+          "mdf": 2,
+          "agi": 4,
+          "luk": 3
+        },
+        "actions": [
+          {
+            "skill": "sk_bite",
+            "rating": 5
+          }
+        ],
+        "drops": [],
+        "exp": 12,
+        "gold": 8
+      }
+    },
+    "troops": {
+      "tr_slime": {
+        "id": "tr_slime",
+        "name": "スライム",
+        "members": [
+          {
+            "enemy": "en_slime",
+            "x": 165,
+            "y": 130
+          }
+        ],
+        "pages": []
+      }
+    },
+    "states": {},
+    "commonEvents": {
+      "ce_hello": {
+        "id": "ce_hello",
+        "name": "あいさつ",
+        "trigger": "none",
+        "commands": [
+          {
+            "code": "ControlSwitches",
+            "params": {
+              "ids": [
+                "sw_common"
+              ],
+              "value": true
+            },
+            "indent": 0
+          }
+        ]
+      }
+    }
+  },
+  "assets": {
+    "entries": {
+      "0123456789abcdef": {
+        "name": "hero.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 1024,
+        "width": 96,
+        "height": 128
+      },
+      "fedcba9876543210": {
+        "name": "bgm.wav",
+        "kind": "audio",
+        "mime": "audio/wav",
+        "size": 100
+      }
+    }
+  },
+  "switches": {
+    "sw_talked": {
+      "name": "話しかけた"
+    },
+    "sw_common": {
+      "name": "コモンイベント実行済み"
+    },
+    "sw_done": {
+      "name": "完了"
+    }
+  },
+  "variables": {
+    "var_talk_count": {
+      "name": "会話回数"
+    },
+    "var_choice": {
+      "name": "選択結果"
+    },
+    "var_number": {
+      "name": "入力した数"
+    },
+    "var_item": {
+      "name": "選んだアイテム"
+    },
+    "var_loop": {
+      "name": "ループ回数"
+    }
+  }
+}

@@ -14,6 +14,7 @@
     "@rpg/audio-webaudio": "workspace:*",
     "@rpg/core": "workspace:*",
     "@rpg/editor-core": "workspace:*",
+    "@rpg/exporter": "workspace:*",
     "@rpg/input-browser": "workspace:*",
     "@rpg/input-script": "workspace:*",
     "@rpg/plugin-api": "workspace:*",

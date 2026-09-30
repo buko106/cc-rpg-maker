@@ -18,7 +18,7 @@ export default defineConfig({
         "packages/core/src/**": { statements: 90, branches: 85, functions: 90, lines: 90 },
         // それ以外の実装済みパッケージは 70%（未実装のパッケージは対象外。実装したマイルストーンで追加する）
         ...Object.fromEntries(
-          ["runtime", "assets", "render-null", "render-canvas2d", "audio-null", "input-script", "input-browser", "save-store", "audio-webaudio", "project-store", "editor-core"].map((name) => [
+          ["runtime", "assets", "render-null", "render-canvas2d", "audio-null", "input-script", "input-browser", "save-store", "audio-webaudio", "project-store", "editor-core", "exporter"].map((name) => [
             `packages/${name}/src/**`,
             { statements: 70, branches: 70, functions: 70, lines: 70 },
           ]),

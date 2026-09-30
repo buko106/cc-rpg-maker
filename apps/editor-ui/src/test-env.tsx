@@ -6,7 +6,7 @@ import type { ProjectRepository } from "@rpg/project-store";
 import { createNullRenderer } from "@rpg/render-null";
 import type { ImageHandle } from "@rpg/runtime";
 import type { ReactElement, ReactNode } from "react";
-import { EnvContext, SessionContext } from "./hooks.js";
+import { EnvContext, RepoContext, SessionContext } from "./hooks.js";
 import type { EditorEnv } from "./hooks.js";
 
 // jsdom には Canvas の実装が無い（getContext が「未実装」と騒ぐ）ので、描画しない前提で null を返す。
@@ -47,6 +47,8 @@ export interface TestEnv {
   repo: ProjectRepository;
   session: EditorSession;
   playtests: { canvas: HTMLCanvasElement; start: unknown }[];
+  /** `saveFile` に渡されたファイル。 */
+  saved: { name: string; bytes: Uint8Array<ArrayBuffer>; mime: string }[];
   /** `session` と `env` を渡した状態で描く。 */
   wrap(children: ReactNode): ReactElement;
 }
@@ -56,7 +58,10 @@ export async function createTestEnv(opts: { session?: Partial<EditorSessionDeps>
   const commands = createCommandRegistry();
   registerBuiltins(commands);
   const playtests: TestEnv["playtests"] = [];
+  const saved: TestEnv["saved"] = [];
   const env: EditorEnv = {
+    loadPlayerBundle: () => Promise.resolve({ js: "/* player */" }),
+    saveFile: (name, bytes, mime) => void saved.push({ name, bytes, mime }),
     commands,
     formOverrides: {},
     createRenderer: () => createNullRenderer(),
@@ -78,9 +83,12 @@ export async function createTestEnv(opts: { session?: Partial<EditorSessionDeps>
     repo,
     session,
     playtests,
+    saved,
     wrap: (children) => (
       <EnvContext.Provider value={env}>
-        <SessionContext.Provider value={session}>{children}</SessionContext.Provider>
+        <RepoContext.Provider value={repo}>
+          <SessionContext.Provider value={session}>{children}</SessionContext.Provider>
+        </RepoContext.Provider>
       </EnvContext.Provider>
     ),
   };
