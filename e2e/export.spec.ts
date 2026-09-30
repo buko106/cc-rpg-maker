@@ -112,13 +112,22 @@ test("エディタで作ったゲームを書き出し、別オリジンの静�
     await play(other, `${server.origin}/`);
     expect(errors).toEqual([]);
     // 見た目：タイルが描かれている（真っ黒ではない）
-    const drawn = await other.evaluate(() => {
-      const canvas = document.querySelector("canvas") as HTMLCanvasElement;
-      const data = canvas.getContext("2d")!.getImageData(0, 0, canvas.width, canvas.height).data;
+    // （描画方式は auto なので WebGL のことも Canvas2D のこともある。どちらでも読めるよう、画面の写しで数える）
+    const shot = (await other.locator("canvas").screenshot()).toString("base64");
+    const drawn = await other.evaluate(async (b64) => {
+      const img = new Image();
+      img.src = `data:image/png;base64,${b64}`;
+      await img.decode();
+      const scratch = document.createElement("canvas");
+      scratch.width = img.width;
+      scratch.height = img.height;
+      const g = scratch.getContext("2d")!;
+      g.drawImage(img, 0, 0);
+      const data = g.getImageData(0, 0, img.width, img.height).data;
       let colored = 0;
       for (let i = 0; i < data.length; i += 4) if (data[i]! + data[i + 1]! + data[i + 2]! > 30) colored++;
       return colored;
-    });
+    }, shot);
     expect(drawn).toBeGreaterThan(1000);
     await context.close();
   } finally {

@@ -43,9 +43,11 @@ export async function serve(files: Map<string, Buffer>): Promise<{ origin: strin
 }
 
 /** 書き出し画面で形式を選んで書き出し、ダウンロードされたファイルを保存する。 */
-export async function exportAs(page: Page, format: RegExp, path: string): Promise<Download> {
+export async function exportAs(page: Page, format: RegExp, path: string, options: { offline?: boolean; renderer?: "auto" | "webgl" | "canvas2d" } = {}): Promise<Download> {
   await page.getByRole("button", { name: "配布物を書き出す…" }).click();
   await page.getByRole("radio", { name: format }).check();
+  if (options.offline === true) await page.getByRole("checkbox", { name: /オフライン/ }).check();
+  if (options.renderer !== undefined) await page.getByLabel("描画方式").selectOption(options.renderer);
   const [download] = await Promise.all([page.waitForEvent("download"), page.getByRole("dialog", { name: "配布物の書き出し" }).getByRole("button", { name: "書き出す" }).click()]);
   await download.saveAs(path);
   await expect(page.getByRole("status").filter({ hasText: "を書き出しました" })).toBeVisible();

@@ -38,6 +38,24 @@ describe("ExportDialog", () => {
     expect(new TextDecoder().decode(files.get("project/project.json")!)).toContain('\n  "formatVersion"');
   });
 
+  it("描画方式とオフライン対応の選択が書き出しに効く。オフラインは単一 HTML では選べない", async () => {
+    fireEvent.change(screen.getByLabelText("描画方式"), { target: { value: "canvas2d" } });
+    fireEvent.click(screen.getByRole("checkbox", { name: /オフライン/ }));
+    exportNow();
+    await waitFor(() => expect(t.saved).toHaveLength(1));
+    const files = await readZip(t.saved[0]!.bytes);
+    expect(files.has("sw.js")).toBe(true);
+    expect(new TextDecoder().decode(files.get("index.html")!)).toContain('data-renderer="canvas2d"');
+    // 単一 HTML ではチェックボックスが無効（チェックも外れて見える）
+    fireEvent.click(screen.getByRole("radio", { name: /単一 HTML/ }));
+    const box = screen.getByRole("checkbox", { name: /オフライン/ }) as HTMLInputElement;
+    expect(box.disabled).toBe(true);
+    expect(box.checked).toBe(false);
+    exportNow();
+    await waitFor(() => expect(t.saved).toHaveLength(2));
+    expect(new TextDecoder().decode(t.saved[1]!.bytes)).not.toContain("serviceWorker");
+  });
+
   it("単一 HTML を選ぶと HTML を保存する", async () => {
     fireEvent.click(screen.getByRole("radio", { name: /単一 HTML/ }));
     exportNow();

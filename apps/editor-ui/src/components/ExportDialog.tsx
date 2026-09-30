@@ -21,6 +21,7 @@ export function ExportDialog({ onClose }: { onClose: () => void }): ReactElement
   const [format, setFormat] = useState<Format>("folder");
   const [minify, setMinify] = useState(true);
   const [renderer, setRenderer] = useState<NonNullable<ExportOptions["renderer"]>>("auto");
+  const [offline, setOffline] = useState(false);
   const [busy, setBusy] = useState(false);
   const [outcome, setOutcome] = useState<Outcome | undefined>();
 
@@ -34,7 +35,7 @@ export function ExportDialog({ onClose }: { onClose: () => void }): ReactElement
         return;
       }
       const player = await env.loadPlayerBundle();
-      const r = await exportGame(repo, session.doc.project.meta.id, { format, minifyJson: minify, renderer }, player);
+      const r = await exportGame(repo, session.doc.project.meta.id, { format, minifyJson: minify, renderer, offline: offline && format === "folder" }, player);
       if (!r.ok) {
         setOutcome({ kind: "error", message: `書き出せませんでした（${r.error.kind}）` });
         return;
@@ -65,6 +66,10 @@ export function ExportDialog({ onClose }: { onClose: () => void }): ReactElement
       <label className="check">
         <input type="checkbox" checked={minify} onChange={(e) => setMinify(e.target.checked)} />
         JSON を圧縮する（小さくなります）
+      </label>
+      <label className="check">
+        <input type="checkbox" checked={offline && format === "folder"} disabled={format !== "folder"} onChange={(e) => setOffline(e.target.checked)} />
+        オフラインでも遊べるようにする（フォルダ形式のみ。2 回目以降）
       </label>
       <label className="check">
         描画方式
