@@ -1,5 +1,5 @@
 {
-  "name": "@rpg/plugin-api",
+  "name": "@rpg/plugin-samples",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -9,10 +9,7 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@rpg/core": "workspace:*",
-    "@rpg/editor-core": "workspace:*",
-    "@rpg/runtime": "workspace:*",
-    "zod": "^4"
+    "@rpg/plugin-api": "workspace:*"
   },
   "devDependencies": {
     "@rpg/test-utils": "workspace:*"

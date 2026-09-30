@@ -11,6 +11,8 @@ export interface EffectSinks {
   visual(effect: Extract<Effect, { kind: "screenShake" | "screenFlash" | "screenTint" | "screenFade" }>): void;
   /** マップの遅延ロードを始める。 */
   loadMap(mapId: MapId): void;
+  /** `plugin` Effect（プラグインが受け口を登録していなければ警告になる）。 */
+  plugin(effect: Extract<Effect, { kind: "plugin" }>): void;
   /** 現在の状態を `slot` に保存する。`slot` 省略時は最初のスロット。 */
   save(slot: number | undefined): void;
   /** `slot` のセーブデータを読み込んで再開する。`slot` 省略時は最初のスロット。 */
@@ -51,7 +53,7 @@ export function distributeEffect(effect: Effect, sinks: EffectSinks): void {
       sinks.logger[effect.level](effect.message);
       return;
     case "plugin":
-      sinks.logger.warn(`plugin effect ${effect.name}: プラグインは未対応`);
+      sinks.plugin(effect);
       return;
     default: {
       const unknown: { kind?: unknown } = effect;

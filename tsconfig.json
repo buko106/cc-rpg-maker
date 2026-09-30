@@ -50,6 +50,9 @@
       "path": "./packages/plugin-api"
     },
     {
+      "path": "./packages/plugin-samples"
+    },
+    {
       "path": "./packages/test-utils"
     },
     {

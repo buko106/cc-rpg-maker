@@ -6,7 +6,7 @@ import type { ScriptInput } from "@rpg/input-script";
 import { createNullRenderer } from "@rpg/render-null";
 import type { NullRenderer } from "@rpg/render-null";
 import { createRuntime, STEP_MS } from "@rpg/runtime";
-import type { Effect, InputFrame, Logger, ProjectSource, Runtime, SaveRepository } from "@rpg/runtime";
+import type { Effect, InputFrame, Logger, ProjectSource, Runtime, RuntimeExtensions, SaveRepository } from "@rpg/runtime";
 import { createMemorySaveRepository } from "@rpg/save-store";
 import type { MapData, MapId, Project } from "@rpg/schema";
 import { createManualScheduler } from "./manualScheduler.js";
@@ -18,6 +18,8 @@ import { stableStringify } from "./replay.js";
 export interface RuntimeHarnessOptions {
   /** `fixtures/projects/v1/<name>` */
   project: string;
+  /** フィクスチャのフォーマットのバージョン（`fixtures/projects/v<n>/`）。既定は 1。 */
+  projectVersion?: number;
   seed?: string;
   /** `mapData` の解決を手動にするマップ（`release(id)` で解決）。遅延ロードのテスト用。 */
   deferMaps?: readonly string[];
@@ -31,6 +33,8 @@ export interface RuntimeHarnessOptions {
   saves?: SaveRepository;
   /** 壁時計（ミリ秒）。既定は固定値（2026-01-01T00:00:00Z）。 */
   clock?: () => number;
+  /** プラグインなどによる拡張。 */
+  extensions?: RuntimeExtensions;
 }
 
 /** 遅延・失敗を制御できる ProjectSource。 */
@@ -66,7 +70,7 @@ export interface RuntimeHarness {
  * `start()` 済みの Runtime を返す。
  */
 export async function createRuntimeHarness(opts: RuntimeHarnessOptions): Promise<RuntimeHarness> {
-  const loaded = loadFixtureProject(opts.project);
+  const loaded = loadFixtureProject(opts.project, opts.projectVersion);
   const deferred = new Set<string>(opts.deferMaps ?? []);
   const failing = new Set<string>(opts.failMaps ?? []);
   const waiting = new Map<string, () => void>();
@@ -109,6 +113,7 @@ export async function createRuntimeHarness(opts: RuntimeHarnessOptions): Promise
     title: opts.title ?? false,
     clock: opts.clock ?? (() => Date.UTC(2026, 0, 1)),
     onError: (e) => errors.push(e),
+    ...(opts.extensions === undefined ? {} : { extensions: opts.extensions }),
   });
   const effects: Effect[] = [];
   runtime.onEffect((e) => effects.push(e));

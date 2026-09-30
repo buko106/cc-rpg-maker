@@ -3,6 +3,7 @@ import type { Action, Ctx, Effect, GameState } from "@rpg/core";
 import type { MapData, MapId } from "@rpg/schema";
 import { distributeEffect } from "./effects.js";
 import type { EffectSinks } from "./effects.js";
+import type { EffectApi, RuntimeExtensions } from "./extensions.js";
 import type { FrameSpec } from "./frame-spec.js";
 import { projectFrame } from "./projection/index.js";
 import type { NoticeKey, UiContext } from "./projection/index.js";
@@ -45,6 +46,8 @@ export interface RuntimeDeps {
   /** 乱数のシード。省略時は開始時の `scheduler.now()`。 */
   seed?: string;
   logger?: Logger;
+  /** プラグインなどによる拡張（コマンド・式関数・戦闘ルール・`plugin` Effect・FrameSpec の後処理）。 */
+  extensions?: RuntimeExtensions;
   /** ループ中の未捕捉エラー（マップのロード失敗など）。呼ばれるとループは止まる。 */
   onError?: (error: unknown) => void;
 }
@@ -91,6 +94,19 @@ export function createRuntime(deps: RuntimeDeps): Runtime {
   let notice: { key: NoticeKey; steps: number } | undefined;
   const inflight = new Set<Promise<unknown>>();
   const listeners = new Set<(e: Effect) => void>();
+
+  const ext = deps.extensions;
+  /** 投影 + 拡張の後処理。後処理が例外を投げたら、拡張なしの結果を使う（ゲームを止めない）。 */
+  const projectWithExtensions = (s: GameState, c: Ctx): FrameSpec => {
+    const frame = projectFrame(s, c.project, fx, uiContext());
+    if (ext?.afterProject === undefined) return frame;
+    try {
+      return ext.afterProject(s.scene.kind, frame, s);
+    } catch (e) {
+      logger.warn(`プラグインの後処理が失敗した: ${e instanceof Error ? e.message : String(e)}`);
+      return frame;
+    }
+  };
 
   const current = (): { state: GameState; ctx: Ctx } => {
     if (state === undefined || ctx === undefined) throw new Error("runtime: start() が完了していない");
@@ -200,6 +216,22 @@ export function createRuntime(deps: RuntimeDeps): Runtime {
     visual(effect) {
       fx = applyFxEffect(fx, effect);
     },
+    plugin(effect) {
+      if (ext?.onPluginEffect === undefined) {
+        logger.warn(`plugin effect ${effect.name}: 受け口が登録されていない`);
+        return;
+      }
+      const api: EffectApi = {
+        audio,
+        dispatch: (action) => runtimeApi.dispatch(action),
+        state: () => current().state,
+      };
+      try {
+        ext.onPluginEffect(effect, api);
+      } catch (e) {
+        logger.warn(`plugin effect ${effect.name} の処理が失敗した: ${e instanceof Error ? e.message : String(e)}`);
+      }
+    },
     loadMap(mapId) {
       runLoading(async () => {
         maps[mapId] = await projectSource.mapData(mapId);
@@ -235,7 +267,7 @@ export function createRuntime(deps: RuntimeDeps): Runtime {
     if (steps === MAX_STEPS_PER_FRAME) acc = Math.min(acc, STEP_MS);
     if (acc < 0) acc = 0;
 
-    renderer.render(projectFrame(current().state, c.project, fx, uiContext()));
+    renderer.render(projectWithExtensions(current().state, c));
     if (loading) {
       await loading;
       acc = 0;
@@ -249,14 +281,15 @@ export function createRuntime(deps: RuntimeDeps): Runtime {
     frame(nowMs).catch(fail);
   };
 
-  return {
+  const runtimeApi: Runtime = {
     async start() {
       if (status !== "created") throw new Error(`runtime: start() は ${status} では呼べない`);
       const project = await projectSource.project();
       projectId = project.meta.id;
       projectHash = await projectSource.projectHash();
       maps[project.system.startMap] = await projectSource.mapData(project.system.startMap);
-      ctx = createCtx(createProjectView(project, maps));
+      const base = createCtx(createProjectView(project, maps));
+      ctx = ext?.setup === undefined ? base : ext.setup(base);
       const seed = deps.seed ?? String(scheduler.now());
       const showTitle = deps.title ?? true;
       state = showTitle ? titleState(ctx, seed) : initialState(ctx, seed);
@@ -302,7 +335,8 @@ export function createRuntime(deps: RuntimeDeps): Runtime {
 
     project(s) {
       const { state: cur, ctx: c } = current();
-      return projectFrame(s ?? cur, c.project, fx, uiContext());
+      return projectWithExtensions(s ?? cur, c);
     },
   };
+  return runtimeApi;
 }

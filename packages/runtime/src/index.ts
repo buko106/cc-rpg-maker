@@ -8,6 +8,7 @@
  */
 export { createRuntime, MAX_FRAME_MS, MAX_STEPS_PER_FRAME, STEP_MS } from "./runtime.js";
 export type { Runtime, RuntimeDeps, RuntimeStatus } from "./runtime.js";
+export type { EffectApi, RuntimeExtensions, SceneKind } from "./extensions.js";
 export { distributeEffect } from "./effects.js";
 export type { EffectSinks } from "./effects.js";
 export { BATTLE_LOG_LINES, formatLogEntry, NO_UI, projectBattle, projectFrame, projectGameOver, projectMapLayers, projectMenu, projectMessage, projectTitle, term } from "./projection/index.js";
