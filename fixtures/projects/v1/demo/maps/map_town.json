@@ -244,6 +244,118 @@
           "commands": []
         }
       ]
+    },
+    "ev_cat": {
+      "id": "ev_cat",
+      "name": "ネコ",
+      "x": 3,
+      "y": 9,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "96d90b7571e30700",
+            "index": 0,
+            "direction": "down"
+          },
+          "moveRoute": {
+            "repeat": true,
+            "skippable": true,
+            "steps": [
+              {
+                "kind": "move",
+                "dir": "random"
+              },
+              {
+                "kind": "wait",
+                "frames": 90
+              }
+            ]
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "にゃーん。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_chick": {
+      "id": "ev_chick",
+      "name": "ヒヨコ",
+      "x": 2,
+      "y": 10,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "a879bad5bc621a64",
+            "index": 0,
+            "direction": "down"
+          },
+          "moveRoute": {
+            "repeat": true,
+            "skippable": false,
+            "steps": [
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "wait",
+                "frames": 30
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "wait",
+                "frames": 30
+              }
+            ]
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ぴよぴよ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
     }
   }
 }

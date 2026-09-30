@@ -269,6 +269,22 @@
         "kind": "audio",
         "mime": "audio/wav",
         "size": 70604
+      },
+      "96d90b7571e30700": {
+        "name": "cat.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 1040,
+        "width": 96,
+        "height": 128
+      },
+      "a879bad5bc621a64": {
+        "name": "chick.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 1011,
+        "width": 96,
+        "height": 128
       }
     }
   },

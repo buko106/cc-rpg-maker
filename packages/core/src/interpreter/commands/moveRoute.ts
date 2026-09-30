@@ -1,5 +1,5 @@
 import { eventIdSchema, moveRouteSchema, moveStepSchema } from "@rpg/schema";
-import type { Direction, EventCommand } from "@rpg/schema";
+import type { Direction, EventCommand, EventId, MoveRoute } from "@rpg/schema";
 import { z } from "zod";
 import { warn } from "../../effects.js";
 import { moveCharacter } from "../../map/index.js";
@@ -7,6 +7,7 @@ import type { Character, GameState } from "../../state.js";
 import { defineCommand } from "../handler.js";
 import type { CommandCtx, CommandResult } from "../handler.js";
 import { startInterpreter } from "../run.js";
+import type { InterpreterOrigin } from "../state.js";
 
 /** 通れない相手に突き当たったまま待ち続けてよいフレーム数（超えたらその歩みをあきらめる）。 */
 export const MAX_BLOCKED_FRAMES = 60;
@@ -42,7 +43,43 @@ function pickDirection(dir: Direction | "random" | "toward" | "away", who: strin
   return dir === "toward" ? toward : ({ up: "down", down: "up", left: "right", right: "left" } as const)[toward];
 }
 
-const stepParams = z.strictObject({ who: z.string(), step: moveStepSchema, skippable: z.boolean().default(false) });
+const stepParams = z.strictObject({
+  who: z.string(),
+  step: moveStepSchema,
+  skippable: z.boolean().default(false),
+  /** ページの `moveRoute`（自律移動）の 1 歩。イベントの実行中・メッセージ表示中・`SetMoveRoute` の実行中は止まり、プレイヤーの居る所へは入らず、通れなくても警告しない。 */
+  auto: z.boolean().default(false),
+});
+
+const PAGE_ROUTE = "pageRoute:";
+/** ページの `moveRoute` を動かす並列インタプリタの名前（`plugin` 起点）。 */
+export const pageRouteName = (eventId: EventId, page: number): string => `${PAGE_ROUTE}${eventId}:${page}`;
+/** その起点が、ページの `moveRoute` を動かすものか。 */
+export const isPageRouteOrigin = (origin: InterpreterOrigin): boolean => origin.kind === "plugin" && origin.name.startsWith(PAGE_ROUTE);
+
+/** `repeat` でない自律移動が終わったあとに、インタプリタを生かしておく待ち（ページが変わるまで再起動させない）。 */
+const FOREVER = 2 ** 31 - 1;
+
+/**
+ * ページの `moveRoute` を、並列インタプリタで動かすコマンド列に展開する。空のルートは `undefined`。
+ * `repeat` は繰り返し（1 周ごとに 1 フレーム待つので、時間のかからない歩だけのルートでも詰まらない）、
+ * そうでなければ一度だけ実行して、ページが変わるまで待ち続ける。
+ */
+export function pageRouteCommands(eventId: EventId, route: MoveRoute): EventCommand[] | undefined {
+  if (route.steps.length === 0) return undefined;
+  const indent = route.repeat ? 1 : 0;
+  const step = (s: MoveRoute["steps"][number]): EventCommand => ({ code: "MoveStep", params: { who: eventId, step: s, skippable: route.skippable, auto: true }, indent });
+  const steps = route.steps.map(step);
+  if (!route.repeat) return [...steps, step({ kind: "wait", frames: FOREVER })];
+  return [{ code: "Loop", params: {}, indent: 0 }, ...steps, step({ kind: "wait", frames: 1 }), { code: "EndLoop", params: {}, indent: 0 }];
+}
+
+/** 自律移動を止めておくべきときか：通常のイベントの実行中、メッセージ表示中、場所移動の予約中、`SetMoveRoute` でそのイベントを動かしている間。 */
+function autoPaused(state: GameState, who: string): boolean {
+  if (state.message.open || state.map.transfer !== undefined) return true;
+  const forced = originName(who);
+  return state.interpreters.some((i) => i.mode === "normal" || (i.origin.kind === "plugin" && i.origin.name === forced));
+}
 
 /**
  * 内部用：移動ルートの 1 歩。`SetMoveRoute` がルートを展開して作る。
@@ -57,7 +94,7 @@ export const moveStep = defineCommand({
   run(p, c) {
     const ch = characterOf(c.state, p.who);
     if (ch === undefined) return { control: { kind: "exit" } };
-    if (ch.moving) return { control: { kind: "wait", wait: { kind: "frames", left: 1 } }, setLocals: { retry: true } };
+    if (ch.moving || (p.auto && autoPaused(c.state, p.who))) return { control: { kind: "wait", wait: { kind: "frames", left: 1 } }, setLocals: { retry: true } };
     const step = p.step;
     switch (step.kind) {
       case "turn":
@@ -70,10 +107,15 @@ export const moveStep = defineCommand({
         const map = c.project.map(c.state.map.mapId);
         if (map === undefined) return {};
         const dir = pickDirection(step.dir, p.who, ch, c);
-        const moved = moveCharacter(ch, dir, { map, tileset: c.project.tileset(map.tileset) ?? { id: "" as never, name: "", passage: [] }, events: c.state.map.events });
+        let moved = moveCharacter(ch, dir, { map, tileset: c.project.tileset(map.tileset) ?? { id: "" as never, name: "", passage: [] }, events: c.state.map.events });
+        // 自律移動のイベントは、プレイヤーの居るタイルへは入らない（プレイヤーは通行判定の対象ではないので、ここで見る）
+        const player = c.state.map.player;
+        if (p.auto && !ch.through && (!("priority" in ch) || ch.priority === "same") && moved.x === player.x && moved.y === player.y) moved = { ...ch, direction: dir };
         const blocked = moved.x === ch.x && moved.y === ch.y;
         const next = withCharacter(c.state, p.who, moved);
         if (!blocked) return { state: next, control: { kind: "wait", wait: { kind: "move", who: p.who } } };
+        // 自律移動で `skippable` でないルートは、通れるようになるまで待ち続ける（あきらめると、相対的な歩みの列がずれていく）
+        if (p.auto && !p.skippable) return { state: next, control: { kind: "wait", wait: { kind: "frames", left: 1 } }, setLocals: { retry: true } };
         const waited = typeof c.interp.locals["blocked"] === "number" ? (c.interp.locals["blocked"] as number) : 0;
         if (p.skippable || waited >= MAX_BLOCKED_FRAMES) {
           return { state: next, setLocals: { blocked: undefined }, ...(p.skippable ? {} : { effects: [warn(`MoveStep: ${p.who} が ${dir} に進めないのであきらめた`)] }) };

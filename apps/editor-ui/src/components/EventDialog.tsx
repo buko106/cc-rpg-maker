@@ -1,6 +1,6 @@
 import { cmd, defaultPage } from "@rpg/editor-core";
-import { eventPageSchema } from "@rpg/schema";
-import type { EventId, EventPage, MapId } from "@rpg/schema";
+import { eventPageSchema, moveRouteSchema } from "@rpg/schema";
+import type { EventId, EventPage, MapId, MoveRoute } from "@rpg/schema";
 import { useCallback, useMemo, useState } from "react";
 import type { ReactElement } from "react";
 import type { z } from "zod";
@@ -13,6 +13,9 @@ import { useExecute } from "./useExecute.js";
 /** ページの設定（条件・グラフィック・起動条件など）。コマンド列は専用のリストで編集する。 */
 const pageSettingsSchema = eventPageSchema.omit({ commands: true, moveRoute: true });
 type PageSettings = z.infer<typeof pageSettingsSchema>;
+
+/** 「自律移動する」を入れたときの初期ルート：ランダムに 1 歩、少し待つ、を繰り返す。 */
+const WANDER: MoveRoute = { repeat: true, skippable: true, steps: [{ kind: "move", dir: "random" }, { kind: "wait", frames: 60 }] };
 
 /**
  * イベントの編集ダイアログ：名前、ページ（タブ）、ページの設定、コマンドリスト。
@@ -99,6 +102,23 @@ export function EventDialog({ mapId, eventId, onClose }: { mapId: MapId; eventId
         <details open className="page-settings">
           <summary>ページの設定</summary>
           <FormEditor key={`${eventId}:${index}`} schema={pageSettingsSchema} value={settings} ctx={ctx} label="" onCommit={commit} />
+        </details>
+        <details open className="page-settings">
+          <summary>自律移動（ページが有効な間、勝手に動く）</summary>
+          <label>
+            <input
+              type="checkbox"
+              checked={page.moveRoute !== undefined}
+              onChange={(e) => {
+                const { moveRoute: _m, ...rest } = page;
+                run(cmd.setEventPage(mapId, eventId, index, e.target.checked ? { ...rest, moveRoute: WANDER } : rest));
+              }}
+            />{" "}
+            自律移動する
+          </label>
+          {page.moveRoute !== undefined && (
+            <FormEditor key={`${eventId}:${index}:route`} schema={moveRouteSchema} value={page.moveRoute} ctx={ctx} label="" onCommit={(moveRoute) => run(cmd.setEventPage(mapId, eventId, index, { ...page, moveRoute }))} />
+          )}
         </details>
         <h3>コマンド</h3>
         <CommandList

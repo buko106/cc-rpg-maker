@@ -3,7 +3,7 @@ import type { Ctx } from "../ctx-types.js";
 import { warn } from "../effects.js";
 import type { Effect } from "../effects.js";
 import type { InputFrame } from "../input.js";
-import { runInterpreters, startInterpreter } from "../interpreter/index.js";
+import { isPageRouteOrigin, pageRouteCommands, pageRouteName, runInterpreters, startInterpreter } from "../interpreter/index.js";
 import { advanceCharacter, computeCamera, eventsToTrigger, refreshEventPages } from "../map/index.js";
 import { battleTick } from "../battle/index.js";
 import type { GameState, MapState } from "../state.js";
@@ -15,9 +15,13 @@ import { hasNormalInterpreter, startMapEvent } from "./inputPhase.js";
 function syncEventInterpreters(state: GameState, map: MapData, ctx: Ctx): GameState {
   const mapId = state.map.mapId;
   // 有効ページが変わった・別マップの並列イベントは止める
+  // ページの moveRoute（自律移動）も、そのページが有効な間だけ動かす
+  const live = new Set<string>();
+  for (const rt of Object.values(state.map.events)) if (rt.pageIndex !== null) live.add(pageRouteName(rt.id, rt.pageIndex));
   const kept = state.interpreters.filter((i) => {
-    if (i.mode !== "parallel" || i.origin.kind !== "mapEvent") return true;
-    return i.origin.mapId === mapId && state.map.events[i.origin.eventId]?.pageIndex === i.origin.page;
+    if (i.mode !== "parallel") return true;
+    if (i.origin.kind === "mapEvent") return i.origin.mapId === mapId && state.map.events[i.origin.eventId]?.pageIndex === i.origin.page;
+    return !isPageRouteOrigin(i.origin) || live.has((i.origin as { name: string }).name);
   });
   let s = kept.length === state.interpreters.length ? state : { ...state, interpreters: kept };
 
@@ -29,6 +33,15 @@ function syncEventInterpreters(state: GameState, map: MapData, ctx: Ctx): GameSt
     );
     const page = map.events[id]?.pages[rt.pageIndex];
     if (!running && page) s = startInterpreter(s, { kind: "mapEvent", mapId, eventId: id, page: rt.pageIndex }, page.commands, "parallel");
+  }
+
+  for (const rt of Object.values(s.map.events)) {
+    if (rt.pageIndex === null) continue;
+    const route = map.events[rt.id]?.pages[rt.pageIndex]?.moveRoute;
+    const commands = route === undefined ? undefined : pageRouteCommands(rt.id, route);
+    if (commands === undefined) continue;
+    const name = pageRouteName(rt.id, rt.pageIndex);
+    if (!s.interpreters.some((i) => i.origin.kind === "plugin" && i.origin.name === name)) s = startInterpreter(s, { kind: "plugin", name }, commands, "parallel");
   }
 
   if (!hasNormalInterpreter(s) && s.map.transfer === undefined && !s.message.open) {
@@ -58,7 +71,7 @@ function applyTransfer(state: GameState, ctx: Ctx): StepResult {
   const name = ctx.project.project.maps[t.to]?.name ?? "";
   const entered = enterMap(target, name, player);
   // 元のマップの並列イベントは終了する（移動先で必要なら再び起動される）。移動を待っているインタプリタ自身は残す。
-  const interpreters = state.interpreters.filter((i) => !(i.mode === "parallel" && i.origin.kind === "mapEvent"));
+  const interpreters = state.interpreters.filter((i) => !(i.mode === "parallel" && (i.origin.kind === "mapEvent" || isPageRouteOrigin(i.origin))));
   const s = refreshEventPages({ ...state, map: entered, interpreters }, target);
   return { state: { ...s, map: { ...s.map, camera: computeCamera(player, target, ctx.project.project.system) } }, effects };
 }

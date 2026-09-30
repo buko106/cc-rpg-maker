@@ -68,7 +68,7 @@
 ## 実装メモ（M6 で確定した点）
 - **配布物の書き出し**（`ExportDialog`）：メニューバーの「配布物を書き出す…」。形式（フォルダ形式の ZIP / 単一 HTML）と「JSON を圧縮する」を選び、書き出す前に `session.save()` で未保存の変更を保存する（保存できなければ書き出さない）。`@rpg/exporter` の `exportGame` を、ストアの内容（`RepoContext` の `repo`）から呼ぶ。`EditorEnv` に `loadPlayerBundle()`（ブラウザでは同じオリジンの `player/player.js` を fetch）と `saveFile(name, bytes, mime)`（ダウンロード）を足した。エディタのビルド（`build-web.mjs`）は `apps/player` の `main.ts` を `dist-web/player/player.js` にもバンドルする。
 - **コマンドリスト**：props を `onEdit(ops: CommandOp[])` に一本化した（挿入・削除・差し替えの列。複数なら `cmd.batch` で 1 回の Undo にまとめる）。`Loop` は `EndLoop` と、`ShowChoices` は選択肢の数だけの `ChoiceBranch` と `EndBranch` と一緒に入る。選択肢の数を増減すると、対になる `ChoiceBranch` も増減する（減らすときは余った分岐を本体ごと消す）。`Loop` の直後はループの中に入り、`Loop` / `ShowChoices` は丸ごと消える。`EndLoop` / `MoveStep`（内部用）は単独では追加も削除もできない。
-- **移動ルートの編集**は、`SetMoveRoute` コマンドの標準フォーム（手順の配列。種類を選ぶ）で行う。専用のエディタは無い。ページの `moveRoute` は core が未対応のため、UI にも出していない。
+- **移動ルートの編集**は、`SetMoveRoute` コマンドの標準フォーム（手順の配列。種類を選ぶ）で行う。専用のエディタは無い。ページの `moveRoute`（自律移動）は、イベントダイアログの「自律移動（ページが有効な間、勝手に動く）」で、「自律移動する」を入れると初期ルート（ランダムに 1 歩、60 フレーム待つ、を繰り返す）が付き、同じ標準フォームで手順・繰り返し・動けなければ飛ばすを編集する（外すと `moveRoute` を消す）。`e2e/editor.spec.ts` が、入れたイベントがテストプレイで動き出すことを確かめる。
 - **未対応**：テストプレイの音、タイルセットの追加・画像差し替え、アセットの一括インポート（ZIP の import は project-store にあるが、UI からはまだ呼べない）、イベントの複製・コピー&ペースト、矩形選択、キャンバスのスクロール位置を保った拡大。
 
 ## 実装メモ（M7 で確定した点）
