@@ -2,7 +2,18 @@ import type { ActorId, AssetId, AssetRef, Direction, EventId, EventPage, ItemId,
 import type { InterpreterState } from "./interpreter/state.js";
 import type { RandomState } from "./random.js";
 
-export type SceneState = { readonly kind: "title" | "map" | "battle" | "menu" | "gameover" };
+export type TitleScreen = "main" | "continue";
+export type MenuScreen = "main" | "item" | "status" | "save" | "load";
+
+/**
+ * どのシーンにいるか。タイトルとメニューの UI 状態（画面・カーソル）は GameState の一部なので、
+ * UI 操作も入力列から再現できる（リプレイ可能）。
+ */
+export type SceneState =
+  | { readonly kind: "map" }
+  | { readonly kind: "title"; readonly screen: TitleScreen; readonly cursor: number }
+  | { readonly kind: "menu"; readonly screen: MenuScreen; readonly cursor: number }
+  | { readonly kind: "battle" | "gameover" };
 
 /** 移動できるもの（プレイヤー・イベント・フォロワー）。タイル座標。 */
 export interface Character {

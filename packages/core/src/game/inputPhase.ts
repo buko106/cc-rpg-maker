@@ -6,6 +6,7 @@ import { DIRECTION_VECTOR, moveCharacter, REVERSE } from "../map/index.js";
 import type { EventRuntime, GameState } from "../state.js";
 import { IDLE_MESSAGE } from "../state.js";
 import type { StepResult } from "./actions.js";
+import { handleMenuInput, handleTitleInput, openMenu } from "./uiPhase.js";
 
 /** 通行フラグを持たないタイルセット（未定義のタイルセットを参照したマップ用）。 */
 const OPEN_TILESET: Tileset = { id: "" as Tileset["id"], name: "", passage: [] };
@@ -47,13 +48,16 @@ function directionOf(input: InputFrame): Direction | undefined {
 
 /**
  * 入力フレームを処理する（時間は進めない）。
+ * - タイトル・メニュー：`uiPhase.ts`。
  * - メッセージ表示中：決定/キャンセルで閉じる。
  * - イベント実行中・場所移動の予約中・移動中：プレイヤーは操作できない。
- * - 決定：目の前/足元のアクションイベントを起動。方向キー：1タイル移動を開始（通れなければ向きだけ変わり、
+ * - メニュー/キャンセル：メニューを開く。決定：目の前/足元のアクションイベントを起動。方向キー：1タイル移動を開始（通れなければ向きだけ変わり、
  *   通常プライオリティの「接触」イベントに突き当たったらそれを起動）。
  */
 export function handleInput(state: GameState, input: InputFrame, ctx: Ctx): StepResult {
   const idle: StepResult = { state, effects: [] };
+  if (state.scene.kind === "title") return handleTitleInput(state, input, ctx);
+  if (state.scene.kind === "menu") return handleMenuInput(state, input);
   if (state.scene.kind !== "map") return idle;
 
   if (state.message.open) {
@@ -64,6 +68,8 @@ export function handleInput(state: GameState, input: InputFrame, ctx: Ctx): Step
 
   const map = ctx.project.map(state.map.mapId);
   if (map === undefined) return idle;
+
+  if (input.triggered.has("menu") || input.triggered.has("cancel")) return openMenu(state);
 
   if (input.triggered.has("ok")) {
     const started = triggerAction(state, map);

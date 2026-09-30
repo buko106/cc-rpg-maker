@@ -2,25 +2,35 @@ import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
 
 // M2 の完了条件：ブラウザでマップを歩き、イベントに話しかけてメッセージが出る。
+// M3 の完了条件：セーブ → リロード → ロードで同じ位置から再開する。
 // demo プロジェクト（fixtures/projects/v1/demo）をフォルダ形式で配信して確かめる。
 
 interface State {
   tick: number;
+  scene: { kind: string; screen?: string; cursor?: number };
   map: { mapId: string; name: string; player: { x: number; y: number; moving: boolean } };
   message: { open: boolean; text: string };
   variables: Record<string, number>;
 }
 declare global {
   interface Window {
-    __rpg: { getState(): State; status: string };
+    __rpg: { getState(): State; status: string; settled(): Promise<void> };
   }
 }
 
 const state = (page: Page): Promise<State> => page.evaluate(() => window.__rpg.getState());
 
-async function open(page: Page): Promise<void> {
+/** タイトル画面が出るところまで。 */
+async function openTitle(page: Page): Promise<void> {
   await page.goto("/");
-  await page.waitForFunction(() => window.__rpg !== undefined && window.__rpg.getState().tick > 2);
+  await page.waitForFunction(() => window.__rpg !== undefined && window.__rpg.getState().scene.kind === "title" && window.__rpg.getState().tick > 2);
+}
+
+/** タイトルでニューゲームを選んで、マップを歩ける状態まで。 */
+async function open(page: Page): Promise<void> {
+  await openTitle(page);
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(() => window.__rpg.getState().scene.kind === "map" && window.__rpg.getState().tick > 5);
 }
 
 /** キーを押しっぱなしにして、`until`（ページ内で評価）が真になったら離し、歩き終わるのを待つ。 */
@@ -31,8 +41,11 @@ async function hold(page: Page, key: string, until: string): Promise<void> {
   await page.waitForFunction(() => !window.__rpg.getState().map.player.moving);
 }
 
+/** キーを 1 回押す。続けて押した 2 回が 1 フレームに合流しないよう、数フレーム進むのを待つ。 */
 async function press(page: Page, key: string): Promise<void> {
+  const tick = (await state(page)).tick;
   await page.keyboard.press(key);
+  await page.waitForFunction((t) => window.__rpg.getState().tick >= t + 3, tick);
 }
 
 /** キャンバスの (x, y) の色（論理ピクセル座標。canvas は 320x256）。 */
@@ -146,4 +159,102 @@ test("プロジェクトの読み込みに失敗したらエラー画面を出�
   const alert = page.getByRole("alert");
   await expect(alert).toContainText("エラーが発生しました");
   await expect(alert).toContainText("404");
+});
+
+test("タイトル画面が描かれ、ニューゲームで始まる", async ({ page }) => {
+  await openTitle(page);
+  await page.waitForTimeout(100);
+  // 暗い背景に、白いタイトル文字とコマンドウィンドウ（濃い青）
+  const white = (x: number, y: number, w: number, h: number): Promise<number> =>
+    page.evaluate(
+      ([px, py, pw, ph]) => {
+        const d = (document.querySelector("canvas") as HTMLCanvasElement).getContext("2d")!.getImageData(px!, py!, pw!, ph!).data;
+        let n = 0;
+        for (let i = 0; i < d.length; i += 4) if (d[i]! > 230 && d[i + 1]! > 230 && d[i + 2]! > 230) n++;
+        return n;
+      },
+      [x, y, w, h] as const,
+    );
+  expect(await white(60, 50, 200, 40)).toBeGreaterThan(50); // タイトル
+  expect(await white(76, 158, 168, 60)).toBeGreaterThan(50); // コマンド
+  const [r, , b] = await pixel(page, 90, 200);
+  expect(b).toBeGreaterThan(r! + 20);
+  await page.screenshot({ path: "test-results/player-title.png" });
+
+  // タイトルの間は歩けない
+  await page.keyboard.down("ArrowRight");
+  await page.waitForTimeout(200);
+  await page.keyboard.up("ArrowRight");
+  expect((await state(page)).scene.kind).toBe("title");
+  expect((await state(page)).map.player).toMatchObject({ x: 3, y: 3 });
+});
+
+test("メニューでセーブし、リロードしてコンティニューすると同じ位置から再開する", async ({ page }) => {
+  await open(page);
+  await hold(page, "ArrowRight", "s.map.player.x === 5");
+
+  // メニュー（M）→ セーブ → スロット 1
+  await press(page, "m");
+  await page.waitForFunction(() => window.__rpg.getState().scene.kind === "menu");
+  await page.waitForTimeout(100);
+  await page.screenshot({ path: "test-results/player-menu.png" });
+  await press(page, "ArrowDown");
+  await press(page, "ArrowDown");
+  await press(page, "Enter");
+  await page.waitForFunction(() => window.__rpg.getState().scene.screen === "save");
+  await press(page, "Enter");
+  await page.evaluate(() => window.__rpg.settled());
+  await page.waitForTimeout(100);
+  await page.screenshot({ path: "test-results/player-save.png" });
+  const saved = await state(page);
+
+  // リロード（IndexedDB のセーブは残る）。タイトルのコンティニューからスロット 1 を読む。
+  await page.reload();
+  await page.waitForFunction(() => window.__rpg !== undefined && window.__rpg.getState().scene.kind === "title");
+  expect((await state(page)).map.player).toMatchObject({ x: 3, y: 3 }); // 新しいセッション
+  await press(page, "ArrowDown");
+  await press(page, "Enter");
+  await page.waitForFunction(() => window.__rpg.getState().scene.screen === "continue");
+  await page.waitForTimeout(100);
+  await page.screenshot({ path: "test-results/player-continue.png" });
+  await press(page, "Enter");
+  await page.waitForFunction(() => window.__rpg.getState().scene.kind === "map");
+  await page.evaluate(() => window.__rpg.settled());
+
+  const loaded = await state(page);
+  expect(loaded.map.player).toMatchObject({ x: 5, y: 3 });
+  expect(loaded.map.mapId).toBe(saved.map.mapId);
+  // 再開後も歩ける
+  await hold(page, "ArrowDown", "s.map.player.y === 5");
+  expect((await state(page)).map.player).toMatchObject({ x: 5, y: 5 });
+});
+
+test("メニューのロードで、保存した位置に戻る。空のスロットは読めない", async ({ page }) => {
+  await open(page);
+  await hold(page, "ArrowRight", "s.map.player.x === 4");
+  await press(page, "m");
+  await press(page, "ArrowDown");
+  await press(page, "ArrowDown");
+  await press(page, "Enter");
+  await press(page, "Enter"); // スロット 1 に保存
+  await page.evaluate(() => window.__rpg.settled());
+  await press(page, "m");
+  await page.waitForFunction(() => window.__rpg.getState().scene.kind === "map");
+  await hold(page, "ArrowDown", "s.map.player.y === 5");
+
+  await press(page, "m");
+  await press(page, "ArrowDown");
+  await press(page, "ArrowDown");
+  await press(page, "ArrowDown");
+  await press(page, "Enter"); // ロード
+  await page.waitForFunction(() => window.__rpg.getState().scene.screen === "load");
+  await press(page, "ArrowDown");
+  await press(page, "Enter"); // スロット 2 は空
+  await page.evaluate(() => window.__rpg.settled());
+  expect((await state(page)).scene).toMatchObject({ kind: "menu", screen: "load" });
+  await press(page, "ArrowUp");
+  await press(page, "Enter"); // スロット 1
+  await page.evaluate(() => window.__rpg.settled());
+  await page.waitForFunction(() => window.__rpg.getState().scene.kind === "map");
+  expect((await state(page)).map.player).toMatchObject({ x: 4, y: 3 });
 });

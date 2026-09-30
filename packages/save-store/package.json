@@ -9,6 +9,10 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@rpg/core": "workspace:*"
+    "@rpg/core": "workspace:*",
+    "@rpg/runtime": "workspace:*"
+  },
+  "devDependencies": {
+    "@rpg/test-utils": "workspace:*"
   }
 }

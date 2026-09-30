@@ -6,8 +6,9 @@ import type { ScriptInput } from "@rpg/input-script";
 import { createNullRenderer } from "@rpg/render-null";
 import type { NullRenderer } from "@rpg/render-null";
 import { createRuntime, STEP_MS } from "@rpg/runtime";
-import type { Effect, InputFrame, Logger, ProjectSource, Runtime } from "@rpg/runtime";
-import type { MapData, MapId } from "@rpg/schema";
+import type { Effect, InputFrame, Logger, ProjectSource, Runtime, SaveRepository } from "@rpg/runtime";
+import { createMemorySaveRepository } from "@rpg/save-store";
+import type { MapData, MapId, Project } from "@rpg/schema";
 import { createManualScheduler } from "./manualScheduler.js";
 import type { ManualScheduler } from "./manualScheduler.js";
 import { loadFixtureProject } from "./project.js";
@@ -22,6 +23,14 @@ export interface RuntimeHarnessOptions {
   deferMaps?: readonly string[];
   /** `mapData` を失敗させるマップ。 */
   failMaps?: readonly string[];
+  /** ProjectSource が返すプロジェクトを差し替える（`system.bgm` などの設定を変えたテスト用）。 */
+  patchProject?: (project: Project) => Project;
+  /** タイトル画面から始めるか。既定 false（すぐニューゲーム。M2 までのテストの前提）。 */
+  title?: boolean;
+  /** セーブデータの置き場。省略時は空のメモリ上のもの。 */
+  saves?: SaveRepository;
+  /** 壁時計（ミリ秒）。既定は固定値（2026-01-01T00:00:00Z）。 */
+  clock?: () => number;
 }
 
 /** 遅延・失敗を制御できる ProjectSource。 */
@@ -38,6 +47,7 @@ export interface RuntimeHarness {
   renderer: NullRenderer;
   audio: NullAudioOut;
   input: ScriptInput;
+  saves: SaveRepository;
   projectSource: TestProjectSource;
   loaded: LoadedProject;
   /** `onEffect` で観測した Effect（古い順）。 */
@@ -62,9 +72,10 @@ export async function createRuntimeHarness(opts: RuntimeHarnessOptions): Promise
   const waiting = new Map<string, () => void>();
   const requested: MapId[] = [];
 
+  const served = opts.patchProject?.(loaded.project) ?? loaded.project;
   const projectSource: TestProjectSource = {
-    project: () => Promise.resolve(loaded.project),
-    projectHash: () => Promise.resolve(stableStringify(loaded.project).length.toString(16)),
+    project: () => Promise.resolve(served),
+    projectHash: () => Promise.resolve(stableStringify(served).length.toString(16)),
     requested,
     mapData(id) {
       requested.push(id);
@@ -90,7 +101,15 @@ export async function createRuntimeHarness(opts: RuntimeHarnessOptions): Promise
   const errors: unknown[] = [];
   const logger: Logger = { debug: () => {}, info: () => {}, warn: (m) => warnings.push(m), error: (m) => warnings.push(m) };
 
-  const runtime = createRuntime({ scheduler, renderer, audio, input, assets, projectSource, logger, seed: opts.seed ?? "harness", onError: (e) => errors.push(e) });
+  const projectHash = await projectSource.projectHash();
+  const saves = opts.saves ?? createMemorySaveRepository({ projectId: loaded.project.meta.id, projectHash });
+  const runtime = createRuntime({
+    scheduler, renderer, audio, input, assets, projectSource, saves, logger,
+    seed: opts.seed ?? "harness",
+    title: opts.title ?? false,
+    clock: opts.clock ?? (() => Date.UTC(2026, 0, 1)),
+    onError: (e) => errors.push(e),
+  });
   const effects: Effect[] = [];
   runtime.onEffect((e) => effects.push(e));
   await runtime.start();
@@ -103,6 +122,7 @@ export async function createRuntimeHarness(opts: RuntimeHarnessOptions): Promise
     renderer,
     audio,
     input,
+    saves,
     projectSource,
     loaded,
     effects,

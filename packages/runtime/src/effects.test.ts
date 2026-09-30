@@ -18,14 +18,18 @@ function setup() {
   const logs: string[] = [];
   const visual: string[] = [];
   const loads: string[] = [];
+  const saves: string[] = [];
   const logger = {
     debug: (m: string) => logs.push(`debug:${m}`),
     info: (m: string) => logs.push(`info:${m}`),
     warn: (m: string) => logs.push(`warn:${m}`),
     error: (m: string) => logs.push(`error:${m}`),
   };
-  const sinks: EffectSinks = { audio: out, logger, visual: (e) => visual.push(e.kind), loadMap: (id) => loads.push(id) };
-  return { out, logs, visual, loads, sinks };
+  const sinks: EffectSinks = { audio: out, logger, visual: (e) => visual.push(e.kind), loadMap: (id) => loads.push(id),
+    save: (slot) => saves.push(`save:${String(slot)}`),
+    load: (slot) => saves.push(`load:${String(slot)}`),
+  };
+  return { out, logs, visual, loads, saves, sinks };
 }
 
 describe("distributeEffect", () => {
@@ -56,14 +60,21 @@ describe("distributeEffect", () => {
     expect(logs).toEqual(["warn:w", "info:i", "debug:d"]);
   });
 
-  it("[inv-5] 未対応の Effect（セーブ/ロード・プラグイン・未知の種類）は warn に流れる", () => {
-    const { logs, sinks } = setup();
+  it("[inv-5] セーブ/ロードの要求はスロット番号つきで届く（省略もそのまま）", () => {
+    const { logs, saves, sinks } = setup();
+    distributeEffect({ kind: "requestSave", slot: 3 }, sinks);
     distributeEffect({ kind: "requestSave" }, sinks);
     distributeEffect({ kind: "requestLoad", slot: 1 }, sinks);
+    expect(saves).toEqual(["save:3", "save:undefined", "load:1"]);
+    expect(logs).toEqual([]);
+  });
+
+  it("[inv-5] 未対応の Effect（プラグイン・未知の種類）は warn に流れる", () => {
+    const { logs, sinks } = setup();
     distributeEffect({ kind: "plugin", name: "p", payload: 1 }, sinks);
     distributeEffect({ kind: "somethingNew" } as unknown as Effect, sinks);
-    expect(logs).toHaveLength(4);
+    expect(logs).toHaveLength(2);
     expect(logs.every((l) => l.startsWith("warn:"))).toBe(true);
-    expect(logs[3]).toContain("somethingNew");
+    expect(logs[1]).toContain("somethingNew");
   });
 });

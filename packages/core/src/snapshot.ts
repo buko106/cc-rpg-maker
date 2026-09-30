@@ -33,14 +33,16 @@ export const snapshotMigrations: readonly SnapshotMigration[] = [];
 const snapCharacter = <C extends Character>(ch: C): C => (ch.moving || ch.realX !== ch.x || ch.realY !== ch.y ? { ...ch, realX: ch.x, realY: ch.y, moving: false } : ch);
 
 /**
- * セーブ時に捨てる一時状態を落とす：移動の補間中の位置（`realX/realY/moving`）を目的のタイルに確定させる。
+ * セーブ時に捨てる一時状態を落とす：移動の補間中の位置（`realX/realY/moving`）を目的のタイルに確定させ、
+ * タイトル・メニューの UI 状態（`scene`）をマップに戻す。
  * `fromSnapshot(toSnapshot(s))` は `stripTransient(s)` と一致する。
  */
 export function stripTransient(s: GameState): SerializedGameState {
   const { battle: _battle, ...rest } = s;
   const events: Record<string, EventRuntime> = {};
   for (const [id, ev] of Object.entries(s.map.events)) events[id] = snapCharacter(ev);
-  return { ...rest, map: { ...s.map, player: snapCharacter(s.map.player), events, followers: s.map.followers.map(snapCharacter) } };
+  const scene: SerializedGameState["scene"] = s.scene.kind === "menu" || s.scene.kind === "title" ? { kind: "map" } : s.scene;
+  return { ...rest, scene, map: { ...s.map, player: snapCharacter(s.map.player), events, followers: s.map.followers.map(snapCharacter) } };
 }
 
 export function toSnapshot(s: GameState, meta: { projectId: string; projectHash: string; savedAt: string }): SaveSnapshot {
@@ -120,7 +122,8 @@ const serializedStateSchema = z.strictObject({
     seed: z.string(),
     s: z.tuple([z.number().int().min(0).max(0xffffffff), z.number().int().min(0).max(0xffffffff), z.number().int().min(0).max(0xffffffff), z.number().int().min(0).max(0xffffffff)]),
   }),
-  scene: z.strictObject({ kind: z.enum(["title", "map", "battle", "menu", "gameover"]) }),
+  // セーブされるのはマップ上の状態だけ（タイトル・メニューは `stripTransient` が map に戻す）
+  scene: z.strictObject({ kind: z.literal("map") }),
   map: z.strictObject({
     mapId: mapIdSchema,
     name: z.string(),

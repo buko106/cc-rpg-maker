@@ -71,3 +71,8 @@ export function initialState(ctx: Ctx, seed: string): GameState {
   const refreshed = refreshEventPages(base, startMap);
   return { ...refreshed, map: { ...refreshed.map, camera: computeCamera(player, startMap, system) } };
 }
+
+/** タイトル画面から始まる状態（ニューゲームで `initialState` から作り直す）。 */
+export function titleState(ctx: Ctx, seed: string): GameState {
+  return { ...initialState(ctx, seed), scene: { kind: "title", screen: "main", cursor: 0 } };
+}

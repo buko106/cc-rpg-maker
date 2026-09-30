@@ -190,3 +190,10 @@ export const snapshotMigrations: readonly { from: number; to: number; migrate(s:
 
 ## 実装メモ（M2 で確定した点）
 - **イベントページの更新は 1 フレームに 2 回**：フレームの頭と、インタプリタ実行の直後（イベントが変えたスイッチ・変数・セルフスイッチを同じフレームのうちにページへ反映する。次のフレームの入力フェーズで古いページが起動しないように）。
+
+## 実装メモ（M3 で確定した点）
+- **`SceneState` は判別共用体**：`{ kind: "map" }` / `{ kind: "title"; screen: "main" | "continue"; cursor }` / `{ kind: "menu"; screen: "main" | "item" | "status" | "save" | "load"; cursor }` / `{ kind: "battle" | "gameover" }`（後者は M4 まで placeholder）。タイトル・メニューの UI 状態（画面・カーソル）は `GameState` の一部なので、UI 操作も入力列から再現でき、リプレイできる（`fixtures/replays/menu-save.json`）。実装は `game/uiPhase.ts`（入力）と `game/scenes.ts`（定数：`TITLE_ITEMS` / `MENU_ITEMS` / `SAVE_SLOT_FIRST = 1` / `SAVE_SLOT_COUNT = 10` / `menuItemIds`）。表示文言は core に持たず、`system.terms[key]` を runtime が引く（`key` = `TITLE_ITEMS` / `MENU_ITEMS` の要素）。
+- **タイトル**：`titleState(ctx, seed)` は `initialState` をタイトルシーンにしたもの。`initialState` 自体は従来どおりマップシーンから始まる（リプレイのハッシュを変えないため）。`main`：上下でカーソル（循環）、決定で「ニューゲーム」＝ `initialState(ctx, state.rng.seed)` から作り直す（`tick` は数え続け、`playtimeTicks` は 0 から。`stopBgm` を発行）／「コンティニュー」＝ `continue` 画面へ。`continue`：スロット 1〜10 のカーソル、決定で `requestLoad { slot }`、キャンセルで `main`。**core はスロットが空かどうかを知らない**（読み込めるかは runtime が決める）。
+- **メニュー**：マップ上で「プレイヤーが止まっていて、メッセージ・通常インタプリタ・場所移動が無い」ときに `menu` または `cancel` で開く。`main` の 4 コマンドから、`item`（所持数 1 以上を ID 順。M3 では使えない）／`status`（上下または pageup/pagedown でメンバー切り替え）／`save`・`load`（決定で `requestSave` / `requestLoad { slot: 1 + cursor }`。画面は開いたまま）。キャンセルは一つ前の画面（`main` ならマップ）へ、`menu` ボタンは一度に閉じる。カーソルは押下開始（`triggered`）だけで動く（押しっぱなしのリピートは無い）。
+- **世界は止まる**：タイトル・メニューの間は `handleTick` が `tick`（メニューでは `playtimeTicks` も）だけ進め、移動・イベント・並列処理は動かない（不変条件 3 は保たれる）。
+- **Snapshot**：セーブされるのはマップシーンだけ。`stripTransient` は `title` / `menu` のシーンを `{ kind: "map" }` に戻す（メニューからセーブしても、ロードするとマップから再開する）。`fromSnapshot` の検証スキーマも `scene` は `map` のみ（`battle` は M4 で追加）。`dispatch({ type: "loadSnapshot" })` は成功すると状態を丸ごと置き換え、場所移動の予約が残っていれば `requested` を `false` に戻す（マップが未ロードでも `requestMapData` を出し直せるように）。失敗（`Err`）は状態を変えず `log` の warn だけを返す。

@@ -11,7 +11,8 @@ import { handleInput } from "./inputPhase.js";
 import { handleTick } from "./tickPhase.js";
 
 export type { Action, InterpreterAction, StepResult } from "./actions.js";
-export { initialState, paramAt } from "./initial.js";
+export { initialState, paramAt, titleState } from "./initial.js";
+export { MENU_ITEMS, menuItemIds, SAVE_SLOT_COUNT, SAVE_SLOT_FIRST, TITLE_ITEMS } from "./scenes.js";
 
 /**
  * 1 フレーム進める：`input` を処理してから時間を 1 進める。`runtime` はこれだけを呼ぶ。
@@ -37,7 +38,10 @@ export function dispatch(state: GameState, action: Action, ctx: Ctx): StepResult
       return { state: initialState({ ...ctx, project: action.project }, action.seed ?? state.rng.seed), effects: [] };
     case "loadSnapshot": {
       const r = fromSnapshot(action.snapshot, ctx);
-      return r.ok ? { state: r.value, effects: [] } : { state, effects: [warn(`セーブデータを読み込めない: ${r.error.kind}`)] };
+      if (!r.ok) return { state, effects: [warn(`セーブデータを読み込めない: ${r.error.kind}`)] };
+      // 場所移動の予約が残っていれば、要求済みの印を外して `requestMapData` を出し直せるようにする（マップは未ロードかもしれない）
+      const transfer = r.value.map.transfer;
+      return { state: transfer === undefined ? r.value : { ...r.value, map: { ...r.value.map, transfer: { ...transfer, requested: false } } }, effects: [] };
     }
     case "interpreter":
       if (action.op === "terminate") {

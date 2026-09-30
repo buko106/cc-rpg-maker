@@ -11,11 +11,15 @@ export interface EffectSinks {
   visual(effect: Extract<Effect, { kind: "screenShake" | "screenFlash" }>): void;
   /** マップの遅延ロードを始める。 */
   loadMap(mapId: MapId): void;
+  /** 現在の状態を `slot` に保存する。`slot` 省略時は最初のスロット。 */
+  save(slot: number | undefined): void;
+  /** `slot` のセーブデータを読み込んで再開する。`slot` 省略時は最初のスロット。 */
+  load(slot: number | undefined): void;
 }
 
 /**
  * `Effect` を届け先へ分配する。すべての Effect は必ずどれかに届く（不変条件 5）：
- * 未対応のもの（セーブ/ロード・プラグイン・未知の種類）は logger.warn に流す。
+ * 未対応のもの（プラグイン・未知の種類）は logger.warn に流す。
  */
 export function distributeEffect(effect: Effect, sinks: EffectSinks): void {
   switch (effect.kind) {
@@ -36,8 +40,10 @@ export function distributeEffect(effect: Effect, sinks: EffectSinks): void {
       sinks.loadMap(effect.mapId);
       return;
     case "requestSave":
+      sinks.save(effect.slot);
+      return;
     case "requestLoad":
-      sinks.logger.warn(`${effect.kind}: セーブ/ロードは未実装（M3）`);
+      sinks.load(effect.slot);
       return;
     case "log":
       sinks.logger[effect.level](effect.message);

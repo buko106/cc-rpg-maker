@@ -23,6 +23,9 @@ importers:
       esbuild:
         specifier: ^0.28.2
         version: 0.28.2
+      fake-indexeddb:
+        specifier: ^6.2.5
+        version: 6.2.5
       fast-check:
         specifier: ^4.0.0
         version: 4.10.2
@@ -251,6 +254,13 @@ importers:
       '@rpg/core':
         specifier: workspace:*
         version: link:../core
+      '@rpg/runtime':
+        specifier: workspace:*
+        version: link:../runtime
+    devDependencies:
+      '@rpg/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
 
   packages/schema:
     dependencies:
@@ -282,6 +292,9 @@ importers:
       '@rpg/runtime':
         specifier: workspace:*
         version: link:../runtime
+      '@rpg/save-store':
+        specifier: workspace:*
+        version: link:../save-store
       '@rpg/schema':
         specifier: workspace:*
         version: link:../schema
@@ -720,6 +733,10 @@ packages:
   expect-type@1.4.0:
     resolution: {integrity: sha512-KfYbmpRm0VbLjEvVa9yGwCi9GI34xvi7A/HXYWQO65CSD2u3MczUJSuwXKFIxlGsgBQizV9q5J9NHj4VG0n+pA==}
     engines: {node: '>=12.0.0'}
+
+  fake-indexeddb@6.2.5:
+    resolution: {integrity: sha512-CGnyrvbhPlWYMngksqrSSUT1BAVP49dZocrHuK0SvtR0D5TMs5wP0o3j7jexDJW01KSadjBp1M/71o/KR3nD1w==}
+    engines: {node: '>=18'}
 
   fast-check@4.10.2:
     resolution: {integrity: sha512-iK2f+YrcmoeGqk6fA0ea2bptcu/itMIm4NfEozq6N25+aG6h7s5HZbB/k1aV7b5w5sFLMCbbtRUsTVR+BgC3xw==}
@@ -1471,6 +1488,8 @@ snapshots:
       '@types/estree': 1.0.9
 
   expect-type@1.4.0: {}
+
+  fake-indexeddb@6.2.5: {}
 
   fast-check@4.10.2:
     dependencies:

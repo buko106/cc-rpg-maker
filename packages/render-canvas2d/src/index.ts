@@ -22,6 +22,7 @@ const css = (c: RGBA): string =>
 const WINDOW_FILL = "rgba(16,16,64,0.88)";
 const WINDOW_BORDER = "rgba(255,255,255,0.9)";
 const DIM_FILL = "rgba(0,0,0,0.6)";
+const CURSOR_FILL = "rgba(255,255,255,0.18)";
 
 export function createCanvas2dRenderer(canvas: HTMLCanvasElement, options: Canvas2dOptions = {}): Renderer {
   const pixelated = options.pixelated ?? true;
@@ -155,6 +156,8 @@ export function createCanvas2dRenderer(canvas: HTMLCanvasElement, options: Canva
         c.fillRect(node.x, node.y, node.w * Math.min(1, Math.max(0, node.ratio)), node.h);
         break;
       case "cursor":
+        c.fillStyle = CURSOR_FILL;
+        c.fillRect(node.x, node.y, node.w, node.h);
         c.strokeStyle = WINDOW_BORDER;
         c.lineWidth = 2;
         c.strokeRect(node.x, node.y, node.w, node.h);

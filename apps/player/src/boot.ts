@@ -4,6 +4,7 @@ import { createBrowserInput } from "@rpg/input-browser";
 import { createCanvas2dRenderer } from "@rpg/render-canvas2d";
 import { createRuntime } from "@rpg/runtime";
 import type { Logger, Runtime } from "@rpg/runtime";
+import { createSaveRepository } from "@rpg/save-store";
 import { createHttpProjectSource } from "./http-project-source.js";
 import { collectStartAssets } from "./preload.js";
 import { createRafScheduler } from "./raf-scheduler.js";
@@ -11,7 +12,7 @@ import { createScreens } from "./screens.js";
 
 /**
  * プレイヤーの設定。M2 ではフォルダ形式（`project/` + `assets/`）のみ。
- * 単一 HTML（`embedded`）、`renderer`（webgl）、`plugins`、`saveScope` は後続のマイルストーンで追加する。
+ * 単一 HTML（`embedded`）、`renderer`（webgl）、`plugins` は後続のマイルストーンで追加する。
  */
 export interface PlayerConfig {
   /** `project.json` の URL（ページからの相対でよい）。例 `project/project.json` */
@@ -20,6 +21,8 @@ export interface PlayerConfig {
   assetsUrl?: string;
   /** エラー画面にスタックを表示し、ログを console に出す。 */
   debug?: boolean;
+  /** 同じオリジンで複数のゲームを配るときの、セーブの保存先を分けるキー。 */
+  saveScope?: string;
 }
 
 /** 画面の拡大率（整数倍にすると輪郭がにじまない）。 */
@@ -60,6 +63,15 @@ export async function bootPlayer(root: HTMLElement, config: PlayerConfig): Promi
     const startMap = await projectSource.mapData(project.system.startMap);
     await assets.preload(collectStartAssets(project, startMap), (done, total) => screens.loading(`読み込み中… ${done}/${total}`));
 
+    // セーブは project.meta.id ごとに分かれる。同じオリジンで複数のゲームを配るときは saveScope で保存先自体を分ける
+    const scope = config.saveScope === undefined ? "" : `-${config.saveScope}`;
+    const saves = createSaveRepository({
+      projectId: project.meta.id,
+      projectHash: await projectSource.projectHash(),
+      dbName: `rpg-saves${scope}`,
+      prefix: `rpg-save${scope}`,
+    });
+
     const input = createBrowserInput(window, { gamepad: true });
     const runtime = createRuntime({
       scheduler: createRafScheduler(),
@@ -68,6 +80,8 @@ export async function bootPlayer(root: HTMLElement, config: PlayerConfig): Promi
       input,
       assets,
       projectSource,
+      saves,
+      clock: Date.now,
       seed: String(Date.now()),
       logger: consoleLogger(debug),
       onError: (e) => {

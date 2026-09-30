@@ -8,7 +8,7 @@ export * from "./expression/index.js";
 export * from "./interpreter/index.js";
 export { computeCamera, activePage, activePageIndex, canPass, eventsToTrigger, moveCharacter, newCharacter, refreshEventPages } from "./map/index.js";
 export type { PassabilityCtx } from "./map/index.js";
-export { dispatch, initialState, paramAt, step } from "./game/index.js";
+export { dispatch, initialState, MENU_ITEMS, menuItemIds, paramAt, SAVE_SLOT_COUNT, SAVE_SLOT_FIRST, step, TITLE_ITEMS, titleState } from "./game/index.js";
 export type { Action, InterpreterAction, StepResult } from "./game/index.js";
 export { createCtx } from "./ctx.js";
 export type { Ctx } from "./ctx.js";
@@ -24,5 +24,5 @@ export { fromSnapshot, migrateSnapshot, SNAPSHOT_VERSION, snapshotMigrations, st
 export type { SaveSnapshot, SerializedGameState, SnapshotError, SnapshotMigration } from "./snapshot.js";
 export { IDLE_MESSAGE, selfSwitchKey } from "./state.js";
 export type {
-  ActorState, BattleState, Character, EventRuntime, GameState, MapState, MessageState, PartyState, SceneState, TimerState,
+  ActorState, BattleState, Character, EventRuntime, GameState, MapState, MenuScreen, MessageState, PartyState, SceneState, TimerState, TitleScreen,
 } from "./state.js";

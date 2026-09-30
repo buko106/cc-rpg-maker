@@ -204,6 +204,7 @@ describe("createCanvas2dRenderer", () => {
     expect(calls).toContain("fillRect(1,2,30,20)");
     expect(calls).toContain("drawImage(img,0,0,16,16,5,6,16,16)");
     expect(calls).toContain("fillRect(0,40,20,4)"); // ratio は 1 に丸められる
+    expect(calls).toContain("fillRect(3,3,8,8)"); // カーソルは半透明の塗り + 枠
     expect(calls).toContain("strokeRect(3,3,8,8)");
   });
 

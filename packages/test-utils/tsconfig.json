@@ -31,6 +31,9 @@
       "path": "../../packages/render-null"
     },
     {
+      "path": "../../packages/save-store"
+    },
+    {
       "path": "../../packages/runtime"
     },
     {

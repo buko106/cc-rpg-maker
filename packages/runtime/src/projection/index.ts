@@ -3,15 +3,39 @@ import type { FrameSpec } from "../frame-spec.js";
 import { fxOverlay, NO_FX } from "../visual-fx.js";
 import type { VisualFx } from "../visual-fx.js";
 import { projectMapLayers } from "./map-scene.js";
+import { projectMenu } from "./menu.js";
 import { projectMessage } from "./message.js";
+import { projectTitle } from "./title.js";
+import { term } from "./terms.js";
+import { NO_UI, textNode, windowNode } from "./ui.js";
+import type { UiContext } from "./ui.js";
+import type { UiNode } from "../frame-spec.js";
+
+/** タイトル・メニューの下端に出すお知らせ（セーブ完了など）。 */
+function projectNotice(view: ProjectView, ui: UiContext, screen: { width: number; height: number }): UiNode[] {
+  if (ui.notice === undefined) return [];
+  const w = 220;
+  const h = 32;
+  const x = Math.round((screen.width - w) / 2);
+  const y = screen.height - 8 - h - 4;
+  return [windowNode(x, y, w, h, [textNode(screen.width / 2, y + 7, term(view, ui.notice), { r: 255, g: 255, b: 255, a: 1 }, { align: "center" })])];
+}
 
 /**
  * `GameState` → `FrameSpec`。純粋関数（同じ入力なら deep-equal な出力）。
- * M2 ではマップシーンとメッセージのみ。タイトル・メニュー・戦闘のシーンは空の画面になる。
+ * マップシーン（とメッセージ）、タイトル、メニューを投影する。戦闘のシーンは空の画面になる（M4）。
+ * `ui` は GameState の外にある情報（保存済みスロット一覧・お知らせ）。
  */
-export function projectFrame(state: GameState, view: ProjectView, fx: VisualFx = NO_FX): FrameSpec {
+export function projectFrame(state: GameState, view: ProjectView, fx: VisualFx = NO_FX, ui: UiContext = NO_UI): FrameSpec {
   const { screen } = view.project.system;
   const overlay = fxOverlay(fx);
+  const size = { width: screen.width, height: screen.height };
+  if (state.scene.kind === "title") return { size, camera: { x: 0, y: 0 }, layers: [], overlay, ui: [...projectTitle(state, view, size, ui), ...projectNotice(view, ui, size)] };
+  if (state.scene.kind === "menu") {
+    // メニューはマップの上に重ねる（背景にマップが見える）
+    const under = projectFrame({ ...state, scene: { kind: "map" } }, view, fx);
+    return { ...under, ui: [{ kind: "window", x: 0, y: 0, w: size.width, h: size.height, variant: "dim", children: [] }, ...projectMenu(state, view, size, ui), ...projectNotice(view, ui, size)] };
+  }
   if (state.scene.kind !== "map") return { size: screen, camera: { x: 0, y: 0 }, layers: [], overlay, ui: [] };
 
   const { tileSize, layers } = projectMapLayers(state, view);
@@ -26,3 +50,9 @@ export function projectFrame(state: GameState, view: ProjectView, fx: VisualFx =
 
 export { projectMapLayers } from "./map-scene.js";
 export { projectMessage } from "./message.js";
+export { projectMenu } from "./menu.js";
+export { projectTitle } from "./title.js";
+export { NO_UI } from "./ui.js";
+export type { UiContext } from "./ui.js";
+export { term } from "./terms.js";
+export type { NoticeKey, TermKey } from "./terms.js";

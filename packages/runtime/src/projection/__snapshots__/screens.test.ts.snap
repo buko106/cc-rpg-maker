@@ -1,0 +1,848 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`projectFrame（タイトル） > [snapshot] コンティニュー：空き・保存済み・読み込めないスロットが並ぶ 1`] = `
+[
+  {
+    "children": [
+      {
+        "color": {
+          "a": 1,
+          "b": 160,
+          "g": 255,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 16,
+        },
+        "kind": "text",
+        "text": "コンティニュー",
+        "x": 16,
+        "y": 16,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 128,
+          "g": 128,
+          "r": 128,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 16,
+        },
+        "kind": "text",
+        "text": " 1  （空き）",
+        "x": 16,
+        "y": 38,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 255,
+          "g": 255,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 16,
+        },
+        "kind": "text",
+        "text": " 2  はじまりの町  Lv7  勇者",
+        "x": 16,
+        "y": 62,
+      },
+      {
+        "align": "right",
+        "color": {
+          "a": 1,
+          "b": 255,
+          "g": 255,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 16,
+        },
+        "kind": "text",
+        "text": "1:02:05",
+        "x": 304,
+        "y": 62,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 76,
+          "g": 120,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 16,
+        },
+        "kind": "text",
+        "text": " 3  はじまりの町  Lv7  勇者",
+        "x": 16,
+        "y": 86,
+      },
+      {
+        "align": "right",
+        "color": {
+          "a": 1,
+          "b": 76,
+          "g": 120,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 16,
+        },
+        "kind": "text",
+        "text": "（読み込めません）",
+        "x": 304,
+        "y": 86,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 128,
+          "g": 128,
+          "r": 128,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 16,
+        },
+        "kind": "text",
+        "text": " 4  （空き）",
+        "x": 16,
+        "y": 110,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 128,
+          "g": 128,
+          "r": 128,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 16,
+        },
+        "kind": "text",
+        "text": " 5  （空き）",
+        "x": 16,
+        "y": 134,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 128,
+          "g": 128,
+          "r": 128,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 16,
+        },
+        "kind": "text",
+        "text": " 6  （空き）",
+        "x": 16,
+        "y": 158,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 128,
+          "g": 128,
+          "r": 128,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 16,
+        },
+        "kind": "text",
+        "text": " 7  （空き）",
+        "x": 16,
+        "y": 182,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 128,
+          "g": 128,
+          "r": 128,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 16,
+        },
+        "kind": "text",
+        "text": " 8  （空き）",
+        "x": 16,
+        "y": 206,
+      },
+      {
+        "blink": false,
+        "h": 24,
+        "kind": "cursor",
+        "w": 296,
+        "x": 12,
+        "y": 60,
+      },
+    ],
+    "h": 240,
+    "kind": "window",
+    "variant": "normal",
+    "w": 304,
+    "x": 8,
+    "y": 8,
+  },
+]
+`;
+
+exports[`projectFrame（タイトル） > [snapshot] メイン画面：ゲームタイトルとコマンド、カーソル 1`] = `
+{
+  "size": {
+    "height": 256,
+    "width": 320,
+  },
+  "ui": [
+    {
+      "align": "center",
+      "color": {
+        "a": 1,
+        "b": 255,
+        "g": 255,
+        "r": 255,
+      },
+      "font": {
+        "bold": true,
+        "family": "sans-serif",
+        "size": 28,
+      },
+      "kind": "text",
+      "maxWidth": 304,
+      "text": "minimal",
+      "x": 160,
+      "y": 61,
+    },
+    {
+      "children": [
+        {
+          "color": {
+            "a": 1,
+            "b": 255,
+            "g": 255,
+            "r": 255,
+          },
+          "font": {
+            "family": "sans-serif",
+            "size": 16,
+          },
+          "kind": "text",
+          "text": "ニューゲーム",
+          "x": 84,
+          "y": 169,
+        },
+        {
+          "color": {
+            "a": 1,
+            "b": 255,
+            "g": 255,
+            "r": 255,
+          },
+          "font": {
+            "family": "sans-serif",
+            "size": 16,
+          },
+          "kind": "text",
+          "text": "コンティニュー",
+          "x": 84,
+          "y": 193,
+        },
+        {
+          "blink": false,
+          "h": 24,
+          "kind": "cursor",
+          "w": 160,
+          "x": 80,
+          "y": 167,
+        },
+      ],
+      "h": 64,
+      "kind": "window",
+      "variant": "normal",
+      "w": 168,
+      "x": 76,
+      "y": 159,
+    },
+  ],
+}
+`;
+
+exports[`projectFrame（メニュー） > [snapshot] アイテム：所持品を名前 × 個数で。空なら（なし） 1`] = `
+[
+  {
+    "children": [],
+    "h": 256,
+    "kind": "window",
+    "variant": "dim",
+    "w": 320,
+    "x": 0,
+    "y": 0,
+  },
+  {
+    "children": [
+      {
+        "color": {
+          "a": 1,
+          "b": 160,
+          "g": 255,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 16,
+        },
+        "kind": "text",
+        "text": "アイテム",
+        "x": 16,
+        "y": 16,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 255,
+          "g": 255,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 16,
+        },
+        "kind": "text",
+        "text": "herb",
+        "x": 16,
+        "y": 38,
+      },
+      {
+        "align": "right",
+        "color": {
+          "a": 1,
+          "b": 255,
+          "g": 255,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 16,
+        },
+        "kind": "text",
+        "text": "× 12",
+        "x": 304,
+        "y": 38,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 255,
+          "g": 255,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 16,
+        },
+        "kind": "text",
+        "text": "potion",
+        "x": 16,
+        "y": 62,
+      },
+      {
+        "align": "right",
+        "color": {
+          "a": 1,
+          "b": 255,
+          "g": 255,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 16,
+        },
+        "kind": "text",
+        "text": "× 3",
+        "x": 304,
+        "y": 62,
+      },
+      {
+        "blink": false,
+        "h": 24,
+        "kind": "cursor",
+        "w": 296,
+        "x": 12,
+        "y": 60,
+      },
+    ],
+    "h": 240,
+    "kind": "window",
+    "variant": "normal",
+    "w": 304,
+    "x": 8,
+    "y": 8,
+  },
+]
+`;
+
+exports[`projectFrame（メニュー） > [snapshot] ステータス：名前・クラス・レベル・HP/MP・能力値 1`] = `
+[
+  {
+    "children": [],
+    "h": 256,
+    "kind": "window",
+    "variant": "dim",
+    "w": 320,
+    "x": 0,
+    "y": 0,
+  },
+  {
+    "children": [
+      {
+        "color": {
+          "a": 1,
+          "b": 160,
+          "g": 255,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 16,
+        },
+        "kind": "text",
+        "text": "ステータス  1/1",
+        "x": 16,
+        "y": 16,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 255,
+          "g": 255,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 16,
+        },
+        "kind": "text",
+        "text": "勇者  戦士",
+        "x": 16,
+        "y": 44,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 160,
+          "g": 255,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 16,
+        },
+        "kind": "text",
+        "text": "Lv 1   経験値 0",
+        "x": 16,
+        "y": 68,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 255,
+          "g": 255,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 16,
+        },
+        "kind": "text",
+        "text": "HP 100/100",
+        "x": 16,
+        "y": 96,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 64,
+          "g": 204,
+          "r": 102,
+        },
+        "h": 6,
+        "kind": "gauge",
+        "ratio": 1,
+        "w": 160,
+        "x": 16,
+        "y": 116,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 255,
+          "g": 255,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 16,
+        },
+        "kind": "text",
+        "text": "MP 20/20",
+        "x": 16,
+        "y": 126,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 214,
+          "g": 160,
+          "r": 32,
+        },
+        "h": 6,
+        "kind": "gauge",
+        "ratio": 1,
+        "w": 160,
+        "x": 16,
+        "y": 146,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 255,
+          "g": 255,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 14,
+        },
+        "kind": "text",
+        "text": "攻撃力 10",
+        "x": 16,
+        "y": 164,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 255,
+          "g": 255,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 14,
+        },
+        "kind": "text",
+        "text": "防御力 10",
+        "x": 160,
+        "y": 164,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 255,
+          "g": 255,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 14,
+        },
+        "kind": "text",
+        "text": "魔力 10",
+        "x": 16,
+        "y": 184,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 255,
+          "g": 255,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 14,
+        },
+        "kind": "text",
+        "text": "魔法防御 10",
+        "x": 160,
+        "y": 184,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 255,
+          "g": 255,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 14,
+        },
+        "kind": "text",
+        "text": "敏捷性 10",
+        "x": 16,
+        "y": 204,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 255,
+          "g": 255,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 14,
+        },
+        "kind": "text",
+        "text": "運 10",
+        "x": 160,
+        "y": 204,
+      },
+    ],
+    "h": 240,
+    "kind": "window",
+    "variant": "normal",
+    "w": 304,
+    "x": 8,
+    "y": 8,
+  },
+]
+`;
+
+exports[`projectFrame（メニュー） > [snapshot] メイン：コマンド・所持金/プレイ時間・パーティの HP/MP 1`] = `
+[
+  {
+    "children": [],
+    "h": 256,
+    "kind": "window",
+    "variant": "dim",
+    "w": 320,
+    "x": 0,
+    "y": 0,
+  },
+  {
+    "children": [
+      {
+        "color": {
+          "a": 1,
+          "b": 255,
+          "g": 255,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 16,
+        },
+        "kind": "text",
+        "text": "アイテム",
+        "x": 16,
+        "y": 18,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 255,
+          "g": 255,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 16,
+        },
+        "kind": "text",
+        "text": "ステータス",
+        "x": 16,
+        "y": 42,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 255,
+          "g": 255,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 16,
+        },
+        "kind": "text",
+        "text": "セーブ",
+        "x": 16,
+        "y": 66,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 255,
+          "g": 255,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 16,
+        },
+        "kind": "text",
+        "text": "ロード",
+        "x": 16,
+        "y": 90,
+      },
+      {
+        "blink": false,
+        "h": 24,
+        "kind": "cursor",
+        "w": 112,
+        "x": 12,
+        "y": 64,
+      },
+    ],
+    "h": 112,
+    "kind": "window",
+    "variant": "normal",
+    "w": 120,
+    "x": 8,
+    "y": 8,
+  },
+  {
+    "children": [
+      {
+        "color": {
+          "a": 1,
+          "b": 255,
+          "g": 255,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 16,
+        },
+        "kind": "text",
+        "text": "所持金 250",
+        "x": 16,
+        "y": 192,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 255,
+          "g": 255,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 16,
+        },
+        "kind": "text",
+        "text": "0:01:01",
+        "x": 16,
+        "y": 216,
+      },
+    ],
+    "h": 64,
+    "kind": "window",
+    "variant": "normal",
+    "w": 120,
+    "x": 8,
+    "y": 184,
+  },
+  {
+    "children": [
+      {
+        "color": {
+          "a": 1,
+          "b": 255,
+          "g": 255,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 16,
+        },
+        "kind": "text",
+        "text": "勇者  Lv1",
+        "x": 144,
+        "y": 16,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 255,
+          "g": 255,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 12,
+        },
+        "kind": "text",
+        "text": "HP 100/100",
+        "x": 144,
+        "y": 36,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 64,
+          "g": 204,
+          "r": 102,
+        },
+        "h": 6,
+        "kind": "gauge",
+        "ratio": 1,
+        "w": 160,
+        "x": 144,
+        "y": 52,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 255,
+          "g": 255,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 12,
+        },
+        "kind": "text",
+        "text": "MP 20/20",
+        "x": 144,
+        "y": 60,
+      },
+      {
+        "color": {
+          "a": 1,
+          "b": 214,
+          "g": 160,
+          "r": 32,
+        },
+        "h": 6,
+        "kind": "gauge",
+        "ratio": 1,
+        "w": 160,
+        "x": 144,
+        "y": 76,
+      },
+    ],
+    "h": 240,
+    "kind": "window",
+    "variant": "normal",
+    "w": 176,
+    "x": 136,
+    "y": 8,
+  },
+]
+`;
