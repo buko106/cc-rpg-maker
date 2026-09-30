@@ -12,7 +12,7 @@
 > 全ての組み込みコマンド（選択肢・移動ルート・画面効果・ショップなど）が使え、エディタの「配布物を書き出す…」から、フォルダ形式（ZIP）と単一 HTML の配布物を作れます（別のオリジンの静的サーバでも `file://` でも遊べます）。
 > プラグイン（`@rpg/plugin-api`。独自コマンド・式関数・戦闘ルール・HUD など。サンプルは `@rpg/plugin-samples`）がプレイヤーとエディタの両方で動き、
 > 描画は WebGL（`@rpg/render-webgl`）と Canvas2D を選べ（`auto` は WebGL が使えなければ Canvas2D）、フォルダ形式の配布物は Service Worker でオフラインでも遊べます。
-> プロジェクトの保存先は IndexedDB のほか、OPFS / フォルダ（File System Access API）も使えます。
+> プロジェクトの保存先は IndexedDB のほか、OPFS / 利用者が選んだフォルダ（File System Access API。一覧の「フォルダを選ぶ…」）も使えます。
 > 設計は [`docs/`](./docs/) にあります。
 
 ## 作るもの

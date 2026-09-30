@@ -4,7 +4,19 @@ import type { ReactElement } from "react";
 import { ConfirmDialog } from "./ConfirmDialog.js";
 
 /** プロジェクトの一覧：新規作成、開く、削除。 */
-export function ProjectList({ repo, onOpen }: { repo: ProjectRepository; onOpen: (doc: ProjectDocument) => void }): ReactElement {
+export function ProjectList({
+  repo,
+  onOpen,
+  storageLabel,
+  onPickFolder,
+}: {
+  repo: ProjectRepository;
+  onOpen: (doc: ProjectDocument) => void;
+  /** いまの保存先の名前。 */
+  storageLabel?: string;
+  /** 保存先のフォルダを選び直す。選ぶのをやめたとき（AbortError）は何も起きない。 */
+  onPickFolder?: () => Promise<void>;
+}): ReactElement {
   const [projects, setProjects] = useState<ProjectMeta[] | undefined>();
   const [title, setTitle] = useState("");
   const [error, setError] = useState<string | undefined>();
@@ -24,6 +36,28 @@ export function ProjectList({ repo, onOpen }: { repo: ProjectRepository; onOpen:
   return (
     <main className="project-list">
       <h1>cc-rpg-maker</h1>
+      {storageLabel !== undefined && (
+        <p className="storage muted">
+          保存先：<strong>{storageLabel}</strong>
+          {onPickFolder !== undefined && (
+            <>
+              {" "}
+              <button
+                type="button"
+                onClick={() => {
+                  setError(undefined);
+                  onPickFolder().catch((e: unknown) => {
+                    if (e instanceof DOMException && e.name === "AbortError") return; // 選ぶのをやめた
+                    setError(e instanceof Error ? e.message : String(e));
+                  });
+                }}
+              >
+                フォルダを選ぶ…
+              </button>
+            </>
+          )}
+        </p>
+      )}
       <form
         className="row-form"
         onSubmit={(e) => {

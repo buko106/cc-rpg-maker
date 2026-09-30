@@ -57,6 +57,37 @@ describe("App", () => {
     await waitFor(() => expect(screen.queryByText("冒険")).toBeNull());
   });
 
+  it("保存先の名前を出し、フォルダを選ぶと一覧がそのフォルダのものに切り替わる。pickFolder が無ければボタンは出ない", async () => {
+    const { env, repo } = t;
+    const { unmount } = render(<App env={env} repo={repo} storageLabel="ブラウザ内" />);
+    await screen.findByRole("list", { name: "プロジェクト一覧" });
+    expect(screen.getByText("ブラウザ内")).toBeTruthy();
+    expect(screen.queryByRole("button", { name: /フォルダを選ぶ/ })).toBeNull();
+    unmount();
+
+    const other = { ...repo, list: () => Promise.resolve([]) };
+    render(<App env={env} repo={repo} storageLabel="ブラウザ内" pickFolder={() => Promise.resolve({ repo: other, label: "選んだフォルダ" })} />);
+    await screen.findByRole("list", { name: "プロジェクト一覧" });
+    fireEvent.click(screen.getByRole("button", { name: /フォルダを選ぶ/ }));
+    await waitFor(() => expect(screen.getByText("選んだフォルダ")).toBeTruthy());
+    await waitFor(() => expect(screen.getByText(/まだプロジェクトがありません/)).toBeTruthy());
+  });
+
+  it("フォルダ選択をやめても何も起きず、失敗したら理由を出す", async () => {
+    const abort = vi.fn(() => Promise.reject(new DOMException("cancelled", "AbortError")));
+    const { rerender } = render(<App env={t.env} repo={t.repo} pickFolder={abort} />);
+    await screen.findByRole("list", { name: "プロジェクト一覧" });
+    fireEvent.click(screen.getByRole("button", { name: /フォルダを選ぶ/ }));
+    await waitFor(() => expect(abort).toHaveBeenCalled());
+    await act(async () => void (await Promise.resolve()));
+    expect(screen.queryByRole("alert")).toBeNull();
+    expect(screen.getByRole("list", { name: "プロジェクト一覧" })).toBeTruthy();
+
+    rerender(<App env={t.env} repo={t.repo} pickFolder={() => Promise.reject(new Error("許可されなかった"))} />);
+    fireEvent.click(screen.getByRole("button", { name: /フォルダを選ぶ/ }));
+    await waitFor(() => expect(screen.getByRole("alert").textContent).toBe("許可されなかった"));
+  });
+
   it("名前が空なら既定の名前。プロジェクトが無いときは案内を出す", async () => {
     await t.repo.remove(t.session.doc.project.meta.id);
     render(<App env={t.env} repo={t.repo} />);
