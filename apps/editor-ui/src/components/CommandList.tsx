@@ -147,7 +147,7 @@ function focusFirstField(root: HTMLElement | null): void {
 
 /**
  * イベントコマンドのリスト。行を選んで「追加」「編集」「削除」「並べ替え」「コピー」する。
- * 矢印キーで行を移動（Shift で範囲を選ぶ）、Enter で編集、Delete で削除、Alt+↑↓ で並べ替え、Ctrl/⌘+C・X・V でコピー・切り取り・貼り付け。
+ * 矢印キーで行を移動（Shift で範囲を選ぶ）、Enter で編集、Delete / Backspace で削除、Alt+↑↓ で並べ替え、Ctrl/⌘+C・X・V でコピー・切り取り・貼り付け。
  * 分岐・ループの開始の行を選ぶと、削除・並べ替え・コピーはブロック全体が対象になる（範囲選択もブロックを切らない）。
  * 文書の変更は親が渡す `onEdit` を通して行う。
  * コマンドを追加すると設定のフォームが開き、最初の欄にフォーカスが移る。下の欄からは「文章の表示」を続けて入れられる。
@@ -307,7 +307,7 @@ export function CommandList({ commands, onEdit }: CommandListProps): ReactElemen
     else if (e.key === "ArrowDown" && commands.length > 0) select(Math.min(commands.length - 1, (selected ?? -1) + 1), e.shiftKey);
     else if (e.key === "ArrowUp" && commands.length > 0) select(Math.max(0, (selected ?? commands.length) - 1), e.shiftKey);
     else if (e.key === "Enter" && selected !== undefined && range === undefined) setEditing(true);
-    else if (e.key === "Delete" && target !== undefined) remove();
+    else if ((e.key === "Delete" || e.key === "Backspace") && target !== undefined) remove();
     else return;
     e.preventDefault();
   };

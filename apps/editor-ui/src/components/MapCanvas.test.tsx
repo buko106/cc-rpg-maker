@@ -111,6 +111,18 @@ describe("MapCanvas：ツール", () => {
 });
 
 describe("MapCanvas：キーボード", () => {
+  it("Backspace でも（Delete と同じく）選択中のイベントを削除する。Undo で戻る", () => {
+    act(() => void t.session.setUi({ tool: "event" }));
+    const c = canvas();
+    fireEvent.keyDown(c, { key: "Enter" });
+    expect(Object.keys(t.session.doc.maps[M1]!.events)).toHaveLength(1);
+    fireEvent.keyDown(c, { key: "Backspace" });
+    expect(t.session.doc.maps[M1]!.events).toEqual({});
+    expect(t.session.undoLabel).toBe("イベントの削除");
+    act(() => t.session.undo());
+    expect(Object.keys(t.session.doc.maps[M1]!.events)).toHaveLength(1);
+  });
+
   it("矢印でセルを移動し、Enter でツールを適用、O でイベントを開き、Delete で選択中のイベントを削除する", () => {
     act(() => void t.session.setUi({ tile: 5 }));
     const c = canvas();

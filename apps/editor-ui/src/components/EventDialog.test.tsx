@@ -90,7 +90,7 @@ describe("EventDialog", () => {
     expect(page().commands).toEqual([]);
   });
 
-  it("キーボード：矢印で選択、Enter で編集、Delete で削除", () => {
+  it("キーボード：矢印で選択、Enter で編集、Delete / Backspace で削除", () => {
     addCommand("ウェイト");
     addCommand("ウェイト");
     const list = screen.getByRole("listbox", { name: "イベントコマンド" });
@@ -104,6 +104,9 @@ describe("EventDialog", () => {
     expect(screen.getByLabelText("コマンドの設定")).toBeTruthy();
     fireEvent.keyDown(list, { key: "Delete" });
     expect(page().commands).toHaveLength(1);
+    fireEvent.keyDown(list, { key: "ArrowDown" }); // 削除で選択が外れたので、選び直す
+    fireEvent.keyDown(list, { key: "Backspace" });
+    expect(page().commands).toHaveLength(0);
     fireEvent.keyDown(list, { key: "Home" }); // 他のキーは何もしない
   });
 
