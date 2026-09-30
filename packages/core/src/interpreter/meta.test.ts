@@ -144,3 +144,45 @@ describe("builtin command metadata", () => {
     expect(ctx.commands.get("BattleProcessing")!.params.parse({ troop: "t" })).toEqual({ troop: "t", canEscape: true, canLose: false });
   });
 });
+
+describe("ブロックの構造（meta.block / meta.internal）", () => {
+  const roles = (role: string): string[] => ctx.commands.list().filter((h) => h.meta.block?.role === role).map((h) => h.code).sort();
+
+  it("組み込みの開始・区切り・終端・内部用", () => {
+    expect(roles("open")).toEqual(["BattleProcessing", "ConditionalBranch", "Loop", "ShowChoices"]);
+    expect(roles("divider")).toEqual(["ChoiceBranch", "Else"]);
+    expect(roles("close")).toEqual(["EndBranch", "EndLoop"]);
+    expect(ctx.commands.list().filter((h) => h.meta.internal === true).map((h) => h.code)).toEqual(["MoveStep"]);
+  });
+
+  it("開始の close は終端のコマンド、dividers が返す行は区切りのコマンドで、params は検証を通る", () => {
+    const samples: Record<string, Record<string, unknown>> = {
+      ConditionalBranch: { condition: "true" },
+      ShowChoices: { choices: ["a", "b", "c"] },
+      BattleProcessing: { troop: "tr_x" },
+      Loop: {},
+    };
+    for (const h of ctx.commands.list()) {
+      const block = h.meta.block;
+      if (block?.role !== "open") continue;
+      expect(ctx.commands.get(block.close)?.meta.block?.role).toBe("close");
+      for (const d of block.dividers(h.params.parse(samples[h.code]))) {
+        expect(ctx.commands.get(d.code)?.meta.block?.role).toBe("divider");
+        expect(ctx.commands.validate({ code: d.code, params: { ...d.params }, indent: 0 }).ok).toBe(true);
+      }
+    }
+  });
+
+  it("区切りの並び：条件分岐は Else 1 つ、選択肢は選択肢の数だけ、戦闘の処理は 勝ち/逃げ/負け の 3 つ、ループは無し。直後が本体なのは条件分岐とループ", () => {
+    const open = (code: string, params: Record<string, unknown>) => {
+      const h = ctx.commands.get(code)!;
+      const block = h.meta.block!;
+      if (block.role !== "open") throw new Error("開始ではない");
+      return { bodyFirst: block.bodyFirst, dividers: block.dividers(h.params.parse(params)) };
+    };
+    expect(open("ConditionalBranch", { condition: "true" })).toEqual({ bodyFirst: true, dividers: [{ code: "Else", params: {} }] });
+    expect(open("ShowChoices", { choices: ["a", "b"] })).toEqual({ bodyFirst: false, dividers: [{ code: "ChoiceBranch", params: { index: 0 } }, { code: "ChoiceBranch", params: { index: 1 } }] });
+    expect(open("BattleProcessing", { troop: "t" }).dividers.map((d) => d.params)).toEqual([{ index: 0 }, { index: 1 }, { index: 2 }]);
+    expect(open("Loop", {})).toEqual({ bodyFirst: true, dividers: [] });
+  });
+});

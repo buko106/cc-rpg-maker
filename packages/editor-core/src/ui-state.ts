@@ -1,4 +1,4 @@
-import type { EventId, MapEvent, MapId } from "@rpg/schema";
+import type { EventCommand, EventId, MapEvent, MapId } from "@rpg/schema";
 import type { ProjectDocument } from "@rpg/project-store";
 
 export type Tool = "pencil" | "eraser" | "fill" | "event" | "select";
@@ -16,6 +16,8 @@ export interface EditorUiState {
   zoom: number;
   /** コピー／切り取りしたイベント（スナップショット。文書には保存されず、マップをまたいで貼れる） */
   clipboard: MapEvent | undefined;
+  /** コピー／切り取りしたイベントコマンド（ブロックを切らない行の並び。字下げは 0 始まり。文書には保存されず、イベントやページをまたいで貼れる） */
+  commandClipboard: readonly EventCommand[] | undefined;
   /** イベントツールで空いたセルに置くもの：ひな形の ID（`undefined` は空のイベント） */
   eventTemplate: string | undefined;
   /** 最近追加したイベントコマンドの code（新しい順、重複なし。コマンドの追加画面の「最近使ったもの」） */
@@ -32,5 +34,5 @@ export const withRecentCommand = (recent: readonly string[], code: string): stri
 export function initialUiState(doc: ProjectDocument): EditorUiState {
   const first = Object.keys(doc.project.maps)[0] as MapId | undefined;
   const start = Object.hasOwn(doc.project.maps, doc.project.system.startMap) ? doc.project.system.startMap : first;
-  return { currentMap: start, currentLayer: 0, tool: "pencil", tile: 1, selection: { kind: "none" }, zoom: 1, clipboard: undefined, eventTemplate: undefined, recentCommands: [] };
+  return { currentMap: start, currentLayer: 0, tool: "pencil", tile: 1, selection: { kind: "none" }, zoom: 1, clipboard: undefined, commandClipboard: undefined, eventTemplate: undefined, recentCommands: [] };
 }

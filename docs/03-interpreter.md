@@ -43,6 +43,8 @@ export interface CommandHandler<P = unknown> {
     describe(p: P, view: ProjectView): string;   // イベントリストの1行表示
     branchLabel?(p: P, index: number): string;   // 分岐を持つコマンドの、index 番目の ChoiceBranch の行の見出し（「[はい] のとき」など）
     refs(p: P): RefTarget[];                 // 参照整合性チェック用（01 の collectRefs に渡す）
+    block?: CommandBlock<P>;                 // ブロック（分岐・ループ）の構造。省略は単独の 1 行（下）
+    internal?: boolean;                      // 内部用（他のコマンドが展開して作る）。エディタの追加の一覧に出さない（MoveStep）
   };
   /** 命令を実行する。純関数。 */
   run(p: P, ctx: CommandCtx): CommandResult;
@@ -174,3 +176,10 @@ export function runInterpreters(state: GameState, input: InputFrame, ctx: Ctx): 
 - **値段**：買値は `Item.price`、売値はその半分（切り捨て。`sellPrice`）。`kind: "key"`（大事なもの）と値段 0 のものは売れない（`isSellable`）。売り買いの結果は確定した時点で `party.gold` / `party.items` に直接書く（数が 0 になった品物は `items` から消える）。
 - **時間**：ショップ中は世界が止まり（`handleTick`）、`tick` とプレイ時間だけ進む。メニューは開かない。`stripTransient` は `scene` をマップに戻すので、ショップ中にセーブされても（オートセーブなど）ロードするとマップから再開し、`wait: shop` のインタプリタはそのまま次へ進む（`snapshot` の `waitSchema` に `shop` を追加）。
 - **文言**は core に持たず、runtime が `system.terms` の `buy` / `sell` / `quit` / `owned` / `total`（と `gold`）から引く（06）。エディタのコマンド編集は `canSell`（「売却できる」）のチェックボックスが増えただけ。
+
+## 実装メモ（ブロックの構造）
+分岐・ループの「開始・区切り・終端」が同じ字下げの行として並ぶ、という構造の知識は、エディタ側にハードコードせず、各コマンドの `meta` に持たせた。**実行には使わない**（インタプリタは従来どおり `Else` / `ChoiceBranch` / `EndBranch` / `EndLoop` を字下げで追う）。
+- **`meta.block`**（`CommandBlock<P>`）：`{ role: "open"; close; bodyFirst; dividers(p) }`（開始）、`{ role: "divider" }`（区切り）、`{ role: "close" }`（終端）。`close` は終端のコマンドの code。`bodyFirst` は、開始の直後が本体か（条件分岐・ループ：開始の行に続けて足したコマンドはブロックの中に入る）、区切りか（選択肢・戦闘の処理）。`dividers(p)` は、その設定のときに開始と終端の間に並べる区切りの行（条件分岐 = `Else` 1 つ、選択肢 = 選択肢の数だけの `ChoiceBranch { index }`、戦闘の処理 = `ChoiceBranch` 0/1/2、ループ = 無し）。設定が変わったら（選択肢の数など）エディタが区切りの数を合わせる。
+- **`meta.internal`**：内部用（他のコマンドが展開して作る）。`MoveStep` だけ。エディタの追加の一覧に出さず、単独では扱えない。
+- **組み込みの対応**：開始 = `ConditionalBranch`（`bodyFirst`・`Else`）/ `ShowChoices` / `BattleProcessing` / `Loop`（`bodyFirst`）、区切り = `Else` / `ChoiceBranch`、終端 = `EndBranch` / `EndLoop`。プラグインのコマンドも同じ `meta.block` を書けばエディタで同じように扱える（14）。
+- **テスト**：`meta.test.ts`（組み込みの役割、`close` と `dividers` が登録済みの終端・区切りを指すこと、区切りの並び）。

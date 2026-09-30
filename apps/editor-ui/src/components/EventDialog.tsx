@@ -121,12 +121,12 @@ export function EventDialog({ mapId, eventId, onClose }: { mapId: MapId; eventId
         <h3>コマンド</h3>
         <CommandList
           commands={page.commands}
-          onEdit={(ops) => {
+          onEdit={(ops, label) => {
             const edits = ops.map((o) =>
               o.op === "insert" ? cmd.insertCommands(mapId, eventId, index, o.at, o.commands) : o.op === "remove" ? cmd.removeCommands(mapId, eventId, index, o.at, o.count) : cmd.replaceCommand(mapId, eventId, index, o.at, o.command),
             );
-            // 1 つなら（入力中の文字のまとめなど）そのまま、複数なら 1 回の Undo で戻せるようにまとめる
-            run(edits.length === 1 ? edits[0]! : cmd.batch("コマンドの編集", edits));
+            // 1 つなら（入力中の文字のまとめなど）そのまま、複数か見出しがあれば 1 回の Undo で戻せるようにまとめる
+            run(edits.length === 1 && label === undefined ? edits[0]! : cmd.batch(label ?? "コマンドの編集", edits));
           }}
         />
       </div>

@@ -1,6 +1,7 @@
 export { registerBuiltins } from "./builtins.js";
 export { defineCommand } from "./handler.js";
 export type {
+  CommandBlock,
   CommandControl,
   CommandCtx,
   CommandError,

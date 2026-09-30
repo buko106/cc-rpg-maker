@@ -46,6 +46,26 @@ export interface CommandResult {
   readonly setLocals?: Readonly<Record<string, unknown>>;
 }
 
+/**
+ * ブロック（分岐・ループ）の構造。開始・区切り・終端は、コマンド列の中で同じ字下げの行として並び、本体はその間に 1 段深く入る。
+ * エディタが、対になる行をまとめて追加・削除・移動・コピーするのに使う（実行には使わない）。省略したコマンドは単独の 1 行。
+ */
+export type CommandBlock<P = unknown> =
+  /** ブロックを開く行（条件分岐・選択肢・戦闘の処理・ループなど）。`close` の行（同じ字下げ）までがひとかたまり。 */
+  | {
+      readonly role: "open";
+      /** このブロックを閉じるコマンドの code（`role: "close"` のもの） */
+      readonly close: string;
+      /** 開始の直後が本体か（条件分岐・ループ）、区切りか（選択肢・戦闘の処理）。本体なら、開始の行の次に足したコマンドはブロックの中に入る。 */
+      readonly bodyFirst: boolean;
+      /** この設定のとき、開始と終端の間に並べる区切りの行（条件分岐の `Else`、選択肢の数だけの `ChoiceBranch` など）。設定が変わると、エディタが数を合わせる。 */
+      dividers(p: P): readonly { readonly code: string; readonly params: Readonly<Record<string, unknown>> }[];
+    }
+  /** ブロックの途中の区切り（`Else` / `ChoiceBranch`）。直後に本体が続く。単独では追加・削除・移動できない。 */
+  | { readonly role: "divider" }
+  /** ブロックの終端（`EndBranch` / `EndLoop`）。単独では追加・削除・移動できない。 */
+  | { readonly role: "close" };
+
 export interface CommandHandler<P = unknown> {
   readonly code: string;
   /** params の検証（既定値の適用を含む）とエディタのフォーム生成に使う。 */
@@ -59,6 +79,10 @@ export interface CommandHandler<P = unknown> {
     branchLabel?(p: P, index: number): string;
     /** 参照整合性チェック用（schema の `collectRefs` に渡す） */
     refs(p: P): RefTarget[];
+    /** ブロックの構造（分岐・ループ）。省略は単独の 1 行。 */
+    readonly block?: CommandBlock<P>;
+    /** 内部用（他のコマンドが展開して作る）。エディタの追加の一覧に出さない。 */
+    readonly internal?: boolean;
   };
   /** 命令を実行する。純関数。 */
   run(p: P, ctx: CommandCtx): CommandResult;

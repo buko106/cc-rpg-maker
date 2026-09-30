@@ -4,6 +4,8 @@
  * 設計: docs/12-editor-core.md
  */
 export { cmd } from "./commands/index.js";
+export { applyOps, blockOwner, blockSpan, commandTemplate, copyRows, insertionPoint, isPart, moveSpan, pasteRows, removalRange, selectionSpan, syncDividers } from "./command-blocks.js";
+export type { BlockRegistry, CommandOp, MoveResult, Span } from "./command-blocks.js";
 export { blankLayers, defaultPage, eventCommand, TABLE_KIND } from "./commands/index.js";
 export type { Anchor, NewMapData, PaintTilesCommand, TileCell } from "./commands/index.js";
 export { batch, defineEdit } from "./command.js";
