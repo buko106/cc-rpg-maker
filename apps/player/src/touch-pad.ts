@@ -22,6 +22,20 @@ const DPAD_SIZE = 140;
 const BASE = "position:relative;pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;";
 const FACE = "display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(255,255,255,0.22);border:2px solid rgba(255,255,255,0.5);color:#fff;font:bold 20px sans-serif;";
 
+function svg<K extends keyof SVGElementTagNameMap>(tag: K, attrs: Record<string, string>): SVGElementTagNameMap[K] {
+  const el = document.createElementNS("http://www.w3.org/2000/svg", tag);
+  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+  return el;
+}
+
+/** メニューボタンの ☰（三本線）。文字だと絵文字化しうるので SVG。 */
+function menuIcon(): SVGElement {
+  const icon = svg("svg", { viewBox: "0 0 24 24", width: "22", height: "22", "aria-hidden": "true" });
+  for (const y of [6, 12, 18]) icon.append(svg("line", { x1: "4", y1: y.toString(), x2: "20", y2: y.toString(), stroke: "currentColor", "stroke-width": "2.4", "stroke-linecap": "round" }));
+  icon.style.pointerEvents = "none";
+  return icon;
+}
+
 const BUTTONS: readonly { button: Button; label: string; aria: string; size: number }[] = [
   { button: "cancel", label: "B", aria: "キャンセル", size: 64 },
   { button: "ok", label: "A", aria: "決定", size: 64 },
@@ -36,6 +50,11 @@ export function mountTouchPad(root: HTMLElement, input: TouchInput): TouchPadVie
   pad.dataset["touchPad"] = "";
   pad.style.cssText = "position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:space-between;align-items:flex-end;padding:12px 16px calc(12px + env(safe-area-inset-bottom));pointer-events:none;z-index:10;";
   pad.addEventListener("contextmenu", (e) => e.preventDefault());
+  // iOS Safari は touch-action だけではダブルタップ/ピンチの拡大を止めきれない。タッチ開始と gesture を握りつぶす。
+  const stop = (e: Event): void => e.preventDefault();
+  pad.addEventListener("touchstart", stop, { passive: false });
+  pad.addEventListener("touchmove", stop, { passive: false });
+  document.addEventListener("gesturestart", stop);
 
   const centerOf = (el: HTMLElement): { x: number; y: number } => {
     const r = el.getBoundingClientRect();
@@ -72,18 +91,19 @@ export function mountTouchPad(root: HTMLElement, input: TouchInput): TouchPadVie
   dpad.setAttribute("role", "group");
   dpad.setAttribute("aria-label", "十字キー");
   dpad.style.cssText = `${BASE}${FACE}width:${DPAD_SIZE}px;height:${DPAD_SIZE}px;`;
-  const arrows: readonly { button: Button; mark: string; css: string }[] = [
-    { button: "up", mark: "▲", css: "top:6px;left:50%;transform:translateX(-50%)" },
-    { button: "down", mark: "▼", css: "bottom:6px;left:50%;transform:translateX(-50%)" },
-    { button: "left", mark: "◀", css: "left:8px;top:50%;transform:translateY(-50%)" },
-    { button: "right", mark: "▶", css: "right:8px;top:50%;transform:translateY(-50%)" },
+  const arrows: readonly { button: Button; points: string; css: string }[] = [
+    { button: "up", points: "12,5 20,19 4,19", css: "top:4px;left:50%;margin-left:-12px" },
+    { button: "down", points: "12,19 20,5 4,5", css: "bottom:4px;left:50%;margin-left:-12px" },
+    { button: "left", points: "5,12 19,4 19,20", css: "left:4px;top:50%;margin-top:-12px" },
+    { button: "right", points: "19,12 5,4 5,20", css: "right:4px;top:50%;margin-top:-12px" },
   ];
-  const arrowEls = new Map<Button, HTMLElement>();
+  const arrowEls = new Map<Button, HTMLElement | SVGElement>();
   for (const a of arrows) {
-    const m = document.createElement("span");
-    m.textContent = a.mark;
+    // 記号文字（▲◀▶）は iOS で絵文字に化けるので SVG で描く。
+    const m = svg("svg", { viewBox: "0 0 24 24", width: "24", height: "24", "aria-hidden": "true" });
+    m.append(svg("polygon", { points: a.points, fill: "currentColor" }));
     m.dataset["button"] = a.button;
-    m.style.cssText = `position:absolute;${a.css};font-size:18px;opacity:0.7;pointer-events:none;`;
+    m.style.cssText = `position:absolute;${a.css};opacity:0.7;pointer-events:none;`;
     dpad.append(m);
     arrowEls.set(a.button, m);
   }
@@ -95,19 +115,20 @@ export function mountTouchPad(root: HTMLElement, input: TouchInput): TouchPadVie
   const faces = document.createElement("div");
   faces.style.cssText = "display:flex;gap:16px;align-items:flex-end;";
   const buttonEls = new Map<Button, HTMLElement>();
-  const makeButton = (button: Button, label: string, aria: string, size: number): HTMLElement => {
+  const makeButton = (button: Button, label: string | SVGElement, aria: string, size: number): HTMLElement => {
     const el = document.createElement("div");
     el.dataset["control"] = button;
     el.setAttribute("role", "button");
     el.setAttribute("aria-label", aria);
-    el.textContent = label;
+    if (typeof label === "string") el.textContent = label;
+    else el.append(label);
     el.style.cssText = `${BASE}${FACE}width:${size}px;height:${size}px;`;
     attach(el, { kind: "button", button });
     buttonEls.set(button, el);
     return el;
   };
   for (const b of BUTTONS) faces.append(makeButton(b.button, b.label, b.aria, b.size));
-  menu.append(makeButton("menu", "☰", "メニュー", 44));
+  menu.append(makeButton("menu", menuIcon(), "メニュー", 44));
   right.append(menu, faces);
   pad.append(dpad, right);
 
@@ -125,6 +146,7 @@ export function mountTouchPad(root: HTMLElement, input: TouchInput): TouchPadVie
     element: pad,
     dispose() {
       input.releaseAll();
+      document.removeEventListener("gesturestart", stop);
       pad.remove();
     },
   };

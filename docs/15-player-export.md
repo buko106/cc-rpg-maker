@@ -97,4 +97,5 @@ export async function exportGame(repo: ProjectRepository, projectId: string, opt
 
 ### 実装メモ（スマホ用の操作パッド）
 - 主入力が指の端末（`matchMedia("(pointer: coarse)")`）では、ゲーム画面の下に操作パッド（十字キー・決定・キャンセル・メニュー）を出す。`bootPlayer` の `touchPad`（`auto` / `on` / `off`）、`?touch=on|off` で上書きできる。仕組みは docs/08 を参照。
+- iOS 対策：矢印・☰ は記号文字だと絵文字に化けるので SVG で描く。ダブルタップ/ピンチでページが拡大されないよう、パッド上の `touchstart` / `touchmove` と `gesturestart` の既定動作を止め、viewport に `maximum-scale=1, user-scalable=no` も付ける（iOS の Safari は touch-action だけでは止めきれない）。実機での確認はまだ。
 - 画面の幅だけでなく高さにも収まるように拡大率を決める（横向きのスマホでも、ゲーム画面が切れない）。`index.html` は `viewport-fit=cover` と `overscroll-behavior: none`（引っ張って更新を防ぐ）。書き出しのテンプレートも同じ。

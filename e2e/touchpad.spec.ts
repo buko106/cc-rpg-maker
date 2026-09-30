@@ -29,6 +29,18 @@ test.describe("タッチ端末", () => {
     await boot(page, "");
     await expect(page.locator("[data-touch-pad]")).toBeVisible();
 
+    // 矢印・メニューは SVG（記号文字だと iOS で絵文字になる）。ボタンにも拡大を誘発する既定動作が無い
+    await expect(page.locator('[data-touch-pad] [data-control="dpad"] svg')).toHaveCount(4);
+    await expect(page.locator('[data-touch-pad] [data-control="menu"] svg')).toHaveCount(1);
+    expect(await page.locator('[data-touch-pad] [data-control="dpad"]').innerText()).toBe("");
+    const prevented = await page.evaluate(() => {
+      const el = document.querySelector('[data-touch-pad] [data-control="ok"]') as HTMLElement;
+      const ev = new Event("touchstart", { bubbles: true, cancelable: true });
+      el.dispatchEvent(ev);
+      return ev.defaultPrevented;
+    });
+    expect(prevented).toBe(true);
+
     // タイトル：決定（A）でニューゲーム
     const a = await centerOf(page, "ok");
     await page.touchscreen.tap(a.x, a.y);
