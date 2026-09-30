@@ -1,0 +1,165 @@
+{
+  "id": "map_room17",
+  "width": 11,
+  "height": 11,
+  "tileset": "ts_cave",
+  "layers": [
+    {
+      "name": "ground",
+      "tiles": [8, 8, 8, 8, 8, 9, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 4, 4, 4, 8, 8, 8, 8, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 8, 4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, 11, 4, 4, 4, 4, 4, 4, 4, 4, 4, 12, 8, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 8, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 8, 4, 4, 4, 4, 4, 4, 4, 8, 8, 8, 8, 8, 8, 8, 10, 8, 8, 8, 8, 8]
+    },
+    {
+      "name": "objects",
+      "tiles": [0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 0, 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 0, 0, 18, 0, 0, 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, 19, 0, 0, 0, 18, 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+  ],
+  "events": {
+    "ev_door_down": {
+      "id": "ev_door_down",
+      "name": "下の出入口",
+      "x": 5,
+      "y": 10,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_room16",
+                "x": 5,
+                "y": 1,
+                "dir": "down",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_door_left": {
+      "id": "ev_door_left",
+      "name": "左の出入口",
+      "x": 0,
+      "y": 5,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_room18",
+                "x": 9,
+                "y": 5,
+                "dir": "left",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_door_up": {
+      "id": "ev_door_up",
+      "name": "上の出入口",
+      "x": 5,
+      "y": 0,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_room17",
+                "x": 5,
+                "y": 9,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_door_right": {
+      "id": "ev_door_right",
+      "name": "右の出入口",
+      "x": 10,
+      "y": 5,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ひゅうっ……！\n冷たい風に 押し戻された！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_room13",
+                "x": 5,
+                "y": 1,
+                "dir": "down",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_sign": {
+      "id": "ev_sign",
+      "name": "看板",
+      "x": 5,
+      "y": 3,
+      "pages": [
+        {
+          "conditions": [],
+          "graphic": {
+            "asset": "ec5b6ad1b2757c76",
+            "index": 0,
+            "direction": "down"
+          },
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]〜 深淵・第17の間 〜\\C[0]\nここまで 来た。\n出口まで、あと \\C[1]3\\C[0] の間。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

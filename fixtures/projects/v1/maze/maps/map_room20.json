@@ -1,0 +1,104 @@
+{
+  "id": "map_room20",
+  "width": 11,
+  "height": 11,
+  "tileset": "ts_cave",
+  "layers": [
+    {
+      "name": "ground",
+      "tiles": [8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 4, 4, 4, 4, 4, 8, 8, 8, 8, 8, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 8, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 8, 4, 4, 4, 4, 4, 4, 4, 4, 4, 8, 8, 8, 4, 8, 4, 4, 4, 4, 8, 4, 8, 8, 8, 8, 8, 8, 10, 8, 8, 8, 8, 8]
+    },
+    {
+      "name": "objects",
+      "tiles": [0, 0, 20, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 23, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, 23, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 23, 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 23, 0, 0, 15, 0, 0, 0, 0, 18, 0, 0, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 0, 15, 16, 0, 0, 0, 0, 0, 0, 0, 15, 0, 0, 16, 15, 0, 0, 0, 0, 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+  ],
+  "events": {
+    "ev_door_down": {
+      "id": "ev_door_down",
+      "name": "下の出入口",
+      "x": 5,
+      "y": 10,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_room19",
+                "x": 5,
+                "y": 1,
+                "dir": "down",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_light": {
+      "id": "ev_light",
+      "name": "出口の光",
+      "x": 5,
+      "y": 5,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 255,
+                  "g": 250,
+                  "b": 210,
+                  "a": 1
+                },
+                "duration": 30
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "まぶしい光が 差しこんでいる……！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\N[actor_hero]は 地下迷宮を 抜け出した！\n\\C[6]クリア おめでとう！\\C[0]",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "Fadeout",
+              "params": {
+                "duration": 30
+              },
+              "indent": 0
+            },
+            {
+              "code": "ReturnToTitle",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

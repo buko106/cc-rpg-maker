@@ -6,4 +6,5 @@ test-results/
 playwright-report/
 .DS_Store
 dist-web/
+dist-demos/
 site-dist/

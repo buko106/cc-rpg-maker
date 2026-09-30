@@ -7,7 +7,7 @@
  * 出力（既定は site-dist/。https://<host>/cc-rpg-maker/ の直下に置く想定）:
  *   index.html       ランディングページ（site/ をそのままコピー）
  *   editor/          エディタ（apps/editor-ui/scripts/build-web.mjs）
- *   demo/            demo プロジェクト付きのプレイヤー（apps/player/scripts/build-web.mjs）
+ *   demo/            デモを選ぶページと、デモごとのプレイヤー（tools/build-demos.mjs。demo/village/・demo/maze/）
  *   .nojekyll        Jekyll の処理を止める
  * どのページも相対パスだけで参照し合うので、サブパス（/cc-rpg-maker/）でも動く。
  */
@@ -16,6 +16,7 @@ import { cpSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseArgs } from "node:util";
+import { buildDemos } from "./build-demos.mjs";
 
 const repo = resolve(import.meta.dirname, "..");
 
@@ -28,7 +29,7 @@ export async function buildSite({ out, quiet = false }) {
   mkdirSync(dir, { recursive: true });
 
   node("apps/editor-ui/scripts/build-web.mjs", "--out", join(dir, "editor"));
-  node("apps/player/scripts/build-web.mjs", "--project", "fixtures/projects/v1/demo", "--out", join(dir, "demo"));
+  await buildDemos({ out: join(dir, "demo"), quiet });
   cpSync(join(repo, "site"), dir, { recursive: true });
   writeFileSync(join(dir, ".nojekyll"), "");
   if (!quiet) console.log(`サイトを ${dir} にビルドした`);
