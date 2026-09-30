@@ -62,8 +62,8 @@ test("サンプルプラグインを有効にして、エディタのテスト�
   await page.getByRole("button", { name: "イベントを編集…" }).click();
   await page.getByRole("button", { name: "コマンドを追加…" }).click();
   await page.getByRole("button", { name: "ランダムな所持金" }).click();
-  await page.getByLabel("min").fill("10");
-  await page.getByLabel("max").fill("20");
+  await page.getByLabel("最小").fill("10");
+  await page.getByLabel("最大").fill("20");
   await page.getByRole("button", { name: /^イベント：.*を閉じる$/ }).click();
   // プラグインの診断は出ない（有効にしてあり、範囲も正しい）
   expect(await evalIn<string[]>(page, "window.__editor.validate().map((d) => d.code)")).not.toEqual(expect.arrayContaining(["pluginNotEnabled", "randomGoldRange"]));

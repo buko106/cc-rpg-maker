@@ -1,4 +1,4 @@
-import { useId } from "react";
+import { useId, useState } from "react";
 import type { ReactElement, ReactNode } from "react";
 import type { EventCommand } from "@rpg/schema";
 import type { FieldSpec, ObjectField } from "./introspect.js";
@@ -14,6 +14,11 @@ export interface FormContext {
   checkFormula?: (source: string) => string | undefined;
   /** イベントコマンド列の編集ウィジェット（無ければ JSON で編集する）。 */
   renderCommands?: (commands: EventCommand[], onChange: (next: EventCommand[]) => void) => ReactNode;
+  /**
+   * `ref` の種類の ID をその場で作る口（作れない種類なら `undefined`）。`create` は名前を受け取って作り、その ID を返す（失敗は `undefined`）。
+   * ID 欄の選択肢の最後に「＋ 新しい{noun}…」が出る。
+   */
+  newRef?: (ref: string) => { noun: string; create: (name: string) => string | undefined } | undefined;
 }
 
 interface FieldProps {
@@ -28,20 +33,71 @@ interface FieldProps {
 
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
 
+/** ID 欄の「＋ 新しい…」の値。ID には `:` を使えないので、既存の ID と重ならない。 */
+const NEW_REF = ":new";
+
+/** ID 欄の下に出る、新しく作るものの名前の入力欄。Enter か「作成」で作る。Esc か「やめる」で閉じる。 */
+function NewRef({ noun, onCreate, onCancel }: { noun: string; onCreate: (name: string) => void; onCancel: () => void }): ReactElement {
+  const id = useId();
+  return (
+    <form
+      className="sf-newref"
+      onSubmit={(e) => {
+        e.preventDefault();
+        onCreate((e.currentTarget.elements.namedItem(id) as HTMLInputElement).value.trim());
+      }}
+    >
+      <input
+        name={id}
+        type="text"
+        aria-label={`新しい${noun}の名前`}
+        placeholder={`新しい${noun}の名前`}
+        autoFocus
+        onKeyDown={(e) => {
+          if (e.key !== "Escape") return;
+          e.stopPropagation(); // ダイアログは閉じない
+          onCancel();
+        }}
+      />
+      <button type="submit">作成</button>
+      <button type="button" onClick={onCancel}>
+        やめる
+      </button>
+    </form>
+  );
+}
+
 function StringField({ spec, value, onChange, ctx, label }: FieldProps & { spec: Extract<FieldSpec, { kind: "string" }> }): ReactElement {
+  const [creating, setCreating] = useState(false);
   const text = typeof value === "string" ? value : "";
   if (spec.ref !== undefined) {
     const options = ctx.refOptions(spec.ref, spec.assetKind);
     const known = options.some((o) => o.value === text);
+    const creator = ctx.newRef?.(spec.ref);
     return (
-      <select aria-label={label} value={text} onChange={(e) => onChange(e.target.value)}>
-        {!known && <option value={text}>{text === "" ? "（選択してください）" : `${text}（存在しない）`}</option>}
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>
-            {o.label}
-          </option>
-        ))}
-      </select>
+      <>
+        <select aria-label={label} value={text} onChange={(e) => (e.target.value === NEW_REF ? setCreating(true) : onChange(e.target.value))}>
+          {!known && <option value={text}>{text === "" ? "（選択してください）" : `${text}（存在しない）`}</option>}
+          {options.map((o) => (
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
+          ))}
+          {creator !== undefined && <option value={NEW_REF}>＋ 新しい{creator.noun}…</option>}
+        </select>
+        {creating && creator !== undefined && (
+          <NewRef
+            noun={creator.noun}
+            onCancel={() => setCreating(false)}
+            onCreate={(name) => {
+              const created = creator.create(name);
+              if (created === undefined) return;
+              setCreating(false);
+              onChange(created);
+            }}
+          />
+        )}
+      </>
     );
   }
   if (spec.multiline === true) return <textarea aria-label={label} rows={4} value={text} onChange={(e) => onChange(e.target.value)} />;
@@ -257,7 +313,7 @@ function Field(props: FieldProps): ReactElement | null {
         <select aria-label={label} value={typeof value === "string" ? value : ""} onChange={(e) => onChange(e.target.value)}>
           {spec.values.map((v) => (
             <option key={v} value={v}>
-              {optionLabelOf(v)}
+              {spec.labels?.[v] ?? optionLabelOf(v)}
             </option>
           ))}
         </select>

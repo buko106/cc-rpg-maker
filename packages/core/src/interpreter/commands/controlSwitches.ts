@@ -1,8 +1,9 @@
 import { z } from "zod";
 import { defineCommand } from "../handler.js";
-import { switchIds } from "./params.js";
+import { switchIds, switchName } from "./params.js";
 
-const params = z.strictObject({ ids: switchIds, value: z.boolean() });
+/** `initial` はエディタで新しく作るときの初期値（検証には影響しない）。 */
+const params = z.strictObject({ ids: switchIds, value: z.boolean().meta({ initial: true }) });
 
 export const controlSwitches = defineCommand({
   code: "ControlSwitches",
@@ -10,7 +11,7 @@ export const controlSwitches = defineCommand({
   meta: {
     label: "スイッチの操作",
     category: "ゲーム進行",
-    describe: (p) => `スイッチ ${p.ids.join(", ")} = ${p.value ? "ON" : "OFF"}`,
+    describe: (p, view) => `スイッチ ${p.ids.map((id) => switchName(view, id)).join(", ")} = ${p.value ? "ON" : "OFF"}`,
     refs: (p) => p.ids.map((id) => ({ kind: "switch", id })),
   },
   run(p, c) {

@@ -61,7 +61,7 @@ button.selected, button[aria-pressed="true"], button[aria-checked="true"], butto
   color: var(--accent-text);
   border-color: var(--accent);
 }
-input[type="text"], input[type="number"], select, textarea {
+input[type="text"], input[type="search"], input[type="number"], select, textarea {
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -133,6 +133,10 @@ textarea { width: 100%; resize: vertical; }
 .command-actions { display: flex; gap: var(--gap); margin: var(--gap) 0; }
 .command-editor { padding: 10px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); }
 .picker-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.picker-search { width: 100%; margin-bottom: 12px; }
+.quick-text { display: flex; gap: var(--gap); align-items: flex-start; margin-bottom: var(--gap); }
+.quick-text textarea { flex: 1; resize: vertical; }
+.sf-newref { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; margin-top: 4px; }
 
 /* スキーマ駆動フォーム */
 .schema-form { display: flex; flex-direction: column; gap: 6px; }

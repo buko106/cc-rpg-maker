@@ -29,6 +29,7 @@ export const battleProcessing = defineCommand({
     category: "ゲーム進行",
     describe: (p, view) =>
       `戦闘の処理：${view.project.database.troops[p.troop]?.name ?? p.troop}${p.canEscape ? "" : "（逃走不可）"}${p.canLose ? "（敗北可）" : ""}`,
+    branchLabel: (_p, index) => ["勝ったとき", "逃げたとき", "負けたとき"][index] ?? `分岐 ${index}`,
     refs: (p) => [{ kind: "troop", id: p.troop }],
   },
   run(p, c) {

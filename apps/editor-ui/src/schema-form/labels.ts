@@ -52,6 +52,23 @@ const FIELD_LABELS: Readonly<Record<string, string>> = {
   audio: "音声",
   expr: "式",
   allowDeath: "戦闘不能を許す",
+  operand: "オペランド",
+  min: "最小",
+  max: "最大",
+  key: "セルフスイッチ",
+  who: "対象キャラ",
+  step: "手順",
+  auto: "自律移動",
+  r: "赤",
+  g: "緑",
+  b: "青",
+  a: "不透明度",
+  // イベントページ
+  conditions: "出現条件",
+  direction: "向き",
+  through: "すり抜け",
+  priority: "プライオリティ",
+  moveRoute: "自律移動",
   // データベース
   classId: "職業",
   initialLevel: "初期レベル",
@@ -179,7 +196,33 @@ const OPTION_LABELS: Readonly<Record<string, string>> = {
   move: "移動",
   wait: "ウェイト",
   speed: "速度",
+  add: "加える",
+  all: "すべて",
+  expr: "式",
+  item: "アイテム",
+  actor: "アクター",
+  ">=": "以上",
+  "==": "等しい",
+  "<=": "以下",
+};
+
+/** ID の種類（`ref`）の表示名。union の選択肢の見出しや「＋ 新しい…」に使う。 */
+const REF_LABELS: Readonly<Record<string, string>> = {
+  actor: "アクター",
+  class: "職業",
+  skill: "スキル",
+  item: "アイテム",
+  enemy: "敵",
+  troop: "敵グループ",
+  state: "ステート",
+  commonEvent: "コモンイベント",
+  map: "マップ",
+  tileset: "タイルセット",
+  switch: "スイッチ",
+  variable: "変数",
+  asset: "アセット",
 };
 
 export const fieldLabel = (key: string): string => FIELD_LABELS[key] ?? key;
 export const optionLabelOf = (value: string): string => OPTION_LABELS[value] ?? value;
+export const refLabel = (ref: string): string => REF_LABELS[ref] ?? ref;

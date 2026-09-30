@@ -2,6 +2,7 @@ import { err, MapDataSchema, ok, ProjectSchema } from "@rpg/schema";
 import type { AssetId, AssetEntry, MapData, MapId, Project, RefTarget, Result } from "@rpg/schema";
 import type { CommandRegistry } from "@rpg/core";
 import type { AssetKind, ProjectAssetStore, ProjectDocument, ProjectRepository, ProjectStoreError } from "@rpg/project-store";
+import { batch } from "./command.js";
 import { cmd } from "./commands/index.js";
 import type { EditorCommand } from "./command.js";
 import { commandRefResolver, impactOf as computeImpact, validateDoc } from "./diagnostics.js";
@@ -62,8 +63,12 @@ export interface EditorSession {
   /** 何かが変わるたびに増える（UI が変化を検知するための値）。 */
   readonly version: number;
 
-  /** コマンドを実行する。`force` で「参照が残る削除」を許す。失敗しても文書は変わらない。 */
-  execute(c: EditorCommand, opts?: { force?: boolean }): Result<void, EditError>;
+  /**
+   * コマンドを実行する。`force` で「参照が残る削除」を許す。失敗しても文書は変わらない。
+   * `groupWithNext` は「次の編集の下準備」：直後（`COALESCE_MS` 以内）に実行した編集と 1 回の Undo にまとめる
+   * （例：フォームの中でスイッチを作り、そのまま選ぶ）。続く編集が無ければ単独の Undo になる。
+   */
+  execute(c: EditorCommand, opts?: ExecuteOptions): Result<void, EditError>;
   undo(): void;
   redo(): void;
   setUi(patch: Partial<EditorUiState>): void;
@@ -81,6 +86,11 @@ export interface EditorSession {
   projectSource(): DocProjectSource;
   /** 自動保存のタイマーを止める。 */
   dispose(): void;
+}
+
+export interface ExecuteOptions {
+  force?: boolean;
+  groupWithNext?: boolean;
 }
 
 interface HistoryEntry {
@@ -121,6 +131,8 @@ export function createEditorSession(deps: EditorSessionDeps): EditorSession {
   let redoStack: HistoryEntry[] = [];
   /** 直前の `execute` が積んだエントリと時刻（Undo / Redo / 他の操作でまとめの対象から外れる）。 */
   let last: { entry: HistoryEntry; at: number } | undefined;
+  /** `groupWithNext` で積んだエントリと時刻。次の `execute` をこれにまとめる（Undo / Redo で外れる）。 */
+  let opening: { entry: HistoryEntry; at: number } | undefined;
 
   // 保存管理：編集ごとに増える連番と、マップごとの最後に触った連番
   let editSeq = 0;
@@ -166,7 +178,7 @@ export function createEditorSession(deps: EditorSessionDeps): EditorSession {
     if (layers !== undefined && ui.currentLayer >= layers) ui = { ...ui, currentLayer: layers - 1 };
   };
 
-  function execute(c: EditorCommand, opts: { force?: boolean } = {}): Result<void, EditError> {
+  function execute(c: EditorCommand, opts: ExecuteOptions = {}): Result<void, EditError> {
     const applied = c.apply(doc);
     if (!applied.ok) return applied;
     const next = applied.value;
@@ -181,8 +193,16 @@ export function createEditorSession(deps: EditorSessionDeps): EditorSession {
     }
 
     const at = now();
-    const merged = last !== undefined && at - last.at <= COALESCE_MS ? c.coalesce?.(last.entry.command) : undefined;
-    if (merged !== undefined && last !== undefined) {
+    const group = opening !== undefined && opening.entry === last?.entry && at - opening.at <= COALESCE_MS ? opening.entry : undefined;
+    opening = undefined;
+    // 下準備そのものは前の編集にまとめない（まとめると、前の編集まで一緒に戻ってしまう）
+    const merged = group === undefined && opts.groupWithNext !== true && last !== undefined && at - last.at <= COALESCE_MS ? c.coalesce?.(last.entry.command) : undefined;
+    if (group !== undefined) {
+      // 下準備の編集と 1 つに：やり直しは順に、元に戻すは逆順に
+      group.inverse = batch(c.label, [c.invert(doc, next), group.inverse]);
+      group.command = batch(c.label, [group.command, c]);
+      last = { entry: group, at };
+    } else if (merged !== undefined && last !== undefined) {
       last.entry.command = merged;
       last.at = at;
     } else {
@@ -191,6 +211,7 @@ export function createEditorSession(deps: EditorSessionDeps): EditorSession {
       if (undoStack.length > UNDO_LIMIT) undoStack.shift();
       last = { entry, at };
     }
+    if (opts.groupWithNext === true && last !== undefined) opening = { entry: last.entry, at };
     redoStack = [];
     doc = next;
     reconcileUi();
@@ -212,6 +233,7 @@ export function createEditorSession(deps: EditorSessionDeps): EditorSession {
     doc = applied.value;
     to.push(entry);
     last = undefined;
+    opening = undefined;
     reconcileUi();
     touch(opposite(entry));
     notify();

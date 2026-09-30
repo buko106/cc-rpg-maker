@@ -92,6 +92,67 @@ test("新規作成 → タイル描画 → イベント（ShowText）→ 保存 
   expect(await page.evaluate(() => window.__rpgPlaytest.getState().message.text)).toBe("こんにちは、E2E です。");
 });
 
+test("イベントの入力の手間を減らす：文章をすぐ追加・コマンドの絞り込み・スイッチをその場で作成 → テストプレイで選択肢の分岐が動く", async ({ page }) => {
+  await createProject(page, "かんたん入力");
+  await page.getByRole("radio", { name: "イベント" }).click();
+  const spot = await cellCenter(page, 5, 6);
+  await page.mouse.click(spot.x, spot.y);
+  await page.getByRole("button", { name: "イベントを編集…" }).click();
+  const rows = page.getByRole("listbox", { name: "イベントコマンド" }).getByRole("option");
+  const commands = () => editor(page, (s) => Object.values(Object.values(s.doc.maps)[0]!.events)[0]!.pages[0]!.commands);
+
+  // 文章をすぐ追加：Shift+Enter で改行、Enter で「文章の表示」が入る
+  const quick = page.getByLabel("文章をすぐ追加");
+  await quick.fill("いらっしゃい");
+  await quick.press("Shift+Enter");
+  await quick.pressSequentially("宿屋へようこそ");
+  await quick.press("Enter");
+  await expect(quick).toHaveValue("");
+  expect(await commands()).toMatchObject([{ code: "ShowText", params: { text: "いらっしゃい\n宿屋へようこそ" } }]);
+
+  // コマンドの追加：打って絞り込み、Enter で先頭を追加。選択肢は「はい / いいえ」で入り、1 つ目の欄を打ち替えられる
+  await page.getByRole("button", { name: "コマンドを追加…" }).click();
+  await page.keyboard.type("選択肢");
+  await page.keyboard.press("Enter");
+  await expect(rows).toHaveText(["文章：いらっしゃい", "選択肢：はい / いいえ", "[はい] のとき", "[いいえ] のとき", "分岐終了"]);
+  await page.keyboard.type("泊まる");
+  await expect(rows.nth(2)).toHaveText("[泊まる] のとき");
+
+  // 「[泊まる] のとき」の中に「スイッチの操作」を入れ、スイッチをその場で作る
+  await rows.nth(2).click();
+  await page.getByRole("button", { name: "コマンドを追加…" }).click();
+  await page.keyboard.type("スイッチの操作");
+  await page.keyboard.press("Enter");
+  await page.getByRole("combobox", { name: "対象 1" }).selectOption({ label: "＋ 新しいスイッチ…" });
+  await page.getByLabel("新しいスイッチの名前").fill("泊まった");
+  await page.getByLabel("新しいスイッチの名前").press("Enter");
+  await expect(rows.nth(3)).toHaveText("スイッチ 泊まった = ON");
+  expect(await editor(page, (s) => (s.doc.project as unknown as { switches: unknown }).switches)).toEqual({ sw_001: { name: "泊まった" } });
+  expect((await commands())[3]).toMatchObject({ code: "ControlSwitches", params: { ids: ["sw_001"], value: true }, indent: 1 });
+
+  // 作成と選択は 1 回の Undo で戻り、Redo でそろって戻る
+  await page.keyboard.press("Control+z");
+  expect(await editor(page, (s) => (s.doc.project as unknown as { switches: unknown }).switches)).toEqual({});
+  await page.keyboard.press("Control+Shift+z");
+  expect((await commands())[3]).toMatchObject({ params: { ids: ["sw_001"] } });
+  await page.getByRole("button", { name: /^イベント：.*を閉じる$/ }).click();
+
+  // テストプレイ：話しかける → 文章 → 「泊まる」を選ぶとスイッチが入る
+  await page.getByRole("button", { name: "テストプレイ", exact: true }).click();
+  await page.waitForFunction(() => window.__rpgPlaytest !== undefined && window.__rpgPlaytest.getState().scene.kind === "title");
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(() => window.__rpgPlaytest.getState().scene.kind === "map");
+  await page.waitForTimeout(200);
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(() => window.__rpgPlaytest.getState().message.open);
+  expect(await page.evaluate(() => window.__rpgPlaytest.getState().message.text)).toBe("いらっしゃい\n宿屋へようこそ");
+  await page.keyboard.press("Enter");
+  await page.waitForFunction("window.__rpgPlaytest.getState().message.choices !== null");
+  await page.waitForTimeout(200);
+  await page.keyboard.press("Enter");
+  await page.waitForFunction("window.__rpgPlaytest.getState().switches.sw_001 === true");
+});
+
 test("自動保存：編集して待つだけで保存され、リロードしても残る", async ({ page }) => {
   await createProject(page, "自動保存");
   await page.getByRole("button", { name: "タイル 4", exact: true }).click();

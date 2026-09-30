@@ -20,6 +20,11 @@ const cases: [EventCommand, string, unknown[]][] = [
   [cmd("ConditionalBranch", { condition: { kind: "switch", id: "s", value: true } }), "条件分岐：スイッチ s == ON", [{ kind: "switch", id: "s" }]],
   [cmd("ConditionalBranch", { condition: { kind: "switch", id: "s", value: false } }), "条件分岐：スイッチ s == OFF", [{ kind: "switch", id: "s" }]],
   [cmd("ConditionalBranch", { condition: { kind: "variable", id: "v", op: ">=", value: 3 } }), "条件分岐：変数 v >= 3", [{ kind: "variable", id: "v" }]],
+  // 名前のあるスイッチ・変数は名前で出す
+  [cmd("ControlSwitches", { ids: ["sw_entered", "a"], value: true }), "スイッチ 入室済み, a = ON", [{ kind: "switch", id: "sw_entered" }, { kind: "switch", id: "a" }]],
+  [cmd("ControlVariables", { ids: ["var_visits"], op: "add", operand: { kind: "variable", id: "var_visits" } }), "変数 訪問回数 ＋ 変数 訪問回数", [{ kind: "variable", id: "var_visits" }, { kind: "variable", id: "var_visits" }]],
+  [cmd("ConditionalBranch", { condition: { kind: "switch", id: "sw_entered", value: true } }), "条件分岐：スイッチ 入室済み == ON", [{ kind: "switch", id: "sw_entered" }]],
+  [cmd("ConditionalBranch", { condition: { kind: "variable", id: "var_visits", op: "<=", value: 1 } }), "条件分岐：変数 訪問回数 <= 1", [{ kind: "variable", id: "var_visits" }]],
   [cmd("Else"), "それ以外のとき", []],
   [cmd("EndBranch"), "分岐終了", []],
   [cmd("Wait", { frames: 30 }), "ウェイト：30フレーム", []],
@@ -76,6 +81,16 @@ describe("builtin command metadata", () => {
     const params = handler.params.parse(command.params);
     expect(handler.meta.describe(params, project)).toBe(description);
     expect(handler.meta.refs(params)).toEqual(refs);
+  });
+
+  it("分岐を持つコマンドは、分岐の見出し（branchLabel）を持つ", () => {
+    const choices = ctx.commands.get("ShowChoices")!;
+    const p = choices.params.parse({ choices: ["泊まる", "やめる"] });
+    expect([0, 1, 2].map((i) => choices.meta.branchLabel!(p, i))).toEqual(["[泊まる] のとき", "[やめる] のとき", "[選択肢 3] のとき"]);
+    const battle = ctx.commands.get("BattleProcessing")!;
+    const b = battle.params.parse({ troop: "tr_x" });
+    expect([0, 1, 2, 3].map((i) => battle.meta.branchLabel!(b, i))).toEqual(["勝ったとき", "逃げたとき", "負けたとき", "分岐 3"]);
+    expect(ctx.commands.get("ShowText")!.meta.branchLabel).toBeUndefined();
   });
 
   it("every builtin has a label and a category for the editor", () => {

@@ -79,8 +79,8 @@ describe("エディタの中のプラグイン", () => {
     fireEvent.click(within(screen.getByRole("dialog", { name: "コマンドの追加" })).getByRole("button", { name: "ランダムな所持金" }));
     const page = () => t.session.doc.maps[M1]!.events[EV]!.pages[0]!;
     expect(page().commands[0]).toMatchObject({ code: "plugin:custom-command/RandomGold" });
-    fireEvent.change(screen.getByLabelText("min"), { target: { value: "30" } });
-    fireEvent.change(screen.getByLabelText("max"), { target: { value: "10" } });
+    fireEvent.change(screen.getByLabelText("最小"), { target: { value: "30" } });
+    fireEvent.change(screen.getByLabelText("最大"), { target: { value: "10" } });
     // 有効になっていない警告と、プラグイン自身の診断（min > max）の両方
     const codes = t.session.validate().map((d) => d.code);
     expect(codes).toEqual(expect.arrayContaining(["pluginNotEnabled", "randomGoldRange"]));

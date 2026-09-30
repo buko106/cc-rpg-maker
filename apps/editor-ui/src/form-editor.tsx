@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { ReactElement } from "react";
 import type { ZodType } from "zod";
 import { describeSchema } from "./schema-form/introspect.js";
+import { fieldLabel } from "./schema-form/labels.js";
 import { SchemaForm } from "./schema-form/SchemaForm.js";
 import type { FormContext } from "./schema-form/SchemaForm.js";
 
@@ -17,6 +18,13 @@ export interface FormEditorProps<T> {
 }
 
 const same = (a: unknown, b: unknown): boolean => JSON.stringify(a) === JSON.stringify(b);
+
+/** 問題の場所を、フォームの見出しと同じ呼び名で（`conditions.0.id` → `出現条件 1 ID`）。 */
+export const issuePlace = (path: readonly PropertyKey[]): string => path.map((k) => (typeof k === "number" ? String(k + 1) : fieldLabel(String(k)))).join(" ");
+
+/** `path` の位置の値（無ければ `undefined`）。 */
+const valueAt = (value: unknown, path: readonly PropertyKey[]): unknown =>
+  path.reduce<unknown>((v, k) => (typeof v === "object" && v !== null ? (v as Record<PropertyKey, unknown>)[k] : undefined), value);
 
 /**
  * スキーマ駆動のフォーム 1 つ。入力の途中は下書き（`draft`）として持ち、zod の検証を通ったときだけ `onCommit` する。
@@ -50,7 +58,10 @@ export function FormEditor<T>({ schema, value, ctx, onCommit, label = "" }: Form
         <ul className="sf-issues" role="alert" aria-label="入力の問題">
           {parsed.error.issues.map((issue, i) => (
             <li key={i}>
-              {issue.path.length > 0 && <code>{issue.path.join(".")}</code>} {issue.message}
+              {issue.path.length > 0 && <strong>{issuePlace(issue.path)}</strong>}
+              {issue.path.length > 0 && "："}
+              {/* 空のまま（ID を選んでいないなど）は、形式の説明より「未設定」の方が分かりやすい */}
+              {valueAt(draft, issue.path) === "" ? "未設定です" : issue.message}
             </li>
           ))}
         </ul>

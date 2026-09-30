@@ -1,7 +1,9 @@
 import { createContext, useContext, useMemo, useSyncExternalStore } from "react";
 import type { CommandRegistry } from "@rpg/core";
 import { parse } from "@rpg/core";
+import { cmd } from "@rpg/editor-core";
 import type { EditorSession } from "@rpg/editor-core";
+import type { SwitchId, VariableId } from "@rpg/schema";
 import type { PlayerBundle } from "@rpg/exporter";
 import type { CommandFormOverrideProps } from "./command-form.js";
 import type { PluginEnv } from "./plugin-env.js";
@@ -12,6 +14,7 @@ import type { AssetSource, Renderer } from "@rpg/runtime";
 import type { ComponentType } from "react";
 import type { FormContext } from "./schema-form/SchemaForm.js";
 import type { RefOptions } from "./schema-form/values.js";
+import { nextId } from "./next-id.js";
 import type { Playtest, PlaytestStart } from "./playtest.js";
 
 /** エディタが外の世界に頼ること。具象アダプタはここ（composition root）でだけ作る。 */
@@ -82,6 +85,25 @@ function refOptionsOf(session: EditorSession): RefOptions {
   };
 }
 
+/**
+ * フォームの中でその場で作れる ID の種類：スイッチと変数。`sw_001` / `var_001` のような空いている連番で作り、
+ * 直後の編集（作ったものを選ぶフォームの確定）と 1 回の Undo にまとめる（`groupWithNext`）。
+ */
+function newRefOf(session: EditorSession): NonNullable<FormContext["newRef"]> {
+  return (ref) => {
+    if (ref !== "switch" && ref !== "variable") return undefined;
+    const isSwitch = ref === "switch";
+    return {
+      noun: isSwitch ? "スイッチ" : "変数",
+      create(name) {
+        const id = nextId(isSwitch ? "sw" : "var", Object.keys(session.doc.project[isSwitch ? "switches" : "variables"]));
+        const c = isSwitch ? cmd.setSwitchName(id as SwitchId, name) : cmd.setVariableName(id as VariableId, name);
+        return session.execute(c, { groupWithNext: true }).ok ? id : undefined;
+      },
+    };
+  };
+}
+
 /** 式の文法エラーを返す（05 の `parse`）。 */
 const checkFormula = (source: string): string | undefined => {
   const r = parse(source);
@@ -94,7 +116,7 @@ export function useFormContext(renderCommands?: FormContext["renderCommands"]): 
   const { project } = session.doc;
   // 選択肢は文書のうち ID を持つ部分にだけ依存する（version ごとに作り直しても害はないが、軽くしておく）
   return useMemo(
-    () => ({ refOptions: refOptionsOf(session), checkFormula, ...(renderCommands === undefined ? {} : { renderCommands }) }),
+    () => ({ refOptions: refOptionsOf(session), checkFormula, newRef: newRefOf(session), ...(renderCommands === undefined ? {} : { renderCommands }) }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [project, renderCommands],
   );

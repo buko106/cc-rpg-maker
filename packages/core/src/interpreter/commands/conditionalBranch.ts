@@ -4,13 +4,15 @@ import { z } from "zod";
 import { warn } from "../../effects.js";
 import { defineCommand } from "../handler.js";
 import type { CommandCtx, CommandResult } from "../handler.js";
-import { comparison } from "./params.js";
+import { comparison, switchName, variableName } from "./params.js";
 
-/** 条件は 05 の式（文字列）か、構造化条件。 */
+/**
+ * 条件は構造化条件か、05 の式（文字列）。エディタは先頭の種類（スイッチ・ON）を新しい条件の既定にする。
+ */
 const condition = z.union([
-  z.string().meta({ formula: true }),
-  z.strictObject({ kind: z.literal("switch"), id: switchIdSchema, value: z.boolean() }),
+  z.strictObject({ kind: z.literal("switch"), id: switchIdSchema, value: z.boolean().meta({ initial: true }) }),
   z.strictObject({ kind: z.literal("variable"), id: variableIdSchema, op: comparison, value: z.number() }),
+  z.string().meta({ formula: true }),
 ]);
 
 const params = z.strictObject({ condition });
@@ -27,10 +29,10 @@ export const conditionalBranch = defineCommand({
   meta: {
     label: "条件分岐",
     category: "フロー制御",
-    describe: (p) => {
+    describe: (p, view) => {
       const c = p.condition;
       if (typeof c === "string") return `条件分岐：${c}`;
-      return c.kind === "switch" ? `条件分岐：スイッチ ${c.id} == ${c.value ? "ON" : "OFF"}` : `条件分岐：変数 ${c.id} ${c.op} ${c.value}`;
+      return c.kind === "switch" ? `条件分岐：スイッチ ${switchName(view, c.id)} == ${c.value ? "ON" : "OFF"}` : `条件分岐：変数 ${variableName(view, c.id)} ${c.op} ${c.value}`;
     },
     refs: (p): RefTarget[] => {
       const c = p.condition;
