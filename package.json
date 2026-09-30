@@ -18,6 +18,8 @@
     "clean": "tsc -b --clean",
     "test:coverage": "vitest run --coverage",
     "demo": "node apps/player/scripts/build-web.mjs --project fixtures/projects/v1/demo && node tools/serve-static.mjs apps/player/dist-web 4173",
+    "build:site": "node tools/build-site.mjs",
+    "site": "pnpm build:site && node tools/serve-static.mjs site-dist 4175",
     "editor": "node apps/editor-ui/scripts/build-web.mjs && node tools/serve-static.mjs apps/editor-ui/dist-web 4174"
   },
   "devDependencies": {

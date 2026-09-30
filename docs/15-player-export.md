@@ -87,3 +87,10 @@ export async function exportGame(repo: ProjectRepository, projectId: string, opt
 - **プラグイン**：`PlayerConfig.plugins`（09 ではなく 14）。単一 HTML でも同じ（プレイヤーに同梱したカタログから、`system.plugins` のものを読み込む）。
 - **E2E**：`e2e/webgl.spec.ts`（demo を WebGL と Canvas2D で動かしてタイトル・マップの見た目を比べる。`--disable-3d-apis` のブラウザで `auto` が Canvas2D になり、`webgl` の明示はエラー画面）。ピクセルを 2D コンテキストから読む既存のプレイヤーの E2E は `?renderer=canvas2d` を指定するようにした。
 - **未対応**：ローディングのタップ待ち画面（音声の解禁）、`saveScope` を書き出しの設定にすること。
+
+## 実装メモ（GitHub Pages への公開）
+- **公開先**：https://www.buko106.tokyo/cc-rpg-maker/ 。`/` がランディングページ（`site/index.html`。画像は `site/img/`）、`/editor/` がエディタ、`/demo/` が demo プロジェクト付きのプレイヤー。
+- **ビルド**：`pnpm build:site`（`tools/build-site.mjs`）が `site-dist/`（git 管理外）に、エディタ（`apps/editor-ui/scripts/build-web.mjs`）・プレイヤー（`apps/player/scripts/build-web.mjs --project fixtures/projects/v1/demo`）・`site/` をまとめて出力し、`.nojekyll` を置く。`pnpm site` はビルドして http://127.0.0.1:4175/ で配信する。
+- **サブパスで動く条件**：どの HTML も `editor.js` / `project/project.json` / `player/player.js` のように**相対パス**だけで参照する（`/` 始まりを使わない）。`tools/build-site.test.ts` が、出力の HTML に絶対パスが無いことと、ランディングのリンク先が実在することを確かめる。
+- **デプロイ**：`.github/workflows/pages.yml`。`main` への push と手動実行（`workflow_dispatch`）で、ビルド → `actions/upload-pages-artifact` → `actions/deploy-pages`。**初回だけ**、リポジトリの Settings → Pages → Source を「GitHub Actions」にする。独自ドメイン（`www.buko106.tokyo`）はアカウント側の設定で、このリポジトリに `CNAME` は置かない。
+- **保存先の注意**：エディタのプロジェクト（IndexedDB `rpg-projects`）とデモのセーブ（`rpg-saves-*`）は**オリジン単位**で、パスでは分かれない。同じドメインの別サイトが同じ名前を使うと混ざる。
