@@ -8,7 +8,7 @@ import { comparison } from "./params.js";
 
 /** 条件は 05 の式（文字列）か、構造化条件。 */
 const condition = z.union([
-  z.string(),
+  z.string().meta({ formula: true }),
   z.strictObject({ kind: z.literal("switch"), id: switchIdSchema, value: z.boolean() }),
   z.strictObject({ kind: z.literal("variable"), id: variableIdSchema, op: comparison, value: z.number() }),
 ]);

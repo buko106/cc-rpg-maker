@@ -61,3 +61,9 @@ export function createAssetSource(bytes: AssetBytesSource, manifest: AssetManife
 - `createAssetSource` の追加オプション：`decodeImage`（既定は `createImageBitmap`。Node のテストでは差し替える）。1 つで `maxCacheBytes` を超えるアセットはキャッシュしない。`verifyHash` の既定は false（`bootPlayer` も false。ID がそのままファイル名なので、エディタ側の取り込み時に検証する）。**pin（`preload` したものを退避させない）は未実装**。
 - 契約テスト：`assetBytesSourceContract(name, make)` の `make` は `{ source, entries, missingId }` を返す。
 - デモ用アセット（`fixtures/projects/v1/demo/assets/`）は `tools/make-demo-assets.mjs` で生成した PNG。ファイル名が内容ハッシュと一致することは `apps/player/src/demo-fixture.test.ts` で検証している。
+
+## 実装メモ（M5 で確定した点）
+- **追加**：`createZipBytesSource(zip: Blob)`（ZIP 内の `assets/<AssetId>.<ext>` を読む。store と deflate に対応。`DecompressionStream`）と、その下地の `readZip` / `writeZip`（無圧縮の ZIP を作る。M6 のエクスポートで使う）、`createOpfsBytesSource(dir)`（`<AssetId>.<ext>` を走査して読む。呼び出しのたびに走査するので、書き足したファイルがすぐ見える）。`crc32` も公開。
+- どちらも `assetBytesSourceContract` を通す（`opfs` はフォルダのふりをする最小のフェイクで検証。実ブラウザの OPFS は M6 以降の E2E で確かめる）。
+- エディタは `ProjectAssetStore.bytesSource()`（10）を `createAssetSource` に渡して画像を読む。マニフェストは `session.doc.project.assets` を常に読む形（getter）で渡すので、アセットの登録が増減しても `AssetSource` を作り直さない。`verifyHash: true`。
+- `tsconfig` の `lib` に `DOM.AsyncIterable` を追加した（`FileSystemDirectoryHandle.entries()`）。

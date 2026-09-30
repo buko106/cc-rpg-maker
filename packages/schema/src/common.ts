@@ -9,11 +9,12 @@ export const PARAMS = ["mhp", "mmp", "atk", "def", "mat", "mdf", "agi", "luk"] a
 export const paramSchema = z.enum(PARAMS);
 export type Param = z.infer<typeof paramSchema>;
 
-export const assetRefSchema = z.strictObject({ asset: assetIdSchema });
+/** 画像アセットへの参照（顔・歩行グラフィック・タイルセットなど）。`assetKind` はエディタの選択肢の絞り込み用メタデータ。 */
+export const assetRefSchema = z.strictObject({ asset: assetIdSchema.meta({ ref: "asset", assetKind: "image" }) });
 export type AssetRef = z.infer<typeof assetRefSchema>;
 
 export const audioRefSchema = z.strictObject({
-  asset: assetIdSchema,
+  asset: assetIdSchema.meta({ ref: "asset", assetKind: "audio" }),
   volume: z.number().min(0).max(1),
   pitch: z.number().min(0.1).max(4),
   loop: z.boolean(),

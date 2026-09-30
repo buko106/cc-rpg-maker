@@ -10,5 +10,8 @@
   },
   "dependencies": {
     "@rpg/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "@rpg/test-utils": "workspace:*"
   }
 }

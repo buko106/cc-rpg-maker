@@ -6,7 +6,7 @@ const { LOCATIONS, NAMES, TEST_SUPPORT, allowedOf } = require("./tools/dependenc
 
 const dir = (name) => `${LOCATIONS[name]}/${name}`;
 
-const TEST_FILE = "\\.test\\.ts$";
+const TEST_FILE = "\\.test\\.tsx?$";
 
 /**
  * パッケージごとに「許可されていない他パッケージへの依存」を禁止するルール。

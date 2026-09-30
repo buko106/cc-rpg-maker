@@ -52,3 +52,15 @@
 ## 完了条件
 - 上記 E2E が通る。
 - 全画面がキーボード操作可能（アクセシビリティ最低限）。
+
+## 実装メモ（M5 で確定した点）
+- **起動**：`pnpm editor`（`apps/editor-ui/scripts/build-web.mjs` で `dist-web/` にバンドルして `:4174` で配信）。プロジェクトはブラウザの IndexedDB（`rpg-projects`）。結線（composition root）は `browser-env.ts` だけ。テストは `test-env.tsx`（メモリのリポジトリと null のレンダラ）。`window.__editor`（セッション）と `window.__rpgPlaytest`（テストプレイ中の Runtime）は E2E とデバッグ用。
+- **技術選定の変更**：Zustand は使わず、`useSyncExternalStore(session.subscribe, () => session.version)` で `EditorSession` をそのまま購読する（セッションに属さない一時状態は各コンポーネントの `useState`）。スタイルは CSS Modules ではなくプレーンな 1 枚の `styles.css`（トークンをカスタムプロパティにし、ダークテーマは `prefers-color-scheme`）。React は 18。
+- **CommandForm の自動生成**（`schema-form/`）：zod の内部表現（`_zod.def`）を読んで `FieldSpec` にし（`describeSchema`）、`SchemaForm` が描く。対応する型：string / number / boolean / enum / literal / object / array / record（enum キーは固定行、`partialRecord` は行ごとに有無、文字列キーは自由に追加）/ union（種類の選択）/ 判別付き union / リテラルだけの union（選択肢）/ optional（チェックで有効化）/ default（新規追加時の初期値に使う）/ イベントコマンド列（専用のリスト）。それ以外は JSON 欄。ID 欄は `schema` の ID スキーマに付けたメタデータ（`.meta({ ref })`、画像・音声の絞り込みは `assetKind`、`ShowText.text` は `multiline`、条件式は `formula`）から、文書の該当テーブルの選択肢を出す。値の検証は zod 自身（`FormEditor`）：有効なときだけ `onCommit`、不正な間は問題を一覧で出して文書には渡さない。Undo などで値が外から変わったら下書きも追随する。式の欄は 05 の `parse` で文法エラーを出す。
+- **フォームの差し替え**：`EditorEnv.formOverrides: Record<code, Component>`（プラグインも同じ口を使う）。M5 では空。
+- **画面**：マップツリー（追加・設定・削除）、タイルパレット（タイルごとのボタン。選んだタイルの通行方向も編集）、ツールバー（鉛筆・消しゴム・塗りつぶし・イベント・選択、レイヤ、×1/×2、グリッド）、マップキャンバス、イベントダイアログ（名前・ページのタブ・ページ設定・コマンドリスト）、データベース（8 テーブルの一覧とフォーム）、システム（設定・スイッチ・変数）、アセット、診断、テストプレイ。コマンドの追加は分岐の部品を一緒に入れる（条件分岐 = ConditionalBranch / Else / EndBranch、戦闘の処理 = BattleProcessing / ChoiceBranch×3 / EndBranch）。分岐は開始行を消すと丸ごと消え、部品だけは消せない。
+- **マップキャンバス**：下のキャンバスにゲームと同じ `Renderer`（`projectMapForEditor` の `FrameSpec`：タイルレイヤとイベントのスプライト）、上のキャンバスにグリッド・イベント枠・選択・ホバー（`drawOverlay`。`FrameSpec` の UI ノードにはしなかった）。ポインタとキーボード（矢印・Enter・O・Delete）から `paintTiles` / `fillTiles` / `createEvent` / `moveEvent` / `deleteEvent` を発行する。速いドラッグでも途切れないよう、前のセルとの間を補間する。
+- **テストプレイ**：`startPlaytest(session, deps, start?)`。編集中の文書のスナップショット（`session.projectSource()`）で `createRuntime` を起動し、セーブはメモリ（`createMemorySaveRepository`）。「選択位置から」は開始マップ・位置を差し替えてタイトルを飛ばす（`TransferPlayer` の dispatch はしない）。音は出さない（`audio-null`）。rAF の `Scheduler` は player のものと同じ実装を持っている（共有は M7 で検討）。
+- **キーボード・確認**：Ctrl+Z / Ctrl+Shift+Z（Ctrl+Y）/ Ctrl+S はどの画面でも `session` に届く（テストプレイ中はゲームに任せる）。未保存のまま閉じようとすると `beforeunload` で確認。ダイアログは Esc で閉じ、開いたら中の最初の操作部品にフォーカスして、閉じたら戻す。削除で参照が残るときは影響範囲つきの確認を出す。
+- **テスト**：フォーム生成（組み込みコマンド全部で描画でき、既定値が `params` の zod を通る）、各画面のコンポーネントテスト（jsdom + Testing Library。`EditorSession` はモックせず、メモリのリポジトリの本物を使う）、`projectMapForEditor` / ヒットテスト / オーバーレイ、`startPlaytest`、E2E（`e2e/editor.spec.ts`：作成 → ドラッグで描画 → Undo/Redo → イベント作成と ShowText → 保存 → リロード → テストプレイでメッセージ、自動保存、データベースと削除の確認）。jsdom に無い `PointerEvent` / `Blob.arrayBuffer` / Canvas の `getContext` は `test-env.tsx` で補う。テストで `session` を直接操作するときは `act()` で包む。
+- **未対応**：移動ルートの編集（対応するコマンドが M6）、テストプレイの音、タイルセットの追加・画像差し替え、アセットの一括インポート（ZIP は M6）、イベントの複製・コピー&ペースト、矩形選択ツール、キャンバスのスクロール位置を保った拡大、`doc` への代入を禁じる lint ルール（UI は `session.execute` 以外で文書を書き換えない — テストで確認）。

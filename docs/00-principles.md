@@ -38,9 +38,9 @@ input-*       → runtime（ポート型のみ）
 assets        → runtime（ポート型のみ）
 project-store → schema
 save-store    → core（Snapshot 型・マイグレーション）, runtime（ポート型のみ）
-editor-core   → schema, project-store（ポート型のみ）
+editor-core   → schema, core（CommandRegistry のメタデータ参照のみ）, project-store（ポート型のみ）
 plugin-api    → core, runtime, editor-core（公開型のみ）
-editor-ui     → editor-core, runtime, plugin-api, 任意のアダプタ
+editor-ui     → editor-core, runtime, plugin-api, schema, core（CommandRegistry のメタデータ参照のみ）, 任意のアダプタ
 player        → runtime, plugin-api, schema（project.json の検証用）, 任意のアダプタ
 test-utils    → 任意（テスト専用）
 ```

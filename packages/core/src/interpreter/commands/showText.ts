@@ -3,7 +3,7 @@ import { z } from "zod";
 import { defineCommand } from "../handler.js";
 
 const params = z.strictObject({
-  text: z.string(),
+  text: z.string().meta({ multiline: true }),
   face: assetRefSchema.optional(),
   position: z.enum(["top", "middle", "bottom"]).default("bottom"),
   background: z.enum(["window", "dim", "transparent"]).default("window"),

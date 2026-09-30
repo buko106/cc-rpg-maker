@@ -1,0 +1,181 @@
+/* エディタのスタイル。色・余白・角丸はトークン（カスタムプロパティ）にまとめ、ダークテーマは prefers-color-scheme で切り替える。 */
+:root {
+  --bg: #f4f5f8;
+  --panel: #ffffff;
+  --panel-2: #eceef4;
+  --border: #d3d7e2;
+  --text: #1c2030;
+  --muted: #5d6478;
+  --accent: #3b5bdb;
+  --accent-text: #ffffff;
+  --danger: #c92a2a;
+  --warn: #b26a00;
+  --focus: #f59f00;
+  --radius: 6px;
+  --gap: 8px;
+  --font: system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", "Yu Gothic UI", sans-serif;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #14161f;
+    --panel: #1d2030;
+    --panel-2: #262a3d;
+    --border: #363b52;
+    --text: #e8eaf3;
+    --muted: #9aa1b9;
+    --accent: #748ffc;
+    --accent-text: #10131f;
+    --danger: #ff8787;
+    --warn: #ffc078;
+  }
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; }
+body { background: var(--bg); color: var(--text); font: 14px/1.5 var(--font); }
+h1, h2, h3, h4 { margin: 0 0 var(--gap); line-height: 1.3; }
+h1 { font-size: 22px; }
+h2 { font-size: 15px; }
+h3 { font-size: 14px; }
+h4 { font-size: 13px; }
+code { font-size: 12px; }
+.muted { color: var(--muted); font-size: 12px; }
+.spacer { flex: 1; }
+
+button, input, select, textarea { font: inherit; color: inherit; }
+button {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 4px 10px;
+  cursor: pointer;
+}
+button:hover:not(:disabled) { border-color: var(--accent); }
+button:disabled { opacity: 0.45; cursor: default; }
+button.primary { background: var(--accent); color: var(--accent-text); border-color: var(--accent); }
+button.danger { color: var(--danger); border-color: var(--danger); background: transparent; }
+button.selected, button[aria-pressed="true"], button[aria-checked="true"], button[aria-selected="true"] {
+  background: var(--accent);
+  color: var(--accent-text);
+  border-color: var(--accent);
+}
+input[type="text"], input[type="number"], select, textarea {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 4px 8px;
+  min-width: 0;
+}
+textarea { width: 100%; resize: vertical; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+
+/* プロジェクト一覧 */
+.project-list { max-width: 720px; margin: 0 auto; padding: 32px 16px; }
+.project-list .projects { list-style: none; padding: 0; margin: 0; }
+.project-list .projects li { display: flex; gap: var(--gap); align-items: center; padding: 8px 12px; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); margin-bottom: var(--gap); }
+.project-title { flex: 1; font-weight: 600; }
+.row-form { display: flex; gap: var(--gap); margin: var(--gap) 0; }
+.row-form input { flex: 1; }
+
+/* シェル */
+.shell { display: grid; grid-template-columns: 280px 1fr; grid-template-rows: auto 1fr; height: 100vh; }
+.menubar { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: var(--gap); align-items: center; padding: 6px 12px; background: var(--panel); border-bottom: 1px solid var(--border); }
+.project-name { margin: 0 var(--gap); }
+.save-status { font-size: 12px; color: var(--muted); display: inline-block; min-width: 13em; }  /* 文言が変わっても、メニューバーが折り返しを変えない（キャンバスがずれない） */
+.save-status.error { color: var(--danger); }
+.sidebar { overflow: auto; padding: var(--gap); background: var(--panel); border-right: 1px solid var(--border); display: flex; flex-direction: column; gap: 16px; }
+.workspace { overflow: auto; padding: var(--gap); display: flex; flex-direction: column; gap: var(--gap); min-width: 0; }
+.selection-bar { display: flex; gap: var(--gap); align-items: center; padding: 6px 10px; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); }
+
+.map-tree ul { list-style: none; margin: 0 0 var(--gap); padding: 0; }
+.map-tree li button { width: 100%; text-align: left; border-color: transparent; background: transparent; }
+.map-tree li button.selected { background: var(--accent); }
+.palette-grid { display: grid; gap: 2px; }
+.tile { padding: 0; border: 2px solid transparent; background-color: var(--panel-2); background-repeat: no-repeat; image-rendering: pixelated; }
+.tile.selected { border-color: var(--focus); }
+
+.toolbar { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+.btn-group { display: inline-flex; gap: 2px; }
+.check { display: inline-flex; gap: 4px; align-items: center; }
+
+.map-canvas .canvas-scroll { overflow: auto; max-height: calc(100vh - 220px); border: 1px solid var(--border); background: #000; }
+.canvas-stack { position: relative; }
+.canvas-stack canvas { position: absolute; left: 0; top: 0; image-rendering: pixelated; }
+.canvas-stack canvas[role="application"] { cursor: crosshair; touch-action: none; }
+.status-line { min-height: 1.4em; margin: 4px 0 0; }
+.map-canvas.empty { padding: 32px; color: var(--muted); }
+
+/* ダイアログ */
+.dialog-backdrop { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); display: grid; place-items: center; z-index: 10; padding: 16px; }
+.dialog { width: min(520px, 100%); max-height: 90vh; display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4); }
+.dialog-wide { width: min(980px, 100%); }
+.dialog-header { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; border-bottom: 1px solid var(--border); }
+.dialog-header h2 { margin: 0; font-size: 16px; }
+.dialog-body { padding: 14px; overflow: auto; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: var(--gap); margin-top: 14px; }
+
+.tabs { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 12px; }
+.notice { padding: 6px 10px; border-radius: var(--radius); margin: var(--gap) 0; }
+.notice.error { background: color-mix(in srgb, var(--danger) 14%, transparent); color: var(--danger); }
+.event-header { display: flex; gap: 12px; align-items: center; margin-bottom: var(--gap); flex-wrap: wrap; }
+.event-header label { display: flex; gap: 6px; align-items: center; }
+.page-settings { margin-bottom: 12px; padding: 8px; border: 1px solid var(--border); border-radius: var(--radius); }
+.page-settings summary { cursor: pointer; font-weight: 600; }
+
+/* コマンドリスト */
+.command-list ol { list-style: none; margin: 0; padding: 0; min-height: 96px; max-height: 300px; overflow: auto; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 13px; }
+.command-list li { padding: 3px 8px; cursor: pointer; white-space: nowrap; }
+.command-list li.selected { background: var(--accent); color: var(--accent-text); }
+.command-list li.empty { color: var(--muted); cursor: default; }
+.command-actions { display: flex; gap: var(--gap); margin: var(--gap) 0; }
+.command-editor { padding: 10px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--panel); }
+.picker-grid { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+
+/* スキーマ駆動フォーム */
+.schema-form { display: flex; flex-direction: column; gap: 6px; }
+.sf-object { display: flex; flex-direction: column; gap: 6px; }
+.sf-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.sf-row.sf-block { align-items: flex-start; flex-direction: column; }
+.sf-label { min-width: 120px; color: var(--muted); font-size: 12px; display: inline-flex; gap: 4px; align-items: center; }
+.sf-key { min-width: 80px; font-size: 12px; }
+.sf-array, .sf-record, .sf-union { display: flex; flex-direction: column; gap: 6px; padding-left: 12px; border-left: 2px solid var(--border); width: 100%; }
+.sf-array-item { display: flex; gap: 8px; align-items: flex-start; }
+.sf-array-body { flex: 1; }
+.sf-array-actions { display: flex; gap: 4px; }
+.sf-issues { margin: 4px 0 0; padding: 6px 10px 6px 26px; color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, transparent); border-radius: var(--radius); }
+.sf-error { color: var(--danger); }
+.sf-newkey { display: flex; gap: 6px; }
+
+/* データベース・アセット・診断 */
+.db-body { display: grid; grid-template-columns: 220px 1fr; gap: 16px; }
+.db-list ul { list-style: none; padding: 0; margin: 0 0 var(--gap); max-height: 420px; overflow: auto; }
+.db-list li button { width: 100%; text-align: left; border-color: transparent; background: transparent; }
+.db-list li button.selected { background: var(--accent); }
+.db-actions { display: flex; gap: var(--gap); }
+.named-list ul, .asset-list, .diagnostics { list-style: none; padding: 0; margin: 0 0 var(--gap); }
+.named-list li, .asset-list li, .diagnostics li { display: flex; gap: var(--gap); align-items: center; padding: 4px 0; border-bottom: 1px solid var(--border); }
+.named-add { display: flex; gap: var(--gap); }
+.asset-name { flex: 1; }
+.thumb { width: 32px; height: 32px; object-fit: contain; background: var(--panel-2); border-radius: 4px; image-rendering: pixelated; display: inline-grid; place-items: center; }
+.dropzone { border: 2px dashed var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: var(--gap); }
+.dropzone.over { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.diagnostics .badge { padding: 0 6px; border-radius: 4px; font-size: 12px; }
+.diagnostics .error .badge { background: var(--danger); color: var(--accent-text); }
+.diagnostics .warning .badge { background: var(--warn); color: var(--accent-text); }
+.impact-list { max-height: 240px; overflow: auto; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 12px; }
+.form-grid label { display: flex; flex-direction: column; gap: 2px; font-size: 12px; color: var(--muted); }
+.form-grid input, .form-grid select { color: var(--text); }
+
+.playtest-canvas { display: block; margin: 0 auto; background: #000; image-rendering: pixelated; }
+
+@media (max-width: 800px) {
+  .shell { grid-template-columns: 1fr; grid-template-rows: auto auto 1fr; height: auto; min-height: 100vh; }
+  .sidebar { border-right: 0; border-bottom: 1px solid var(--border); }
+  .db-body { grid-template-columns: 1fr; }
+}
+
+.passage { border: 1px solid var(--border); border-radius: var(--radius); margin: var(--gap) 0 0; padding: 6px 10px; display: flex; flex-direction: column; gap: 2px; }
+.passage legend { font-size: 12px; color: var(--muted); }

@@ -107,3 +107,12 @@ export interface Diagnostic { severity: "error" | "warning"; code: string; messa
 
 ## 完了条件
 - 上記テストが通り、13 が本パッケージだけを使って UI を組める。
+
+## 実装メモ（M5 で確定した点）
+- **依存**：`editor-core` は `schema` / `project-store`（ポート型）に加えて `core`（`CommandRegistry` のメタデータだけ）に依存する（00 の表と依存ルールを更新）。`runtime` には依存しないので、テストプレイ用の `projectSource()` は同じ形の構造的な型 `DocProjectSource` を返し、`projectMapForEditor` は 13 の側（`editor-ui`）に置いた。
+- **コマンド**：`cmd.*` はすべて `defineEdit` で作り、`invert` は「書き換えた範囲（マップ・project）を実行前の内容に戻す」コマンドが自動で作られる。`EditorCommand` には `touchesProject()` と `removes()` を足した。追加したファクトリ：`setMapMeta` / `setMapProperties` / `setEventName` / `removeEventPage` / `removeSwitch` / `removeVariable` / `upsertTileset` / `deleteTileset`。`registerAsset(id, entry)` は ID も取る。`createMap` / `createEvent` は ID を引数で受け取れる（省略時は `newId`）ので、Redo は同じ ID になる。
+- **削除と参照**：`removes()` が挙げた対象を、適用後の文書がまだ参照していれば `execute` は `hasReferences`（参照元の一覧つき）を返す。`execute(c, { force: true })` で強制。適用「後」で見るので、参照元と一緒に消す `batch` は通る。
+- **軽量検証**：`execute` は `apply` の後、書き換えた部分だけを `ProjectSchema` / `MapDataSchema` で検証し、通らなければ `schema` エラーで文書を変えない。何も変えないコマンド（`apply` が引数をそのまま返す）は履歴にも積まず dirty にもしない。
+- **まとめ（coalesce）**：直前の `execute` から 500ms 以内で、同じ対象への `paintTiles` / `moveEvent` / `setEventName` / `setEventPage` / `replaceCommand` / `upsertEntity` / `setSystem`（同じキー集合）は 1 回の Undo になる。Undo / Redo をはさむとまとめない。履歴は 200 件まで。
+- **`EditorSession` の追加**：`version`（変更のたびに増える。UI が購読する値）、`undoLabel` / `redoLabel`、`saveStatus`（`idle` / `saving` / `saved` / `error` / `conflict`）、`importAsset`（バイト列の保存とマニフェスト登録を 1 回の Undo にする）、`assetStore()`、`dispose()`。`save({ overwrite: true })` は競合していても上書きする。保存は直列化し、保存中に入った編集は次の保存に回す（マップごとの編集番号で `changedMaps` を管理）。競合中は自動保存を止める。`validate()` の診断は、参照切れ・不明なコマンド・不正なパラメータ・開始位置・未使用アセット・初期パーティが空、プラグインのコマンド（警告）。
+- **性質テスト**：`test-utils` の `editorCommandArb(doc)` が、文書の中身を見て合法なコマンド（一部は失敗するもの）を生成する。不変条件 1・2・3・4 と「全部 Undo → 全部 Redo」「保存 → 読み込みで一致」を `fast-check`（`fc.gen`）で確かめる。フィルタで詰まらないよう、選択肢は先に絞ってから `constantFrom` する。

@@ -1,7 +1,17 @@
 /**
- * @rpg/editor-ui — エディタ UI。
+ * @rpg/editor-ui — エディタ UI（React）。
  *
  * 設計: docs/13-editor-ui.md
- * 実装マイルストーン: docs/17-milestones.md を参照（M0 時点では空）。
+ * ブラウザのエントリは main.tsx（`scripts/build-web.mjs` が editor.js にバンドルする）。ここは他から使う部品の公開口。
  */
-export {};
+export { App, AUTOSAVE_MS } from "./App.js";
+export type { AppProps } from "./App.js";
+export { EnvContext, SessionContext, useEnv, useFormContext, useSession } from "./hooks.js";
+export type { CommandFormOverrideProps, EditorEnv } from "./hooks.js";
+export { startPlaytest } from "./playtest.js";
+export type { Playtest, PlaytestDeps, PlaytestStart } from "./playtest.js";
+export { describeSchema } from "./schema-form/introspect.js";
+export type { FieldSpec } from "./schema-form/introspect.js";
+export { SchemaForm } from "./schema-form/SchemaForm.js";
+export type { FormContext } from "./schema-form/SchemaForm.js";
+export { projectMapForEditor } from "./map/project-map.js";

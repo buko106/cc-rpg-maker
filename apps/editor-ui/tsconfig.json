@@ -8,13 +8,15 @@
       "ES2022",
       "DOM",
       "DOM.Iterable"
-    ]
+    ],
+    "jsx": "react-jsx"
   },
   "include": [
     "src"
   ],
   "exclude": [
-    "src/**/*.test.ts"
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx"
   ],
   "references": [
     {
@@ -55,6 +57,12 @@
     },
     {
       "path": "../../packages/save-store"
+    },
+    {
+      "path": "../../packages/schema"
+    },
+    {
+      "path": "../../packages/core"
     }
   ]
 }

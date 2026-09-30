@@ -60,9 +60,9 @@ const ALLOWED = {
   assets: ["runtime"],
   "project-store": ["schema"],
   "save-store": ["core", "runtime"],
-  "editor-core": ["schema", "project-store"],
+  "editor-core": ["schema", "core", "project-store"],
   "plugin-api": ["core", "runtime", "editor-core"],
-  "editor-ui": ["editor-core", "runtime", "plugin-api", ...ADAPTERS],
+  "editor-ui": ["editor-core", "runtime", "plugin-api", "schema", "core", ...ADAPTERS],
   player: ["runtime", "plugin-api", "schema", ...ADAPTERS],
   "test-utils": "*",
 };

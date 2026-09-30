@@ -9,18 +9,31 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@rpg/editor-core": "workspace:*",
-    "@rpg/runtime": "workspace:*",
-    "@rpg/plugin-api": "workspace:*",
-    "@rpg/render-canvas2d": "workspace:*",
-    "@rpg/render-webgl": "workspace:*",
-    "@rpg/render-null": "workspace:*",
-    "@rpg/audio-webaudio": "workspace:*",
+    "@rpg/assets": "workspace:*",
     "@rpg/audio-null": "workspace:*",
+    "@rpg/audio-webaudio": "workspace:*",
+    "@rpg/core": "workspace:*",
+    "@rpg/editor-core": "workspace:*",
     "@rpg/input-browser": "workspace:*",
     "@rpg/input-script": "workspace:*",
-    "@rpg/assets": "workspace:*",
+    "@rpg/plugin-api": "workspace:*",
     "@rpg/project-store": "workspace:*",
-    "@rpg/save-store": "workspace:*"
+    "@rpg/render-canvas2d": "workspace:*",
+    "@rpg/render-null": "workspace:*",
+    "@rpg/render-webgl": "workspace:*",
+    "@rpg/runtime": "workspace:*",
+    "@rpg/save-store": "workspace:*",
+    "@rpg/schema": "workspace:*",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@rpg/test-utils": "workspace:*",
+    "@testing-library/dom": "^10.4.2",
+    "@testing-library/react": "^16.3.3",
+    "@types/react": "^18.3.31",
+    "@types/react-dom": "^18.3.7",
+    "jsdom": "^26.1.0",
+    "zod": "^4"
   }
 }
