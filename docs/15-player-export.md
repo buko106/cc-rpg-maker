@@ -94,3 +94,7 @@ export async function exportGame(repo: ProjectRepository, projectId: string, opt
 - **サブパスで動く条件**：どの HTML も `editor.js` / `project/project.json` / `player/player.js` のように**相対パス**だけで参照する（`/` 始まりを使わない）。`tools/build-site.test.ts` が、出力の HTML に絶対パスが無いことと、ランディングのリンク先が実在することを確かめる。
 - **デプロイ**：`.github/workflows/pages.yml`。`main` への push と手動実行（`workflow_dispatch`）で、ビルド → `actions/upload-pages-artifact` → `actions/deploy-pages`。**初回だけ**、リポジトリの Settings → Pages → Source を「GitHub Actions」にする。独自ドメイン（`www.buko106.tokyo`）はアカウント側の設定で、このリポジトリに `CNAME` は置かない。
 - **保存先の注意**：エディタのプロジェクト（IndexedDB `rpg-projects`）とデモのセーブ（`rpg-saves-*`）は**オリジン単位**で、パスでは分かれない。同じドメインの別サイトが同じ名前を使うと混ざる。
+
+### 実装メモ（スマホ用の操作パッド）
+- 主入力が指の端末（`matchMedia("(pointer: coarse)")`）では、ゲーム画面の下に操作パッド（十字キー・決定・キャンセル・メニュー）を出す。`bootPlayer` の `touchPad`（`auto` / `on` / `off`）、`?touch=on|off` で上書きできる。仕組みは docs/08 を参照。
+- 画面の幅だけでなく高さにも収まるように拡大率を決める（横向きのスマホでも、ゲーム画面が切れない）。`index.html` は `viewport-fit=cover` と `overscroll-behavior: none`（引っ張って更新を防ぐ）。書き出しのテンプレートも同じ。

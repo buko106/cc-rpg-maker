@@ -2,10 +2,16 @@
  * @rpg/input-browser — ブラウザ InputSource アダプタ。キーボードとゲームパッドを抽象ボタンに変換する。
  *
  * 設計: docs/08-audio-input.md
- * 未実装（後続）：タッチ/ポインタ（仮想十字キー、`InputFrame.pointer`）。
+ * タッチ（仮想十字キー・ボタン）は `createTouchInput`（判定ロジックだけ。見た目の DOM は利用側のアプリが作る）。
+ * 未実装（後続）：ポインタ座標（`InputFrame.pointer`）。
  */
 import { emptyInput } from "@rpg/runtime";
 import type { Button, InputFrame, InputSource } from "@rpg/runtime";
+import { createButtonLatch } from "./button-latch.js";
+
+export { createTouchInput, dpadButtons } from "./touch.js";
+export type { Point, TouchControl, TouchInput } from "./touch.js";
+export { mergeInputSources } from "./merge.js";
 
 /** `KeyboardEvent.code` → ボタン */
 export interface KeyMap {
@@ -86,8 +92,7 @@ export function createBrowserInput(target: EventTarget, options: BrowserInputOpt
     ? (options.readGamepads ?? (() => (typeof navigator === "undefined" ? [] : navigator.getGamepads())))
     : undefined;
 
-  const held = new Set<Button>();
-  const started = new Set<Button>();
+  const latch = createButtonLatch();
   let padPressed = new Set<Button>();
   let disposed = false;
 
@@ -100,18 +105,17 @@ export function createBrowserInput(target: EventTarget, options: BrowserInputOpt
     const button = buttonOf(e);
     if (button === undefined) return;
     e.preventDefault();
-    if (!held.has(button)) started.add(button);
-    held.add(button);
+    latch.down(button);
   };
   const onKeyUp = (e: Event): void => {
     const button = buttonOf(e);
     if (button === undefined) return;
     e.preventDefault();
-    held.delete(button);
+    latch.up(button);
   };
   // フォーカスを失うと keyup が届かないので、押しっぱなしを防ぐ
   const onBlur = (): void => {
-    held.clear();
+    latch.releaseAll();
   };
 
   target.addEventListener("keydown", onKeyDown);
@@ -122,11 +126,11 @@ export function createBrowserInput(target: EventTarget, options: BrowserInputOpt
     poll(): InputFrame {
       if (disposed) return emptyInput();
       const pad = readGamepads ? gamepadButtons(readGamepads()) : new Set<Button>();
-      const triggered = new Set(started);
+      const keys = latch.take();
+      const triggered = keys.triggered;
       for (const b of pad) if (!padPressed.has(b)) triggered.add(b);
       padPressed = pad;
-      started.clear();
-      return { pressed: new Set([...held, ...pad, ...triggered]), triggered };
+      return { pressed: new Set([...keys.pressed, ...pad, ...triggered]), triggered };
     },
     dispose() {
       if (disposed) return;
@@ -134,8 +138,7 @@ export function createBrowserInput(target: EventTarget, options: BrowserInputOpt
       target.removeEventListener("keydown", onKeyDown);
       target.removeEventListener("keyup", onKeyUp);
       target.removeEventListener("blur", onBlur);
-      held.clear();
-      started.clear();
+      latch.reset();
     },
   };
 }
