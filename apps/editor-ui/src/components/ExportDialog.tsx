@@ -20,6 +20,7 @@ export function ExportDialog({ onClose }: { onClose: () => void }): ReactElement
   const session = useSession();
   const [format, setFormat] = useState<Format>("folder");
   const [minify, setMinify] = useState(true);
+  const [renderer, setRenderer] = useState<NonNullable<ExportOptions["renderer"]>>("auto");
   const [busy, setBusy] = useState(false);
   const [outcome, setOutcome] = useState<Outcome | undefined>();
 
@@ -33,7 +34,7 @@ export function ExportDialog({ onClose }: { onClose: () => void }): ReactElement
         return;
       }
       const player = await env.loadPlayerBundle();
-      const r = await exportGame(repo, session.doc.project.meta.id, { format, minifyJson: minify }, player);
+      const r = await exportGame(repo, session.doc.project.meta.id, { format, minifyJson: minify, renderer }, player);
       if (!r.ok) {
         setOutcome({ kind: "error", message: `書き出せませんでした（${r.error.kind}）` });
         return;
@@ -64,6 +65,14 @@ export function ExportDialog({ onClose }: { onClose: () => void }): ReactElement
       <label className="check">
         <input type="checkbox" checked={minify} onChange={(e) => setMinify(e.target.checked)} />
         JSON を圧縮する（小さくなります）
+      </label>
+      <label className="check">
+        描画方式
+        <select aria-label="描画方式" value={renderer} onChange={(e) => setRenderer(e.target.value as typeof renderer)}>
+          <option value="auto">自動（WebGL が使えれば WebGL）</option>
+          <option value="webgl">WebGL</option>
+          <option value="canvas2d">Canvas2D</option>
+        </select>
       </label>
       {outcome?.kind === "error" && (
         <p role="alert" className="notice error">

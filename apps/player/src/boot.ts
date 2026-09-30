@@ -3,8 +3,9 @@ import { createBrowserInput } from "@rpg/input-browser";
 import { createPluginRegistry, loadPlugins, selectPlugins, toRuntimeExtensions } from "@rpg/plugin-api";
 import type { PluginModule } from "@rpg/plugin-api";
 import { createCanvas2dRenderer } from "@rpg/render-canvas2d";
+import { createWebglRenderer, isWebglAvailable } from "@rpg/render-webgl";
 import { createRuntime } from "@rpg/runtime";
-import type { Logger, Runtime } from "@rpg/runtime";
+import type { Logger, Renderer, Runtime } from "@rpg/runtime";
 import { createSaveRepository } from "@rpg/save-store";
 import { createPlayerAudio } from "./audio.js";
 import { createEmbeddedProjectSource } from "./embedded-project-source.js";
@@ -16,9 +17,20 @@ import { createScreens } from "./screens.js";
 
 /**
  * プレイヤーの設定。フォルダ形式（`projectUrl`：`project/` + `assets/`）か、単一 HTML（`embedded`）のどちらか。
- * `plugins` はビルドに入っているプラグイン。`renderer`（webgl）は M7 で追加する。
+ * `plugins` はビルドに入っているプラグイン。`renderer` は描画方式（既定は `auto`）。
  */
+export type RendererKind = "canvas2d" | "webgl" | "auto";
+
+/** 描画方式を決める。`auto` は WebGL が使えれば WebGL、使えなければ Canvas2D。 */
+export function pickRenderer(kind: RendererKind | undefined, webglAvailable: () => boolean = isWebglAvailable): "canvas2d" | "webgl" {
+  if (kind === "canvas2d") return "canvas2d";
+  if (kind === "webgl") return "webgl";
+  return webglAvailable() ? "webgl" : "canvas2d";
+}
+
 export interface PlayerConfig {
+  /** 描画方式。`auto`（既定）は WebGL が使えれば WebGL、使えなければ Canvas2D。 */
+  renderer?: RendererKind;
   /** フォルダ形式：`project.json` の URL（ページからの相対でよい）。例 `project/project.json` */
   projectUrl?: string;
   /** 単一 HTML：埋め込まれたゲーム一式。指定すると通信しない（`projectUrl` は無視される）。 */
@@ -97,9 +109,13 @@ export async function bootPlayer(root: HTMLElement, config: PlayerConfig): Promi
     const registry = createPluginRegistry();
     await loadPlugins(selection.modules, registry, { logger, params: selection.params });
     const audio = playerAudio.connect(assets, logger);
+    const rendererName = pickRenderer(config.renderer);
+    canvas.dataset["renderer"] = rendererName; // 観測用（E2E とデバッグ）
+    // `preserveDrawingBuffer` は、描いた内容をあとから読む（スクリーンショット・ピクセル確認）ために debug のときだけ有効にする
+    const renderer: Renderer = rendererName === "webgl" ? createWebglRenderer(canvas, { pixelated: true, preserveDrawingBuffer: debug }) : createCanvas2dRenderer(canvas, { pixelated: true });
     const runtime = createRuntime({
       scheduler: createRafScheduler(),
-      renderer: createCanvas2dRenderer(canvas, { pixelated: true }),
+      renderer,
       audio,
       input,
       assets,

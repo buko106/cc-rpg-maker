@@ -323,6 +323,10 @@ importers:
       '@rpg/runtime':
         specifier: workspace:*
         version: link:../runtime
+    devDependencies:
+      '@rpg/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
 
   packages/runtime:
     dependencies:

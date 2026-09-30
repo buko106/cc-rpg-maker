@@ -1,3 +1,5 @@
+import { SW_REGISTER } from "./service-worker.js";
+
 /** 単一 HTML に埋め込むゲーム一式（プレイヤーの `PlayerConfig.embedded` と同じ形）。 */
 export interface EmbeddedGame {
   project: unknown;
@@ -13,8 +15,11 @@ const escapeHtml = (s: string): string => s.replace(/&/g, "&amp;").replace(/</g,
 const STYLE = `html, body { margin: 0; height: 100%; background: #111; }
 #app { min-height: 100%; display: flex; flex-direction: column; justify-content: center; }`;
 
+/** 書き出しで選べる描画方式（プレイヤーの `data-renderer` になる）。 */
+export type RendererKind = "canvas2d" | "webgl" | "auto";
+
 /** フォルダ形式の `index.html`（`player.js` と `project/project.json` を相対パスで読む）。 */
-export function renderIndexHtml(title: string): string {
+export function renderIndexHtml(title: string, renderer: RendererKind = "auto", offline = false): string {
   return `<!doctype html>
 <html lang="ja">
   <head>
@@ -26,8 +31,8 @@ ${STYLE}
     </style>
   </head>
   <body>
-    <div id="app"></div>
-    <script type="module" src="player.js"></script>
+    <div id="app" data-renderer="${renderer}"></div>
+    <script type="module" src="player.js"></script>${offline ? `\n    ${SW_REGISTER}` : ""}
   </body>
 </html>
 `;
@@ -38,7 +43,7 @@ ${STYLE}
  * 1 ファイルに入れる。外部のファイルは読まない（favicon も `data:` で空にする）。
  * `playerJs` と `embeddedJson` は、それぞれ `escapeForScript` / `escapeJsonForScript` で処理済みであること。
  */
-export function renderSingleHtml(title: string, embeddedJson: string, playerJs: string): string {
+export function renderSingleHtml(title: string, embeddedJson: string, playerJs: string, renderer: RendererKind = "auto"): string {
   return `<!doctype html>
 <html lang="ja">
   <head>
@@ -51,7 +56,7 @@ ${STYLE}
     </style>
   </head>
   <body>
-    <div id="app"></div>
+    <div id="app" data-renderer="${renderer}"></div>
     <script type="application/json" id="rpg-embedded">${embeddedJson}</script>
     <script type="module">
 ${playerJs}
