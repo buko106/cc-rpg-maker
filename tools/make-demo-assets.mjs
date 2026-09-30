@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
- * デモプロジェクト（fixtures/projects/v1/demo）用の PNG アセットを生成する開発用スクリプト。
- * 出力: fixtures/projects/v1/demo/assets/<AssetId>.png（AssetId = 内容の sha256 先頭 16 桁）
+ * デモプロジェクト（fixtures/projects/v1/demo）用の PNG / WAV アセットを生成する開発用スクリプト。
+ * 出力: fixtures/projects/v1/demo/assets/<AssetId>.<ext>（AssetId = 内容の sha256 先頭 16 桁）
  * 生成物はコミット済み。絵を変えたいときだけ再実行し、表示された AssetId で project.json を更新する。
  *
  *   node tools/make-demo-assets.mjs
@@ -158,16 +158,97 @@ function character({ shirt, hair, skin }) {
   return img;
 }
 
+// ── スライム：戦闘画面の絵（64x48）とマップ上のキャラクターシート（character と同じ並び） ─────
+function blob(img, ox, oy, w, h, { body, edge, eye }) {
+  const cx = ox + w / 2;
+  for (let y = 0; y < h; y++) {
+    // 上が丸く、下が平らなドーム型
+    const t = y / (h - 1);
+    const half = Math.round((w / 2) * Math.sqrt(Math.max(0, 1 - (1 - t) * (1 - t) * 0.92)));
+    for (let x = -half; x <= half; x++) {
+      const edgeCell = Math.abs(x) >= half - 1 || y >= h - 2 || y === 0;
+      img.set(cx + x, oy + y, edgeCell ? edge : t < 0.35 ? shade(body, 28) : body);
+    }
+  }
+  const ey = oy + Math.round(h * 0.55);
+  const ex = Math.max(2, Math.round(w * 0.2));
+  for (const dx of [-ex, ex]) {
+    img.rect(cx + dx - 1, ey, 3, 4, eye);
+    img.set(cx + dx, ey, [255, 255, 255]);
+  }
+  img.rect(cx - 2, ey + 8 > oy + h - 3 ? oy + h - 4 : ey + 8, 5, 1, edge);
+}
+const SLIME = { body: [96, 200, 120], edge: [40, 120, 70], eye: [20, 40, 30] };
+function slimeBattle() {
+  const img = image(64, 48);
+  img.disc(32, 44, 22, [0, 0, 0, 0]);
+  blob(img, 2, 4, 60, 42, SLIME);
+  return img;
+}
+function slimeWalk() {
+  const img = image(TILE * 3, TILE * 4);
+  for (let row = 0; row < 4; row++) {
+    for (let pattern = 0; pattern < 3; pattern++) {
+      const squash = [0, 1, 0][pattern];
+      blob(img, pattern * TILE + 4, row * TILE + 12 + squash, 24, 18 - squash, SLIME);
+    }
+  }
+  return img;
+}
+
+// ── 戦闘 BGM：8bit / 11025Hz / モノラルの短いループ（矩形波のアルペジオ + ベース） ─────
+function battleBgm() {
+  const rate = 11025;
+  const bpm = 150;
+  const step = Math.round((rate * 60) / bpm / 2); // 8 分音符
+  const notes = [
+    [57, 45], [60, 45], [64, 45], [60, 45], [57, 45], [60, 45], [64, 45], [69, 45],
+    [55, 43], [59, 43], [62, 43], [59, 43], [55, 43], [59, 43], [62, 43], [67, 43],
+    [53, 41], [57, 41], [60, 41], [57, 41], [53, 41], [57, 41], [60, 41], [65, 41],
+    [55, 43], [59, 43], [62, 43], [67, 43], [64, 40], [62, 40], [60, 40], [59, 40],
+  ];
+  const hz = (m) => 440 * 2 ** ((m - 69) / 12);
+  const data = Buffer.alloc(step * notes.length);
+  notes.forEach(([lead, bass], i) => {
+    for (let n = 0; n < step; n++) {
+      const t = n / rate;
+      const env = Math.max(0, 1 - n / step) ** 0.6;
+      const sq = (f, duty) => ((t * f) % 1 < duty ? 1 : -1);
+      const v = 0.32 * env * sq(hz(lead), 0.35) + 0.22 * sq(hz(bass - 12), 0.5);
+      data[i * step + n] = Math.max(0, Math.min(255, Math.round(128 + v * 127)));
+    }
+  });
+  const header = Buffer.alloc(44);
+  header.write("RIFF", 0, "ascii");
+  header.writeUInt32LE(36 + data.length, 4);
+  header.write("WAVEfmt ", 8, "ascii");
+  header.writeUInt32LE(16, 16);
+  header.writeUInt16LE(1, 20); // PCM
+  header.writeUInt16LE(1, 22); // mono
+  header.writeUInt32LE(rate, 24);
+  header.writeUInt32LE(rate, 28); // byte rate
+  header.writeUInt16LE(1, 32); // block align
+  header.writeUInt16LE(8, 34); // bits
+  header.write("data", 36, "ascii");
+  header.writeUInt32LE(data.length, 40);
+  return { bytes: Buffer.concat([header, data]), ext: "wav", info: `${(data.length / rate).toFixed(1)}s` };
+}
+
 const assets = {
   "tileset.png": tileset(),
   "hero.png": character({ shirt: [58, 110, 165], hair: [110, 70, 40], skin: [240, 200, 160] }),
   "npc.png": character({ shirt: [192, 80, 58], hair: [150, 150, 150], skin: [235, 190, 150] }),
+  "slime.png": slimeBattle(),
+  "slime_walk.png": slimeWalk(),
+  "battle.wav": battleBgm(),
 };
 
 mkdirSync(OUT, { recursive: true });
-for (const [name, img] of Object.entries(assets)) {
-  const bytes = img.png();
+for (const [name, asset] of Object.entries(assets)) {
+  const image = typeof asset.png === "function";
+  const bytes = image ? asset.png() : asset.bytes;
+  const ext = image ? "png" : asset.ext;
   const id = createHash("sha256").update(bytes).digest("hex").slice(0, 16);
-  writeFileSync(join(OUT, `${id}.png`), bytes);
-  console.log(`${name}\t${id}\t${bytes.length} bytes\t${img.width}x${img.height}`);
+  writeFileSync(join(OUT, `${id}.${ext}`), bytes);
+  console.log(`${name}\t${id}\t${bytes.length} bytes\t${image ? `${asset.width}x${asset.height}` : asset.info}`);
 }

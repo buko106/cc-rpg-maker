@@ -74,3 +74,11 @@ export function hold(button: Button, frames: number): InputFrame[]; // ヘルパ
 - `input-script`：`createScriptInput(frames?)` は `push` / `remaining` を持ち、`dispose` で残りを捨てる。`keys(...buttons)` は押下開始を含む 1 フレーム、`hold(button, n)` は最初のフレームだけ押下開始。
 - `input-browser`：`KeyMap` のキーは `KeyboardEvent.code`（`ArrowUp`、`KeyZ` など）。既定は 方向 = 矢印/WASD、決定 = Z/Enter/Space、キャンセル = X/Esc、メニュー = M、shift = Shift、pageup/down = PageUp/PageDown。割り当てたキーは `preventDefault` する（スクロール防止）。キーリピートは新しい押下として数えない。`poll` の間に押して離したボタンも、そのフレームは `pressed` かつ `triggered` に入る（不変条件 1 を保つ）。`blur` で押しっぱなしを解除する。ゲームパッドは `{ gamepad: true }` で有効（標準配置：A = 決定、B = キャンセル、Y = メニュー、LB/RB = pageup/down、十字キーとスティック）。
 - **契約テスト**：`inputSourceContract(name, make)` の `make` は `{ source, press(button), release(button) }`（デバイス入力を再現する操作口）を返す。`audioOutContract` は不変条件 2, 3 を検証する（不変条件 1 = BGM の多重再生防止は再生ノードが要るので webaudio のテストで）。
+
+## 実装メモ（M4 で確定した点）
+- **`audio-webaudio` を実装**：`createWebAudioOut(ctx, assets, { logger? }): WebAudioOut`（`AudioOut` + `resume()`）と `createDecodeAudio(ctx)`（`AssetSource` の `decodeAudio` に渡す。`decodeAudioData` はバッファを消費するので、キャッシュ側を壊さないようコピーを渡す）。
+  - BGM は 1 曲だけ。**同じ音源の `playBgm` は再生し直さず**、音量とピッチだけを反映する（`loop` はソースの作成時のまま）。曲を変えると古い曲をフェードアウトして新しい曲をフェードインする。読み込み中に次の要求（別の曲・`stopBgm`）が来たら古い要求は捨てる（最新が勝つ）。
+  - `AudioContext` が `running` でない間は、最後の BGM 要求だけを覚え、`resume()` か `statechange` で `running` になったら鳴らす。効果音は捨てる。どの状態でも例外は投げない（読み込み・再生の失敗は `logger.warn`）。`dispose` 後はすべて no-op。
+  - マスター音量は 0〜1 に丸める（NaN は 0）。効果音は 1 発ごとに専用のソース（重なって鳴る）。
+- **プレイヤー**（`apps/player/src/audio.ts`）：`AudioContext` を作れれば Web Audio、無ければ `audio-null`（その場合は音声アセットを事前読み込みしない）。最初のキー/ポインタ/タッチで `resume()` し、再開できたらリスナーを外す。
+- **テスト**：モックの `AudioContext`（ノード・パラメータの呼び出しを記録）で、多重再生の防止、フェード、最新の要求が勝つこと、`suspended` 中の待機と再開、SE、音量、`dispose` を検証。契約テスト（`audioOutContract`）は `running` と `suspended` の両方で通す。ブラウザ上の実際の音は自動テストできない（E2E では `playBgm` / `stopBgm` の Effect が発行されることまで）。

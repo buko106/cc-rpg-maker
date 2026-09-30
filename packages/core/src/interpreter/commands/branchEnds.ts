@@ -1,3 +1,4 @@
+import { nonNegativeInt } from "@rpg/schema";
 import { z } from "zod";
 import { defineCommand } from "../handler.js";
 
@@ -24,4 +25,18 @@ export const endBranch = defineCommand({
   params: empty,
   meta: { label: "分岐終了", category: "フロー制御", describe: () => "分岐終了", refs: noRefs },
   run: () => ({}),
+});
+
+/**
+ * 複数の分岐のうち `index` 番目の本体。`branch[indent]`（選ばれた番号。戦闘の結果など）が `index` と一致するときだけ
+ * 続く本体を実行し、違えば次の `ChoiceBranch` / `EndBranch` まで飛ぶ。
+ */
+export const choiceBranch = defineCommand({
+  code: "ChoiceBranch",
+  params: z.strictObject({ index: nonNegativeInt }),
+  meta: { label: "分岐", category: "フロー制御", describe: (p) => `分岐 ${p.index}`, refs: noRefs },
+  run(p, c) {
+    const indent = c.interp.commands[c.interp.pc]?.indent ?? 0;
+    return { control: c.interp.branch[indent] === p.index ? { kind: "next" } : { kind: "skipBlock", indent } };
+  },
 });

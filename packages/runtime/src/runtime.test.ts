@@ -95,7 +95,7 @@ describe("Runtime のループ", () => {
     // door-transfer は遅延ロードでステップ数がずれるので、別テストで確かめる
     for (const name of listReplays().filter((n) => n !== "door-transfer")) {
       const replay = loadReplay(name);
-      const h = await boot(replay.project.split("/").pop(), { seed: replay.seed });
+      const h = await boot(replay.project.split("/").pop(), { seed: replay.seed, title: replay.title === true });
       h.play(...expandInputs(replay.inputs));
       expect(hashState(h.runtime.getState()), name).toBe(replay.expect.finalStateHash);
     }

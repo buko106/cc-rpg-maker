@@ -1,10 +1,11 @@
 import type { EventId, MapData } from "@rpg/schema";
-import type { Ctx } from "../ctx.js";
+import type { Ctx } from "../ctx-types.js";
 import { warn } from "../effects.js";
 import type { Effect } from "../effects.js";
 import type { InputFrame } from "../input.js";
 import { runInterpreters, startInterpreter } from "../interpreter/index.js";
 import { advanceCharacter, computeCamera, eventsToTrigger, refreshEventPages } from "../map/index.js";
+import { battleTick } from "../battle/index.js";
 import type { GameState, MapState } from "../state.js";
 import type { StepResult } from "./actions.js";
 import { enterMap } from "./initial.js";
@@ -87,7 +88,7 @@ function advanceMovement(state: GameState, map: MapData): GameState {
 }
 
 /**
- * 時間を 1 フレーム進める。タイトル・メニューの間は `tick`（とメニューではプレイ時間）だけ進む。順序：tick 加算 → イベントページ更新 → 自動実行/並列イベントの起動 →
+ * 時間を 1 フレーム進める。タイトル・ゲームオーバーの間は `tick`、メニューではプレイ時間も進む。戦闘中は `battleTick`。順序：tick 加算 → イベントページ更新 → 自動実行/並列イベントの起動 →
  * インタプリタ実行 → イベントページ更新 → 場所移動 → 移動の補間 → カメラ。
  */
 export function handleTick(state: GameState, input: InputFrame, ctx: Ctx): StepResult {
@@ -95,6 +96,9 @@ export function handleTick(state: GameState, input: InputFrame, ctx: Ctx): StepR
   // タイトル・メニューの間は世界が止まる（時間だけ進む。プレイ時間はメニュー中も数える）
   if (state.scene.kind === "title") return { state: { ...state, tick: state.tick + 1 }, effects };
   if (state.scene.kind === "menu") return { state: { ...state, tick: state.tick + 1, playtimeTicks: state.playtimeTicks + 1 }, effects };
+  if (state.scene.kind === "gameover") return { state: { ...state, tick: state.tick + 1 }, effects };
+  // 戦闘中はマップの世界（イベント・移動・並列処理）が止まる。BattleProcessing を待つインタプリタも戦闘が終わるまで動かない。
+  if (state.scene.kind === "battle") return battleTick({ ...state, tick: state.tick + 1, playtimeTicks: state.playtimeTicks + 1 }, ctx);
   let s: GameState = { ...state, tick: state.tick + 1, playtimeTicks: state.playtimeTicks + 1 };
 
   const mapAtStart = s.scene.kind === "map" ? ctx.project.map(s.map.mapId) : undefined;

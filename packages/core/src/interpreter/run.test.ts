@@ -42,9 +42,9 @@ const call = defineCommand({
 });
 
 describe("registry", () => {
-  it("registers the M1 builtin commands", () => {
+  it("registers the builtin commands (M1 + M4)", () => {
     const codes = loadFixtureProject("minimal").ctx.commands.list().map((h) => h.code).sort();
-    expect(codes).toEqual(["Else", "ConditionalBranch", "ControlSwitches", "ControlVariables", "EndBranch", "ShowText", "TransferPlayer", "Wait"].sort());
+    expect(codes).toEqual(["Else", "ConditionalBranch", "ControlSwitches", "ControlVariables", "EndBranch", "ChoiceBranch", "BattleProcessing", "ShowText", "TransferPlayer", "Wait"].sort());
   });
 
   it("rejects duplicate registration", () => {

@@ -1,5 +1,5 @@
 import type { EventId, EventPage, MapData, MapEvent, MapId, PageCondition } from "@rpg/schema";
-import type { Ctx } from "../ctx.js";
+import type { Ctx } from "../ctx-types.js";
 import type { EventRuntime, GameState } from "../state.js";
 import { selfSwitchKey } from "../state.js";
 

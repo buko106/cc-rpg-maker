@@ -14,6 +14,7 @@ export type ItemId = Brand<string, "ItemId">;
 export type EnemyId = Brand<string, "EnemyId">;
 export type TroopId = Brand<string, "TroopId">;
 export type CommonEventId = Brand<string, "CommonEventId">;
+export type StateId = Brand<string, "StateId">;
 /** 内容ハッシュ（sha256 先頭16桁）。形式のみ schema で検査し、実体との一致は `assets` が検証する。 */
 export type AssetId = Brand<string, "AssetId">;
 export type SwitchId = Brand<string, "SwitchId">;
@@ -40,6 +41,7 @@ export const itemIdSchema = idSchema<"ItemId">();
 export const enemyIdSchema = idSchema<"EnemyId">();
 export const troopIdSchema = idSchema<"TroopId">();
 export const commonEventIdSchema = idSchema<"CommonEventId">();
+export const stateIdSchema = idSchema<"StateId">();
 export const switchIdSchema = idSchema<"SwitchId">();
 export const variableIdSchema = idSchema<"VariableId">();
 export const assetIdSchema = z

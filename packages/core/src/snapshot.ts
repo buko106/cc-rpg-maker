@@ -1,7 +1,7 @@
 import { assetIdSchema, assetRefSchema, directionSchema, eventCommandSchema, eventIdSchema, err, mapIdSchema, nonNegativeInt, ok } from "@rpg/schema";
 import type { Result, SchemaIssue } from "@rpg/schema";
 import { z } from "zod";
-import type { Ctx } from "./ctx.js";
+import type { Ctx } from "./ctx-types.js";
 import type { Character, EventRuntime, GameState } from "./state.js";
 
 /** セーブデータのフォーマットバージョン。`SaveSnapshot` を変えるときは上げて `snapshotMigrations` を追加する。 */
@@ -34,14 +34,14 @@ const snapCharacter = <C extends Character>(ch: C): C => (ch.moving || ch.realX 
 
 /**
  * セーブ時に捨てる一時状態を落とす：移動の補間中の位置（`realX/realY/moving`）を目的のタイルに確定させ、
- * タイトル・メニューの UI 状態（`scene`）をマップに戻す。
+ * タイトル・メニュー・戦闘・ゲームオーバーの状態（`scene` と `battle`）をマップに戻す。
  * `fromSnapshot(toSnapshot(s))` は `stripTransient(s)` と一致する。
  */
 export function stripTransient(s: GameState): SerializedGameState {
   const { battle: _battle, ...rest } = s;
   const events: Record<string, EventRuntime> = {};
   for (const [id, ev] of Object.entries(s.map.events)) events[id] = snapCharacter(ev);
-  const scene: SerializedGameState["scene"] = s.scene.kind === "menu" || s.scene.kind === "title" ? { kind: "map" } : s.scene;
+  const scene: SerializedGameState["scene"] = { kind: "map" };
   return { ...rest, scene, map: { ...s.map, player: snapCharacter(s.map.player), events, followers: s.map.followers.map(snapCharacter) } };
 }
 

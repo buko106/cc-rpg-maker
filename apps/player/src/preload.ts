@@ -1,7 +1,8 @@
 import type { AssetId, MapData, Project } from "@rpg/schema";
 
 /**
- * ゲーム開始前に読み込んでおくアセット：タイルセット画像、アクターの歩行・顔グラフィック、開始マップのイベントの絵。
+ * ゲーム開始前に読み込んでおくアセット：タイルセット画像、アクターの歩行・顔グラフィック、開始マップのイベントの絵、
+ * 敵の絵、タイトル・戦闘の BGM（戦闘の初回に読み込みで止まらないように）。
  * マニフェストに無い ID は含めない（`Renderer` が遅延ロードに失敗して描かないだけで済む）。
  */
 export function collectStartAssets(project: Project, startMap: MapData): AssetId[] {
@@ -11,6 +12,8 @@ export function collectStartAssets(project: Project, startMap: MapData): AssetId
     if (actor.walk) ids.add(actor.walk.asset);
     if (actor.face) ids.add(actor.face.asset);
   }
+  for (const enemy of Object.values(project.database.enemies)) if (enemy.graphic) ids.add(enemy.graphic.asset);
+  for (const bgm of Object.values(project.system.bgm)) if (bgm) ids.add(bgm.asset);
   for (const event of Object.values(startMap.events)) {
     for (const page of event.pages) if (page.graphic) ids.add(page.graphic.asset);
   }

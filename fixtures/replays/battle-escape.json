@@ -1,0 +1,37 @@
+{
+  "project": "fixtures/projects/v1/demo",
+  "seed": "battle-escape",
+  "title": true,
+  "inputs": [
+    { "wait": 2 },
+    { "press": "ok" },
+    { "wait": 2 },
+    { "hold": "down", "frames": 48 },
+    { "hold": "right", "frames": 128 },
+    { "hold": "down", "frames": 16 },
+    { "wait": 2 },
+    { "press": "ok" },
+    { "wait": 5 },
+    { "press": "ok" },
+    { "wait": 5 },
+    { "press": "up" },
+    { "press": "ok" },
+    { "wait": 80 },
+    { "press": "ok" },
+    { "wait": 5 },
+    { "press": "ok" },
+    { "wait": 30 }
+  ],
+  "expect": { "finalStateHash": "c51bca9a7c95a4a78af31282805f7bc54ded0430596669ae03a9aa2949c44844", "effects": { "playBgm": 1, "stopBgm": 2, "log": 0 } },
+  "assertions": [
+    { "atTick": 206, "path": "scene.kind", "equals": "battle" },
+    { "atTick": 213, "path": "battle.phase", "equals": "resolve" },
+    { "atTick": 223, "path": "battle.phase", "equals": "escape" },
+    { "atTick": 223, "path": "battle.result.outcome", "equals": "escape" },
+    { "atTick": 294, "path": "scene.kind", "equals": "map" },
+    { "atTick": 294, "path": "message.text", "equals": "うまく にげきれた。" },
+    { "atTick": 330, "path": "switches", "equals": {} },
+    { "atTick": 330, "path": "party.gold", "equals": 0 },
+    { "atTick": 330, "path": "interpreters", "equals": [] }
+  ]
+}

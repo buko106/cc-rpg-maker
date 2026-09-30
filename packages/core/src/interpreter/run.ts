@@ -1,6 +1,6 @@
 import type { EventCommand } from "@rpg/schema";
 import { err, ok } from "@rpg/schema";
-import type { Ctx } from "../ctx.js";
+import type { Ctx } from "../ctx-types.js";
 import { warn } from "../effects.js";
 import type { Effect } from "../effects.js";
 import { evaluate, parse } from "../expression/index.js";
@@ -16,7 +16,7 @@ import type { InterpreterOrigin, InterpreterState } from "./state.js";
 export const MAX_COMMANDS_PER_FRAME = 1000;
 
 /** 分岐の終端になるコマンド。`skipBlock` の飛び先。 */
-const BLOCK_ENDS: ReadonlySet<string> = new Set(["Else", "EndBranch"]);
+const BLOCK_ENDS: ReadonlySet<string> = new Set(["Else", "EndBranch", "ChoiceBranch"]);
 
 /**
  * インタプリタを開始する。

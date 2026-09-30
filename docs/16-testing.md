@@ -84,3 +84,10 @@ saveRepositoryContract("idb", () => createIdbSaveRepository({ ... }), { supports
 - `runtimeHarness`（`createRuntimeHarness`）と、FrameSpec の要約 `summarizeFrame` を追加。
 - カバレッジ閾値：`schema` / `core` は 90%（branches 85%）、実装済みのその他のパッケージ（runtime・assets・render-null・render-canvas2d・audio-null・input-script・input-browser）は 70%。
 - ブラウザ層：`pnpm test:browser` は demo プロジェクトをビルドして静的サーバで配信する（`playwright.config.ts` の `webServer`）。
+
+## 実装メモ（M4 で確定した点）
+- **リプレイ**：`fixtures/replays/*.json` に任意の `"title": true` を追加した（`titleState` から始め、先頭の入力でニューゲームを選ぶ）。`battle-win.json`（歩いてスライムに話しかけ、攻撃とファイアで勝利、マップに戻って続きのイベント）と `battle-escape.json`。demo プロジェクトを使うので、demo の敵・トループの座標を変えたら `UPDATE_REPLAYS=1` で更新する。`runtime.test.ts` はリプレイを Runtime 経由でも実行して同じハッシュになることを確かめる。
+- **戦闘のテストデータ**：`test-utils` の `battleProject()`（`minimal` に、勇者と魔法使い・スキル・アイテム・状態・敵・トループを足した、手計算しやすい固定値のプロジェクト。`mutate` で書き換えられる）と `battleKit()`（Ctx と初期状態）、`beginBattle` / `drive` / `driveUntil` / `press` / `idleFrames`。
+- **プロパティテスト**：任意の入力列で HP/MP が範囲内・状態を変更しない（`deepFreeze`）・毎フレーム何かが進む・同じ入力で同じ結果。
+- **カバレッジ閾値**：実装済みのパッケージに `audio-webaudio` を追加（70%）。
+- **依存ルール（テスト）**：パッケージ自身を `@rpg/<自分>` の名前で import できない（解決できない依存として検出される）ので、同じパッケージのテストは相対パスで import する。

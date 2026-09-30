@@ -1,4 +1,4 @@
-import type { Actor, ActorId, Class, ClassId, CommonEvent, CommonEventId, Enemy, EnemyId, Item, ItemId, MapData, MapId, Project, Skill, SkillId, Tileset, TilesetId, Troop, TroopId } from "@rpg/schema";
+import type { Actor, ActorId, Class, ClassId, CommonEvent, CommonEventId, Enemy, EnemyId, Item, ItemId, MapData, MapId, Project, Skill, SkillId, State, StateId, Tileset, TilesetId, Troop, TroopId } from "@rpg/schema";
 
 /**
  * Ctx に渡す Project の読み取りビュー。マップ本体は遅延ロードされるので、未ロードなら `map()` は `undefined`
@@ -14,6 +14,7 @@ export interface ProjectView {
   item(id: ItemId): Item | undefined;
   enemy(id: EnemyId): Enemy | undefined;
   troop(id: TroopId): Troop | undefined;
+  state(id: StateId): State | undefined;
   commonEvent(id: CommonEventId): CommonEvent | undefined;
 }
 
@@ -34,6 +35,7 @@ export function createProjectView(project: Project, maps: Record<MapId, MapData>
     item: (id) => lookup(project.database.items, id),
     enemy: (id) => lookup(project.database.enemies, id),
     troop: (id) => lookup(project.database.troops, id),
+    state: (id) => lookup(project.database.states, id),
     commonEvent: (id) => lookup(project.database.commonEvents, id),
   };
 }

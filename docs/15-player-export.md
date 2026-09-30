@@ -66,3 +66,8 @@ export async function exportGame(repo: ProjectRepository, projectId: string, opt
 - **ビルド**：`node apps/player/scripts/build-web.mjs [--project <dir>] [--out <dir>]` が esbuild で `player.js` を作り、`static/index.html` と（指定があれば）プロジェクトのフォルダをコピーする。出力の既定は `apps/player/dist-web/`（git 管理外）。`pnpm demo` でデモを配信（http://127.0.0.1:4173/）。エントリ（`main.ts`）は `?project=<url>` と `?debug` を受け、起動した Runtime を `window.__rpg` に置く（E2E とデバッグ用）。
 - **M3 の変更**：`PlayerConfig` に `saveScope?`（同じオリジンで複数のゲームを配るとき、IndexedDB の DB 名 `rpg-saves-<scope>` と localStorage の接頭辞 `rpg-save-<scope>` に反映して保存先自体を分ける）を追加。`saves = createSaveRepository({ projectId: project.meta.id, projectHash })`（`projectHash` は `project.json` のバイト列の sha256）、`clock: Date.now` を Runtime に渡す。**タイトル画面から始まる**（`title` の既定が `true`）。キー操作は既定の割り当て（決定 = Z/Enter/Space、キャンセル = X/Esc、メニュー = M）。
 - **E2E**（`e2e/player.spec.ts`）：Playwright の `webServer` が demo プロジェクト付きでビルドして `tools/serve-static.mjs` で配信する。起動と描画のピクセル確認、歩行と壁での停止、会話（ウィンドウと文字の描画、2 ページ目）、扉でのマップ遅延ロード（リクエストの発行タイミング）、読み込み失敗のエラー画面。
+
+## 実装メモ（M4 で確定した点）
+- **音**：`bootPlayer` は `audio-webaudio` を結線した（08）。`AssetSource` に `decodeAudio` を渡し、開始前の事前読み込み（`collectStartAssets`）に**敵の絵とタイトル/戦闘の BGM** を加えた（戦闘の初回に読み込みで止まらないように）。`AudioContext` が無い環境では音声は読み込まない。
+- **demo プロジェクト**：マップ `map_town` の (11,8) にスライム（話しかけると戦闘。勝てば `sw_slime_defeated` を立てて消え、逃げれば残る）、戦闘 BGM（8bit の短いループ WAV）、スキル「ファイア」、アイテム「ポーション」（スライムが確実にドロップ）を追加。アセットは `node tools/make-demo-assets.mjs`（PNG と WAV。ID は内容のハッシュ）で生成する。
+- **E2E**（`e2e/player.spec.ts`）：話しかけて戦闘 → 攻撃で勝利 → マップに戻って続きのイベント（画面のピクセル・報酬・Effect を確認）、逃走してもう一度戦う、戦闘中はメニューが開かずスキルで戦える。

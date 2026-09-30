@@ -3,10 +3,17 @@ import { loadFixtureProject } from "@rpg/test-utils";
 import { collectStartAssets } from "./preload.js";
 
 describe("collectStartAssets", () => {
-  it("タイルセット画像・アクターの歩行グラフィック・開始マップのイベントの絵を、重複なく集める", () => {
+  it("タイルセット画像・アクターの歩行グラフィック・開始マップのイベントの絵・敵の絵・BGM を、重複なく集める", () => {
     const { project, maps } = loadFixtureProject("demo");
     const ids = collectStartAssets(project, maps["map_town" as never]!);
-    expect(ids).toEqual(["0eefde69801856a9", "b9b596c2f04468ac", "bb2e23b45d1f4d4d"]); // npc, tileset, hero
+    expect(ids).toEqual([
+      "0c4fa5c6a7e06cb7", // スライム（マップ）
+      "0eefde69801856a9", // npc
+      "54bc63c07507e5c4", // スライム（戦闘）
+      "87073bd84cdaced6", // 戦闘 BGM
+      "b9b596c2f04468ac", // tileset
+      "bb2e23b45d1f4d4d", // hero
+    ]);
   });
 
   it("マニフェストに無い ID は含めない", () => {

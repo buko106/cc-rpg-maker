@@ -60,3 +60,6 @@ export function createNullRenderer(): NullRenderer;
 - **M3 の変更（canvas2d）**：`cursor` は半透明の白い塗り + 枠で描く（選択行のハイライト。`blink` は引き続き無視）。`gauge` / `text` の `align`（`center` / `right` は `x` が基準点）はタイトル・メニューで使い始めた。`FrameSpec` の型は変わっていない。
 - **契約テスト**：`rendererContract(name, make)` は不変条件 1〜3（例外を出さない・`FrameSpec` を変更しない・`dispose` 後は no-op）を検証する。壊れた値（NaN、負のタイルサイズ、短すぎるタイル配列）と未ロードアセットも投げる。不変条件 4 は WebGL が入る M7 で。
 - **canvas2d のテスト**：Node では呼び出しを記録するモックコンテキストで、描画順・カリング・スキップ→次フレーム描画・overlay の順序を検証する。ピクセルの確認は `e2e/player.spec.ts`（demo プロジェクトのタイル・スプライト・ウィンドウの色）で行う。`fixtures/frames/*.json` → PNG スナップショットは、`FrameSpec` の見た目が安定した後（M3〜）。
+
+## 実装メモ（M4 で確定した点）
+- 戦闘の UI は既存の部品（`window` / `text` / `gauge` / `cursor` / `image`）だけで作っており、`FrameSpec` の型もレンダラも変更していない。敵の絵は `image` ノード（`sx` `sy` `sw` `sh` を指定して原寸）。ダメージ数字は `text`（20px 太字、`align: "center"`）。
