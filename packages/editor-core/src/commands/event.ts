@@ -61,6 +61,28 @@ export function createEvent(mapId: MapId, x: number, y: number, id: EventId = ne
   });
 }
 
+/**
+ * コピーしておいたイベント（`source`）を `(x, y)` に貼り付ける。ページの中身は JSON として複製し、ID は新しく採番する（名前はそのまま）。
+ * 別のマップにも貼れる。そのセルに既にイベントがあるときは貼らない（重なるとクリックで選べなくなる）。
+ * `source` は文書の外のスナップショットなので、元のイベントを後から編集・削除しても影響しない。
+ */
+export function pasteEvent(mapId: MapId, source: MapEvent, x: number, y: number, id: EventId = newId<"EventId">("ev")): EditorCommand {
+  return defineEdit({
+    kind: "pasteEvent",
+    label: "イベントの貼り付け",
+    maps: [mapId],
+    apply(doc) {
+      const map = mapOf(doc, mapId);
+      if (map === undefined) return err(notFound("マップ", mapId));
+      if (!inMap(map, x, y)) return err(invalid(`(${x},${y}) はマップ ${mapId} の外`));
+      if (eventOf(map, id) !== undefined) return err({ kind: "duplicate", message: `イベント ${id} は既にある` });
+      const there = Object.values(map.events).find((e) => e.x === x && e.y === y);
+      if (there !== undefined) return err({ kind: "duplicate", message: `(${x},${y}) には既にイベント「${there.name}」がある` });
+      return ok(withEvent(doc, map, { ...(JSON.parse(JSON.stringify(source)) as MapEvent), id, x, y }));
+    },
+  });
+}
+
 interface MoveEventCommand extends EditorCommand {
   readonly mapId: MapId;
   readonly eventId: EventId;

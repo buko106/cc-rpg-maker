@@ -146,6 +146,69 @@ describe("MapCanvas：キーボード", () => {
   });
 });
 
+describe("MapCanvas：イベントのコピー・切り取り・貼り付け", () => {
+  const ids = (): string[] => Object.keys(t.session.doc.maps[M1]!.events);
+  const select = (x: number, y: number): void => {
+    fireEvent.pointerDown(canvas(), at(x, y));
+    fireEvent.pointerUp(canvas(), at(x, y));
+  };
+  const key = (k: string, mod: Record<string, boolean> = { ctrlKey: true }): void => void fireEvent.keyDown(canvas(), { key: k, ...mod });
+
+  beforeEach(() => {
+    act(() => void t.session.execute(cmd.createEvent(M1, 2, 2, "ev_a" as EventId)));
+    act(() => void t.session.execute(cmd.setEventName(M1, "ev_a" as EventId, "看板")));
+    act(() => void t.session.setUi({ tool: "select" }));
+    select(2, 2);
+  });
+
+  it("Ctrl+C でコピーし、カーソルのセルへ Ctrl+V で貼る。貼ったものが選択され、1 回の Undo で消える", () => {
+    key("c");
+    expect(t.session.ui.clipboard).toMatchObject({ id: "ev_a", name: "看板" });
+    fireEvent.pointerMove(canvas(), at(6, 3));
+    key("v");
+    expect(ids()).toHaveLength(2);
+    const pasted = Object.values(t.session.doc.maps[M1]!.events).find((e) => e.id !== "ev_a")!;
+    expect(pasted).toMatchObject({ name: "看板", x: 6, y: 3 });
+    expect(t.session.ui.selection).toEqual({ kind: "event", eventId: pasted.id });
+    key("v", { metaKey: true }); // ⌘ でも同じ。同じセルには重ねない
+    expect(screen.getByRole("alert").textContent).toContain("既にイベント");
+    expect(ids()).toHaveLength(2);
+    act(() => void t.session.undo());
+    expect(ids()).toEqual(["ev_a"]);
+  });
+
+  it("Ctrl+X で切り取る（元は消え、貼り付けで戻せる）", () => {
+    key("x");
+    expect(ids()).toEqual([]);
+    expect(t.session.ui.clipboard).toMatchObject({ id: "ev_a" });
+    fireEvent.pointerMove(canvas(), at(5, 5));
+    key("v");
+    expect(Object.values(t.session.doc.maps[M1]!.events)).toEqual([expect.objectContaining({ name: "看板", x: 5, y: 5 })]);
+  });
+
+  it("イベントを選んでいないときのコピー・切り取りと、クリップボードが空のときの貼り付けは何もしない", () => {
+    select(9, 9);
+    key("c");
+    key("x");
+    key("v");
+    expect(t.session.ui.clipboard).toBeUndefined();
+    expect(ids()).toEqual(["ev_a"]);
+    expect((screen.getByRole("button", { name: "コピー" }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole("button", { name: "貼り付け" }) as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it("ボタンでも同じ操作ができる（貼り付け先は最後にカーソルがあったセル）", () => {
+    fireEvent.click(screen.getByRole("button", { name: "コピー" }));
+    expect(screen.getByText("クリップボード：「看板」")).toBeTruthy();
+    fireEvent.pointerMove(canvas(), at(8, 4));
+    fireEvent.pointerLeave(canvas());
+    fireEvent.click(screen.getByRole("button", { name: "貼り付け" }));
+    expect(Object.values(t.session.doc.maps[M1]!.events).find((e) => e.id !== "ev_a")).toMatchObject({ x: 8, y: 4 });
+    fireEvent.click(screen.getByRole("button", { name: "切り取り" })); // 貼ったものが選択中
+    expect(ids()).toEqual(["ev_a"]);
+  });
+});
+
 describe("MapCanvas：表示", () => {
   it("マップが選ばれていなければ案内を出す", async () => {
     cleanup();

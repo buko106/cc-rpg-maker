@@ -40,7 +40,7 @@ export const cmd = {
   createMap(meta: Omit<MapMeta,"id">, data: Partial<MapData>): EditorCommand;
   deleteMap(mapId): EditorCommand;
   // イベント
-  createEvent(mapId, x, y): EditorCommand;  moveEvent(mapId, eventId, x, y): EditorCommand;  deleteEvent(mapId, eventId): EditorCommand;
+  createEvent(mapId, x, y): EditorCommand;  pasteEvent(mapId, source: MapEvent, x, y): EditorCommand;  moveEvent(mapId, eventId, x, y): EditorCommand;  deleteEvent(mapId, eventId): EditorCommand;
   setEventPage(mapId, eventId, pageIndex, page: EventPage): EditorCommand;
   insertCommands(mapId, eventId, pageIndex, at: number, commands: EventCommand[]): EditorCommand;
   removeCommands(mapId, eventId, pageIndex, at: number, count: number): EditorCommand;
@@ -60,7 +60,7 @@ export const cmd = {
 ```ts
 export interface EditorSession {
   readonly doc: ProjectDocument;
-  readonly ui: EditorUiState;         // { currentMap, currentLayer, tool, selection, zoom }
+  readonly ui: EditorUiState;         // { currentMap, currentLayer, tool, tile, selection, zoom, clipboard }
   readonly dirty: boolean;
   readonly canUndo: boolean; readonly canRedo: boolean;
 
@@ -116,3 +116,7 @@ export interface Diagnostic { severity: "error" | "warning"; code: string; messa
 - **まとめ（coalesce）**：直前の `execute` から 500ms 以内で、同じ対象への `paintTiles` / `moveEvent` / `setEventName` / `setEventPage` / `replaceCommand` / `upsertEntity` / `setSystem`（同じキー集合）は 1 回の Undo になる。Undo / Redo をはさむとまとめない。履歴は 200 件まで。
 - **`EditorSession` の追加**：`version`（変更のたびに増える。UI が購読する値）、`undoLabel` / `redoLabel`、`saveStatus`（`idle` / `saving` / `saved` / `error` / `conflict`）、`importAsset`（バイト列の保存とマニフェスト登録を 1 回の Undo にする）、`assetStore()`、`dispose()`。`save({ overwrite: true })` は競合していても上書きする。保存は直列化し、保存中に入った編集は次の保存に回す（マップごとの編集番号で `changedMaps` を管理）。競合中は自動保存を止める。`validate()` の診断は、参照切れ・不明なコマンド・不正なパラメータ・開始位置・未使用アセット・初期パーティが空、プラグインのコマンド（警告）。
 - **性質テスト**：`test-utils` の `editorCommandArb(doc)` が、文書の中身を見て合法なコマンド（一部は失敗するもの）を生成する。不変条件 1・2・3・4 と「全部 Undo → 全部 Redo」「保存 → 読み込みで一致」を `fast-check`（`fc.gen`）で確かめる。フィルタで詰まらないよう、選択肢は先に絞ってから `constantFrom` する。
+
+## 実装メモ（イベントのコピー＆ペースト）
+- **`cmd.pasteEvent(mapId, source, x, y, id?)`**：`source`（`MapEvent`）を JSON として複製し、新しい ID（省略時は採番）で `(x, y)` に置く。名前とページはそのまま。別のマップにも貼れる。範囲外は `invalid`、ID の重複と**そのセルに別のイベントがある**ときは `duplicate`（重なるとクリックで選べなくなるため。`createEvent` / `moveEvent` は今のところ重なりを許すが、貼り付けだけは断る）。
+- **クリップボードは `EditorUiState.clipboard`**：コピー時点のイベントのスナップショット（文書には保存しない。Undo の対象でもない）。元のイベントを後で編集・削除しても貼れる中身は変わらない。切り取りは「`clipboard` に入れる + `deleteEvent`」。OS のクリップボードは使わない（別のプロジェクト・別のタブへは貼れない）。
