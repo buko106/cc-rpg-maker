@@ -1,4 +1,4 @@
-import { z } from "@rpg/plugin-api";
+import { defineEventTemplate, z } from "@rpg/plugin-api";
 import type { Diagnostic, PluginModule } from "@rpg/plugin-api";
 
 const params = z.strictObject({
@@ -8,7 +8,8 @@ const params = z.strictObject({
 
 /**
  * サンプルプラグイン 2：独自のイベントコマンド `plugin:custom-command/RandomGold`（所持金を min〜max のランダムな額だけ増やす）と、
- * 式関数 `twice(n)`、`plugin` Effect の受け口 `custom-command/notice`、エディタの診断（min > max の警告）。
+ * 式関数 `twice(n)`、`plugin` Effect の受け口 `custom-command/notice`、エディタの診断（min > max の警告）と、
+ * このコマンドを使うイベントのひな形「くじ引き」（`plugin:custom-command/lottery`）。
  * 乱数は共有のストリーム（`ctx.rng`）から引くので、リプレイで同じ結果になる。
  */
 export const customCommandPlugin: PluginModule = {
@@ -45,6 +46,39 @@ export const customCommandPlugin: PluginModule = {
       const gained = (payload as { gained?: unknown }).gained;
       host.log.info(`所持金が ${String(gained)} 増えた`);
     });
+
+    host.editor?.eventTemplate(
+      defineEventTemplate({
+        id: "lottery",
+        label: "くじ引き",
+        description: "話しかけると、所持金がランダムな額だけ増える（1 回だけ）。",
+        input: z.strictObject({
+          name: z.string().meta({ title: "イベント名", initial: "くじ引き" }),
+          min: z.number().int().min(0).meta({ title: "最小", initial: 10 }),
+          max: z.number().int().min(0).meta({ title: "最大", initial: 100 }),
+        }),
+        build: (i) => {
+          const say = (text: string) => ({ code: "ShowText", params: { text, position: "bottom", background: "window" }, indent: 0 });
+          return {
+            name: i.name,
+            pages: [
+              {
+                conditions: [],
+                trigger: "action",
+                through: false,
+                priority: "same",
+                commands: [
+                  say("くじを引いてみよう！"),
+                  { code: "plugin:custom-command/RandomGold", params: { min: i.min, max: i.max }, indent: 0 },
+                  { code: "ControlSelfSwitch", params: { key: "A", value: true }, indent: 0 },
+                ],
+              },
+              { conditions: [{ kind: "selfSwitch", key: "A", value: true }], trigger: "action", through: false, priority: "same", commands: [say("今日のくじは おしまい。")] },
+            ],
+          };
+        },
+      }),
+    );
 
     host.editor?.diagnostics((doc) => {
       const out: Diagnostic[] = [];

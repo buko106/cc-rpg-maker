@@ -13,7 +13,8 @@ export type FieldSpec =
   | { kind: "literal"; value: string | number | boolean }
   /** リテラルと列挙だけのユニオン（例：16 | 32 | 48、向き | "retain"）。1 つの選択肢の一覧から選ぶ。 */
   | { kind: "choice"; values: (string | number | boolean)[] }
-  | { kind: "object"; fields: ObjectField[] }
+  /** `location` はスキーマのメタデータ（`.meta({ location })`）：マップと位置のフィールド。マップをクリックして選ぶ欄が付く。 */
+  | { kind: "object"; fields: ObjectField[]; location?: LocationKeys }
   | { kind: "array"; item: FieldSpec; min: number }
   /** キーが enum なら固定の行（`partial` なら行ごとに有無を選べる）、文字列なら自由なキーの行。 */
   | { kind: "record"; key: FieldSpec; value: FieldSpec; partial: boolean }
@@ -34,6 +35,17 @@ export interface ObjectField {
   default?: unknown;
   /** スキーマのメタデータ（`.meta({ initial })`）：エディタで新しく作るときの初期値。検証には影響しない。 */
   initial?: unknown;
+  /** スキーマのメタデータ（`.meta({ title })`）：見出し（無ければフィールド名から決める）。 */
+  title?: string;
+  /** スキーマのメタデータ（`.meta({ description })`）：欄の下に出す補足。 */
+  description?: string;
+}
+
+/** マップと位置を表すフィールドの名前（`.meta({ location: true })` なら mapId / x / y）。 */
+export interface LocationKeys {
+  map: string;
+  x: string;
+  y: string;
 }
 
 /** zod の内部表現（`_zod.def`）を読むための最小の型。 */
@@ -121,12 +133,20 @@ export function describeSchema(schema: ZodType): FieldSpec {
       const value = def.values?.[0];
       return typeof value === "string" || typeof value === "number" || typeof value === "boolean" ? { kind: "literal", value } : { kind: "unknown" };
     }
-    case "object":
+    case "object": {
+      const shape = def.shape ?? {};
+      const loc = meta["location"];
+      const location: LocationKeys | undefined =
+        loc === true ? { map: "mapId", x: "x", y: "y" } : typeof loc === "object" && loc !== null ? (loc as LocationKeys) : undefined;
       return {
         kind: "object",
-        fields: Object.entries(def.shape ?? {}).map(([key, s]) => {
+        fields: Object.entries(shape).map(([key, s]) => {
           const u = unwrap(s);
-          const initial = metaOf(s)["initial"] ?? metaOf(u.inner)["initial"];
+          // 皮（optional / default）の外と中、どちらに付けたメタデータも読む
+          const own = { ...metaOf(u.inner), ...metaOf(s) };
+          const initial = own["initial"];
+          const title = own["title"];
+          const description = own["description"];
           return {
             key,
             spec: describeSchema(s),
@@ -134,9 +154,13 @@ export function describeSchema(schema: ZodType): FieldSpec {
             hasDefault: u.hasDefault,
             ...(u.default === undefined ? {} : { default: u.default }),
             ...(initial === undefined ? {} : { initial }),
+            ...(typeof title === "string" ? { title } : {}),
+            ...(typeof description === "string" ? { description } : {}),
           };
         }),
+        ...(location !== undefined && [location.map, location.x, location.y].every((k) => Object.hasOwn(shape, k)) ? { location } : {}),
       };
+    }
     case "array": {
       const element = def.element === undefined ? undefined : defOf(def.element);
       const keys = element?.type === "object" ? Object.keys(element.shape ?? {}) : [];

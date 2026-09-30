@@ -153,6 +153,54 @@ test("イベントの入力の手間を減らす：文章をすぐ追加・コ�
   await page.waitForFunction("window.__rpgPlaytest.getState().switches.sw_001 === true");
 });
 
+test("イベントのひな形：宝箱（お金）と扉（移動先はマップのクリックで選ぶ）を置く → テストプレイで手に入り、扉で移動する", async ({ page }) => {
+  await createProject(page, "ひな形");
+  const events = () => editor(page, (s) => Object.values(Object.values(s.doc.maps)[0]!.events));
+
+  // 宝箱：開始位置 (5, 5) の真下に置く。中身をお金に切り替える
+  await page.getByLabel("置くイベント").selectOption({ label: "宝箱" });
+  const below = await cellCenter(page, 5, 6);
+  await page.mouse.click(below.x, below.y);
+  const chest = page.getByRole("dialog", { name: "ひな形から作成：宝箱" });
+  await expect(chest.getByRole("button", { name: "作成", exact: true })).toBeDisabled(); // アイテムが無いので、まだ作れない
+  await chest.getByLabel("中身の種類").selectOption({ label: "お金" });
+  await chest.getByLabel("中身 金額").fill("120");
+  await chest.getByRole("button", { name: "作成", exact: true }).click();
+  await expect(chest).toBeHidden();
+
+  // 扉：開始位置の左に置き、移動先はプレビューの (15, 10) をクリックして選ぶ
+  await page.getByLabel("置くイベント").selectOption({ label: "扉・場所移動" });
+  const left = await cellCenter(page, 4, 5);
+  await page.mouse.click(left.x, left.y);
+  const door = page.getByRole("dialog", { name: "ひな形から作成：扉・場所移動" });
+  const picker = door.getByRole("application");
+  const box = await picker.boundingBox();
+  if (box === null) throw new Error("プレビューが無い");
+  await page.mouse.click(box.x + (15.5 / 20) * box.width, box.y + (10.5 / 15) * box.height);
+  await expect(door.getByText("選んでいる位置：(15, 10)")).toBeVisible();
+  await door.getByRole("button", { name: "作成", exact: true }).click();
+  expect(await events()).toMatchObject([
+    { x: 5, y: 6, pages: [{ commands: [{ code: "ShowText" }, { code: "ChangeGold" }, { code: "ControlSelfSwitch" }] }, { commands: [] }] },
+    { x: 4, y: 5, pages: [{ trigger: "touch", commands: [{ code: "TransferPlayer", params: { x: 15, y: 10 } }] }] },
+  ]);
+
+  // テストプレイ：下の宝箱を調べるとお金が手に入り、左の扉にぶつかると移動する
+  await page.getByRole("button", { name: "テストプレイ", exact: true }).click();
+  await page.waitForFunction(() => window.__rpgPlaytest !== undefined && window.__rpgPlaytest.getState().scene.kind === "title");
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(() => window.__rpgPlaytest.getState().scene.kind === "map");
+  await page.waitForTimeout(200);
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(() => window.__rpgPlaytest.getState().message.open);
+  expect(await page.evaluate(() => window.__rpgPlaytest.getState().message.text)).toContain("120G");
+  await page.keyboard.press("Enter");
+  await page.waitForFunction("window.__rpgPlaytest.getState().party.gold === 120");
+  await page.keyboard.down("ArrowLeft");
+  await page.waitForFunction(() => window.__rpgPlaytest.getState().map.player.x === 15, undefined, { timeout: 5000 });
+  await page.keyboard.up("ArrowLeft");
+  expect(await page.evaluate(() => window.__rpgPlaytest.getState().map.player)).toMatchObject({ x: 15, y: 10 });
+});
+
 test("自動保存：編集して待つだけで保存され、リロードしても残る", async ({ page }) => {
   await createProject(page, "自動保存");
   await page.getByRole("button", { name: "タイル 4", exact: true }).click();

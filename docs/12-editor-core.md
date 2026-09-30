@@ -40,7 +40,7 @@ export const cmd = {
   createMap(meta: Omit<MapMeta,"id">, data: Partial<MapData>): EditorCommand;
   deleteMap(mapId): EditorCommand;
   // イベント
-  createEvent(mapId, x, y): EditorCommand;  pasteEvent(mapId, source: MapEvent, x, y): EditorCommand;  moveEvent(mapId, eventId, x, y): EditorCommand;  deleteEvent(mapId, eventId): EditorCommand;
+  createEvent(mapId, x, y): EditorCommand;  createEventFromTemplate(mapId, x, y, template: EventTemplate, input: unknown): EditorCommand;  pasteEvent(mapId, source: MapEvent, x, y): EditorCommand;  moveEvent(mapId, eventId, x, y): EditorCommand;  deleteEvent(mapId, eventId): EditorCommand;
   setEventPage(mapId, eventId, pageIndex, page: EventPage): EditorCommand;
   insertCommands(mapId, eventId, pageIndex, at: number, commands: EventCommand[]): EditorCommand;
   removeCommands(mapId, eventId, pageIndex, at: number, count: number): EditorCommand;
@@ -60,7 +60,7 @@ export const cmd = {
 ```ts
 export interface EditorSession {
   readonly doc: ProjectDocument;
-  readonly ui: EditorUiState;         // { currentMap, currentLayer, tool, tile, selection, zoom, clipboard, recentCommands }
+  readonly ui: EditorUiState;         // { currentMap, currentLayer, tool, tile, selection, zoom, clipboard, eventTemplate, recentCommands }
   readonly dirty: boolean;
   readonly canUndo: boolean; readonly canRedo: boolean;
 
@@ -124,3 +124,17 @@ export interface Diagnostic { severity: "error" | "warning"; code: string; messa
 ## 実装メモ（イベント入力の手間を減らす）
 - **`execute(c, { groupWithNext: true })`**：「次の編集の下準備」。直後（`COALESCE_MS` 以内、間に Undo / Redo をはさまない）に実行した編集と 1 回の Undo にまとめる（履歴のエントリは `batch([下準備, 次の編集])`、元に戻すは逆順）。続く編集が無ければ単独の Undo のまま。まとめるのは 1 回だけで、`coalesce` よりも優先する。エディタは、フォームの中でスイッチ・変数をその場で作ってそのまま選ぶときに使う（13）。
 - **`EditorUiState.recentCommands`**：最近追加したイベントコマンドの code（新しい順・重複なし・`RECENT_COMMANDS_LIMIT` = 6 件。`withRecentCommand`）。文書には保存しない。
+
+## 実装メモ（イベントのひな形）
+- **`EventTemplate`**（`templates.ts`）：`{ id, label, description, input: zod, build(input, project) → { name, pages }, initial?(project) }`。`input` はエディタが入力フォームを作るスキーマで、見出し・補足・初期値はメタデータ（`.meta({ title, description, initial })`）に持たせる（13）。`build` は検証を通った入力（既定値の適用後）を受け取る。`initial(project)` はプロジェクトの中身で決めたい初期値（見た目の画像など）。`defineEventTemplate` は入力の型を推論させるだけの関数。
+- **組み込みのひな形 `BUILTIN_EVENT_TEMPLATES`**（作られるのは普通のページとコマンドなので、あとから自由に編集できる）：
+  - **話しかける人**（`npc`）：決定ボタンで起動。セリフは空行ごとに「文章の表示」。2 回目からのセリフを入れると、1 ページ目の最後でセルフスイッチ A を ON にし、A を条件にした 2 ページ目を作る。うろうろ歩く（`WANDER_ROUTE`）も選べる。
+  - **扉・場所移動**（`door`）：接触で起動して `TransferPlayer`。「ぶつかったとき」はプライオリティ「通常キャラと同じ」、「上に乗ったとき」は「通常キャラの下」。効果音を選ぶと先に `PlaySe`。
+  - **宝箱**（`chest`）：アイテムかお金。「〇〇 を手に入れた！」→ `ChangeItems` / `ChangeGold` → セルフスイッチ A。2 ページ目（A が条件）は開いた後の見た目で、何もしない。アイテム名は作ったときの名前を文章に入れる（名前の制御文字は無いため）。
+  - **商人**（`merchant`）：あいさつ → `ShopProcessing` → 帰りのあいさつ（空なら入れない）。
+  - **敵シンボル**（`enemy`）：`BattleProcessing` と、コマンドの追加と同じ形の分岐（勝ったとき / 逃げたとき / 負けたとき）。勝ったときにセルフスイッチ A を ON、2 ページ目（A が条件）は見た目なし・すり抜け・下（いないのと同じ）。戦闘になるとき（ぶつかる / 話しかける）と動き（うろうろ / 近づいてくる / 動かない）を選べる。
+  - 人の見た目の初期値（話しかける人・商人）は `characterImage(project)`：タイルセットの画像に使われていない最初の画像アセット。
+- **`cmd.createEventFromTemplate(mapId, x, y, template, input, id?)`**：入力を `template.input` で検証し、`build` の結果を `mapEventSchema` で検証してから置く（プラグインのひな形が例外を投げたり、正しくないイベントやページの無いイベントを作ったりしても `invalid` で、文書は変わらない）。範囲外は `invalid`、ID の重複とそのセルに別のイベントがあるときは `duplicate`（`pasteEvent` と同じ）。1 回の Undo で消える。ラベルは「イベントの作成（{ひな形の名前}）」。
+- **`EditorUiState.eventTemplate`**：イベントツールで空いたセルに置くもの（ひな形の ID。`undefined` は空のイベント）。文書には保存しない。
+- **`splitMessages`**（空行で文章を分ける）は editor-ui から移した（「文章をすぐ追加」とひな形のセリフで共有）。
+- **テスト**：`templates.test.ts`（5 種類のページとコマンドがスキーマと各コマンドの params の zod を通る・ページの形・初期値・`createEventFromTemplate` の Undo と失敗）。

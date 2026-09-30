@@ -1,4 +1,5 @@
 import type { CommandRegistry } from "@rpg/core";
+import type { EventTemplate } from "@rpg/editor-core";
 import { createPluginRegistry, loadPlugins, selectPlugins, toRuntimeExtensions } from "@rpg/plugin-api";
 import type { DiagnosticsFn, PluginModule, PluginRefLike } from "@rpg/plugin-api";
 import type { Logger, RuntimeExtensions } from "@rpg/runtime";
@@ -11,6 +12,8 @@ export interface PluginEnv {
   pluginCatalog: readonly PluginModule[];
   /** プラグインが登録したエディタ用の診断（セッションの `validate()` に足す）。 */
   pluginDiagnostics: readonly DiagnosticsFn[];
+  /** プラグインが足したイベントのひな形（組み込みのひな形の後ろに並ぶ）。 */
+  pluginEventTemplates: readonly EventTemplate[];
   /** プラグインのコマンドの専用フォーム（コマンド code → コンポーネント）。 */
   pluginForms: Readonly<Record<string, ComponentType<CommandFormOverrideProps>>>;
   /** プロジェクトが有効にしているプラグインから、テストプレイ用のランタイム拡張を作る（プロジェクトごとに読み込み直す）。 */
@@ -31,6 +34,7 @@ export async function createPluginEnv(catalog: readonly PluginModule[], commands
   return {
     pluginCatalog: catalog,
     pluginDiagnostics: registry.editor.diagnostics,
+    pluginEventTemplates: registry.editor.eventTemplates,
     pluginForms: Object.fromEntries(registry.editor.commandForms) as PluginEnv["pluginForms"],
     pluginFailures: result.failed,
     async createExtensions(refs, log) {

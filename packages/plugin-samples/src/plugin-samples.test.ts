@@ -101,6 +101,25 @@ describe("custom-command", () => {
   });
 });
 
+describe("custom-command のひな形「くじ引き」", () => {
+  it("エディタで読み込むと、ひな形が 1 つ足される。1 回目は RandomGold とセルフスイッチ A、2 回目は別のセリフ", async () => {
+    const registry = createPluginRegistry();
+    await loadPlugins([customCommandPlugin], registry, { editor: true });
+    const [lottery] = registry.editor.eventTemplates;
+    expect(lottery?.id).toBe("plugin:custom-command/lottery");
+    const input = lottery!.input.parse({ name: "くじ", min: 5, max: 20 });
+    const { name, pages } = lottery!.build(input, {} as never);
+    expect(name).toBe("くじ");
+    expect(pages[0]!.commands.map((c) => c.code)).toEqual(["ShowText", "plugin:custom-command/RandomGold", "ControlSelfSwitch"]);
+    expect(pages[0]!.commands[1]!.params).toEqual({ min: 5, max: 20 });
+    expect(pages[1]).toMatchObject({ conditions: [{ kind: "selfSwitch", key: "A", value: true }] });
+    // ゲームの中（エディタ以外）で読み込んだときは、ひな形は登録されない
+    const game = createPluginRegistry();
+    await loadPlugins([customCommandPlugin], game);
+    expect(game.editor.eventTemplates).toEqual([]);
+  });
+});
+
 describe("[inv-1] プラグインの有無とリプレイ", () => {
   it("プラグインを 0 個読み込んだ状態と、何も登録しないプラグインを 1 個読み込んだ状態で、同じリプレイが同じ結果になる", async () => {
     const noop: PluginModule = { name: "noop", version: "1.0.0", register: () => {} };

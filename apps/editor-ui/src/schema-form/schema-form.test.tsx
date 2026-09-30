@@ -89,6 +89,31 @@ describe("describeSchema", () => {
     expect(byKey["wrapped"]).toMatchObject({ optional: true, initial: ["はい"] });
   });
 
+  it("見出し（title）・補足（description）は、皮（optional / default）の外と中のどちらに付けても読む", () => {
+    const schema = z.strictObject({
+      a: z.string().meta({ title: "見出し A", description: "補足 A" }),
+      b: z.string().meta({ title: "中" }).optional(),
+      c: z.boolean().default(true).meta({ title: "外" }),
+    });
+    const spec = describeSchema(schema);
+    if (spec.kind !== "object") throw new Error("object のはず");
+    expect(spec.fields.map((f) => [f.key, f.title, f.description])).toEqual([
+      ["a", "見出し A", "補足 A"],
+      ["b", "中", undefined],
+      ["c", "外", undefined],
+    ]);
+  });
+
+  it("マップと位置の欄（location）：true なら mapId / x / y、オブジェクトならその名前。フィールドが無ければ付けない", () => {
+    const xy = { x: z.number(), y: z.number() };
+    expect(describeSchema(z.strictObject({ mapId: z.string(), ...xy }).meta({ location: true }))).toMatchObject({ location: { map: "mapId", x: "x", y: "y" } });
+    expect(describeSchema(systemSettingsSchema)).toMatchObject({ location: { map: "startMap", x: "startX", y: "startY" } });
+    expect(describeSchema(z.strictObject({ ...xy }).meta({ location: true }))).not.toHaveProperty("location");
+    const transfer = createCommandRegistry();
+    registerBuiltins(transfer);
+    expect(describeSchema(transfer.get("TransferPlayer")!.params)).toMatchObject({ location: { map: "mapId", x: "x", y: "y" } });
+  });
+
   it("リテラルと列挙だけのユニオンは、1 つの選択肢の一覧にまとめる", () => {
     expect(describeSchema(z.union([z.enum(["down", "up"]), z.literal("retain")]))).toEqual({ kind: "choice", values: ["down", "up", "retain"] });
     expect(describeSchema(z.union([z.enum(["down", "up"]), z.enum(["random"])]))).toEqual({ kind: "choice", values: ["down", "up", "random"] });
@@ -315,6 +340,55 @@ describe("ウィジェット", () => {
       expect(last).toBeUndefined();
       expect([...(screen.getByLabelText("アクター") as HTMLSelectElement).options].map((o) => o.text)).not.toContain("＋ 新しいアクター…");
     });
+  });
+
+  it("見出しはメタデータの title（無ければ共通の表示名）。補足は欄の近くに出る", () => {
+    render(<Harness schema={z.strictObject({ name: z.string().meta({ title: "イベント名", description: "マップに出る名前" }), text: z.string() })} />);
+    expect(screen.getByLabelText("イベント名")).toBeTruthy();
+    expect(screen.getByLabelText("本文")).toBeTruthy();
+    expect(screen.getByText("マップに出る名前")).toBeTruthy();
+  });
+
+  it("選択肢が 1 つも無い ID 欄には、どこで作れるかを出す（その場で作れる種類には出さない）", () => {
+    const none: FormContext = { refOptions: () => [] };
+    render(<Harness schema={z.strictObject({ item: z.string().meta({ ref: "item" }), map: z.string().meta({ ref: "map" }) })} context={none} />);
+    expect(screen.getByText("まだアイテムがありません（メニューの「データベース」で追加できます）")).toBeTruthy();
+    expect(screen.getByText("まだマップがありません（左のマップの一覧で追加できます）")).toBeTruthy();
+    cleanup();
+    render(<Harness schema={z.strictObject({ sw: z.string().meta({ ref: "switch" }) })} context={{ ...none, newRef: () => ({ noun: "スイッチ", create: () => undefined }) }} />);
+    expect(screen.queryByText(/まだスイッチがありません/)).toBeNull();
+  });
+
+  it("マップと位置の欄：マップが選ばれていれば、位置の欄の後ろに renderLocation の部品が付き、選んだ位置が x / y に入る", () => {
+    let last: unknown;
+    const seen: unknown[] = [];
+    const context: FormContext = {
+      refOptions,
+      renderLocation: (p) => {
+        seen.push({ mapId: p.mapId, x: p.x, y: p.y, label: p.label });
+        return (
+          <button type="button" onClick={() => p.onPick(7, 8)}>
+            位置を選ぶ
+          </button>
+        );
+      },
+    };
+    const schema = z.strictObject({ to: z.strictObject({ mapId: z.string().meta({ ref: "map" }), x: z.number(), y: z.number() }).meta({ title: "移動先", location: true }), after: z.string() });
+    render(<Harness schema={schema} initial={{ to: { mapId: "map_town", x: 1, y: 2 }, after: "" }} context={context} onValue={(v) => (last = v)} />);
+    expect(seen.at(-1)).toEqual({ mapId: "map_town", x: 1, y: 2, label: "移動先" });
+    // 部品は Y の欄の後ろ、次のフィールドの前
+    const picker = screen.getByRole("button", { name: "位置を選ぶ" });
+    expect(screen.getByLabelText("移動先 Y").compareDocumentPosition(picker) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(picker.compareDocumentPosition(screen.getByLabelText("after")) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    fireEvent.click(picker);
+    expect(last).toEqual({ to: { mapId: "map_town", x: 7, y: 8 }, after: "" });
+    cleanup();
+    // マップが未選択なら出さない。renderLocation が無ければ数値の欄だけ
+    render(<Harness schema={schema} initial={{ to: { mapId: "", x: 0, y: 0 }, after: "" }} context={context} />);
+    expect(screen.queryByRole("button", { name: "位置を選ぶ" })).toBeNull();
+    cleanup();
+    render(<Harness schema={schema} initial={{ to: { mapId: "map_town", x: 0, y: 0 }, after: "" }} />);
+    expect(screen.getByLabelText("移動先 X")).toBeTruthy();
   });
 
   it("unknown な型は JSON で編集できる（壊れた JSON は無視）", () => {

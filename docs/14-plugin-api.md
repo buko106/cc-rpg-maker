@@ -33,6 +33,7 @@ export interface PluginHost {
   readonly editor?: {                         // エディタ内でロードされたときのみ存在
     commandForm(code: string, component: unknown): void;
     diagnostics(fn: (doc: ProjectDocument) => Diagnostic[]): void;
+    eventTemplate(template: EventTemplate): void;   // イベントのひな形（12）。id は `plugin:<name>/<id>` になる
   };
   readonly log: Logger;
 }
@@ -70,3 +71,8 @@ export function loadPlugins(mods: PluginModule[], host: PluginHost): Promise<{ l
 - **結線**：`apps/player` は `PlayerConfig.plugins`（ビルドに入っているプラグイン。`main.ts` は `samplePlugins`）から、プロジェクトの `system.plugins` で有効にされたものだけを読み込む（読み込めなくてもゲームは始まり、警告だけ）。`apps/editor-ui` は `EditorEnv` にカタログ・診断・専用フォーム・`createExtensions(refs)` を持ち、エディタでは全部入りで読み込み（コマンドが一覧に出る）、テストプレイでは `system.plugins` に従って読み込み直す。システム設定に「プラグイン」タブ（有効/無効と設定の JSON）。`editor-core` は、プラグインのコマンドを使っているのに有効になっていないと `pluginNotEnabled` の警告を出し、`EditorSessionDeps.diagnostics` でプラグインの診断を足す（例外を投げても他の診断は出る）。
 - **テスト**：ローダ（依存順・循環・ロールバック・衝突・遅延登録・エディタ用の登録）、`toRuntimeExtensions`、`selectPlugins`、サンプルの統合（実プロジェクト `fixtures/projects/v2/plugin-demo` をランタイムで動かす。共有の乱数で同じシードなら同じ額）、**不変条件 1**（プラグイン 0 個と no-op 1 個で、demo のリプレイの状態ハッシュ・Effect・警告が一致）、エディタ（プラグインタブ・コマンド一覧・専用フォーム・診断・テストプレイ）、E2E `e2e/plugins.spec.ts`（エディタでプラグインを有効にして独自コマンドを置き、エディタのテストプレイと、書き出したゲーム（別オリジン）の両方で HUD と所持金が動く）。
 - **未対応**：プラグインの実行時の読み込み（URL からの動的 import。ビルドに同梱したものだけ）、プラグインのサンドボックス、コマンドの専用フォームの実例（仕組みとテストだけ）。
+
+## 実装メモ（イベントのひな形）
+- **`host.editor.eventTemplate(template)`**：イベントのひな形（`EventTemplate`、12）を足す。`id` は接頭辞なしで書き、`plugin:<name>/<id>` として登録される（書式はコマンドの code と同じ。不正な id・同じ id の二重登録はそのプラグインの失敗で、何も残さない）。登録内容は `PluginRegistry.editor.eventTemplates`、エディタでは `EditorEnv.pluginEventTemplates` として、組み込みのひな形の後ろに「置くイベント」に並ぶ。ゲームの中（エディタ以外）で読み込んだときは `host.editor` が無いので登録されない。
+- プラグイン作者向けに `defineEventTemplate` と型（`EventTemplate` / `EventDraft`）を再エクスポートした。入力フォームは `input` の zod から作られる（見出しは `.meta({ title })`）。
+- **サンプル**：`custom-command` に「くじ引き」（`plugin:custom-command/lottery`。`RandomGold` を使い、1 回引いたらセルフスイッチ A で別のセリフ）。テスト：`plugin-api.test.ts`（接頭辞・不正な id・二重登録）、`plugin-samples.test.ts`（くじ引きの形・ゲームの中では登録されない）、editor-ui の `EventTemplateDialog.test.tsx`（「置くイベント」に並んで置ける）。

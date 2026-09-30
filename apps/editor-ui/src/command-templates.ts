@@ -92,17 +92,8 @@ export function branchOwner(commands: readonly EventCommand[], index: number): n
   return undefined;
 }
 
-/**
- * 「文章をすぐ追加」の入力を、1 つずつの「文章の表示」の本文に分ける。空行（空白だけの行を含む）が区切り。
- * 各本文の前後の空行と末尾の空白は落とす（行頭の全角スペースなどの字下げは残す）。中身の無いものは入れない。
- */
-export function splitMessages(input: string): string[] {
-  return input
-    .replace(/\r\n?/g, "\n")
-    .split(/\n[ \t　]*\n/)
-    .map((block) => block.replace(/^(?:[ \t　]*\n)+/, "").replace(/\s+$/, ""))
-    .filter((block) => block.trim() !== "");
-}
+/** 「文章をすぐ追加」の入力を、1 つずつの「文章の表示」の本文に分ける（ひな形のセリフと同じ規則。editor-core にある）。 */
+export { splitMessages } from "@rpg/editor-core";
 
 /** 選択中の行の直後に入れるときの位置と字下げ。開きの行なら分岐の中（字下げ +1）、そうでなければ同じ字下げ。 */
 export function insertionPoint(commands: readonly EventCommand[], selected: number | undefined): { at: number; indent: number } {

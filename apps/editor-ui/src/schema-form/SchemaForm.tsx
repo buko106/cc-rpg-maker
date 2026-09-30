@@ -1,8 +1,8 @@
-import { useId, useState } from "react";
+import { Fragment, useId, useState } from "react";
 import type { ReactElement, ReactNode } from "react";
 import type { EventCommand } from "@rpg/schema";
 import type { FieldSpec, ObjectField } from "./introspect.js";
-import { fieldLabel, optionLabelOf } from "./labels.js";
+import { fieldLabel, optionLabelOf, refLabel } from "./labels.js";
 import { defaultValue, matchOption, optionLabel, tryParseJson } from "./values.js";
 import type { RefOptions } from "./values.js";
 
@@ -19,6 +19,17 @@ export interface FormContext {
    * ID 欄の選択肢の最後に「＋ 新しい{noun}…」が出る。
    */
   newRef?: (ref: string) => { noun: string; create: (name: string) => string | undefined } | undefined;
+  /** マップと位置の欄（`.meta({ location })`）に付ける、マップをクリックして位置を選ぶウィジェット（無ければ数値の欄だけ）。 */
+  renderLocation?: (props: LocationPickerProps) => ReactNode;
+}
+
+export interface LocationPickerProps {
+  mapId: string;
+  x: number;
+  y: number;
+  /** 欄の名前（アクセシブルな名前に使う） */
+  label: string;
+  onPick: (x: number, y: number) => void;
 }
 
 interface FieldProps {
@@ -32,6 +43,9 @@ interface FieldProps {
 }
 
 const isRecord = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
+
+/** `ref` の種類のものを作る画面の名前（選択肢が無いときの案内）。 */
+const refHome = (ref: string): string => (ref === "asset" ? "メニューの「アセット」" : ref === "map" ? "左のマップの一覧" : ref === "switch" || ref === "variable" ? "メニューの「システム」" : "メニューの「データベース」");
 
 /** ID 欄の「＋ 新しい…」の値。ID には `:` を使えないので、既存の ID と重ならない。 */
 const NEW_REF = ":new";
@@ -85,6 +99,7 @@ function StringField({ spec, value, onChange, ctx, label }: FieldProps & { spec:
           ))}
           {creator !== undefined && <option value={NEW_REF}>＋ 新しい{creator.noun}…</option>}
         </select>
+        {options.length === 0 && creator === undefined && <small className="sf-hint">まだ{refLabel(spec.ref)}がありません（{refHome(spec.ref)}で追加できます）</small>}
         {creating && creator !== undefined && (
           <NewRef
             noun={creator.noun}
@@ -250,7 +265,7 @@ function UnionField({ spec, value, onChange, ctx, label }: FieldProps & { spec: 
 
 function ObjectFieldRow({ field, obj, onChange, ctx, parentLabel }: { field: ObjectField; obj: Record<string, unknown>; onChange: (v: unknown) => void; ctx: FormContext; parentLabel: string }): ReactElement | null {
   if (field.spec.kind === "literal") return null;
-  const label = fieldLabel(field.key);
+  const label = field.title ?? fieldLabel(field.key);
   const fullLabel = parentLabel === "" ? label : `${parentLabel} ${label}`;
   const present = Object.hasOwn(obj, field.key) && obj[field.key] !== undefined;
   const set = (v: unknown): void => onChange({ ...obj, [field.key]: v });
@@ -271,17 +286,44 @@ function ObjectFieldRow({ field, obj, onChange, ctx, parentLabel }: { field: Obj
       ) : (
         <span className="sf-label">{label}</span>
       )}
+      {/* 補足は、ひとかたまりの欄なら見出しの直下、1 行の欄なら欄の下 */}
+      {block && field.description !== undefined && <small className="sf-hint">{field.description}</small>}
       {(present || !field.optional) && <Field spec={field.spec} value={obj[field.key]} label={fullLabel} ctx={ctx} onChange={set} />}
+      {!block && field.description !== undefined && <small className="sf-hint">{field.description}</small>}
     </div>
   );
 }
 
 function ObjectFields({ spec, value, onChange, ctx, label }: FieldProps & { spec: Extract<FieldSpec, { kind: "object" }> }): ReactElement {
   const obj = isRecord(value) ? value : {};
+  const loc = spec.location;
+  // マップと位置の欄は、最後の欄の直後にマップのプレビューを付ける（クリックで位置が決まる）
+  const last = loc === undefined ? -1 : Math.max(...[loc.map, loc.x, loc.y].map((k) => spec.fields.findIndex((f) => f.key === k)));
+  const picker = (): ReactNode => {
+    if (loc === undefined || ctx.renderLocation === undefined) return null;
+    const mapId = obj[loc.map];
+    const x = obj[loc.x];
+    const y = obj[loc.y];
+    if (typeof mapId !== "string" || mapId === "") return null;
+    return (
+      <div className="sf-row sf-block">
+        {ctx.renderLocation({
+          mapId,
+          x: typeof x === "number" ? x : 0,
+          y: typeof y === "number" ? y : 0,
+          label: label === "" ? "位置" : label,
+          onPick: (px, py) => onChange({ ...obj, [loc.x]: px, [loc.y]: py }),
+        })}
+      </div>
+    );
+  };
   return (
     <div className="sf-object" role="group" aria-label={label === "" ? undefined : label}>
-      {spec.fields.map((f) => (
-        <ObjectFieldRow key={f.key} field={f} obj={obj} onChange={onChange} ctx={ctx} parentLabel={label} />
+      {spec.fields.map((f, i) => (
+        <Fragment key={f.key}>
+          <ObjectFieldRow field={f} obj={obj} onChange={onChange} ctx={ctx} parentLabel={label} />
+          {i === last && picker()}
+        </Fragment>
       ))}
     </div>
   );

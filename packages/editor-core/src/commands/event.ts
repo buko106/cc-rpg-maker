@@ -1,10 +1,11 @@
-import { newId } from "@rpg/schema";
+import { mapEventSchema, newId } from "@rpg/schema";
 import type { EventCommand, EventId, EventPage, MapData, MapEvent, MapId } from "@rpg/schema";
 import type { ProjectDocument } from "@rpg/project-store";
 import type { Result } from "@rpg/schema";
 import { defineEdit, err, invalid, mapOf, notFound, ok, withEntry, withMap } from "../command.js";
 import type { EditorCommand } from "../command.js";
 import type { EditError } from "../errors.js";
+import type { EventTemplate } from "../templates.js";
 
 /** 新しいイベントページの既定。 */
 export const defaultPage = (): EventPage => ({ conditions: [], trigger: "action", through: false, priority: "same", commands: [] });
@@ -57,6 +58,40 @@ export function createEvent(mapId: MapId, x: number, y: number, id: EventId = ne
       if (eventOf(map, id) !== undefined) return err({ kind: "duplicate", message: `イベント ${id} は既にある` });
       const n = Object.keys(map.events).length + 1;
       return ok(withEvent(doc, map, { id, name: `EV${String(n).padStart(3, "0")}`, x, y, pages: [defaultPage()] }));
+    },
+  });
+}
+
+/**
+ * ひな形（`template`）に入力（`input`）を渡して作ったイベントを、マップ上の `(x, y)` に置く。1 回の Undo で消える。
+ * 入力は `template.input` で検証し、作られたイベントも `mapEventSchema` で検証する（プラグインのひな形の誤りで文書を壊さない）。
+ * そのセルに既にイベントがあるときは置かない。
+ */
+export function createEventFromTemplate(mapId: MapId, x: number, y: number, template: EventTemplate, input: unknown, id: EventId = newId<"EventId">("ev")): EditorCommand {
+  return defineEdit({
+    kind: "createEventFromTemplate",
+    label: `イベントの作成（${template.label}）`,
+    maps: [mapId],
+    apply(doc) {
+      const map = mapOf(doc, mapId);
+      if (map === undefined) return err(notFound("マップ", mapId));
+      if (!inMap(map, x, y)) return err(invalid(`(${x},${y}) はマップ ${mapId} の外`));
+      if (eventOf(map, id) !== undefined) return err({ kind: "duplicate", message: `イベント ${id} は既にある` });
+      const there = Object.values(map.events).find((e) => e.x === x && e.y === y);
+      if (there !== undefined) return err({ kind: "duplicate", message: `(${x},${y}) には既にイベント「${there.name}」がある` });
+      const parsed = template.input.safeParse(input);
+      if (!parsed.success) return err(invalid(`ひな形「${template.label}」の入力が正しくない：${parsed.error.issues.map((i) => i.message).join("、")}`));
+      let built: ReturnType<EventTemplate["build"]>;
+      try {
+        built = template.build(parsed.data, doc.project);
+      } catch (e) {
+        return err(invalid(`ひな形「${template.label}」でイベントを作れなかった：${e instanceof Error ? e.message : String(e)}`));
+      }
+      const event = mapEventSchema.safeParse({ id, name: built.name, x, y, pages: built.pages });
+      if (!event.success || event.data.pages.length === 0) {
+        return err(invalid(`ひな形「${template.label}」が作ったイベントが正しくない：${event.success ? "ページが無い" : event.error.issues.map((i) => `${i.path.join(".")} ${i.message}`).join("、")}`));
+      }
+      return ok(withEvent(doc, map, event.data));
     },
   });
 }

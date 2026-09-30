@@ -1,6 +1,6 @@
 import type { EventCommand } from "@rpg/schema";
 import { describe, expect, it } from "vitest";
-import { applyOps, branchOwner, commandTemplate, insertionPoint, removalRange, splitMessages, syncChoiceBranches } from "./command-templates.js";
+import { applyOps, branchOwner, commandTemplate, insertionPoint, removalRange, syncChoiceBranches } from "./command-templates.js";
 
 const c = (code: string, indent = 0): EventCommand => ({ code, params: {}, indent });
 
@@ -112,21 +112,5 @@ describe("branchOwner", () => {
     expect(branchOwner([c("Wait"), c("ChoiceBranch", 1)], 1)).toBeUndefined();
     expect(branchOwner([c("ChoiceBranch")], 0)).toBeUndefined();
     expect(branchOwner([], 3)).toBeUndefined();
-  });
-});
-
-describe("splitMessages", () => {
-  it("空行で区切る。区切りの中の改行は残し、前後の空行と末尾の空白は落とす", () => {
-    expect(splitMessages("こんにちは")).toEqual(["こんにちは"]);
-    expect(splitMessages("1行目\n2行目\n\n次の文章  \n")).toEqual(["1行目\n2行目", "次の文章"]);
-    expect(splitMessages("a\n\n\n\nb")).toEqual(["a", "b"]);
-    expect(splitMessages("a\n \u3000\nb")).toEqual(["a", "b"]); // 空白だけの行も区切り
-    expect(splitMessages("a\r\n\r\nb")).toEqual(["a", "b"]);
-  });
-
-  it("行頭の字下げ（全角スペース）は残す。中身の無い入力は何も返さない", () => {
-    expect(splitMessages("\u3000字下げ")).toEqual(["\u3000字下げ"]);
-    expect(splitMessages("")).toEqual([]);
-    expect(splitMessages(" \n\n\u3000\n")).toEqual([]);
   });
 });

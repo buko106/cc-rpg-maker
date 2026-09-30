@@ -28,19 +28,22 @@ export const pluginRefSchema = z.strictObject({
 });
 export type PluginRef = z.infer<typeof pluginRefSchema>;
 
-export const systemSettingsSchema = z.strictObject({
-  startMap: mapIdSchema,
-  startX: nonNegativeInt,
-  startY: nonNegativeInt,
-  initialParty: z.array(actorIdSchema),
-  tileSize: z.union([z.literal(16), z.literal(32), z.literal(48)]),
-  screen: z.strictObject({ width: z.number().int().min(1), height: z.number().int().min(1) }),
-  bgm: z.strictObject({ title: audioRefSchema.optional(), battle: audioRefSchema.optional() }),
-  /** UI 文言 */
-  terms: z.record(z.string(), z.string()),
-  /** このプロジェクトが使うプラグイン（docs/14-plugin-api.md）。`params` は各プラグインが解釈する。 */
-  plugins: z.array(pluginRefSchema),
-});
+export const systemSettingsSchema = z
+  .strictObject({
+    startMap: mapIdSchema,
+    startX: nonNegativeInt,
+    startY: nonNegativeInt,
+    initialParty: z.array(actorIdSchema),
+    tileSize: z.union([z.literal(16), z.literal(32), z.literal(48)]),
+    screen: z.strictObject({ width: z.number().int().min(1), height: z.number().int().min(1) }),
+    bgm: z.strictObject({ title: audioRefSchema.optional(), battle: audioRefSchema.optional() }),
+    /** UI 文言 */
+    terms: z.record(z.string(), z.string()),
+    /** このプロジェクトが使うプラグイン（docs/14-plugin-api.md）。`params` は各プラグインが解釈する。 */
+    plugins: z.array(pluginRefSchema),
+  })
+  // エディタ用のメタデータ：開始位置をマップのクリックで選べる（検証には影響しない）
+  .meta({ location: { map: "startMap", x: "startX", y: "startY" } });
 export type SystemSettings = z.infer<typeof systemSettingsSchema>;
 
 export const assetEntrySchema = z.strictObject({

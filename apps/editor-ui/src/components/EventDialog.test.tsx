@@ -2,7 +2,7 @@
 import { cmd } from "@rpg/editor-core";
 import type { EventId, MapId } from "@rpg/schema";
 import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createTestEnv } from "../test-env.js";
 import type { TestEnv } from "../test-env.js";
 import { EventDialog } from "./EventDialog.js";
@@ -160,7 +160,7 @@ describe("EventDialog", () => {
 
   it("グラフィックを設定して、外すと page から消える", () => {
     fireEvent.click(screen.getByLabelText("グラフィックを設定"));
-    expect(page().graphic).toMatchObject({ index: 0, direction: "up" });
+    expect(page().graphic).toMatchObject({ index: 0, direction: "down" });
     expect(Object.keys(t.session.doc.project.assets.entries)).toContain(page().graphic!.asset);
     fireEvent.click(screen.getByLabelText("グラフィックを設定"));
     expect(page()).not.toHaveProperty("graphic");
@@ -275,6 +275,26 @@ describe("EventDialog", () => {
     act(() => t.session.redo());
     expect(t.session.doc.project.switches).toEqual({ sw_001: { name: "扉を開けた" } });
     expect(page().commands[0]!.params).toEqual({ ids: ["sw_001"], value: true });
+  });
+
+  it("場所移動の移動先は、マップのプレビューをクリックして選べる。範囲の外の位置はそう出て、矢印キーで内側に寄る", () => {
+    vi.spyOn(HTMLCanvasElement.prototype, "getBoundingClientRect").mockReturnValue({ left: 0, top: 0, width: 640, height: 480, right: 640, bottom: 480, x: 0, y: 0, toJSON: () => ({}) });
+    addCommand("場所移動");
+    const form = screen.getByLabelText("コマンドの設定");
+    const picker = within(form).getByRole("application", { name: /マップ「MAP001」をクリックして位置を選ぶ/ });
+    fireEvent.pointerDown(picker, { clientX: 4 * 32 + 16, clientY: 2 * 32 + 16, button: 0, pointerId: 1 });
+    expect(page().commands[0]!.params).toMatchObject({ mapId: M1, x: 4, y: 2 });
+    fireEvent.pointerMove(picker, { clientX: 6 * 32 + 16, clientY: 1 * 32 + 16 });
+    expect(within(form).getByText(/カーソル：\(6, 1\)/)).toBeTruthy();
+    fireEvent.pointerLeave(picker);
+    fireEvent.change(within(form).getByLabelText("X"), { target: { value: "30" } });
+    expect(within(form).getByText("(30, 2) はマップ「MAP001」（20×15）の外です")).toBeTruthy();
+    fireEvent.keyDown(picker, { key: "ArrowUp" });
+    expect(page().commands[0]!.params).toMatchObject({ x: 19, y: 1 });
+    // 移動先のマップが無くなっていたら、プレビューの代わりにそう出す
+    act(() => void t.session.execute(cmd.replaceCommand(M1, EV, 0, 0, { ...page().commands[0]!, params: { ...page().commands[0]!.params, mapId: "map_gone" } })));
+    expect(within(form).getByText("マップ map_gone はありません。")).toBeTruthy();
+    vi.restoreAllMocks();
   });
 
   it("入力の問題は、フォームと同じ呼び名の場所と「未設定です」で出る", () => {

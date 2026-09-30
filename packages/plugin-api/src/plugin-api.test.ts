@@ -1,7 +1,7 @@
 import { createCtx } from "@rpg/core";
 import { loadFixtureProject } from "@rpg/test-utils";
 import { describe, expect, it } from "vitest";
-import { createPluginRegistry, loadPlugins, selectPlugins, toRuntimeExtensions, z } from "./index.js";
+import { createPluginRegistry, defineEventTemplate, loadPlugins, selectPlugins, toRuntimeExtensions, z } from "./index.js";
 import type { Logger, PluginModule } from "./index.js";
 
 const plugin = (name: string, register: PluginModule["register"] = () => {}, extra: Partial<PluginModule> = {}): PluginModule => ({ name, version: "1.0.0", register, ...extra });
@@ -146,6 +146,30 @@ describe("loadPlugins", () => {
     expect(r.failed.map((f) => f.name)).toEqual(["bad-form"]);
     expect(registry.editor.commandForms.get("plugin:ed/C")).toBe(Form);
     expect(registry.editor.diagnostics).toHaveLength(1);
+  });
+
+  it("イベントのひな形：id に plugin:<name>/ が付く。不正な id・二重の登録は失敗し、何も残さない", async () => {
+    const registry = createPluginRegistry();
+    const template = (id: string) => defineEventTemplate({ id, label: "看板", description: "", input: empty, build: () => ({ name: "看板", pages: [] }) });
+    const r = await loadPlugins(
+      [
+        plugin("tpl", (h) => h.editor!.eventTemplate(template("sign"))),
+        plugin("bad-id", (h) => h.editor!.eventTemplate(template("no/slash"))),
+        plugin("twice", (h) => {
+          h.editor!.eventTemplate(template("a"));
+          h.editor!.eventTemplate(template("a"));
+        }),
+      ],
+      registry,
+      { editor: true },
+    );
+    expect(r.loaded).toEqual(["tpl"]);
+    expect(r.failed.map((f) => f.name)).toEqual(["bad-id", "twice"]);
+    expect(registry.editor.eventTemplates.map((t) => [t.id, t.label])).toEqual([["plugin:tpl/sign", "看板"]]);
+    // 同じプラグインを別の登録簿へ読み込み直しても、同じ id になる（エディタを開き直したとき）
+    const again = createPluginRegistry();
+    await loadPlugins([plugin("tpl", (h) => h.editor!.eventTemplate(template("sign")))], again, { editor: true });
+    expect(again.editor.eventTemplates.map((t) => t.id)).toEqual(["plugin:tpl/sign"]);
   });
 
   it("失敗は logger に警告として出る", async () => {

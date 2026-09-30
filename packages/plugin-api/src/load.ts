@@ -1,7 +1,7 @@
 import { createFormulaRegistry, registerBuiltinFns } from "@rpg/core";
 import type { CommandHandler } from "@rpg/core";
 import { noopLogger } from "@rpg/runtime";
-import type { BattleRules, DiagnosticsFn, EffectHandler, FormulaFn, LoadOptions, LoadResult, PluginHost, PluginModule, PluginRegistry, ProjectionHook, SceneKind } from "./types.js";
+import type { BattleRules, DiagnosticsFn, EffectHandler, EventTemplate, FormulaFn, LoadOptions, LoadResult, PluginHost, PluginModule, PluginRegistry, ProjectionHook, SceneKind } from "./types.js";
 
 const NAME = /^[A-Za-z0-9_-]{1,64}$/;
 const COMMAND_CODE = /^[A-Za-z][A-Za-z0-9_]*$/;
@@ -15,17 +15,18 @@ interface Staged {
   hooks: { scene: SceneKind; fn: ProjectionHook }[];
   forms: { code: string; component: unknown }[];
   diagnostics: DiagnosticsFn[];
+  templates: EventTemplate[];
 }
 
 /** 登録口。`seal()` のあとに呼ぶと例外（`register` の外で登録できてしまうと、ロールバックできない）。 */
 function createStagedHost(mod: PluginModule, opts: LoadOptions): { host: PluginHost; staged: Staged; seal(): void } {
-  const staged: Staged = { commands: [], formulas: [], battle: {}, effects: [], hooks: [], forms: [], diagnostics: [] };
+  const staged: Staged = { commands: [], formulas: [], battle: {}, effects: [], hooks: [], forms: [], diagnostics: [], templates: [] };
   let sealed = false;
   const open = (what: string): void => {
     if (sealed) throw new Error(`${mod.name}: register の外で ${what} は呼べない`);
   };
-  const fullCode = (code: string): string => {
-    if (!COMMAND_CODE.test(code)) throw new Error(`${mod.name}: コマンドの code が不正: "${code}"`);
+  const fullCode = (code: string, what = "コマンドの code"): string => {
+    if (typeof code !== "string" || !COMMAND_CODE.test(code)) throw new Error(`${mod.name}: ${what}が不正: "${String(code)}"`);
     return `plugin:${mod.name}/${code}`;
   };
   const host: PluginHost = {
@@ -72,6 +73,10 @@ function createStagedHost(mod: PluginModule, opts: LoadOptions): { host: PluginH
               open("editor.diagnostics");
               staged.diagnostics.push(fn);
             },
+            eventTemplate(template: EventTemplate) {
+              open("editor.eventTemplate");
+              staged.templates.push({ ...template, id: fullCode(template.id, "ひな形の id") });
+            },
           },
         }
       : {}),
@@ -93,6 +98,11 @@ function check(mod: PluginModule, staged: Staged, registry: PluginRegistry): voi
   for (const f of registry.formulas) scratch.registerFn(f.name, f.fn, { sideEffect: f.sideEffect });
   for (const f of staged.formulas) scratch.registerFn(f.name, f.fn, { sideEffect: f.sideEffect });
   for (const f of staged.forms) if (!staged.commands.some((c) => c.code === f.code)) throw new Error(`${mod.name}: フォームを差し替えるコマンド ${f.code} を、このプラグインは登録していない`);
+  const templates = new Set(registry.editor.eventTemplates.map((t) => t.id));
+  for (const t of staged.templates) {
+    if (templates.has(t.id)) throw new Error(`${mod.name}: ひな形 ${t.id} が二重に登録された`);
+    templates.add(t.id);
+  }
 }
 
 function commit(staged: Staged, registry: PluginRegistry, name: string): void {
@@ -103,6 +113,7 @@ function commit(staged: Staged, registry: PluginRegistry, name: string): void {
   registry.projectionHooks.push(...staged.hooks);
   for (const f of staged.forms) registry.editor.commandForms.set(f.code, f.component);
   registry.editor.diagnostics.push(...staged.diagnostics);
+  registry.editor.eventTemplates.push(...staged.templates);
   registry.loaded.push(name);
 }
 

@@ -1,9 +1,9 @@
 import type { Action, BattleRules, CommandCtx, CommandHandler, CommandResult, Effect, FormulaFn, GameState, ProjectView } from "@rpg/core";
-import type { Diagnostic } from "@rpg/editor-core";
+import type { Diagnostic, EventDraft, EventTemplate } from "@rpg/editor-core";
 import type { EffectApi, FrameSpec, Logger, MapData, MapId, Project, SceneKind } from "@rpg/runtime";
 import type { z } from "zod";
 
-export type { Action, BattleRules, CommandCtx, CommandHandler, CommandResult, Diagnostic, Effect, EffectApi, FormulaFn, FrameSpec, GameState, Logger, ProjectView, SceneKind };
+export type { Action, BattleRules, CommandCtx, CommandHandler, CommandResult, Diagnostic, Effect, EffectApi, EventDraft, EventTemplate, FormulaFn, FrameSpec, GameState, Logger, ProjectView, SceneKind };
 
 /** エディタの診断フックが受け取る文書（読み取り専用）。 */
 export interface PluginDocument {
@@ -57,6 +57,11 @@ export interface PluginHost {
     /** コマンドの設定フォームを差し替える（コンポーネントの型は editor-ui が決める）。 */
     commandForm(code: string, component: unknown): void;
     diagnostics(fn: DiagnosticsFn): void;
+    /**
+     * イベントのひな形を足す（エディタのイベントツールの「置くイベント」に出る）。`id` は接頭辞なしで書く
+     * （`plugin:<name>/<id>` として登録される）。入力フォームは `input` の zod から作られる。
+     */
+    eventTemplate(template: EventTemplate): void;
   };
   readonly log: Logger;
 }
@@ -68,7 +73,7 @@ export interface PluginRegistry {
   battleRules: Partial<BattleRules>;
   readonly effectHandlers: Map<string, EffectHandler[]>;
   readonly projectionHooks: { scene: SceneKind; fn: ProjectionHook }[];
-  readonly editor: { commandForms: Map<string, unknown>; diagnostics: DiagnosticsFn[] };
+  readonly editor: { commandForms: Map<string, unknown>; diagnostics: DiagnosticsFn[]; eventTemplates: EventTemplate[] };
   /** 読み込みに成功したプラグインの名前（読み込み順）。 */
   readonly loaded: string[];
 }

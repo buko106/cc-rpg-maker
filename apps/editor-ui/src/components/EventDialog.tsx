@@ -1,11 +1,12 @@
-import { cmd, defaultPage } from "@rpg/editor-core";
+import { cmd, defaultPage, WANDER_ROUTE } from "@rpg/editor-core";
 import { eventPageSchema, moveRouteSchema } from "@rpg/schema";
-import type { EventId, EventPage, MapId, MoveRoute } from "@rpg/schema";
+import type { EventId, EventPage, MapId } from "@rpg/schema";
 import { useCallback, useMemo, useState } from "react";
 import type { ReactElement } from "react";
 import type { z } from "zod";
 import { FormEditor } from "../form-editor.js";
-import { useFormContext, useSession } from "../hooks.js";
+import { useFormContext } from "../form-context.js";
+import { useSession } from "../hooks.js";
 import { CommandList } from "./CommandList.js";
 import { Dialog } from "./Dialog.js";
 import { useExecute } from "./useExecute.js";
@@ -13,9 +14,6 @@ import { useExecute } from "./useExecute.js";
 /** ページの設定（条件・グラフィック・起動条件など）。コマンド列は専用のリストで編集する。 */
 const pageSettingsSchema = eventPageSchema.omit({ commands: true, moveRoute: true });
 type PageSettings = z.infer<typeof pageSettingsSchema>;
-
-/** 「自律移動する」を入れたときの初期ルート：ランダムに 1 歩、少し待つ、を繰り返す。 */
-const WANDER: MoveRoute = { repeat: true, skippable: true, steps: [{ kind: "move", dir: "random" }, { kind: "wait", frames: 60 }] };
 
 /**
  * イベントの編集ダイアログ：名前、ページ（タブ）、ページの設定、コマンドリスト。
@@ -111,7 +109,7 @@ export function EventDialog({ mapId, eventId, onClose }: { mapId: MapId; eventId
               checked={page.moveRoute !== undefined}
               onChange={(e) => {
                 const { moveRoute: _m, ...rest } = page;
-                run(cmd.setEventPage(mapId, eventId, index, e.target.checked ? { ...rest, moveRoute: WANDER } : rest));
+                run(cmd.setEventPage(mapId, eventId, index, e.target.checked ? { ...rest, moveRoute: WANDER_ROUTE } : rest));
               }}
             />{" "}
             自律移動する

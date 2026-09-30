@@ -1,6 +1,6 @@
 import { batch } from "../command.js";
 import { deleteEntity, deleteTileset, registerAsset, removeSwitch, removeVariable, setSwitchName, setSystem, setVariableName, unregisterAsset, upsertEntity, upsertTileset } from "./database.js";
-import { createEvent, deleteEvent, insertCommands, moveEvent, pasteEvent, removeCommands, removeEventPage, replaceCommand, setEventName, setEventPage } from "./event.js";
+import { createEvent, createEventFromTemplate, deleteEvent, insertCommands, moveEvent, pasteEvent, removeCommands, removeEventPage, replaceCommand, setEventName, setEventPage } from "./event.js";
 import { createMap, deleteMap, fillTiles, paintTiles, resizeMap, setMapMeta, setMapProperties } from "./map.js";
 
 /** コマンドファクトリ。UI が発行できる編集操作は、すべてここにある。 */
@@ -15,6 +15,7 @@ export const cmd = {
   setMapProperties,
   // イベント
   createEvent,
+  createEventFromTemplate,
   pasteEvent,
   moveEvent,
   deleteEvent,

@@ -8,7 +8,7 @@ export function createPluginRegistry(): PluginRegistry {
     battleRules: {},
     effectHandlers: new Map(),
     projectionHooks: [],
-    editor: { commandForms: new Map(), diagnostics: [] },
+    editor: { commandForms: new Map(), diagnostics: [], eventTemplates: [] },
     loaded: [],
   };
 }

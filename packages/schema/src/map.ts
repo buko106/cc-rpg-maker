@@ -40,7 +40,7 @@ export type MoveRoute = z.infer<typeof moveRouteSchema>;
 export const eventPageSchema = z.strictObject({
   /** すべて満たすと有効 */
   conditions: z.array(pageConditionSchema),
-  graphic: z.strictObject({ asset: assetIdSchema.meta({ ref: "asset", assetKind: "image" }), index: nonNegativeInt, direction: directionSchema }).optional(),
+  graphic: z.strictObject({ asset: assetIdSchema.meta({ ref: "asset", assetKind: "image" }), index: nonNegativeInt, direction: directionSchema.meta({ initial: "down" }) }).optional(),
   trigger: z.enum(["action", "touch", "autorun", "parallel"]),
   through: z.boolean(),
   priority: z.enum(["below", "same", "above"]),

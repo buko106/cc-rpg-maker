@@ -151,6 +151,10 @@ textarea { width: 100%; resize: vertical; }
 .sf-array-actions { display: flex; gap: 4px; }
 .sf-issues { margin: 4px 0 0; padding: 6px 10px 6px 26px; color: var(--danger); background: color-mix(in srgb, var(--danger) 10%, transparent); border-radius: var(--radius); }
 .sf-error { color: var(--danger); }
+.sf-hint { color: var(--muted); font-size: 12px; flex-basis: 100%; }
+.sf-row:not(.sf-block) > .sf-hint { padding-left: 128px; }  /* 欄の列にそろえる（見出しの幅 120px + 間隔） */
+.map-picker { display: flex; flex-direction: column; gap: 4px; }
+.map-picker .canvas-stack { border: 1px solid var(--border); background: #000; }
 .sf-newkey { display: flex; gap: 6px; }
 
 /* データベース・アセット・診断 */
