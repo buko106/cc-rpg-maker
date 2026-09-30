@@ -1,11 +1,13 @@
 /**
- * @rpg/player — 配布用シェル（`bootPlayer`）。エクスポータは M7。
+ * @rpg/player — 配布用シェル（`bootPlayer`）。エクスポータは `@rpg/exporter`。
  *
  * 設計: docs/15-player-export.md
- * M2 ではフォルダ形式の起動のみ（`static/index.html` + `player.js` + `project/` + `assets/`）。
+ * フォルダ形式（`static/index.html` + `player.js` + `project/` + `assets/`）と、単一 HTML（`embedded`）の起動。
  */
 export { bootPlayer } from "./boot.js";
 export type { PlayerConfig } from "./boot.js";
+export { createEmbeddedProjectSource } from "./embedded-project-source.js";
+export type { EmbeddedData } from "./embedded-project-source.js";
 export { createHttpProjectSource } from "./http-project-source.js";
 export type { HttpProjectSourceOptions } from "./http-project-source.js";
 export { collectStartAssets } from "./preload.js";
