@@ -104,3 +104,10 @@ saveRepositoryContract("idb", () => createIdbSaveRepository({ ... }), { supports
 - **ZIP**：`projectRepositoryContract` に、書き出しのレイアウト・ラウンドトリップ（ID だけが新しい）・入れ子フォルダ・壊れた ZIP/JSON/マップ欠落・`newer-format`・アセットの改ざん・マニフェスト外のファイル・バイト列の無いアセットを追加した。
 - **エクスポータ**：`packages/exporter` を 70% のカバレッジ対象に追加。フォルダ形式の構造・単一 HTML の外部参照なし・`</script>` のエスケープ・警告をテストする。プレイヤーの取り決め（アセットの拡張子）は `apps/player` のテストで突き合わせる。
 - **E2E**：`e2e/export.spec.ts` を追加（別オリジン + `file://` + リクエスト 0 件）。`Window` の型宣言は E2E の各ファイルで衝突する（型チェックは 1 つのプログラム）ので、新しい E2E ではページ内の式を文字列で評価する。
+
+## 実装メモ（M7 で確定した点）
+- **カバレッジ**：`plugin-api` / `plugin-samples` / `render-webgl` を 70% の対象に追加。
+- **ピクセル差分**：`e2e/render.spec.ts` は、ブラウザ側のハーネス（`e2e/support/render-harness.ts`）をテストの中で esbuild でバンドルしてページに流し込み、同じ `FrameSpec` を両レンダラで描いて比べる（差の画像は Playwright の添付に付く）。SwiftShader の WebGL で Chromium（PR 必須のブラウザ）だけを対象にしている。
+- **`e2e/support/*.ts` と `e2e/helpers.ts`** はテストではない（`*.spec.ts` だけがテストとして実行される）。`Window` の型宣言は E2E の各ファイルで衝突するので、ページ内の式は文字列で評価する。
+- **フェイクのディレクトリ**：`createFakeDirectory()`（test-utils）で OPFS / File System Access の契約テストを Node で回し、実物の OPFS は `e2e/opfs.spec.ts`。
+- **E2E の数**：プレイヤー 11、エディタ 3、書き出し 1、プラグイン 1、描画 9、WebGL のプレイヤー 3、オフライン 1、OPFS 1。

@@ -87,7 +87,7 @@ function* allCommands(project: Project, maps: Record<MapId, MapData>): Generator
  * 整合性チェック。参照切れ・不明なコマンド・不正なパラメータ・開始位置はエラー、未使用アセットなどは警告。
  * エディタのコマンド（force なし）で作れる文書は、エラーを含まない。
  */
-export function validateDoc(doc: ProjectDocument, registry: CommandRegistry): Diagnostic[] {
+export function validateDoc(doc: ProjectDocument, registry: CommandRegistry, extra: readonly ((doc: ProjectDocument) => Diagnostic[])[] = []): Diagnostic[] {
   const { project, maps } = doc;
   const resolve = commandRefResolver(registry);
   const out: Diagnostic[] = [];
@@ -133,6 +133,23 @@ export function validateDoc(doc: ProjectDocument, registry: CommandRegistry): Di
     });
   }
 
+  // プラグインのコマンドを使っているのに、そのプラグインがプロジェクトで有効になっていない（実行時に飛ばされる）
+  const enabled = new Set(project.system.plugins.map((p) => p.name));
+  const reported = new Set<string>(); // 登録されていないコマンドは pluginCommand で報告済み
+  for (const { from, commands } of allCommands(project, maps)) {
+    commands.forEach((c, i) => {
+      const name = /^plugin:([^/]+)\//.exec(c.code)?.[1];
+      if (name === undefined || enabled.has(name) || registry.get(c.code) === undefined || reported.has(`${from}:${i}`)) return;
+      reported.add(`${from}:${i}`);
+      out.push({
+        severity: "warning",
+        code: "pluginNotEnabled",
+        message: `${describeFrom(`${from}/command:${i}`, doc)}：プラグイン ${name} のコマンドだが、システム設定でそのプラグインが有効になっていない`,
+        location: { ...locationOf(from), commandIndex: i },
+      });
+    });
+  }
+
   const start = maps[project.system.startMap];
   if (start !== undefined && (project.system.startX >= start.width || project.system.startY >= start.height)) {
     out.push({ severity: "error", code: "startOutOfMap", message: `開始位置 (${project.system.startX},${project.system.startY}) が開始マップの外`, target: { kind: "map", id: project.system.startMap } });
@@ -142,6 +159,14 @@ export function validateDoc(doc: ProjectDocument, registry: CommandRegistry): Di
   const used = new Set<string>(collectRefs(project, maps, resolve).filter((r: Ref) => r.to.kind === "asset").map((r) => r.to.id));
   for (const [id, entry] of Object.entries(project.assets.entries)) {
     if (!used.has(id)) out.push({ severity: "warning", code: "unusedAsset", message: `アセット ${entry.name}（${id}）はどこからも使われていない`, target: { kind: "asset", id } });
+  }
+  // プラグインの診断（1 つが例外を投げても、他の診断は出す）
+  for (const fn of extra) {
+    try {
+      out.push(...fn(doc));
+    } catch (e) {
+      out.push({ severity: "warning", code: "pluginDiagnosticsFailed", message: `プラグインの診断が失敗した: ${e instanceof Error ? e.message : String(e)}` });
+    }
   }
   return out;
 }

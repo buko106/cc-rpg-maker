@@ -107,3 +107,10 @@ IndexedDB はオブジェクトストア `projects`, `maps`（key: `[projectId, 
 - **`importZip` の検証**：`project.json` を `parseProject`（マイグレーション込み）、マップを `parseMapData` で検証し、壊れた ZIP・JSON・マップの欠落・未来の `formatVersion`（`newer-format`）は `schema` エラー。アセットはマニフェストに載っているものだけを取り込み、**内容ハッシュ（sha256 先頭 16 桁）が ID と一致しなければ `schema` エラー**。バイト列の無いアセットは、マニフェストだけ取り込む。取り込んだプロジェクトは**新しい ID**・`revision` 1・`updatedAt` は取り込み時刻。途中で失敗したら、書きかけのアセットも残さない（`removeProject`）。
 - ZIP の読み書き（`zip.ts`）は `@rpg/assets` の `zip.ts` と同じ形式のコピー（project-store は schema にしか依存できないため。`hashAsset` と同じ扱い）。
 - **未対応**：古い `formatVersion` の ZIP の import（`migrations` がまだ空なので、テストする対象が無い。最初のマイグレーションを足すときに `fixtures/projects/v{old}/*.zip` と一緒にテストする）、`opfs` / `fsa`（M7）。
+
+## 実装メモ（M7 で確定した点）
+- **`opfs` / `fsa` を実装した**：`createOpfsProjectRepository(root)` / `createFsaProjectRepository(dir)`（どちらも `FileSystemDirectoryHandle` 上の `createDirectoryBackend` に共通の `createRepository` を載せたもの）と、入口の `openOpfsProjectRepository(name = "rpg-projects")`（`navigator.storage.getDirectory()` の下）/ `pickFsaProjectRepository()`（`showDirectoryPicker`）。レイアウトは `<id>/project.json` / `meta.json` / `maps/<mapId>.json` / `assets/<assetId>.bin`（別のツールが `<assetId>.png` で置いたものも、拡張子を問わず読める）。ファイル名は安全な文字だけ（`..` や区切りは拒否）。
+- **原子性**：1 ファイルの書き込みは `createWritable` が原子的。複数ファイルにまたがる `commit` は マップ → `project.json` → `meta.json` の順で、`meta.json` が最後（コミットの印）。途中で止まっても `revision` は古いままなので、次の `save` の楽観ロックで整合を取り直せる（リネームによる完全な原子性は、ブラウザの対応がそろっていないので採らなかった）。
+- **テスト**：`createFakeDirectory()`（test-utils。`NotFoundError` / `TypeMismatchError` / `InvalidModificationError`、`close()` で反映、書き込みの失敗の仕込みまでブラウザに合わせたメモリ上のフェイク）で共通の契約テストにかけ、実ブラウザの OPFS は `e2e/opfs.spec.ts`（作成・保存・楽観ロック・ZIP の往復・削除）で確かめる。`fsa` の `showDirectoryPicker` はユーザー操作が要るので E2E には入れていない（フェイクのフォルダで検証）。
+- マイグレーションの統合テストを足した：v1 の ZIP を `importZip` すると v2 で保存され、v1 で保存されていた文書は `load` で変換されて直ちに保存し直される（`revision` +1、2 回目以降は保存し直さない）。
+- **エディタ**：`?storage=opfs` で OPFS に保存する（既定は IndexedDB）。フォルダを選ぶ UI は未実装（`pickFsaProjectRepository` は用意してある）。

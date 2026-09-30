@@ -14,9 +14,20 @@ export interface Migration {
 /**
  * 登録済みのマイグレーション。`from` の昇順に、途切れなく並べる。
  * フォーマットを変えるときは `CURRENT_FORMAT_VERSION` を上げてここに追加する（docs/00-principles.md §6）。
- * フォーマット v1 が最初なので、現時点では空。
+ *
+ * - v1 → v2：`system.plugins`（使うプラグインの一覧）を足す。既存のプロジェクトはプラグインを使っていないので空配列。
  */
-export const migrations: readonly Migration[] = [];
+export const migrations: readonly Migration[] = [
+  {
+    from: 1,
+    to: 2,
+    migrateProject(p) {
+      if (!isRecord(p) || !isRecord(p["system"])) return p;
+      return { ...p, system: { plugins: [], ...p["system"] } };
+    },
+    migrateMap: (m) => m,
+  },
+];
 
 function isRecord(x: unknown): x is Record<string, unknown> {
   return typeof x === "object" && x !== null && !Array.isArray(x);

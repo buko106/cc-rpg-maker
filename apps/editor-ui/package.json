@@ -18,6 +18,7 @@
     "@rpg/input-browser": "workspace:*",
     "@rpg/input-script": "workspace:*",
     "@rpg/plugin-api": "workspace:*",
+    "@rpg/plugin-samples": "workspace:*",
     "@rpg/project-store": "workspace:*",
     "@rpg/render-canvas2d": "workspace:*",
     "@rpg/render-null": "workspace:*",

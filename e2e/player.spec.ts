@@ -27,7 +27,8 @@ const state = (page: Page): Promise<State> => page.evaluate(() => window.__rpg.g
 
 /** タイトル画面が出るところまで。 */
 async function openTitle(page: Page): Promise<void> {
-  await page.goto("/");
+  // ピクセルの確認は 2D コンテキストから読むので、Canvas2D を指定する（WebGL は e2e/render.spec.ts と e2e/webgl.spec.ts）
+  await page.goto("/?renderer=canvas2d");
   await page.waitForFunction(() => window.__rpg !== undefined && window.__rpg.getState().scene.kind === "title" && window.__rpg.getState().tick > 2);
 }
 

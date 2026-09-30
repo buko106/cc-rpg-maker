@@ -6,7 +6,9 @@ import type { ProjectRepository } from "@rpg/project-store";
 import { createNullRenderer } from "@rpg/render-null";
 import type { ImageHandle } from "@rpg/runtime";
 import type { ReactElement, ReactNode } from "react";
+import type { PluginModule } from "@rpg/plugin-api";
 import { EnvContext, RepoContext, SessionContext } from "./hooks.js";
+import { createPluginEnv } from "./plugin-env.js";
 import type { EditorEnv } from "./hooks.js";
 
 // jsdom には Canvas の実装が無い（getContext が「未実装」と騒ぐ）ので、描画しない前提で null を返す。
@@ -53,17 +55,19 @@ export interface TestEnv {
   wrap(children: ReactNode): ReactElement;
 }
 
-export async function createTestEnv(opts: { session?: Partial<EditorSessionDeps> } = {}): Promise<TestEnv> {
+export async function createTestEnv(opts: { session?: Partial<EditorSessionDeps>; plugins?: readonly PluginModule[] } = {}): Promise<TestEnv> {
   const repo = createMemoryProjectRepository();
   const commands = createCommandRegistry();
   registerBuiltins(commands);
   const playtests: TestEnv["playtests"] = [];
   const saved: TestEnv["saved"] = [];
+  const pluginEnv = await createPluginEnv(opts.plugins ?? [], commands);
   const env: EditorEnv = {
+    ...pluginEnv,
     loadPlayerBundle: () => Promise.resolve({ js: "/* player */" }),
     saveFile: (name, bytes, mime) => void saved.push({ name, bytes, mime }),
     commands,
-    formOverrides: {},
+    formOverrides: pluginEnv.pluginForms,
     createRenderer: () => createNullRenderer(),
     createAssets: () => ({
       loadImage: () => Promise.resolve({} as ImageHandle),
@@ -77,7 +81,7 @@ export async function createTestEnv(opts: { session?: Partial<EditorSessionDeps>
     },
   };
   const doc = await repo.create("テスト");
-  const session = createEditorSession({ repo, doc, commands, ...opts.session });
+  const session = createEditorSession({ repo, doc, commands, diagnostics: pluginEnv.pluginDiagnostics, ...opts.session });
   return {
     env,
     repo,

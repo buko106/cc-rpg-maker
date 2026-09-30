@@ -23,21 +23,23 @@ export function createHttpProjectSource(projectUrl: string, options: HttpProject
     return res.arrayBuffer();
   };
 
-  let loaded: Promise<{ project: Project; hash: string }> | undefined;
-  const load = (): Promise<{ project: Project; hash: string }> =>
+  // `formatVersion` は書き出されたままの値（マップのマイグレーションの起点。`project` はマイグレーション後）
+  let loaded: Promise<{ project: Project; hash: string; formatVersion: number }> | undefined;
+  const load = (): Promise<{ project: Project; hash: string; formatVersion: number }> =>
     (loaded ??= (async () => {
       const bytes = await get(projectUrl);
-      const parsed = parseProject(JSON.parse(new TextDecoder().decode(bytes)));
+      const json: unknown = JSON.parse(new TextDecoder().decode(bytes));
+      const parsed = parseProject(json);
       if (!parsed.ok) throw new Error(`project.json が不正: ${JSON.stringify(parsed.error)}`);
-      return { project: parsed.value, hash: hex(await crypto.subtle.digest("SHA-256", bytes)) };
+      return { project: parsed.value, hash: hex(await crypto.subtle.digest("SHA-256", bytes)), formatVersion: (json as { formatVersion: number }).formatVersion };
     })());
 
   const maps = new Map<string, Promise<MapData>>();
   const loadMap = async (id: MapId): Promise<MapData> => {
-    const { project } = await load();
+    const { project, formatVersion } = await load();
     if (!Object.hasOwn(project.maps, id)) throw new Error(`マップ ${id} はプロジェクトに無い`);
     const bytes = await get(new URL(`maps/${id}.json`, projectUrl).href);
-    const parsed = parseMapData(JSON.parse(new TextDecoder().decode(bytes)), project.formatVersion);
+    const parsed = parseMapData(JSON.parse(new TextDecoder().decode(bytes)), formatVersion);
     if (!parsed.ok) throw new Error(`maps/${id}.json が不正: ${JSON.stringify(parsed.error)}`);
     return parsed.value;
   };

@@ -22,6 +22,8 @@ export type { ReplayFixture, ReplayInput, ReplayResult } from "./harness/replay.
 export { createMemorySaveRepository } from "@rpg/save-store"; // runtime のテストはアダプタを直接 import できないので、ここから使う
 export { createMemoryStorage, quotaError } from "./harness/memoryStorage.js";
 export type { MemoryStorage } from "./harness/memoryStorage.js";
+export { createFakeDirectory } from "./harness/fakeDirectory.js";
+export type { FakeDirectory } from "./harness/fakeDirectory.js";
 export { summarizeFrame } from "./harness/frame.js";
 export { createRuntimeHarness } from "./harness/runtimeHarness.js";
 export type { RuntimeHarness, RuntimeHarnessOptions, TestProjectSource } from "./harness/runtimeHarness.js";

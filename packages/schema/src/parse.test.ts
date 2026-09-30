@@ -4,6 +4,7 @@ import { describe, expect, expectTypeOf, it } from "vitest";
 import {
   CURRENT_FORMAT_VERSION,
   MapDataSchema,
+  migrateTo,
   parseMapData,
   parseProject,
   serializeMapData,
@@ -40,10 +41,13 @@ describe("fixtures/projects/v1", () => {
       }
     });
 
-    it("[inv-1] serialize(parse(j)) deep-equals j", () => {
+    it("[inv-1] serialize(parse(j)) deep-equals the migrated j (maps: j itself)", () => {
       const r = parseProject(raw.project);
       if (!r.ok) throw new Error("fixture must parse");
-      expect(serializeProject(r.value)).toEqual(raw.project);
+      // フィクスチャは v1（旧形式）。読み込むと現行のフォーマットになる（マイグレーション済みの JSON と一致する）
+      const migrated = migrateTo(raw.project, CURRENT_FORMAT_VERSION);
+      if (!migrated.ok) throw new Error("fixture must migrate");
+      expect(serializeProject(r.value)).toEqual(migrated.value);
       for (const json of Object.values(raw.maps)) {
         const m = parseMapData(json, raw.formatVersion);
         if (!m.ok) throw new Error("fixture map must parse");

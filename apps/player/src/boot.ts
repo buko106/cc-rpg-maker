@@ -1,8 +1,11 @@
 import { createAssetSource, createEmbeddedBytesSource, createHttpBytesSource } from "@rpg/assets";
 import { createBrowserInput } from "@rpg/input-browser";
+import { createPluginRegistry, loadPlugins, selectPlugins, toRuntimeExtensions } from "@rpg/plugin-api";
+import type { PluginModule } from "@rpg/plugin-api";
 import { createCanvas2dRenderer } from "@rpg/render-canvas2d";
+import { createWebglRenderer, isWebglAvailable } from "@rpg/render-webgl";
 import { createRuntime } from "@rpg/runtime";
-import type { Logger, Runtime } from "@rpg/runtime";
+import type { Logger, Renderer, Runtime } from "@rpg/runtime";
 import { createSaveRepository } from "@rpg/save-store";
 import { createPlayerAudio } from "./audio.js";
 import { createEmbeddedProjectSource } from "./embedded-project-source.js";
@@ -14,9 +17,20 @@ import { createScreens } from "./screens.js";
 
 /**
  * プレイヤーの設定。フォルダ形式（`projectUrl`：`project/` + `assets/`）か、単一 HTML（`embedded`）のどちらか。
- * `renderer`（webgl）と `plugins` は M7 で追加する。
+ * `plugins` はビルドに入っているプラグイン。`renderer` は描画方式（既定は `auto`）。
  */
+export type RendererKind = "canvas2d" | "webgl" | "auto";
+
+/** 描画方式を決める。`auto` は WebGL が使えれば WebGL、使えなければ Canvas2D。 */
+export function pickRenderer(kind: RendererKind | undefined, webglAvailable: () => boolean = isWebglAvailable): "canvas2d" | "webgl" {
+  if (kind === "canvas2d") return "canvas2d";
+  if (kind === "webgl") return "webgl";
+  return webglAvailable() ? "webgl" : "canvas2d";
+}
+
 export interface PlayerConfig {
+  /** 描画方式。`auto`（既定）は WebGL が使えれば WebGL、使えなければ Canvas2D。 */
+  renderer?: RendererKind;
   /** フォルダ形式：`project.json` の URL（ページからの相対でよい）。例 `project/project.json` */
   projectUrl?: string;
   /** 単一 HTML：埋め込まれたゲーム一式。指定すると通信しない（`projectUrl` は無視される）。 */
@@ -25,6 +39,8 @@ export interface PlayerConfig {
   assetsUrl?: string;
   /** エラー画面にスタックを表示し、ログを console に出す。 */
   debug?: boolean;
+  /** ビルドに入っているプラグインの一覧。プロジェクトの `system.plugins` で有効にされたものだけが読み込まれる。 */
+  plugins?: readonly PluginModule[];
   /** 同じオリジンで複数のゲームを配るときの、セーブの保存先を分けるキー。 */
   saveScope?: string;
 }
@@ -87,10 +103,19 @@ export async function bootPlayer(root: HTMLElement, config: PlayerConfig): Promi
 
     const input = createBrowserInput(window, { gamepad: true });
     const logger = consoleLogger(debug);
+    // プラグイン：プロジェクトが有効にしたものだけを読み込む。読み込めなくてもゲームは始める（警告だけ）
+    const selection = selectPlugins(config.plugins ?? [], project.system.plugins);
+    for (const w of selection.warnings) logger.warn(w);
+    const registry = createPluginRegistry();
+    await loadPlugins(selection.modules, registry, { logger, params: selection.params });
     const audio = playerAudio.connect(assets, logger);
+    const rendererName = pickRenderer(config.renderer);
+    canvas.dataset["renderer"] = rendererName; // 観測用（E2E とデバッグ）
+    // `preserveDrawingBuffer` は、描いた内容をあとから読む（スクリーンショット・ピクセル確認）ために debug のときだけ有効にする
+    const renderer: Renderer = rendererName === "webgl" ? createWebglRenderer(canvas, { pixelated: true, preserveDrawingBuffer: debug }) : createCanvas2dRenderer(canvas, { pixelated: true });
     const runtime = createRuntime({
       scheduler: createRafScheduler(),
-      renderer: createCanvas2dRenderer(canvas, { pixelated: true }),
+      renderer,
       audio,
       input,
       assets,
@@ -99,6 +124,7 @@ export async function bootPlayer(root: HTMLElement, config: PlayerConfig): Promi
       clock: Date.now,
       seed: String(Date.now()),
       logger,
+      extensions: toRuntimeExtensions(registry, logger),
       onError: (e) => {
         input.dispose();
         audio.dispose();

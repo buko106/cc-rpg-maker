@@ -2,11 +2,18 @@ import { extensionOf, writeZip } from "@rpg/project-store";
 import type { ProjectRepository, ProjectStoreError, ZipFile } from "@rpg/project-store";
 import { ok, serializeMapData, serializeProject } from "@rpg/schema";
 import type { Result } from "@rpg/schema";
+import { renderServiceWorker, SW_FILE } from "./service-worker.js";
 import { README_TEXT, renderIndexHtml, renderSingleHtml } from "./templates.js";
-import type { EmbeddedGame } from "./templates.js";
+import type { EmbeddedGame, RendererKind } from "./templates.js";
+
+export type { RendererKind } from "./templates.js";
 
 export interface ExportOptions {
   format: "folder" | "singleHtml";
+  /** 描画方式。`auto`（既定）は WebGL が使えれば WebGL、使えなければ Canvas2D。 */
+  renderer?: RendererKind;
+  /** フォルダ形式だけ：Service Worker（`sw.js`）を同梱して、2 回目以降はオフラインでも遊べるようにする。 */
+  offline?: boolean;
   /** `false` なら JSON を整形して書き出す（人が読むとき用）。既定は圧縮（`true`）。 */
   minifyJson?: boolean;
   /** 単一 HTML がこの大きさ（バイト）を超えたら警告する。既定は 16 MB。 */
@@ -95,16 +102,23 @@ export async function exportGame(
 
   const name = slug(project.meta.title);
   if (opts.format === "folder") {
+    const offline = opts.offline === true;
     const files: ZipFile[] = [
-      { name: "index.html", bytes: encoder.encode(renderIndexHtml(project.meta.title)) },
+      { name: "index.html", bytes: encoder.encode(renderIndexHtml(project.meta.title, opts.renderer ?? "auto", offline)) },
       { name: "player.js", bytes: encoder.encode(player.js) },
       { name: "project/project.json", bytes: projectBytes },
       ...mapJson.map(([id, json]) => ({ name: `project/maps/${id}.json`, bytes: encoder.encode(stringify(json)) })),
       ...assets.map((a) => ({ name: `assets/${a.name}`, bytes: a.bytes })),
       { name: "README.txt", bytes: encoder.encode(README_TEXT) },
     ];
+    if (offline) {
+      // キャッシュ名は配布物の内容から決める：中身が変われば別のキャッシュになり、置き直した新しいゲームが古いものに隠されない
+      const digest = await sha256Hex(encoder.encode((await Promise.all(files.map(async (f) => `${f.name}:${await sha256Hex(Uint8Array.from(f.bytes))}`))).join("\n")));
+      files.push({ name: SW_FILE, bytes: encoder.encode(renderServiceWorker(files.map((f) => f.name), digest.slice(0, 16))) });
+    }
     return ok({ bytes: writeZip(files), mime: "application/zip", fileName: `${name}.zip`, warnings });
   }
+  if (opts.offline === true) warnings.push("オフライン対応（Service Worker）はフォルダ形式だけ。単一 HTML では無効にした");
 
   const embedded: EmbeddedGame = {
     project: JSON.parse(projectJson) as unknown,
@@ -112,7 +126,7 @@ export async function exportGame(
     assets: Object.fromEntries(assets.map((a) => [a.id, toBase64(a.bytes)])),
     projectHash,
   };
-  const html = renderSingleHtml(project.meta.title, escapeJsonForScript(JSON.stringify(embedded)), escapeForScript(player.js));
+  const html = renderSingleHtml(project.meta.title, escapeJsonForScript(JSON.stringify(embedded)), escapeForScript(player.js), opts.renderer ?? "auto");
   const bytes = encoder.encode(html);
   if (bytes.length > (opts.warnAboveBytes ?? SINGLE_HTML_WARN_BYTES)) {
     warnings.push(`単一 HTML が ${(bytes.length / 1024 / 1024).toFixed(1)} MB になった。大きいので、フォルダ形式（ZIP）をおすすめする`);

@@ -217,3 +217,7 @@ export function findDanglingRefs(...): RefTarget[];
 
 ## 実装メモ（M5 で確定した点）
 - ID の zod スキーマにメタデータを付けた：`idSchema<T>(ref?)` が `schema.meta()` に `{ ref: "actor" | "map" | … }` を載せる（`assetIdSchema` は `{ ref: "asset" }`、`assetRefSchema` の `asset` は `assetKind: "image"`、`audioRefSchema` の `asset` は `assetKind: "audio"`）。値の検証には影響しない。エディタが「これは何の ID か」を知ってフォームの選択肢を出すためのもの（13）。
+
+## 実装メモ（M7 で確定した点）
+- **`formatVersion` を 2 に上げた**：`system.plugins: { name, version, params }[]`（プロジェクトが使うプラグイン。`name` は英数字・`_`・`-` の 1〜64 文字、`params` は各プラグインが解釈する）を必須で追加した。最初の実マイグレーション `v1 → v2`（`system.plugins = []` を足す。既にあれば残す。マップは変えない）を `migrations` に登録した。`fixtures/projects/v1/*` は旧形式のまま残してあり、読み込むと v2 になる（`parseProject` のテストは「マイグレーション済みの JSON と一致する」ことを確かめる）。プラグインを使う現行形式のフィクスチャは `fixtures/projects/v2/plugin-demo`。
+- `parseMapData(json, formatVersion)` の `formatVersion` は、**書き出されたままの**（マイグレーション前の）値。プレイヤーの `ProjectSource`（HTTP / 埋め込み）は、`project.json` の生の `formatVersion` を覚えて渡す。

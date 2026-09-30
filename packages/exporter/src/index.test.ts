@@ -1,7 +1,7 @@
 import { createMemoryProjectRepository, readZip } from "@rpg/project-store";
 import { parseMapData, parseProject } from "@rpg/schema";
 import { describe, expect, it } from "vitest";
-import { escapeForScript, escapeJsonForScript, exportGame, toBase64 } from "./index.js";
+import { escapeForScript, escapeJsonForScript, exportGame, renderServiceWorker, SW_FILE, toBase64 } from "./index.js";
 import type { EmbeddedGame } from "./index.js";
 
 const PLAYER = { js: 'console.log("player");' };
@@ -153,5 +153,67 @@ describe("エスケープと base64", () => {
     const big = Uint8Array.from({ length: 300_001 }, (_, i) => (i * 7) % 256);
     expect(toBase64(big)).toBe(Buffer.from(big).toString("base64"));
     expect(toBase64(new Uint8Array())).toBe("");
+  });
+});
+
+describe("描画方式とオフライン対応", () => {
+  const html = async (opts: Parameters<typeof exportGame>[2]): Promise<string> => {
+    const { repo, id } = await setup();
+    const r = await exportGame(repo, id, opts, PLAYER);
+    if (!r.ok) throw new Error("export に失敗");
+    return opts.format === "folder" ? decode((await readZip(r.value.bytes)).get("index.html")!) : decode(r.value.bytes);
+  };
+
+  it("描画方式は #app の data-renderer に入る（既定は auto）。フォルダ形式にも単一 HTML にも", async () => {
+    expect(await html({ format: "folder" })).toContain('<div id="app" data-renderer="auto">');
+    expect(await html({ format: "folder", renderer: "webgl" })).toContain('data-renderer="webgl"');
+    expect(await html({ format: "singleHtml", renderer: "canvas2d" })).toContain('data-renderer="canvas2d"');
+    expect(await html({ format: "singleHtml" })).toContain('data-renderer="auto"');
+  });
+
+  it("offline：フォルダ形式に sw.js と登録のスクリプトが付く。付けなければ無い", async () => {
+    const { repo, doc, id } = await setup();
+    const off = await exportGame(repo, id, { format: "folder", offline: true }, PLAYER);
+    const plain = await exportGame(repo, id, { format: "folder" }, PLAYER);
+    if (!off.ok || !plain.ok) throw new Error("export に失敗");
+    const files = await readZip(off.value.bytes);
+    const sw = decode(files.get(SW_FILE)!);
+    expect(decode(files.get("index.html")!)).toContain('navigator.serviceWorker.register("sw.js")');
+    // キャッシュするのは sw.js 以外のすべてのファイル（と "./"）
+    const listed = JSON.parse(/const FILES = (.*);/.exec(sw)![1]!) as string[];
+    expect(listed.sort()).toEqual(["./", ...[...files.keys()].filter((n) => n !== SW_FILE)].sort());
+    expect(listed).toEqual(expect.arrayContaining(["index.html", "player.js", "project/project.json", ...Object.keys(doc.project.assets.entries).map((a) => `assets/${a}.png`)]));
+
+    const plainFiles = await readZip(plain.value.bytes);
+    expect(plainFiles.has(SW_FILE)).toBe(false);
+    expect(decode(plainFiles.get("index.html")!)).not.toContain("serviceWorker");
+  });
+
+  it("キャッシュ名は配布物の内容から決まる：同じなら同じ、変わったら別", async () => {
+    const { repo, id } = await setup();
+    const version = async (js: string): Promise<string> => {
+      const r = await exportGame(repo, id, { format: "folder", offline: true }, { js });
+      if (!r.ok) throw new Error("export に失敗");
+      return /const CACHE = "(rpg-[0-9a-f]+)"/.exec(decode((await readZip(r.value.bytes)).get(SW_FILE)!))![1]!;
+    };
+    expect(await version("a")).toBe(await version("a"));
+    expect(await version("a")).not.toBe(await version("b"));
+  });
+
+  it("単一 HTML では offline は無効で、警告する", async () => {
+    const { repo, id } = await setup();
+    const r = await exportGame(repo, id, { format: "singleHtml", offline: true }, PLAYER);
+    expect(r.ok && r.value.warnings).toEqual([expect.stringContaining("単一 HTML")]);
+    expect(r.ok && decode(r.value.bytes)).not.toContain("serviceWorker");
+  });
+
+  it("renderServiceWorker：install で全ファイルをキャッシュし、activate で古い rpg- キャッシュを消し、GET だけを扱う", () => {
+    const src = renderServiceWorker(["index.html", "sw.js", "a/b.png"], "abc");
+    expect(src).toContain('const CACHE = "rpg-abc";');
+    expect(src).toContain('const FILES = ["./","index.html","a/b.png"];'); // sw.js 自身は入れない
+    expect(src).toContain('key.startsWith("rpg-") && key !== CACHE');
+    expect(src).toContain('request.method !== "GET"');
+    // 構文として正しい（実行はしない）
+    expect(() => new Function(src)).not.toThrow();
   });
 });

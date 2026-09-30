@@ -3,9 +3,11 @@
  *
  * 設計: docs/10-project-store.md
  * M5 で実装済み：`memory` / `idb` アダプタ、共通の `createRepository`、テンプレート。
- * M6：`exportZip` / `importZip`。`opfs` / `fsa` は後続（M7）。
+ * M6：`exportZip` / `importZip`。M7：`opfs` / `fsa`（ディレクトリ上の永続層）。
  */
 export type { CommitBatch, StoreBackend, StoredMeta } from "./backend.js";
+export { createDirectoryBackend } from "./directory.js";
+export { createFsaProjectRepository, createOpfsProjectRepository, openOpfsProjectRepository, pickFsaProjectRepository } from "./fs-repositories.js";
 export { createIdbBackend, createIdbProjectRepository } from "./idb.js";
 export type { IdbOptions } from "./idb.js";
 export { createMemoryBackend, createMemoryProjectRepository } from "./memory.js";

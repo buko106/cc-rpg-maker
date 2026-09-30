@@ -19,17 +19,18 @@ function setup() {
   const visual: string[] = [];
   const loads: string[] = [];
   const saves: string[] = [];
+  const plugins: string[] = [];
   const logger = {
     debug: (m: string) => logs.push(`debug:${m}`),
     info: (m: string) => logs.push(`info:${m}`),
     warn: (m: string) => logs.push(`warn:${m}`),
     error: (m: string) => logs.push(`error:${m}`),
   };
-  const sinks: EffectSinks = { audio: out, logger, visual: (e) => visual.push(e.kind), loadMap: (id) => loads.push(id),
+  const sinks: EffectSinks = { audio: out, logger, visual: (e) => visual.push(e.kind), plugin: (e) => plugins.push(`${e.name}:${JSON.stringify(e.payload)}`), loadMap: (id) => loads.push(id),
     save: (slot) => saves.push(`save:${String(slot)}`),
     load: (slot) => saves.push(`load:${String(slot)}`),
   };
-  return { out, logs, visual, loads, saves, sinks };
+  return { out, logs, visual, loads, saves, plugins, sinks };
 }
 
 describe("distributeEffect", () => {
@@ -69,12 +70,17 @@ describe("distributeEffect", () => {
     expect(logs).toEqual([]);
   });
 
-  it("[inv-5] 未対応の Effect（プラグイン・未知の種類）は warn に流れる", () => {
+  it("[inv-5] plugin Effect は plugin シンクに届く", () => {
+    const { logs, plugins, sinks } = setup();
+    distributeEffect({ kind: "plugin", name: "hud/pulse", payload: { n: 1 } }, sinks);
+    expect(plugins).toEqual(['hud/pulse:{"n":1}']);
+    expect(logs).toEqual([]);
+  });
+
+  it("[inv-5] 未知の種類の Effect は warn に流れる", () => {
     const { logs, sinks } = setup();
-    distributeEffect({ kind: "plugin", name: "p", payload: 1 }, sinks);
     distributeEffect({ kind: "somethingNew" } as unknown as Effect, sinks);
-    expect(logs).toHaveLength(2);
-    expect(logs.every((l) => l.startsWith("warn:"))).toBe(true);
-    expect(logs[1]).toContain("somethingNew");
+    expect(logs).toHaveLength(1);
+    expect(logs[0]).toMatch(/^warn:.*somethingNew/);
   });
 });

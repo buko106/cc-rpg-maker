@@ -24,6 +24,7 @@ const LOCATIONS = {
   "save-store": "packages",
   "editor-core": "packages",
   "plugin-api": "packages",
+  "plugin-samples": "packages",
   "test-utils": "packages",
   "editor-ui": "apps",
   player: "apps",
@@ -64,8 +65,9 @@ const ALLOWED = {
   "save-store": ["core", "runtime"],
   "editor-core": ["schema", "core", "project-store"],
   "plugin-api": ["core", "runtime", "editor-core"],
-  "editor-ui": ["editor-core", "runtime", "plugin-api", "schema", "core", "exporter", ...ADAPTERS],
-  player: ["runtime", "plugin-api", "schema", ...ADAPTERS],
+  "plugin-samples": ["plugin-api"],
+  "editor-ui": ["editor-core", "runtime", "plugin-api", "plugin-samples", "schema", "core", "exporter", ...ADAPTERS],
+  player: ["runtime", "plugin-api", "plugin-samples", "schema", ...ADAPTERS],
   "test-utils": "*",
 };
 

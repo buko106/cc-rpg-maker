@@ -79,3 +79,11 @@ export async function exportGame(repo: ProjectRepository, projectId: string, opt
 - **`bootPlayer`**：`PlayerConfig` は `{ projectUrl?, embedded?, assetsUrl?, debug?, saveScope? }`（`projectUrl` か `embedded` のどちらか）。`embedded` があれば `createEmbeddedProjectSource`（検証は HTTP 版と同じ）と `createEmbeddedBytesSource`（09）を使い、通信しない。エントリ `main.ts` は `#rpg-embedded` があればそれで起動する（JSON が壊れていればエラーを表示）。
 - **E2E**（`e2e/export.spec.ts`）：エディタで新規作成 → イベントを置く → 「配布物を書き出す…」でフォルダ形式と単一 HTML をダウンロード。ZIP は別実装（テスト内の最小の unzip）で構造を確かめ、**別のオリジン（ランダムなポートの静的サーバ）**で配信して、タイトル → 開始 → 話しかける → セーブ → リロード → コンティニュー → 歩く。単一 HTML は `file://` で同じシナリオを遊び、**リクエストがすべて `file://` / `data:` / `blob:` であること**を確かめる。
 - **未対応**：`renderer`（`webgl` / `auto`）と `plugins`（M7）、Service Worker によるオフライン化（M7）、ローディングのタップ待ち画面（音声の解禁。`AudioContext` は最初の入力で生成する現状の作りのまま）、`saveScope` を書き出しの設定にすること（`project.meta.id` ごとにセーブが分かれるので、既定では混ざらない）。
+
+## 実装メモ（M7 で確定した点）
+- **`renderer`**：`PlayerConfig.renderer?: "canvas2d" | "webgl" | "auto"`（既定 `auto`）。`auto` は `isWebglAvailable()` が真なら WebGL、偽なら Canvas2D。`main.ts` は `?renderer=` か `#app` の `data-renderer`（書き出しが埋める）から決める。選ばれた方式は `<canvas data-renderer>` に出る。`webgl` を明示して使えなければエラー画面。WebGL のときの `preserveDrawingBuffer` は `?debug` のときだけ（ピクセルを読むため）。
+- **エクスポータ**：`ExportOptions` に `renderer`（既定 `auto`。`data-renderer` になる）と `offline`（フォルダ形式のみ。単一 HTML では無効にして警告）を追加。エディタの書き出しダイアログに描画方式とオフラインの選択がある。
+- **オフライン（Service Worker）**：`offline: true` で `sw.js` を同梱し、`index.html` に登録のスクリプトを入れる。`sw.js` は install で全ファイル（と `./`）をキャッシュへ入れ、activate で古い `rpg-` キャッシュを消し、GET・同一オリジンの取得をキャッシュ優先（無ければネットワーク）で返す。**キャッシュ名は配布物の全ファイルの内容ハッシュ**から決めるので、ゲームを置き直せば別のキャッシュになる。E2E `e2e/offline.spec.ts`：別オリジンで一度開いて有効にし、**サーバを止めてネットワークも切った**状態でリロードしても、タイトル → ニューゲームまで動く。
+- **プラグイン**：`PlayerConfig.plugins`（09 ではなく 14）。単一 HTML でも同じ（プレイヤーに同梱したカタログから、`system.plugins` のものを読み込む）。
+- **E2E**：`e2e/webgl.spec.ts`（demo を WebGL と Canvas2D で動かしてタイトル・マップの見た目を比べる。`--disable-3d-apis` のブラウザで `auto` が Canvas2D になり、`webgl` の明示はエラー画面）。ピクセルを 2D コンテキストから読む既存のプレイヤーの E2E は `?renderer=canvas2d` を指定するようにした。
+- **未対応**：ローディングのタップ待ち画面（音声の解禁）、`saveScope` を書き出しの設定にすること。

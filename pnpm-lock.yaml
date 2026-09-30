@@ -65,6 +65,9 @@ importers:
       '@rpg/plugin-api':
         specifier: workspace:*
         version: link:../../packages/plugin-api
+      '@rpg/plugin-samples':
+        specifier: workspace:*
+        version: link:../../packages/plugin-samples
       '@rpg/project-store':
         specifier: workspace:*
         version: link:../../packages/project-store
@@ -135,6 +138,9 @@ importers:
       '@rpg/plugin-api':
         specifier: workspace:*
         version: link:../../packages/plugin-api
+      '@rpg/plugin-samples':
+        specifier: workspace:*
+        version: link:../../packages/plugin-samples
       '@rpg/project-store':
         specifier: workspace:*
         version: link:../../packages/project-store
@@ -264,6 +270,23 @@ importers:
       '@rpg/runtime':
         specifier: workspace:*
         version: link:../runtime
+      zod:
+        specifier: ^4
+        version: 4.6.5
+    devDependencies:
+      '@rpg/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
+
+  packages/plugin-samples:
+    dependencies:
+      '@rpg/plugin-api':
+        specifier: workspace:*
+        version: link:../plugin-api
+    devDependencies:
+      '@rpg/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
 
   packages/project-store:
     dependencies:
@@ -300,6 +323,10 @@ importers:
       '@rpg/runtime':
         specifier: workspace:*
         version: link:../runtime
+    devDependencies:
+      '@rpg/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
 
   packages/runtime:
     dependencies:

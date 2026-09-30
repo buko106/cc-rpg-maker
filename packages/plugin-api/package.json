@@ -10,7 +10,11 @@
   },
   "dependencies": {
     "@rpg/core": "workspace:*",
+    "@rpg/editor-core": "workspace:*",
     "@rpg/runtime": "workspace:*",
-    "@rpg/editor-core": "workspace:*"
+    "zod": "^4"
+  },
+  "devDependencies": {
+    "@rpg/test-utils": "workspace:*"
   }
 }

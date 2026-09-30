@@ -61,3 +61,12 @@ export function loadPlugins(mods: PluginModule[], host: PluginHost): Promise<{ l
 
 ## 完了条件
 - 2 つのサンプルプラグインが `apps/player` と `apps/editor-ui` の両方で動作する。
+
+## 実装メモ（M7 で確定した点）
+- **`loadPlugins(mods, registry, opts)`**（doc の `host` 引数ではなく、コミット先の `PluginRegistry`）。`dependsOn` の順（同じ深さは入力の順）に読み込み、名前が不正・重複・依存が無い・循環・依存先の失敗は `failed`。`register` は一時置き場（`Staged`）に登録を溜める `PluginHost` を受け取り、成功したときにだけ衝突を調べて（コマンドの code、式関数は組み込み + 読み込み済みと突き合わせる）コミットする。例外（同期・非同期）・衝突・`register` の外で host を使ったときは、そのプラグインは何も残さない。**`register` が終わったあとに `host` を使うと例外**（ロールバックできなくなるため）。
+- **`PluginHost`**：doc のとおり（`commands.add` は `plugin:<name>/<code>` に接頭辞、`formulas.addFn`、`battle.setRules`（読み込み順に上書き）、`effects.on(name, handler)`（同じ名前に複数の受け口）、`projection.after(scene, fn)`、`editor?.commandForm` / `editor?.diagnostics`、`log`）に、`name` と `params`（`system.plugins` の設定）を足した。`editor` はエディタの中で読み込んだときだけある。
+- **`toRuntimeExtensions(registry, logger)`** が `RuntimeExtensions`（06）を作る。**`selectPlugins(catalog, refs)`** は、ビルドに入っているプラグイン（catalog）と `system.plugins` を突き合わせ、書かれていない依存先を足し、入っていないもの・バージョン違いを警告にする。プラグイン作者向けに `defineCommand` / `warn` / `z` と型だけを再エクスポート。「プラグインは `GameState` の `locals` と `variables` だけを書き換える」は、型では強制していない（`state` は読み取り専用の型で渡す。書き込みは `dispatch` / コマンドの結果を通す）。
+- **サンプルプラグイン**は `fixtures/plugins/` ではなく、ワークスペースのパッケージ `@rpg/plugin-samples`（`plugin-api` にだけ依存 = 第三者のプラグインと同じ立場を、依存ルールで強制）：`hud`（マップの左上/右上に所持金。`projection.after` だけ。設定 `label` / `corner`）と `custom-command`（独自コマンド `RandomGold`、式関数 `twice`、`plugin` Effect の受け口、エディタの診断）。
+- **結線**：`apps/player` は `PlayerConfig.plugins`（ビルドに入っているプラグイン。`main.ts` は `samplePlugins`）から、プロジェクトの `system.plugins` で有効にされたものだけを読み込む（読み込めなくてもゲームは始まり、警告だけ）。`apps/editor-ui` は `EditorEnv` にカタログ・診断・専用フォーム・`createExtensions(refs)` を持ち、エディタでは全部入りで読み込み（コマンドが一覧に出る）、テストプレイでは `system.plugins` に従って読み込み直す。システム設定に「プラグイン」タブ（有効/無効と設定の JSON）。`editor-core` は、プラグインのコマンドを使っているのに有効になっていないと `pluginNotEnabled` の警告を出し、`EditorSessionDeps.diagnostics` でプラグインの診断を足す（例外を投げても他の診断は出る）。
+- **テスト**：ローダ（依存順・循環・ロールバック・衝突・遅延登録・エディタ用の登録）、`toRuntimeExtensions`、`selectPlugins`、サンプルの統合（実プロジェクト `fixtures/projects/v2/plugin-demo` をランタイムで動かす。共有の乱数で同じシードなら同じ額）、**不変条件 1**（プラグイン 0 個と no-op 1 個で、demo のリプレイの状態ハッシュ・Effect・警告が一致）、エディタ（プラグインタブ・コマンド一覧・専用フォーム・診断・テストプレイ）、E2E `e2e/plugins.spec.ts`（エディタでプラグインを有効にして独自コマンドを置き、エディタのテストプレイと、書き出したゲーム（別オリジン）の両方で HUD と所持金が動く）。
+- **未対応**：プラグインの実行時の読み込み（URL からの動的 import。ビルドに同梱したものだけ）、プラグインのサンドボックス、コマンドの専用フォームの実例（仕組みとテストだけ）。

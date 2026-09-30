@@ -425,4 +425,43 @@ describe("性質：任意のコマンド列", () => {
       { numRuns: 25 },
     );
   }, 30_000);
+
+  describe("プラグイン", () => {
+    const plugged = () => {
+      const commands = createCommandRegistry();
+      registerBuiltins(commands);
+      // 空のオブジェクトだけを受け付ける params（組み込みの Else のものを借りる）
+      const empty = commands.get("Else")!.params;
+      commands.register({ code: "plugin:demo/X", params: empty, meta: { label: "X", category: "p", describe: () => "X", refs: () => [] }, run: () => ({}) });
+      return commands;
+    };
+
+    it("登録済みのプラグインのコマンドを使っているのに、system.plugins で有効になっていなければ警告する。有効なら出ない", () => {
+      const s = createEditorSession({ repo, doc, commands: plugged() });
+      s.execute(cmd.createEvent(M1, 2, 2, "ev_a" as EventId));
+      s.execute(cmd.insertCommands(M1, "ev_a" as EventId, 0, 0, [eventCommand("plugin:demo/X")]));
+      const codes = () => s.validate().map((d) => d.code);
+      expect(codes()).toContain("pluginNotEnabled");
+      expect(codes()).not.toContain("pluginCommand");
+      s.execute(cmd.setSystem({ plugins: [{ name: "demo", version: "1.0.0", params: {} }] }));
+      expect(codes()).not.toContain("pluginNotEnabled");
+    });
+
+    it("deps.diagnostics の診断が validate に足される。例外を投げる診断があっても、ほかの診断は出る", () => {
+      const s = createEditorSession({
+        repo,
+        doc,
+        commands: registry,
+        diagnostics: [
+          () => [{ severity: "warning", code: "fromPlugin", message: "プラグインの診断" }],
+          () => {
+            throw new Error("診断が壊れている");
+          },
+        ],
+      });
+      const found = s.validate();
+      expect(found.map((d) => d.code)).toEqual(expect.arrayContaining(["fromPlugin", "pluginDiagnosticsFailed"]));
+      expect(found.find((d) => d.code === "pluginDiagnosticsFailed")?.message).toContain("診断が壊れている");
+    });
+  });
 });

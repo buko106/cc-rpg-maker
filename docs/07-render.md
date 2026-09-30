@@ -63,3 +63,9 @@ export function createNullRenderer(): NullRenderer;
 
 ## 実装メモ（M4 で確定した点）
 - 戦闘の UI は既存の部品（`window` / `text` / `gauge` / `cursor` / `image`）だけで作っており、`FrameSpec` の型もレンダラも変更していない。敵の絵は `image` ノード（`sx` `sy` `sw` `sh` を指定して原寸）。ダメージ数字は `text`（20px 太字、`align: "center"`）。
+
+## 実装メモ（M7 で確定した点）
+- **`render-webgl` を実装した**（PixiJS は使わず、素の WebGL：`webgl2`、無ければ `webgl`）。何を描くかは純粋な関数 `buildDrawList(frame, env)`（`draw-list.ts`）が「描く順に並べた矩形のリスト」にし、`index.ts` はそれを頂点バッファにまとめて（同じテクスチャの連続は 1 回の `drawArrays`。2048 矩形ごとに分ける）GPU に渡すだけ。順序と見た目の定数は Canvas2D と同じ：レイヤ → 色調 → フラッシュ → 暗転 → UI。シェイクは全レイヤへのオフセット。ウィンドウ・カーソルの縁取りは重ならない矩形 4 枚（カーソルは Canvas2D の `strokeRect` と同じく縁をまたぐ 2px）。
+- **文字**：2D canvas で白く描いてテクスチャにし、頂点色で染める（テクスチャは（フォント, 文字列）ごとに 1 つ。色が違っても使い回す。512 個を超えたら作り直す）。`dpr` 倍の解像度で描くので、`dpr: 2` でも粗くならない。DOM の無い環境向けに、測定と描画は `WebglOptions.text`（`TextSurface`）で差し替えられる。
+- `init` は WebGL が取れない・シェーダがコンパイル/リンクできないと reject（原因つき）。コンテキストロスト中は描かず、復帰したらプログラムとテクスチャを作り直す。`preserveDrawingBuffer` は既定 false（ピクセルを読むテストとデバッグ用に指定できる）。`isWebglAvailable()` は `renderer: "auto"` が使う。
+- **テスト**：`buildDrawList` の単体テスト（タイルの切り出し・カリング・スプライトの反転と alpha・overlay の順序・ウィンドウ/カーソルの縁取りの面積・文字の折り返しと寄せ）、フェイクの GL コンテキストでの契約テスト（`rendererContract`）とバッチ・テクスチャの再利用・破棄・ロスト/復帰。**不変条件 4** は `e2e/render.spec.ts`：同じ `FrameSpec`（マップ・シェイク・overlay・メッセージ・メニュー・タイトル・全部入り、`dpr` 2、補間あり）を両方のレンダラで描き、どれかのチャンネルが 8 より大きく違うピクセルが 1% 以内であることを確かめる（空の絵どうしが一致しないよう、明るいピクセルの割合も確認）。`e2e/webgl.spec.ts` は demo のタイトル・マップを実ゲームで比べる。

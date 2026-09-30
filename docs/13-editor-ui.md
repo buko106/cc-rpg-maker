@@ -70,3 +70,8 @@
 - **コマンドリスト**：props を `onEdit(ops: CommandOp[])` に一本化した（挿入・削除・差し替えの列。複数なら `cmd.batch` で 1 回の Undo にまとめる）。`Loop` は `EndLoop` と、`ShowChoices` は選択肢の数だけの `ChoiceBranch` と `EndBranch` と一緒に入る。選択肢の数を増減すると、対になる `ChoiceBranch` も増減する（減らすときは余った分岐を本体ごと消す）。`Loop` の直後はループの中に入り、`Loop` / `ShowChoices` は丸ごと消える。`EndLoop` / `MoveStep`（内部用）は単独では追加も削除もできない。
 - **移動ルートの編集**は、`SetMoveRoute` コマンドの標準フォーム（手順の配列。種類を選ぶ）で行う。専用のエディタは無い。ページの `moveRoute` は core が未対応のため、UI にも出していない。
 - **未対応**：テストプレイの音、タイルセットの追加・画像差し替え、アセットの一括インポート（ZIP の import は project-store にあるが、UI からはまだ呼べない）、イベントの複製・コピー&ペースト、矩形選択、キャンバスのスクロール位置を保った拡大。
+
+## 実装メモ（M7 で確定した点）
+- **プラグイン**：システム設定に「プラグイン」タブ（ビルドに入っているプラグインの有効/無効、設定の JSON、入っていないプラグインの一覧と外す操作、読み込めなかったプラグインの表示）。`EditorEnv` は `PluginEnv`（`pluginCatalog` / `pluginDiagnostics` / `pluginForms` / `pluginFailures` / `createExtensions`）を持つ。`createBrowserEnv()` は非同期になった（プラグインの `register` が非同期でもよいため）。詳しくは 14。
+- **書き出しダイアログ**に描画方式（自動 / WebGL / Canvas2D）とオフライン対応（フォルダ形式のみ）を追加。
+- **保存先**：`?storage=opfs`（OPFS）。フォルダを選ぶ UI は未実装。

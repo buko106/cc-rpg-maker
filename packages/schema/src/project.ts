@@ -6,7 +6,7 @@ import { databaseSchema } from "./database.js";
 import { mapMetaSchema } from "./map.js";
 
 /** 現在のフォーマットバージョン。`Project` / `MapData` の構造を変えるときは上げ、マイグレーションを追加する。 */
-export const CURRENT_FORMAT_VERSION = 1 as const;
+export const CURRENT_FORMAT_VERSION = 2 as const;
 
 export const tilesetSchema = z.strictObject({
   id: tilesetIdSchema,
@@ -20,6 +20,14 @@ export const tilesetSchema = z.strictObject({
 });
 export type Tileset = z.infer<typeof tilesetSchema>;
 
+export const pluginRefSchema = z.strictObject({
+  /** `PluginModule.name`。コマンドの code の接頭辞（`plugin:<name>/`）になる。 */
+  name: z.string().regex(/^[A-Za-z0-9_-]{1,64}$/),
+  version: z.string(),
+  params: z.record(z.string(), z.unknown()),
+});
+export type PluginRef = z.infer<typeof pluginRefSchema>;
+
 export const systemSettingsSchema = z.strictObject({
   startMap: mapIdSchema,
   startX: nonNegativeInt,
@@ -30,6 +38,8 @@ export const systemSettingsSchema = z.strictObject({
   bgm: z.strictObject({ title: audioRefSchema.optional(), battle: audioRefSchema.optional() }),
   /** UI 文言 */
   terms: z.record(z.string(), z.string()),
+  /** このプロジェクトが使うプラグイン（docs/14-plugin-api.md）。`params` は各プラグインが解釈する。 */
+  plugins: z.array(pluginRefSchema),
 });
 export type SystemSettings = z.infer<typeof systemSettingsSchema>;
 

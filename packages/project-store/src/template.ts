@@ -57,6 +57,7 @@ export function createTemplate(id: string, title: string, nowIso: string): Templ
       screen: { width: 480, height: 320 },
       bgm: {},
       terms: {},
+      plugins: [],
     },
     maps: { [TEMPLATE_MAP_ID]: { id: TEMPLATE_MAP_ID, name: "MAP001", order: 0 } },
     tilesets: {
