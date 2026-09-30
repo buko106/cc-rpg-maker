@@ -196,6 +196,44 @@ function slimeWalk() {
   return img;
 }
 
+// ── 動物：ネコとヒヨコ。キャラクターシートと同じ並び（3 パターン × 4 方向）。歩くパターンでは体が少し上下する ─────
+function critter({ body, belly, accent, eye, ears }) {
+  const img = image(TILE * 3, TILE * 4);
+  ["down", "left", "right", "up"].forEach((dir, row) => {
+    for (let pattern = 0; pattern < 3; pattern++) {
+      const ox = pattern * TILE;
+      const oy = row * TILE;
+      const bob = pattern === 1 ? 1 : 0;
+      const D = (x, y, r, c) => img.disc(ox + x, oy + y + bob, r, c);
+      const R = (x, y, w, h, c) => img.rect(ox + x, oy + y + bob, w, h, c);
+      img.disc(ox + 16, oy + 27, 9, [0, 0, 0, 60]); // 影
+      const side = dir === "left" ? -1 : dir === "right" ? 1 : 0;
+      D(16 - side * 2, 20, 8, body); // 体
+      if (dir !== "up") D(16 - side * 2, 22, 4, belly);
+      if (side !== 0) R(side > 0 ? 3 : 27, 15, 3, 9, shade(body, -25)); // しっぽ
+      const hx = 16 + side * 4;
+      D(hx, 11, 7, body); // 頭
+      if (ears) {
+        R(hx - 7, 3, 4, 5, body);
+        R(hx + 3, 3, 4, 5, body);
+        R(hx - 6, 5, 2, 2, accent);
+        R(hx + 4, 5, 2, 2, accent);
+      }
+      if (dir !== "up") {
+        if (dir === "down") {
+          R(hx - 4, 10, 2, 2, eye);
+          R(hx + 2, 10, 2, 2, eye);
+          R(hx - 1, 13, 3, 2, accent); // 鼻・くちばし
+        } else {
+          R(hx + side * 3 - 1, 10, 2, 2, eye);
+          R(hx + side * 6 - (side < 0 ? 1 : 0), 13, 2, 2, accent);
+        }
+      }
+    }
+  });
+  return img;
+}
+
 // ── 戦闘 BGM：8bit / 11025Hz / モノラルの短いループ（矩形波のアルペジオ + ベース） ─────
 function battleBgm() {
   const rate = 11025;
@@ -240,6 +278,8 @@ const assets = {
   "npc.png": character({ shirt: [192, 80, 58], hair: [150, 150, 150], skin: [235, 190, 150] }),
   "slime.png": slimeBattle(),
   "slime_walk.png": slimeWalk(),
+  "cat.png": critter({ body: [214, 158, 96], belly: [250, 236, 210], accent: [232, 120, 130], eye: [30, 30, 40], ears: true }),
+  "chick.png": critter({ body: [250, 218, 80], belly: [255, 240, 150], accent: [240, 140, 40], eye: [30, 30, 40], ears: false }),
   "battle.wav": battleBgm(),
 };
 

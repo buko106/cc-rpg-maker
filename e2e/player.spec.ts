@@ -392,3 +392,16 @@ test("戦闘中はメニューが開かず、スキル（ファイア）で戦�
   expect(Object.values(s.battle!.enemies)[0]!.hp).toBeLessThanOrEqual(40 - 32);
   await page.screenshot({ path: "test-results/player-battle-skill.png" });
 });
+
+test("町のネコとヒヨコが勝手に歩き回る（ページの moveRoute）", async ({ page }) => {
+  await open(page);
+  const at = (id: string): Promise<{ x: number; y: number }> => page.evaluate(`(() => { const e = window.__rpg.getState().map.events["${id}"]; return { x: e.x, y: e.y }; })()`) as Promise<{ x: number; y: number }>;
+  // ヒヨコは右へ 3 歩、待って、左へ 3 歩、を繰り返す（同じ行を往復する）
+  await page.waitForFunction(`window.__rpg.getState().map.events["ev_chick"].x === 5`);
+  expect((await at("ev_chick")).y).toBe(10);
+  await page.waitForFunction(`window.__rpg.getState().map.events["ev_chick"].x === 2`);
+  // ネコはランダムに歩く
+  const seen = await at("ev_cat");
+  await page.waitForFunction(`(() => { const e = window.__rpg.getState().map.events["ev_cat"]; return e.x !== ${seen.x} || e.y !== ${seen.y}; })()`);
+  await page.locator("canvas").screenshot({ path: "test-results/town-animals.png" });
+});

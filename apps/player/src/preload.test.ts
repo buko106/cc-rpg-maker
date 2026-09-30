@@ -11,6 +11,8 @@ describe("collectStartAssets", () => {
       "0eefde69801856a9", // npc
       "54bc63c07507e5c4", // スライム（戦闘）
       "87073bd84cdaced6", // 戦闘 BGM
+      "96d90b7571e30700", // ネコ
+      "a879bad5bc621a64", // ヒヨコ
       "b9b596c2f04468ac", // tileset
       "bb2e23b45d1f4d4d", // hero
     ]);
