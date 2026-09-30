@@ -6,8 +6,9 @@
     "declarationMap": false,
     "emitDeclarationOnly": false,
     "noEmit": true,
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["node"]
+    "lib": ["ES2022", "DOM", "DOM.Iterable", "DOM.AsyncIterable"],
+    "types": ["node"],
+    "jsx": "react-jsx"
   },
   "include": ["packages/*/src", "apps/*/src", "tools/**/*.ts", "e2e", "vitest.config.ts", "playwright.config.ts"]
 }

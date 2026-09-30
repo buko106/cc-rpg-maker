@@ -91,3 +91,10 @@ saveRepositoryContract("idb", () => createIdbSaveRepository({ ... }), { supports
 - **プロパティテスト**：任意の入力列で HP/MP が範囲内・状態を変更しない（`deepFreeze`）・毎フレーム何かが進む・同じ入力で同じ結果。
 - **カバレッジ閾値**：実装済みのパッケージに `audio-webaudio` を追加（70%）。
 - **依存ルール（テスト）**：パッケージ自身を `@rpg/<自分>` の名前で import できない（解決できない依存として検出される）ので、同じパッケージのテストは相対パスで import する。
+
+## 実装メモ（M5 で確定した点）
+- **契約スイート**：ProjectRepository の契約（`projectRepositoryContract`）を実装した（骨格は無くなり、`registerContractSkeleton` は削除）。`memory` と `idb`（`fake-indexeddb`）が通る。`opfs` / `fsa` は M6 以降。
+- **コンポーネントテスト**：`apps/editor-ui` の `*.test.tsx` は `// @vitest-environment jsdom`（ファイル単位）。依存ルールの「テストは test-utils を import できる」は `*.test.ts` と `*.test.tsx` の両方に適用する。Testing Library の `fireEvent` で操作し、外部ストアの更新（`session.execute` など）は `act()` で包む。
+- **性質テスト**：`editorCommandArb(doc)`（test-utils）。生成器は `fc.filter` を使わず、先に候補を絞る（フィルタの述語が満たされないと無限に再試行して固まる）。
+- **カバレッジ閾値**：`project-store` と `editor-core` を 70% の対象に追加（apps は対象外）。
+- **E2E**：`pnpm test:browser` はプレイヤー（:4173、demo 付き）とエディタ（:4174）の 2 つの静的サーバを起動する。エディタの E2E は各テストの前に IndexedDB を消す。

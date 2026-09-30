@@ -1,0 +1,250 @@
+// @vitest-environment jsdom
+import { createCommandRegistry, createProjectView, registerBuiltins } from "@rpg/core";
+import { actorSchema, classSchema, commonEventSchema, enemySchema, itemSchema, skillSchema, stateSchema, systemSettingsSchema, troopSchema } from "@rpg/schema";
+import { loadFixtureProject } from "@rpg/test-utils";
+import { cleanup, fireEvent, render, screen, within } from "@testing-library/react";
+import { useState } from "react";
+import { afterEach, describe, expect, it } from "vitest";
+import { z } from "zod";
+import { describeSchema } from "./introspect.js";
+import { SchemaForm } from "./SchemaForm.js";
+import type { FormContext } from "./SchemaForm.js";
+import { defaultValue, matchOption } from "./values.js";
+
+afterEach(cleanup);
+
+const { project } = loadFixtureProject("demo");
+const refOptions: FormContext["refOptions"] = (ref) => {
+  const tables: Record<string, Record<string, { name?: string }>> = {
+    actor: project.database.actors,
+    class: project.database.classes,
+    skill: project.database.skills,
+    item: project.database.items,
+    enemy: project.database.enemies,
+    troop: project.database.troops,
+    state: project.database.states,
+    commonEvent: project.database.commonEvents,
+    map: project.maps,
+    tileset: project.tilesets,
+    switch: { sw_a: { name: "A" } },
+    variable: { v_a: { name: "V" } },
+    asset: project.assets.entries,
+  };
+  return Object.entries(tables[ref] ?? {}).map(([value, e]) => ({ value, label: e.name ?? value }));
+};
+const ctx: FormContext = { refOptions, checkFormula: (s) => (s.includes("!!") ? "構文エラー" : undefined) };
+
+function Harness({ schema, initial, onValue }: { schema: z.ZodType; initial?: unknown; onValue?: (v: unknown) => void }) {
+  const spec = describeSchema(schema);
+  const [value, setValue] = useState<unknown>(initial ?? defaultValue(spec, refOptions));
+  return <SchemaForm spec={spec} value={value} ctx={ctx} label="" onChange={(v) => { setValue(v); onValue?.(v); }} />;
+}
+
+describe("describeSchema", () => {
+  it("型・メタデータ・範囲を読む", () => {
+    const schema = z.strictObject({
+      id: z.string().meta({ ref: "actor" }),
+      text: z.string().meta({ multiline: true }),
+      n: z.number().int().min(1).max(9),
+      f: z.number(),
+      opt: z.boolean().optional(),
+      def: z.enum(["a", "b"]).default("a"),
+      list: z.array(z.string()).min(2),
+      rec: z.record(z.enum(["x", "y"]), z.number()),
+      part: z.partialRecord(z.enum(["x", "y"]), z.number()),
+      free: z.record(z.string(), z.number()),
+      u: z.union([z.string().meta({ formula: true }), z.strictObject({ kind: z.literal("k"), v: z.number() })]),
+      d: z.discriminatedUnion("kind", [z.strictObject({ kind: z.literal("p") })]),
+      any: z.custom<number>(() => true),
+    });
+    const spec = describeSchema(schema);
+    if (spec.kind !== "object") throw new Error("object のはず");
+    const byKey = Object.fromEntries(spec.fields.map((f) => [f.key, f]));
+    expect(byKey["id"]?.spec).toEqual({ kind: "string", ref: "actor" });
+    expect(byKey["text"]?.spec).toEqual({ kind: "string", multiline: true });
+    expect(byKey["n"]?.spec).toEqual({ kind: "number", int: true, min: 1, max: 9 });
+    expect(byKey["f"]?.spec).toEqual({ kind: "number", int: false });
+    expect(byKey["opt"]).toMatchObject({ optional: true, hasDefault: false, spec: { kind: "boolean" } });
+    expect(byKey["def"]).toMatchObject({ optional: false, hasDefault: true, default: "a", spec: { kind: "enum", values: ["a", "b"] } });
+    expect(byKey["list"]?.spec).toMatchObject({ kind: "array", min: 2 });
+    expect(byKey["rec"]?.spec).toMatchObject({ kind: "record", partial: false });
+    expect(byKey["part"]?.spec).toMatchObject({ kind: "record", partial: true });
+    expect(byKey["free"]?.spec).toMatchObject({ kind: "record", key: { kind: "string" } });
+    expect(byKey["u"]?.spec).toMatchObject({ kind: "union", options: [{ kind: "string", formula: true }, { kind: "object" }] });
+    expect(byKey["d"]?.spec).toMatchObject({ kind: "union", discriminator: "kind" });
+    expect(byKey["any"]?.spec).toEqual({ kind: "unknown" });
+  });
+});
+
+describe("defaultValue / matchOption", () => {
+  it("必須のものだけを埋め、配列は最小の長さぶん、ID は先頭の選択肢", () => {
+    const schema = z.strictObject({ a: z.string().meta({ ref: "actor" }), b: z.array(z.number().min(2)).min(2), c: z.boolean().optional(), d: z.enum(["x", "y"]), e: z.record(z.enum(["p", "q"]), z.number()) });
+    expect(defaultValue(describeSchema(schema), refOptions)).toEqual({ a: "actor_hero", b: [2, 2], d: "x", e: { p: 0, q: 0 } });
+    expect(defaultValue({ kind: "string", ref: "switch" }, () => [])).toBe("");
+    expect(defaultValue({ kind: "unknown" }, refOptions)).toBeUndefined();
+    // .default() の値は、列挙の先頭より優先される
+    const withDefault = z.strictObject({ p: z.enum(["top", "bottom"]).default("bottom"), q: z.number().default(7) });
+    expect(defaultValue(describeSchema(withDefault), refOptions)).toEqual({ p: "bottom", q: 7 });
+    const deep: z.ZodType = z.lazy(() => z.strictObject({ next: deep }));
+    expect(defaultValue(describeSchema(deep), refOptions)).toBeUndefined(); // lazy は unknown
+  });
+
+  it("union の選択肢を値の形から決める", () => {
+    const spec = describeSchema(z.union([z.string(), z.strictObject({ kind: z.literal("a") }), z.strictObject({ kind: z.literal("b") })]));
+    if (spec.kind !== "union") throw new Error();
+    expect([matchOption(spec.options, "x"), matchOption(spec.options, { kind: "a" }), matchOption(spec.options, { kind: "b" }), matchOption(spec.options, 5)]).toEqual([0, 1, 2, 0]);
+  });
+});
+
+describe("組み込みコマンドのフォーム", () => {
+  const registry = createCommandRegistry();
+  registerBuiltins(registry);
+  createProjectView(project, {});
+
+  for (const handler of registry.list()) {
+    it(`${handler.code}：描画でき、既定値が params の zod を通る`, () => {
+      const spec = describeSchema(handler.params);
+      const initial = defaultValue(spec, refOptions);
+      const parsed = handler.params.safeParse(initial);
+      expect(parsed.success, JSON.stringify(parsed.success ? null : parsed.error.issues)).toBe(true);
+      const { container } = render(<Harness schema={handler.params} initial={parsed.success ? parsed.data : initial} />);
+      expect(container.querySelector(".schema-form")).not.toBeNull();
+      cleanup();
+    });
+  }
+});
+
+describe("データベースとシステムのフォーム", () => {
+  const schemas = { actorSchema, classSchema, skillSchema, itemSchema, enemySchema, troopSchema, stateSchema, commonEventSchema, systemSettingsSchema };
+  for (const [name, schema] of Object.entries(schemas)) {
+    it(`${name}：既存データの描画でクラッシュしない`, () => {
+      const table = { actorSchema: project.database.actors, classSchema: project.database.classes, skillSchema: project.database.skills, itemSchema: project.database.items, enemySchema: project.database.enemies, troopSchema: project.database.troops }[name as string];
+      const sample = table === undefined ? (name === "systemSettingsSchema" ? project.system : defaultValue(describeSchema(schema as never), refOptions)) : Object.values(table)[0];
+      render(<Harness schema={schema as never} initial={sample} />);
+      cleanup();
+    });
+  }
+});
+
+describe("ウィジェット", () => {
+  it("文字列・数値・真偽・列挙を編集できる（数値は空欄で NaN）", () => {
+    let last: unknown;
+    render(<Harness schema={z.strictObject({ s: z.string(), n: z.number(), b: z.boolean(), e: z.enum(["top", "bottom"]) })} onValue={(v) => (last = v)} />);
+    fireEvent.change(screen.getByLabelText("s"), { target: { value: "hi" } });
+    fireEvent.change(screen.getByLabelText("n"), { target: { value: "12" } });
+    fireEvent.click(screen.getByLabelText("b"));
+    fireEvent.change(screen.getByLabelText("e"), { target: { value: "bottom" } });
+    expect(last).toEqual({ s: "hi", n: 12, b: true, e: "bottom" });
+    fireEvent.change(screen.getByLabelText("n"), { target: { value: "" } });
+    expect(last).toMatchObject({ n: Number.NaN });
+  });
+
+  it("ID 欄は選択肢から選び、存在しない ID はそのまま見える", () => {
+    let last: unknown;
+    render(<Harness schema={z.strictObject({ actor: z.string().meta({ ref: "actor" }) })} initial={{ actor: "gone" }} onValue={(v) => (last = v)} />);
+    const select = screen.getByLabelText("actor") as HTMLSelectElement;
+    expect(select.value).toBe("gone");
+    expect(within(select).getByText("gone（存在しない）")).toBeTruthy();
+    fireEvent.change(select, { target: { value: "actor_hero" } });
+    expect(last).toEqual({ actor: "actor_hero" });
+  });
+
+  it("式の欄はリアルタイムに文法エラーを出す", () => {
+    render(<Harness schema={z.strictObject({ f: z.string().meta({ formula: true }) })} initial={{ f: "" }} />);
+    fireEvent.change(screen.getByLabelText("f"), { target: { value: "a!!b" } });
+    expect(screen.getByRole("alert").textContent).toContain("構文エラー");
+    fireEvent.change(screen.getByLabelText("f"), { target: { value: "a+b" } });
+    expect(screen.queryByRole("alert")).toBeNull();
+  });
+
+  it("リテラルだけのユニオンは選択肢から選ぶ（数値のまま入る）", () => {
+    let last: unknown;
+    render(<Harness schema={z.strictObject({ size: z.union([z.literal(16), z.literal(32), z.literal("big")]) })} initial={{ size: 32 }} onValue={(v) => (last = v)} />);
+    expect((screen.getByLabelText("size") as HTMLSelectElement).value).toBe("1");
+    fireEvent.change(screen.getByLabelText("size"), { target: { value: "0" } });
+    expect(last).toEqual({ size: 16 });
+    fireEvent.change(screen.getByLabelText("size"), { target: { value: "2" } });
+    expect(last).toEqual({ size: "big" });
+    expect(defaultValue(describeSchema(z.union([z.literal(1), z.literal(2)])), refOptions)).toBe(1);
+    const spec = describeSchema(z.union([z.literal(1), z.literal(2)]));
+    if (spec.kind !== "choice") throw new Error();
+    expect(matchOption([spec, { kind: "string" }], "x")).toBe(1);
+    expect(matchOption([spec, { kind: "string" }], 2)).toBe(0);
+  });
+
+  it("配列：追加・削除（最小数は残す）・並べ替え", () => {
+    let last: unknown;
+    render(<Harness schema={z.strictObject({ xs: z.array(z.string()).min(1) })} initial={{ xs: ["a", "b"] }} onValue={(v) => (last = v)} />);
+    fireEvent.click(screen.getByText("＋ xsを追加"));
+    expect(last).toEqual({ xs: ["a", "b", ""] });
+    fireEvent.click(screen.getByLabelText("xs 1 を下へ"));
+    expect(last).toEqual({ xs: ["b", "a", ""] });
+    fireEvent.click(screen.getByLabelText("xs 3 を削除"));
+    fireEvent.click(screen.getByLabelText("xs 2 を削除"));
+    expect(last).toEqual({ xs: ["b"] });
+    expect((screen.getByLabelText("xs 1 を削除") as HTMLButtonElement).disabled).toBe(true); // 最小数
+    expect((screen.getByLabelText("xs 1 を上へ") as HTMLButtonElement).disabled).toBe(true);
+  });
+
+  it("optional：チェックで有効にすると既定値が入り、外すと消える", () => {
+    let last: unknown;
+    render(<Harness schema={z.strictObject({ o: z.strictObject({ n: z.number() }).optional() })} onValue={(v) => (last = v)} />);
+    fireEvent.click(screen.getByLabelText("oを設定"));
+    expect(last).toEqual({ o: { n: 0 } });
+    fireEvent.click(screen.getByLabelText("oを設定"));
+    expect(last).toEqual({});
+  });
+
+  it("record：enum キーの固定行（partial は有無を選ぶ）と、自由なキーの追加・削除", () => {
+    let last: unknown;
+    render(
+      <Harness
+        schema={z.strictObject({ full: z.record(z.enum(["x", "y"]), z.number()), part: z.partialRecord(z.enum(["x", "y"]), z.number()), free: z.record(z.string(), z.number()) })}
+        onValue={(v) => (last = v)}
+      />,
+    );
+    fireEvent.change(screen.getByLabelText("full X"), { target: { value: "3" } });
+    expect(last).toMatchObject({ full: { x: 3, y: 0 }, part: {}, free: {} });
+    fireEvent.click(screen.getByLabelText("part Xを設定"));
+    expect(last).toMatchObject({ part: { x: 0 } });
+    fireEvent.click(screen.getByLabelText("part Xを設定"));
+    expect(last).toMatchObject({ part: {} });
+
+    const input = screen.getByLabelText("freeの新しいキー");
+    fireEvent.change(input, { target: { value: "k1" } });
+    fireEvent.submit(input.closest("form")!);
+    expect(last).toMatchObject({ free: { k1: 0 } });
+    fireEvent.change(input, { target: { value: "k1" } }); // 重複は無視
+    fireEvent.submit(input.closest("form")!);
+    fireEvent.change(screen.getByLabelText("free k1"), { target: { value: "5" } });
+    expect(last).toMatchObject({ free: { k1: 5 } });
+    fireEvent.click(screen.getByLabelText("free k1 を削除"));
+    expect(last).toMatchObject({ free: {} });
+  });
+
+  it("union：種類を切り替えると、その種類の既定値になる", () => {
+    let last: unknown;
+    render(
+      <Harness
+        schema={z.strictObject({ c: z.union([z.string(), z.strictObject({ kind: z.literal("switch"), on: z.boolean() }), z.strictObject({ kind: z.literal("variable"), n: z.number() })]) })}
+        initial={{ c: "a > b" }}
+        onValue={(v) => (last = v)}
+      />,
+    );
+    fireEvent.change(screen.getByLabelText("cの種類"), { target: { value: "2" } });
+    expect(last).toEqual({ c: { kind: "variable", n: 0 } });
+    expect(screen.getByLabelText("c n")).toBeTruthy();
+    fireEvent.change(screen.getByLabelText("cの種類"), { target: { value: "0" } });
+    expect(last).toEqual({ c: "" });
+  });
+
+  it("unknown な型は JSON で編集できる（壊れた JSON は無視）", () => {
+    let last: unknown;
+    render(<Harness schema={z.strictObject({ zz: z.custom<unknown>(() => true) })} initial={{ zz: { a: 1 } }} onValue={(v) => (last = v)} />);
+    const area = screen.getByLabelText("zz（JSON）");
+    fireEvent.change(area, { target: { value: "{oops" } });
+    expect(last).toBeUndefined();
+    fireEvent.change(area, { target: { value: '{"b":2}' } });
+    expect(last).toEqual({ zz: { b: 2 } });
+  });
+});

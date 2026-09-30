@@ -1,0 +1,146 @@
+import type { ZodType } from "zod";
+
+/**
+ * zod スキーマから作る「フォームの設計図」。`CommandForm` / `EntityForm` / `SystemForm` が共通で使う。
+ * 値の検証は zod 自身が行い、ここは「どんなウィジェットを出すか」だけを決める。
+ */
+export type FieldSpec =
+  | { kind: "string"; ref?: string; assetKind?: string; multiline?: boolean; formula?: boolean }
+  | { kind: "number"; int: boolean; min?: number; max?: number }
+  | { kind: "boolean" }
+  | { kind: "enum"; values: string[] }
+  | { kind: "literal"; value: string | number | boolean }
+  /** リテラルだけのユニオン（例：16 | 32 | 48）。選択肢から選ぶ。 */
+  | { kind: "choice"; values: (string | number | boolean)[] }
+  | { kind: "object"; fields: ObjectField[] }
+  | { kind: "array"; item: FieldSpec; min: number }
+  /** キーが enum なら固定の行（`partial` なら行ごとに有無を選べる）、文字列なら自由なキーの行。 */
+  | { kind: "record"; key: FieldSpec; value: FieldSpec; partial: boolean }
+  /** `discriminator` があれば判別付きユニオン（各選択肢は discriminator を literal に持つ object）。 */
+  | { kind: "union"; options: FieldSpec[]; discriminator?: string }
+  /** イベントコマンドの列（`{ code, params, indent }` の配列）。専用のリスト編集が出る。 */
+  | { kind: "commands" }
+  | { kind: "unknown" };
+
+export interface ObjectField {
+  key: string;
+  spec: FieldSpec;
+  /** `.optional()`：値が無くてもよい */
+  optional: boolean;
+  /** `.default()`：省略すると既定値が入る */
+  hasDefault: boolean;
+  /** `.default()` の値（新しく追加するときの初期値に使う） */
+  default?: unknown;
+}
+
+/** zod の内部表現（`_zod.def`）を読むための最小の型。 */
+interface Def {
+  type: string;
+  shape?: Record<string, ZodType>;
+  innerType?: ZodType;
+  element?: ZodType;
+  options?: ZodType[];
+  discriminator?: string;
+  keyType?: ZodType;
+  valueType?: ZodType;
+  entries?: Record<string, unknown>;
+  values?: unknown[];
+  defaultValue?: unknown;
+  checks?: { _zod: { def: { check: string; value?: number; inclusive?: boolean; format?: string } } }[];
+}
+
+const defOf = (s: ZodType): Def => (s as unknown as { _zod: { def: Def } })._zod.def;
+const metaOf = (s: ZodType): Record<string, unknown> => (s as unknown as { meta(): Record<string, unknown> | undefined }).meta() ?? {};
+
+/** `optional` / `default` / `nullable` の皮をむいて、中身と、外側にあった性質を返す。 */
+function unwrap(schema: ZodType): { inner: ZodType; optional: boolean; hasDefault: boolean; default?: unknown } {
+  let inner = schema;
+  let optional = false;
+  let hasDefault = false;
+  let dflt: unknown;
+  for (;;) {
+    const def = defOf(inner);
+    if (def.type === "optional" || def.type === "nullable" || def.type === "default" || def.type === "prefault" || def.type === "readonly") {
+      if (def.type === "optional") optional = true;
+      if (def.type === "default" || def.type === "prefault") {
+        hasDefault = true;
+        dflt ??= typeof def.defaultValue === "function" ? (def.defaultValue as () => unknown)() : def.defaultValue;
+      }
+      if (def.innerType === undefined) break;
+      inner = def.innerType;
+      continue;
+    }
+    break;
+  }
+  return { inner, optional, hasDefault, ...(dflt === undefined ? {} : { default: dflt }) };
+}
+
+function numberBounds(def: Def): { int: boolean; min?: number; max?: number } {
+  let int = false;
+  let min: number | undefined;
+  let max: number | undefined;
+  for (const c of def.checks ?? []) {
+    const check = c._zod.def;
+    if (check.check === "number_format" && (check.format === "safeint" || check.format === "int32" || check.format === "uint32")) int = true;
+    if (check.check === "greater_than" && typeof check.value === "number") min = check.value;
+    if (check.check === "less_than" && typeof check.value === "number") max = check.value;
+  }
+  return { int, ...(min === undefined ? {} : { min }), ...(max === undefined ? {} : { max }) };
+}
+
+/** スキーマ 1 つを `FieldSpec` にする。未対応の型は `unknown`（JSON 入力欄）になる。 */
+export function describeSchema(schema: ZodType): FieldSpec {
+  const { inner } = unwrap(schema);
+  const def = defOf(inner);
+  const meta = metaOf(inner);
+  switch (def.type) {
+    case "string":
+      return {
+        kind: "string",
+        ...(typeof meta["ref"] === "string" ? { ref: meta["ref"] } : {}),
+        ...(typeof meta["assetKind"] === "string" ? { assetKind: meta["assetKind"] } : {}),
+        ...(meta["multiline"] === true ? { multiline: true } : {}),
+        ...(meta["formula"] === true ? { formula: true } : {}),
+      };
+    case "number":
+      return { kind: "number", ...numberBounds(def) };
+    case "boolean":
+      return { kind: "boolean" };
+    case "enum":
+      return { kind: "enum", values: Object.values(def.entries ?? {}).map(String) };
+    case "literal": {
+      const value = def.values?.[0];
+      return typeof value === "string" || typeof value === "number" || typeof value === "boolean" ? { kind: "literal", value } : { kind: "unknown" };
+    }
+    case "object":
+      return {
+        kind: "object",
+        fields: Object.entries(def.shape ?? {}).map(([key, s]) => {
+          const u = unwrap(s);
+          return { key, spec: describeSchema(s), optional: u.optional, hasDefault: u.hasDefault, ...(u.default === undefined ? {} : { default: u.default }) };
+        }),
+      };
+    case "array": {
+      const element = def.element === undefined ? undefined : defOf(def.element);
+      const keys = element?.type === "object" ? Object.keys(element.shape ?? {}) : [];
+      if (keys.length === 3 && ["code", "params", "indent"].every((k) => keys.includes(k))) return { kind: "commands" };
+      const min = (def.checks ?? []).find((c) => c._zod.def.check === "min_length")?._zod.def as { minimum?: number } | undefined;
+      return { kind: "array", item: def.element === undefined ? { kind: "unknown" } : describeSchema(def.element), min: min?.minimum ?? 0 };
+    }
+    case "record": {
+      if (def.keyType === undefined || def.valueType === undefined) return { kind: "unknown" };
+      // 空のオブジェクトを受け付ければ、キーごとに有無を選べる（partialRecord）
+      const partial = (inner as unknown as { safeParse(v: unknown): { success: boolean } }).safeParse({}).success;
+      return { kind: "record", key: describeSchema(def.keyType), value: describeSchema(def.valueType), partial };
+    }
+    case "union": {
+      const options = (def.options ?? []).map(describeSchema);
+      if (options.length > 0 && options.every((o) => o.kind === "literal")) {
+        return { kind: "choice", values: options.map((o) => (o as Extract<FieldSpec, { kind: "literal" }>).value) };
+      }
+      return { kind: "union", options, ...(def.discriminator === undefined ? {} : { discriminator: def.discriminator }) };
+    }
+    default:
+      return { kind: "unknown" };
+  }
+}

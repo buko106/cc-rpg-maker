@@ -92,3 +92,11 @@ IndexedDB はオブジェクトストア `projects`, `maps`（key: `[projectId, 
 - `memory`, `idb` が契約テストを通る。
 - `apps/editor-ui` から新規作成→保存→リロード→再開が動く。
 - `opfs`/`fsa` は後続マイルストーン。
+
+## 実装メモ（M5 で確定した点）
+- **実装済み**：`ProjectRepository`（`list` / `create` / `load` / `save` / `remove` / `assets`）、`createMemoryProjectRepository`、`createIdbProjectRepository`（`{ indexedDB, keyRange, dbName }` を注入できる。テストは `fake-indexeddb` の対を渡す）。`exportZip` / `importZip`、`opfs` / `fsa` は後続（M6〜M7）で、ポートには載せていない（載せるときに契約テストも足す）。
+- **構成**：検証・楽観ロック・部分保存・マイグレーション後の保存し直しは共通の `createRepository(backend)` にあり、永続層は最小の `StoreBackend`（`listMeta` / `getMeta` / `getProject` / `getMap` / `commit` / `removeProject` / アセット 3 操作）だけを実装する。`commit` は project・マップ・meta を 1 回で書く（IndexedDB は 1 トランザクション。メモリは書く前に全部を文字列にしてから反映）。原子性は「`commit` が失敗したら直前の状態が残る」をバックエンドのラッパーで確かめる。
+- **`save` の意味**：`expectedRevision` が現在値と違えば `conflict`（何も書かない）。`changedMaps` を指定するとそのマップだけを書き、ストアに無いマップと、文書から消えたマップは常に反映する（指定外の変更は保存されない — 契約テストで固定）。文書は `parseProject` / `parseMapData` で検証してから書く（`schema` エラー）。`project.maps` と `maps` のキーが食い違う文書も `schema` エラー。`revision` は保存のたびに +1、`create` 直後は 1。`QuotaExceededError`（名前または message に quota）は `quota`、他の例外は `io`。
+- **`create`** は `createTemplate`（草原 20×15 のマップ 1 枚、勇者 1 人と職業、タイルセット `ts_default`、歩行グラフィック、開始位置 (5,5)、画面 480×320）から作る。画像は demo のものを `tools/make-template-assets.mjs` で `template-assets.ts` に base64 で埋め込んだ。`fixtures/projects/v1/template` は置いていない（コードで生成する）。
+- **アセット**：`put` は内容ハッシュ（sha256 先頭 16 桁）を ID にし、PNG / GIF / JPEG のヘッダから幅・高さを読む（DOM に頼らない）。マニフェストへの登録は `registerAsset`（12）の仕事。`hashAsset`（09）と同じ定義を project-store 内にも持つ（project-store は schema にしか依存できないため）。プロジェクトを保存し直しても、使われなくなったアセットのバイト列は消さない（ガベージコレクションは未実装）。
+- **未対応**：マイグレーション後の保存し直しの分岐は、現状 `migrations` が空でテストできていない（最初のマイグレーションを足すときに、旧バージョンのフィクスチャ `fixtures/projects/v{old}/` と一緒にテストする）。

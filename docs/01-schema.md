@@ -214,3 +214,6 @@ export function findDanglingRefs(...): RefTarget[];
 - **`Database.states`**（新規・必須）：`State { id, name, restriction: "none" | "cannotAct", turns, paramRates, hpRegen }`。`turns` は継続ターン数（0 は戦闘が終わるまで）、`paramRates` はパラメータの倍率（`Partial<Record<Param, number>>`、0 以上）、`hpRegen` はターン終了時の最大 HP に対する増減の割合（-1〜1。負で毒）。ID は `StateId`。参照の種類に `state` を追加。
 - **`SkillEffect`** に `addState { state, chance }`（`chance` は 0〜1）、`removeState { state }`、`buff { param, level }`（`param` は `atk def mat mdf agi luk`、`level` は -2〜+2 の整数）を追加。`Enemy.graphic?: AssetRef`（戦闘画面の絵。省略時は名前の箱）を追加。`collectRefs` はこれらの参照（状態・絵）も拾う。
 - 形式バージョンは 1 のまま（公開前なので）。`fixtures/projects/v1/*/project.json` に `"states": {}` を足した。
+
+## 実装メモ（M5 で確定した点）
+- ID の zod スキーマにメタデータを付けた：`idSchema<T>(ref?)` が `schema.meta()` に `{ ref: "actor" | "map" | … }` を載せる（`assetIdSchema` は `{ ref: "asset" }`、`assetRefSchema` の `asset` は `assetKind: "image"`、`audioRefSchema` の `asset` は `assetKind: "audio"`）。値の検証には影響しない。エディタが「これは何の ID か」を知ってフォームの選択肢を出すためのもの（13）。

@@ -2,6 +2,15 @@
  * @rpg/editor-core — EditorCommand、Undo/Redo、整合性チェック。
  *
  * 設計: docs/12-editor-core.md
- * 実装マイルストーン: docs/17-milestones.md を参照（M0 時点では空）。
  */
-export {};
+export { cmd } from "./commands/index.js";
+export { blankLayers, defaultPage, eventCommand, TABLE_KIND } from "./commands/index.js";
+export type { Anchor, NewMapData, PaintTilesCommand, TileCell } from "./commands/index.js";
+export { batch, defineEdit } from "./command.js";
+export type { EditorCommand, EditSpec } from "./command.js";
+export type { Diagnostic, EditError, Impact } from "./errors.js";
+export { commandRefResolver, describeFrom, kindLabel, validateDoc } from "./diagnostics.js";
+export { COALESCE_MS, createEditorSession, UNDO_LIMIT } from "./session.js";
+export type { DocProjectSource, EditorSession, EditorSessionDeps, SaveStatus, Timers } from "./session.js";
+export { initialUiState } from "./ui-state.js";
+export type { EditorUiState, Selection, Tool } from "./ui-state.js";

@@ -7,6 +7,7 @@
  */
 export * from "./contracts/index.js";
 export * from "./arbitraries/schema.js";
+export { editorCommandArb } from "./arbitraries/editorCommands.js";
 export * from "./arbitraries/state.js";
 export * from "./fixtures.js";
 export { deepFreeze, isDeepFrozen } from "./harness/freeze.js";

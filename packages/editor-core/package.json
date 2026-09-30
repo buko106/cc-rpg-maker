@@ -9,7 +9,11 @@
     ".": "./src/index.ts"
   },
   "dependencies": {
-    "@rpg/schema": "workspace:*",
-    "@rpg/project-store": "workspace:*"
+    "@rpg/core": "workspace:*",
+    "@rpg/project-store": "workspace:*",
+    "@rpg/schema": "workspace:*"
+  },
+  "devDependencies": {
+    "@rpg/test-utils": "workspace:*"
   }
 }

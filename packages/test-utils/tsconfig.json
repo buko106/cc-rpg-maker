@@ -38,6 +38,12 @@
     },
     {
       "path": "../../packages/schema"
+    },
+    {
+      "path": "../../packages/project-store"
+    },
+    {
+      "path": "../../packages/editor-core"
     }
   ]
 }
