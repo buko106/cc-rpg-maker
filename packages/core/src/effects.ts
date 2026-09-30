@@ -21,8 +21,9 @@ export type Effect =
   | { readonly kind: "screenTint"; readonly color: RGBA; readonly durationTicks: number }
   /** 画面を `durationTicks` かけて暗転（`to` = 1）/明転（`to` = 0）する。暗転は明転を指示するまで続く。 */
   | { readonly kind: "screenFade"; readonly to: 0 | 1; readonly durationTicks: number }
-  | { readonly kind: "requestSave"; readonly slot?: number }
-  | { readonly kind: "requestLoad"; readonly slot?: number }
+  /** `confirmed` は確認ダイアログで「はい」を選んだ後の要求（runtime は再確認しない）。 */
+  | { readonly kind: "requestSave"; readonly slot?: number; readonly confirmed?: boolean }
+  | { readonly kind: "requestLoad"; readonly slot?: number; readonly confirmed?: boolean }
   /** 遅延ロード。runtime が Ctx に供給してから再開する。 */
   | { readonly kind: "requestMapData"; readonly mapId: MapId }
   | { readonly kind: "log"; readonly level: "debug" | "info" | "warn"; readonly message: string }

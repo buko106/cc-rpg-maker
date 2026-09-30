@@ -21,9 +21,9 @@ export { createProjectView } from "./project-view.js";
 export type { ProjectView } from "./project-view.js";
 export { createRandom, restoreRandom } from "./random.js";
 export type { Clock, Random, RandomState } from "./random.js";
-export { fromSnapshot, migrateSnapshot, SNAPSHOT_VERSION, snapshotMigrations, stripTransient, toSnapshot } from "./snapshot.js";
+export { fromSnapshot, migrateSnapshot, progressFingerprint, SNAPSHOT_VERSION, snapshotMigrations, stripTransient, toSnapshot } from "./snapshot.js";
 export type { SaveSnapshot, SerializedGameState, SnapshotError, SnapshotMigration } from "./snapshot.js";
 export { IDLE_MESSAGE, selfSwitchKey } from "./state.js";
 export type {
-  ActorState, Character, EventRuntime, GameState, MapState, MenuScreen, MessageState, PartyState, SceneState, TimerState, TitleScreen,
+  ActorState, Character, EventRuntime, GameState, MapState, MenuConfirm, MenuScreen, MessageState, PartyState, SceneState, TimerState, TitleScreen,
 } from "./state.js";

@@ -13,10 +13,10 @@ export interface EffectSinks {
   loadMap(mapId: MapId): void;
   /** `plugin` Effect（プラグインが受け口を登録していなければ警告になる）。 */
   plugin(effect: Extract<Effect, { kind: "plugin" }>): void;
-  /** 現在の状態を `slot` に保存する。`slot` 省略時は最初のスロット。 */
-  save(slot: number | undefined): void;
-  /** `slot` のセーブデータを読み込んで再開する。`slot` 省略時は最初のスロット。 */
-  load(slot: number | undefined): void;
+  /** 現在の状態を `slot` に保存する。`slot` 省略時は最初のスロット。`confirmed` = 確認ダイアログで承諾済み。 */
+  save(slot: number | undefined, confirmed: boolean): void;
+  /** `slot` のセーブデータを読み込んで再開する。`slot` 省略時は最初のスロット。`confirmed` = 確認ダイアログで承諾済み。 */
+  load(slot: number | undefined, confirmed: boolean): void;
 }
 
 /**
@@ -44,10 +44,10 @@ export function distributeEffect(effect: Effect, sinks: EffectSinks): void {
       sinks.loadMap(effect.mapId);
       return;
     case "requestSave":
-      sinks.save(effect.slot);
+      sinks.save(effect.slot, effect.confirmed === true);
       return;
     case "requestLoad":
-      sinks.load(effect.slot);
+      sinks.load(effect.slot, effect.confirmed === true);
       return;
     case "log":
       sinks.logger[effect.level](effect.message);

@@ -19,6 +19,8 @@ export type Action =
   /** `project` で新しいゲームを始める。`seed` 省略時は現在のシード。 */
   | { readonly type: "startGame"; readonly project: ProjectView; readonly seed?: string }
   | { readonly type: "loadSnapshot"; readonly snapshot: SaveSnapshot }
+  /** メニュー（セーブ/ロード画面）に確認ダイアログを出す。メニュー以外では何もしない。 */
+  | { readonly type: "askConfirm"; readonly kind: "save" | "load"; readonly slot: number }
   | ({ readonly type: "interpreter" } & InterpreterAction);
 
 export interface StepResult {

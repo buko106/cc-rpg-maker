@@ -2,6 +2,7 @@ import type { GameState, ProjectView } from "@rpg/core";
 import { MENU_ITEMS, menuItemIds, paramAt } from "@rpg/core";
 import type { Param } from "@rpg/schema";
 import type { UiNode } from "../frame-spec.js";
+import { projectConfirm } from "./confirm.js";
 import { projectSlotList } from "./slot-list.js";
 import { term } from "./terms.js";
 import { EXP_COLOR, HP_COLOR, MP_COLOR, textColor, UI_MARGIN, UI_PADDING, UI_ROW_HEIGHT } from "./theme.js";
@@ -119,8 +120,9 @@ export function projectMenu(state: GameState, view: ProjectView, screen: Screen,
     case "status":
       return projectStatus(state, view, screen, scene.cursor);
     case "save":
-      return projectSlotList(view, screen, "save", scene.cursor, ui);
-    case "load":
-      return projectSlotList(view, screen, "load", scene.cursor, ui);
+    case "load": {
+      const list = projectSlotList(view, screen, scene.screen, scene.cursor, ui);
+      return scene.confirm === undefined ? list : [...list, ...projectConfirm(view, screen, scene.confirm)];
+    }
   }
 }

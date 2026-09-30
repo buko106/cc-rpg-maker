@@ -81,6 +81,7 @@ export type Action =
   | { type: "tick" }                                 // 時間を1フレーム進める
   | { type: "startGame"; project: ProjectView }
   | { type: "loadSnapshot"; snapshot: SaveSnapshot }
+  | { type: "askConfirm"; kind: "save" | "load"; slot: number }   // メニューのセーブ/ロード画面に確認ダイアログを出す（runtime が発行）
   | { type: "interpreter"; ...InterpreterAction }    // 03
   | { type: "battle"; ...BattleAction };             // 04
 
@@ -115,8 +116,8 @@ export type Effect =
   | { kind: "screenFlash"; color: RGBA; durationTicks: number }
   | { kind: "screenTint"; color: RGBA; durationTicks: number }   // M6：色調（a = 0 で元に戻る）
   | { kind: "screenFade"; to: 0 | 1; durationTicks: number }      // M6：暗転（1）/ 明転（0）。暗転は明転を指示するまで続く
-  | { kind: "requestSave"; slot?: number }
-  | { kind: "requestLoad"; slot?: number }
+  | { kind: "requestSave"; slot?: number; confirmed?: boolean }   // confirmed = 確認ダイアログで「はい」の後
+  | { kind: "requestLoad"; slot?: number; confirmed?: boolean }
   | { kind: "requestMapData"; mapId: MapId }   // 遅延ロード。runtime が Ctx に供給してから再開
   | { kind: "log"; level: "debug"|"info"|"warn"; message: string }
   | { kind: "plugin"; name: string; payload: unknown };
@@ -197,6 +198,7 @@ export const snapshotMigrations: readonly { from: number; to: number; migrate(s:
 - **`SceneState` は判別共用体**：`{ kind: "map" }` / `{ kind: "title"; screen: "main" | "continue"; cursor }` / `{ kind: "menu"; screen: "main" | "item" | "status" | "save" | "load"; cursor }` / `{ kind: "battle" | "gameover" }`（後者は M4 まで placeholder）。タイトル・メニューの UI 状態（画面・カーソル）は `GameState` の一部なので、UI 操作も入力列から再現でき、リプレイできる（`fixtures/replays/menu-save.json`）。実装は `game/uiPhase.ts`（入力）と `game/scenes.ts`（定数：`TITLE_ITEMS` / `MENU_ITEMS` / `SAVE_SLOT_FIRST = 1` / `SAVE_SLOT_COUNT = 10` / `menuItemIds`）。表示文言は core に持たず、`system.terms[key]` を runtime が引く（`key` = `TITLE_ITEMS` / `MENU_ITEMS` の要素）。
 - **タイトル**：`titleState(ctx, seed)` は `initialState` をタイトルシーンにしたもの。`initialState` 自体は従来どおりマップシーンから始まる（リプレイのハッシュを変えないため）。`main`：上下でカーソル（循環）、決定で「ニューゲーム」＝ `initialState(ctx, state.rng.seed)` から作り直す（`tick` は数え続け、`playtimeTicks` は 0 から。`stopBgm` を発行）／「コンティニュー」＝ `continue` 画面へ。`continue`：スロット 1〜10 のカーソル、決定で `requestLoad { slot }`、キャンセルで `main`。**core はスロットが空かどうかを知らない**（読み込めるかは runtime が決める）。
 - **メニュー**：マップ上で「プレイヤーが止まっていて、メッセージ・通常インタプリタ・場所移動が無い」ときに `menu` または `cancel` で開く。`main` の 4 コマンドから、`item`（所持数 1 以上を ID 順。M3 では使えない）／`status`（上下または pageup/pagedown でメンバー切り替え）／`save`・`load`（決定で `requestSave` / `requestLoad { slot: 1 + cursor }`。画面は開いたまま）。キャンセルは一つ前の画面（`main` ならマップ）へ、`menu` ボタンは一度に閉じる。カーソルは押下開始（`triggered`）だけで動く（押しっぱなしのリピートは無い）。
+- **確認ダイアログ**（セーブ/ロード画面）：`menu` シーンの `confirm?: { kind: "save" | "load"; slot; cursor: 0 | 1 }`（0 = はい / 1 = いいえ。誤操作しにくいよう **「いいえ」から始まる**）。出すかどうかは **runtime が判断**し（06 参照）、`askConfirm` Action で開く（メニュー以外では何もしない）。開いている間は一覧のカーソルは動かず、上下左右で はい/いいえ を切り替え、決定で確定（はい = `requestSave` / `requestLoad { slot, confirmed: true }`。いいえ = 何も要求せず閉じる）、キャンセルで閉じる、`menu` ボタンでメニューごと閉じる。ダイアログの開閉も `GameState` の一部なので入力列から再現できる。`progressFingerprint(state)` は「セーブに値する進行」の指紋（`stripTransient` から `tick` / `playtimeTicks` を除いたキー順序に依らない文字列）で、保存直後と一致し、歩く・拾う・スイッチが変わるなどで変わる（メニューの開閉・時間だけの経過では変わらない）。
 - **世界は止まる**：タイトル・メニューの間は `handleTick` が `tick`（メニューでは `playtimeTicks` も）だけ進め、移動・イベント・並列処理は動かない（不変条件 3 は保たれる）。
 - **Snapshot**：セーブされるのはマップシーンだけ。`stripTransient` は `title` / `menu` のシーンを `{ kind: "map" }` に戻す（メニューからセーブしても、ロードするとマップから再開する）。`fromSnapshot` の検証スキーマも `scene` は `map` のみ（`battle` は M4 で追加）。`dispatch({ type: "loadSnapshot" })` は成功すると状態を丸ごと置き換え、場所移動の予約が残っていれば `requested` を `false` に戻す（マップが未ロードでも `requestMapData` を出し直せるように）。失敗（`Err`）は状態を変えず `log` の warn だけを返す。
 

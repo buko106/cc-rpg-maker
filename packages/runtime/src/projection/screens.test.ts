@@ -122,6 +122,31 @@ describe("projectFrame（メニュー）", () => {
     expect(textsOf(projectFrame(load.state, load.h.loaded.view, undefined, { slots }).ui)).toContain("ロード");
   });
 
+  it("確認ダイアログ：一覧の上に問いかけと はい/いいえ を重ね、カーソルが選択に従う", async () => {
+    const at = (screen: "save" | "load", confirm: NonNullable<Extract<GameState["scene"], { kind: "menu" }>["confirm"]>) =>
+      menuState(screen, 0, (s) => ({ ...s, scene: { kind: "menu", screen, cursor: 0, confirm } }));
+    const save = await at("save", { kind: "save", slot: 4, cursor: 1 });
+    const ui = projectFrame(save.state, save.h.loaded.view, undefined, { slots: [meta(4)] }).ui;
+    const texts = textsOf(ui);
+    expect(texts).toEqual(expect.arrayContaining(["セーブ", "スロット4 に上書きしますか？", "はい", "いいえ"]));
+    const cursorY = (state: GameState, view: typeof save.h.loaded.view): number => {
+      const dialog = projectFrame(state, view, undefined, { slots: [] }).ui.filter((n) => n.kind === "window").at(-1);
+      const cursor = dialog?.kind === "window" ? dialog.children.find((c) => c.kind === "cursor") : undefined;
+      return cursor?.kind === "cursor" ? cursor.y : NaN;
+    };
+    const yes = await at("save", { kind: "save", slot: 4, cursor: 0 });
+    expect(cursorY(yes.state, yes.h.loaded.view)).toBeLessThan(cursorY(save.state, save.h.loaded.view)); // はい は いいえ の上
+
+    const load = await at("load", { kind: "load", slot: 2, cursor: 1 });
+    expect(textsOf(projectFrame(load.state, load.h.loaded.view, undefined, { slots: [] }).ui)).toContain("未セーブの進行は失われます。ロードしますか？");
+  });
+
+  it("確認ダイアログの文言は system.terms で差し替えられる", async () => {
+    const h = await createRuntimeHarness({ project: "minimal", title: true, patchProject: (p) => ({ ...p, system: { ...p.system, terms: { ...p.system.terms, confirmOverwrite: "上書き{slot}？", yes: "OK" } } }) });
+    const state = { ...h.runtime.getState(), scene: { kind: "menu", screen: "save", cursor: 0, confirm: { kind: "save", slot: 7, cursor: 0 } } } as GameState;
+    expect(textsOf(h.runtime.project(state).ui)).toEqual(expect.arrayContaining(["上書き7？", "OK", "いいえ"]));
+  });
+
   it("スロット一覧はカーソルが見える範囲にスクロールする", async () => {
     const { h, state } = await menuState("save", SAVE_SLOT_COUNT - 1);
     const ui = projectFrame(state, h.loaded.view, undefined, { slots: [] }).ui;

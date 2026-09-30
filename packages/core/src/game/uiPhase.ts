@@ -1,7 +1,7 @@
 import type { Ctx } from "../ctx-types.js";
 import type { Effect } from "../effects.js";
 import type { InputFrame } from "../input.js";
-import type { GameState, MenuScreen, SceneState } from "../state.js";
+import type { GameState, MenuConfirm, MenuScreen, SceneState } from "../state.js";
 import type { StepResult } from "./actions.js";
 import { initialState, titleState } from "./initial.js";
 import { MENU_ITEMS, menuItemIds, SAVE_SLOT_COUNT, SAVE_SLOT_FIRST, TITLE_ITEMS } from "./scenes.js";
@@ -56,6 +56,21 @@ function screenSize(state: GameState, screen: MenuScreen): number {
 }
 
 /**
+ * 確認ダイアログの入力。上下（左右）で「はい/いいえ」、決定で確定、キャンセルで閉じる。
+ * 「はい」は `confirmed: true` つきで要求を出し直す（画面は開いたまま）。
+ */
+function handleConfirmInput(state: GameState, scene: Extract<SceneState, { kind: "menu" }>, confirm: MenuConfirm, input: InputFrame): StepResult {
+  const { confirm: _closed, ...open } = scene;
+  if (input.triggered.has("cancel")) return withScene(state, open);
+  const toggle = ["up", "down", "left", "right"].some((b) => input.triggered.has(b as "up"));
+  if (toggle) return withScene(state, { ...scene, confirm: { ...confirm, cursor: confirm.cursor === 0 ? 1 : 0 } });
+  if (!input.triggered.has("ok")) return { state, effects: [] };
+  if (confirm.cursor === 1) return withScene(state, open);
+  const kind = confirm.kind === "save" ? "requestSave" : "requestLoad";
+  return withScene(state, open, [{ kind, slot: confirm.slot, confirmed: true }]);
+}
+
+/**
  * メニューの入力。キャンセルで一つ前の画面（メインならマップ）へ、メニューボタンで一度に閉じる。
  * セーブ/ロード画面の決定は `requestSave` / `requestLoad`（書き込み・読み込みは runtime）。
  */
@@ -64,6 +79,7 @@ export function handleMenuInput(state: GameState, input: InputFrame): StepResult
   if (scene.kind !== "menu") return { state, effects: [] };
 
   if (input.triggered.has("menu")) return withScene(state, { kind: "map" });
+  if (scene.confirm !== undefined) return handleConfirmInput(state, scene, scene.confirm, input);
   if (input.triggered.has("cancel")) {
     if (scene.screen === "main") return withScene(state, { kind: "map" });
     return withScene(state, { kind: "menu", screen: "main", cursor: MENU_ITEMS.indexOf(scene.screen) });

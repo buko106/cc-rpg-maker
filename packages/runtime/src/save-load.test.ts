@@ -156,7 +156,9 @@ describe("ロード", () => {
     h.play(...expandInputs([{ hold: "down", frames: 16 }]));
     expect(h.runtime.getState().map.player.y).toBe(3);
 
-    press(h, "menu", "down", "down", "down", "ok", "ok"); // ロード → スロット 1
+    press(h, "menu", "down", "down", "down", "ok", "ok"); // ロード → スロット 1（歩いた後なので確認が出る）
+    expect(h.runtime.getState().scene).toMatchObject({ kind: "menu", screen: "load", confirm: { kind: "load", slot: 1, cursor: 1 } });
+    press(h, "up", "ok"); // はい
     await h.runtime.settled();
     const s = h.runtime.getState();
     expect(s.scene).toEqual({ kind: "map" });
@@ -232,5 +234,221 @@ describe("ロード", () => {
     expect(second.errors).toEqual([]);
     expect(second.runtime.getState().scene.kind).toBe("title");
     expect(screenTexts(second)).toContain("ロードに失敗しました");
+  });
+});
+
+/** メニューを（開いていれば閉じてから）開き直し、セーブ/ロード画面の `slot`（1 始まり）にカーソルを合わせて決定する。 */
+function choose(h: RuntimeHarness, screen: "save" | "load", slot: number): void {
+  if (h.runtime.getState().scene.kind === "menu") press(h, "menu");
+  press(h, "menu", ...Array<Button>(screen === "save" ? 2 : 3).fill("down"), "ok", ...Array<Button>(slot - 1).fill("down"), "ok");
+}
+const confirmOf = (h: RuntimeHarness): unknown => {
+  const scene = h.runtime.getState().scene;
+  return scene.kind === "menu" ? scene.confirm : undefined;
+};
+const walkDown = (h: RuntimeHarness): void => {
+  if (h.runtime.getState().scene.kind === "menu") press(h, "menu");
+  h.play(...expandInputs([{ hold: "down", frames: 16 }]));
+};
+/** 確認ダイアログで「はい」（初期カーソルは「いいえ」）。 */
+const yes = (h: RuntimeHarness): void => press(h, "up", "ok");
+
+describe("セーブの上書き確認", () => {
+  it("空きスロットには確認なしで保存する", async () => {
+    const h = await boot();
+    await newGameAndWalk(h);
+    choose(h, "save", 3);
+    await h.runtime.settled();
+    expect(confirmOf(h)).toBeUndefined();
+    expect(await h.saves.listSlots()).toHaveLength(1);
+  });
+
+  it("ロード/セーブの元になっていないスロットへの保存は確認が挟まる。いいえなら保存しない", async () => {
+    const h = await boot();
+    await newGameAndWalk(h);
+    choose(h, "save", 1);
+    await h.runtime.settled();
+    choose(h, "save", 2); // 空き
+    await h.runtime.settled();
+    walkDown(h);
+    const before = await h.saves.read(1);
+
+    choose(h, "save", 1); // 直近に保存したのは 2 → 1 は確認
+    expect(confirmOf(h)).toEqual({ kind: "save", slot: 1, cursor: 1 });
+    h.advanceFrames(1);
+    expect(screenTexts(h)).toEqual(expect.arrayContaining(["スロット1 に上書きしますか？", "はい", "いいえ"]));
+
+    press(h, "ok"); // いいえ
+    await h.runtime.settled();
+    expect(confirmOf(h)).toBeUndefined();
+    expect(h.runtime.getState().scene).toMatchObject({ kind: "menu", screen: "save" });
+    expect(await h.saves.read(1)).toEqual(before);
+  });
+
+  it("はいを選ぶと上書きされ、そのスロットが元になる（次は確認なし）", async () => {
+    const h = await boot();
+    await newGameAndWalk(h);
+    choose(h, "save", 1);
+    await h.runtime.settled();
+    choose(h, "save", 2);
+    await h.runtime.settled();
+    walkDown(h);
+
+    choose(h, "save", 1);
+    yes(h);
+    await h.runtime.settled();
+    const read = await h.saves.read(1);
+    expect(read.ok && read.value.state.map.player.y).toBe(3);
+    expect(confirmOf(h)).toBeUndefined();
+
+    choose(h, "save", 1); // 直近に保存したのは 1 → 確認なし
+    expect(confirmOf(h)).toBeUndefined();
+  });
+
+  it("保存したばかりの同じスロットには確認なしで上書きできる", async () => {
+    const h = await boot();
+    await newGameAndWalk(h);
+    choose(h, "save", 1);
+    await h.runtime.settled();
+    walkDown(h);
+    choose(h, "save", 1);
+    await h.runtime.settled();
+    expect(confirmOf(h)).toBeUndefined();
+    const read = await h.saves.read(1);
+    expect(read.ok && read.value.state.map.player.y).toBe(3);
+  });
+
+  it("ロードしたスロットには確認なしで上書きでき、別のスロットには確認が出る", async () => {
+    const first = await boot();
+    await newGameAndWalk(first);
+    choose(first, "save", 1);
+    await first.runtime.settled();
+    choose(first, "save", 2);
+    await first.runtime.settled();
+
+    const second = await boot({ saves: first.saves });
+    press(second, "down", "ok", "ok"); // コンティニュー → スロット 1
+    await second.runtime.settled();
+    walkDown(second);
+
+    choose(second, "save", 2);
+    expect(confirmOf(second)).toEqual({ kind: "save", slot: 2, cursor: 1 });
+    press(second, "cancel"); // やめる
+    choose(second, "save", 1);
+    await second.runtime.settled();
+    expect(confirmOf(second)).toBeUndefined();
+    const read = await second.saves.read(1);
+    expect(read.ok && read.value.state.map.player.y).toBe(3);
+  });
+
+  it("保存に失敗したら、元のスロットは変わらない", async () => {
+    const memory = (await boot()).saves; // このプロジェクト用のセーブ置き場
+    let failing = false;
+    const saves: SaveRepository = { ...memory, write: (slot, snap) => (failing ? Promise.resolve({ ok: false, error: { kind: "quota" } }) : memory.write(slot, snap)) };
+    const h = await boot({ saves });
+    await newGameAndWalk(h);
+    choose(h, "save", 1);
+    await h.runtime.settled();
+    choose(h, "save", 2);
+    await h.runtime.settled();
+    failing = true;
+    choose(h, "save", 1);
+    yes(h);
+    await h.runtime.settled(); // 失敗 → 元は 2 のまま
+    choose(h, "save", 1);
+    expect(confirmOf(h)).toMatchObject({ kind: "save", slot: 1 });
+  });
+});
+
+describe("ロードの確認", () => {
+  it("セーブした直後（進行が変わっていない）は確認なしでロードできる", async () => {
+    const h = await boot();
+    await newGameAndWalk(h);
+    choose(h, "save", 1);
+    await h.runtime.settled();
+    choose(h, "load", 1);
+    expect(confirmOf(h)).toBeUndefined();
+    await h.runtime.settled();
+    expect(h.runtime.getState().scene).toEqual({ kind: "map" });
+  });
+
+  it("セーブしたあとに進んでいたら確認が出る。いいえならロードしない・はいならロードする", async () => {
+    const h = await boot();
+    await newGameAndWalk(h);
+    choose(h, "save", 1);
+    await h.runtime.settled();
+    walkDown(h);
+
+    choose(h, "load", 1);
+    expect(confirmOf(h)).toEqual({ kind: "load", slot: 1, cursor: 1 });
+    h.advanceFrames(1);
+    expect(screenTexts(h)).toContain("未セーブの進行は失われます。ロードしますか？");
+
+    press(h, "ok"); // いいえ
+    await h.runtime.settled();
+    expect(h.runtime.getState().scene).toMatchObject({ kind: "menu", screen: "load" });
+    expect(h.runtime.getState().map.player.y).toBe(3);
+
+    press(h, "ok");
+    yes(h);
+    await h.runtime.settled();
+    expect(h.runtime.getState().scene).toEqual({ kind: "map" });
+    expect(h.runtime.getState().map.player.y).toBe(2);
+  });
+
+  it("一度もセーブ/ロードしていないプレイからのロードは確認が出る", async () => {
+    const first = await boot();
+    await newGameAndWalk(first);
+    choose(first, "save", 1);
+    await first.runtime.settled();
+    const second = await boot({ saves: first.saves, title: false });
+    choose(second, "load", 1);
+    expect(confirmOf(second)).toMatchObject({ kind: "load", slot: 1 });
+  });
+
+  it("ロードした直後は、確認なしで別のスロットもロードできる（進行が変わるまで）", async () => {
+    const first = await boot();
+    await newGameAndWalk(first);
+    choose(first, "save", 1);
+    await first.runtime.settled();
+    choose(first, "save", 2);
+    await first.runtime.settled();
+
+    const second = await boot({ saves: first.saves });
+    press(second, "down", "ok", "ok"); // タイトルからのロードは確認なし
+    await second.runtime.settled();
+    expect(second.runtime.getState().scene).toEqual({ kind: "map" });
+    choose(second, "load", 2);
+    expect(confirmOf(second)).toBeUndefined();
+    await second.runtime.settled();
+    expect(second.runtime.getState().scene).toEqual({ kind: "map" });
+  });
+
+  it("空のスロットを選んだときは確認せず、ロードに失敗するだけ（進行は守られる）", async () => {
+    const h = await boot();
+    await newGameAndWalk(h);
+    choose(h, "save", 1);
+    await h.runtime.settled();
+    walkDown(h);
+    choose(h, "load", 2);
+    expect(confirmOf(h)).toBeUndefined();
+    await h.runtime.settled();
+    expect(h.runtime.getState().scene).toMatchObject({ kind: "menu", screen: "load" });
+    expect(h.runtime.getState().map.player.y).toBe(3);
+  });
+
+  it("タイトルに戻ったら、前のプレイの元のセーブは忘れる", async () => {
+    const h = await boot();
+    await newGameAndWalk(h);
+    choose(h, "save", 1);
+    await h.runtime.settled();
+    press(h, "cancel", "cancel");
+
+    h.runtime.dispatch({ type: "interpreter", op: "start", origin: { kind: "plugin", name: "test" }, commands: [{ code: "ReturnToTitle", params: {}, indent: 0 }], mode: "normal" });
+    h.advanceFrames(2);
+    expect(h.runtime.getState().scene.kind).toBe("title");
+    press(h, "ok"); // ニューゲーム
+    choose(h, "save", 1); // 新しいプレイなので、スロット 1 は元ではない → 確認
+    expect(confirmOf(h)).toMatchObject({ kind: "save", slot: 1 });
   });
 });

@@ -126,6 +126,49 @@ describe("menu", () => {
   });
 });
 
+describe("menu confirm dialog", () => {
+  const map = initialState(ctx, "seed");
+  const asked = (kind: "save" | "load", slot = 2): GameState => dispatch(inMenu(map, kind), { type: "askConfirm", kind, slot }, ctx).state;
+
+  it("askConfirm opens the dialog on the menu with the cursor on いいえ; elsewhere it does nothing", () => {
+    expect(asked("save").scene).toEqual({ kind: "menu", screen: "save", cursor: 0, confirm: { kind: "save", slot: 2, cursor: 1 } });
+    const r = dispatch(map, { type: "askConfirm", kind: "save", slot: 2 }, ctx);
+    expect(r.state).toBe(map);
+    expect(r.effects).toEqual([]);
+  });
+
+  it("up/down/left/right toggle はい/いいえ; other buttons do nothing (the slot list stays put)", () => {
+    const s = asked("save");
+    expect(press(s, "up").state.scene).toMatchObject({ confirm: { cursor: 0 } });
+    expect(press(s, "down").state.scene).toMatchObject({ confirm: { cursor: 0 } });
+    expect(pressAll(s, "left", "right").scene).toMatchObject({ confirm: { cursor: 1 } });
+    expect(press(s, "pageup").state.scene).toBe(s.scene);
+    expect(press(s, "up").state.scene).toMatchObject({ cursor: 0 }); // 一覧のカーソルは動かない
+  });
+
+  it("いいえ / cancel closes the dialog without a request; the screen stays open", () => {
+    const s = asked("save");
+    const no = press(s, "ok");
+    expect(no.effects).toEqual([]);
+    expect(no.state.scene).toEqual({ kind: "menu", screen: "save", cursor: 0 });
+    const cancelled = press(s, "cancel");
+    expect(cancelled.effects).toEqual([]);
+    expect(cancelled.state.scene).toEqual({ kind: "menu", screen: "save", cursor: 0 });
+  });
+
+  it("はい re-issues the request with confirmed: true for the asked slot", () => {
+    const save = press(pressAll(asked("save", 5), "up"), "ok");
+    expect(save.effects).toEqual([{ kind: "requestSave", slot: 5, confirmed: true }]);
+    expect(save.state.scene).toEqual({ kind: "menu", screen: "save", cursor: 0 });
+    const load = press(pressAll(asked("load", 3), "up"), "ok");
+    expect(load.effects).toEqual([{ kind: "requestLoad", slot: 3, confirmed: true }]);
+  });
+
+  it("the menu button closes everything at once", () => {
+    expect(press(asked("load"), "menu").state.scene).toEqual({ kind: "map" });
+  });
+});
+
 describe("snapshot of UI scenes", () => {
   const map = initialState(ctx, "seed");
   const meta = { projectId: "p", projectHash: "h", savedAt: "2026-01-01T00:00:00.000Z" };

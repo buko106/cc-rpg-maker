@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { dispatch, initialState, step } from "./game/index.js";
 import { emptyInput, inputFrame } from "./input.js";
 import { startInterpreter } from "./interpreter/index.js";
-import { fromSnapshot, migrateSnapshot, SNAPSHOT_VERSION, snapshotMigrations, stripTransient, toSnapshot } from "./snapshot.js";
+import { fromSnapshot, migrateSnapshot, progressFingerprint, SNAPSHOT_VERSION, snapshotMigrations, stripTransient, toSnapshot } from "./snapshot.js";
 import type { SaveSnapshot } from "./snapshot.js";
 import type { GameState } from "./state.js";
 
@@ -152,6 +152,31 @@ describe("fromSnapshot", () => {
   it("has no migrations yet (v1 is the first format)", () => {
     expect(SNAPSHOT_VERSION).toBe(1);
     expect(snapshotMigrations).toEqual([]);
+  });
+});
+
+describe("progressFingerprint", () => {
+  const start = initialState(ctx, "seed");
+  const walked = Array.from({ length: 16 }).reduce<GameState>((s) => step(s, inputFrame(["right"], ["right"]), ctx).state, start);
+
+  it("時間だけが進んでも、メニューを開閉しても変わらない", () => {
+    const waited = Array.from({ length: 30 }).reduce<GameState>((s) => step(s, emptyInput(), ctx).state, start);
+    expect(waited.tick).toBeGreaterThan(start.tick);
+    expect(progressFingerprint(waited)).toBe(progressFingerprint(start));
+    expect(progressFingerprint({ ...start, scene: { kind: "menu", screen: "save", cursor: 3 } })).toBe(progressFingerprint(start));
+  });
+
+  it("移動や所持品・スイッチの変化で変わる", () => {
+    expect(walked.map.player.x).not.toBe(start.map.player.x);
+    expect(progressFingerprint(walked)).not.toBe(progressFingerprint(start));
+    expect(progressFingerprint({ ...start, party: { ...start.party, gold: start.party.gold + 1 } })).not.toBe(progressFingerprint(start));
+    expect(progressFingerprint({ ...start, switches: { ...start.switches, ["s1" as never]: true } })).not.toBe(progressFingerprint(start));
+  });
+
+  it("キーの順序や補間中の位置には左右されない", () => {
+    const { tick, ...rest } = start;
+    expect(progressFingerprint({ ...rest, tick } as GameState)).toBe(progressFingerprint(start));
+    expect(progressFingerprint({ ...start, map: { ...start.map, player: { ...start.map.player, realX: start.map.player.x + 0.5, moving: true } } })).toBe(progressFingerprint(start));
   });
 });
 
