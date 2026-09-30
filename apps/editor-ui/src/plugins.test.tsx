@@ -10,6 +10,7 @@ import type { EventId, MapId } from "@rpg/schema";
 import { createManualScheduler } from "@rpg/test-utils";
 import { act, cleanup, fireEvent, render, screen, within } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
+import { z } from "zod";
 import { CommandForm } from "./components/CommandList.js";
 import { EventDialog } from "./components/EventDialog.js";
 import { SystemDialog } from "./components/SystemDialog.js";
@@ -86,6 +87,52 @@ describe("エディタの中のプラグイン", () => {
     expect(codes).toEqual(expect.arrayContaining(["pluginNotEnabled", "randomGoldRange"]));
     act(() => void t.session.execute(cmd.setSystem({ plugins: [{ name: "custom-command", version: "1.0.0", params: {} }] })));
     expect(t.session.validate().map((d) => d.code)).not.toContain("pluginNotEnabled");
+  });
+
+  it("プラグインの分岐コマンドも meta.block だけで、区切りと終端が一緒に入り、数が合い、ブロックごと消える。区切りは単独で扱えず、一覧にも出ない", async () => {
+    const noRefs = () => [];
+    const blocks: PluginModule = {
+      name: "blocks",
+      version: "1.0.0",
+      register(h) {
+        const run = () => ({});
+        h.commands.add({
+          code: "Pick",
+          params: z.strictObject({ ways: z.number().int().min(1).default(2) }),
+          meta: {
+            label: "くじの分岐",
+            category: "フロー制御",
+            describe: (p) => `くじ：${p.ways}通り`,
+            refs: noRefs,
+            block: { role: "open", close: "plugin:blocks/EndPick", bodyFirst: false, dividers: (p) => Array.from({ length: p.ways }, (_, k) => ({ code: "plugin:blocks/Way", params: { k } })) },
+          },
+          run,
+        });
+        h.commands.add({ code: "Way", params: z.strictObject({ k: z.number() }), meta: { label: "くじの道", category: "フロー制御", describe: (p) => `道 ${p.k}`, refs: noRefs, block: { role: "divider" } }, run });
+        h.commands.add({ code: "EndPick", params: z.strictObject({}), meta: { label: "くじの終わり", category: "フロー制御", describe: () => "くじ終了", refs: noRefs, block: { role: "close" } }, run });
+      },
+    };
+    const t = await createTestEnv({ plugins: [blocks] });
+    act(() => void t.session.execute(cmd.createEvent(M1, 3, 4, EV)));
+    render(t.wrap(<EventDialog mapId={M1} eventId={EV} onClose={() => {}} />));
+    const page = () => t.session.doc.maps[M1]!.events[EV]!.pages[0]!;
+    fireEvent.click(screen.getByRole("button", { name: "コマンドを追加…" }));
+    const picker = screen.getByRole("dialog", { name: "コマンドの追加" });
+    expect(within(picker).queryByRole("button", { name: "くじの道" })).toBeNull();
+    expect(within(picker).queryByRole("button", { name: "くじの終わり" })).toBeNull();
+    fireEvent.click(within(picker).getByRole("button", { name: "くじの分岐" }));
+    expect(page().commands.map((c) => c.code)).toEqual(["plugin:blocks/Pick", "plugin:blocks/Way", "plugin:blocks/Way", "plugin:blocks/EndPick"]);
+    // 数を増やすと、区切りが足される（設定の確定と 1 回の Undo）
+    fireEvent.change(screen.getByLabelText("ways"), { target: { value: "3" } });
+    expect(page().commands.map((c) => c.code)).toEqual(["plugin:blocks/Pick", "plugin:blocks/Way", "plugin:blocks/Way", "plugin:blocks/Way", "plugin:blocks/EndPick"]);
+    expect(page().commands[3]!.params).toEqual({ k: 2 });
+    // 区切りだけは削除・コピーできない。開始を選べばブロックごと
+    fireEvent.click(screen.getByRole("option", { name: "道 0" }));
+    expect((screen.getByRole("button", { name: "削除" }) as HTMLButtonElement).disabled).toBe(true);
+    expect((screen.getByRole("button", { name: "コマンドをコピー" }) as HTMLButtonElement).disabled).toBe(true);
+    fireEvent.click(screen.getByRole("option", { name: "くじ：3通り" }));
+    fireEvent.click(screen.getByRole("button", { name: "削除" }));
+    expect(page().commands).toEqual([]);
   });
 
   it("host.editor.commandForm で登録した専用フォームが、標準のフォームの代わりに使われる", async () => {

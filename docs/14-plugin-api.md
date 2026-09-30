@@ -76,3 +76,9 @@ export function loadPlugins(mods: PluginModule[], host: PluginHost): Promise<{ l
 - **`host.editor.eventTemplate(template)`**：イベントのひな形（`EventTemplate`、12）を足す。`id` は接頭辞なしで書き、`plugin:<name>/<id>` として登録される（書式はコマンドの code と同じ。不正な id・同じ id の二重登録はそのプラグインの失敗で、何も残さない）。登録内容は `PluginRegistry.editor.eventTemplates`、エディタでは `EditorEnv.pluginEventTemplates` として、組み込みのひな形の後ろに「置くイベント」に並ぶ。ゲームの中（エディタ以外）で読み込んだときは `host.editor` が無いので登録されない。
 - プラグイン作者向けに `defineEventTemplate` と型（`EventTemplate` / `EventDraft`）を再エクスポートした。入力フォームは `input` の zod から作られる（見出しは `.meta({ title })`）。
 - **サンプル**：`custom-command` に「くじ引き」（`plugin:custom-command/lottery`。`RandomGold` を使い、1 回引いたらセルフスイッチ A で別のセリフ）。テスト：`plugin-api.test.ts`（接頭辞・不正な id・二重登録）、`plugin-samples.test.ts`（くじ引きの形・ゲームの中では登録されない）、editor-ui の `EventTemplateDialog.test.tsx`（「置くイベント」に並んで置ける）。
+
+## 実装メモ（プラグインの分岐・ループのコマンド）
+プラグインのコマンドも、`meta.block`（`CommandBlock`。03 の「実装メモ（ブロックの構造）」）を書けば、エディタで組み込みの分岐と同じように扱える：開始を追加すると区切りと終端が一緒に入り、ブロックごと消す・動かす・コピーできる。区切り・終端は追加の一覧に出ず、単独では扱えない。内部用のコマンドは `meta.internal`。
+- **書き方**（型 `CommandBlock` を再エクスポートしている）：開始 = `block: { role: "open", close, bodyFirst, dividers(p) }`、区切り = `block: { role: "divider" }`、終端 = `block: { role: "close" }`。**`close` と `dividers` が返す `code` は、接頭辞の付いた完全な code**（`plugin:<name>/EndPick` のように。`commands.add` が接頭辞を付けるのは登録する `code` だけ）。
+- **実行はプラグインの責任**：`meta.block` はエディタのための情報。実行時に本体を飛ばす・戻るのは、コマンドの `run` が `control`（`skipBlock` / `jump`）と `setBranch` で行う（組み込みの `Else` / `ChoiceBranch` / `EndBranch` / `EndLoop` と同じ流儀）。
+- **テスト**：editor-ui の `plugins.test.tsx`（分岐コマンドの追加・区切りの数の同期・区切りは単独で扱えない・ブロックごと削除）、editor-core の `command-blocks.test.ts`。

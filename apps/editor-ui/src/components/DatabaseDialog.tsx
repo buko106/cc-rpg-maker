@@ -1,4 +1,4 @@
-import { cmd } from "@rpg/editor-core";
+import { applyOps, cmd } from "@rpg/editor-core";
 import { actorSchema, classSchema, commonEventSchema, enemySchema, itemSchema, skillSchema, stateSchema, troopSchema } from "@rpg/schema";
 import type { Database, EventCommand } from "@rpg/schema";
 import { useMemo, useState } from "react";
@@ -9,7 +9,6 @@ import { useFormContext } from "../form-context.js";
 import { useSession } from "../hooks.js";
 import { describeSchema } from "../schema-form/introspect.js";
 import { defaultValue } from "../schema-form/values.js";
-import { applyOps } from "../command-templates.js";
 import { nextId } from "../next-id.js";
 import { CommandList } from "./CommandList.js";
 import { Dialog } from "./Dialog.js";

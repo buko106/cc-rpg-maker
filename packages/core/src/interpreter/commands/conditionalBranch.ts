@@ -39,6 +39,7 @@ export const conditionalBranch = defineCommand({
       if (typeof c === "string") return [];
       return [{ kind: c.kind, id: c.id }];
     },
+    block: { role: "open", close: "EndBranch", bodyFirst: true, dividers: () => [{ code: "Else", params: {} }] },
   },
   run(p, c): CommandResult {
     const indent = c.interp.commands[c.interp.pc]?.indent ?? 0;

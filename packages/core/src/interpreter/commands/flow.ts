@@ -39,7 +39,7 @@ export function enclosingLoop(commands: readonly EventCommand[], pc: number): nu
 export const loop = defineCommand({
   code: "Loop",
   params: empty,
-  meta: { label: "ループ", category: "フロー制御", describe: () => "ループ", refs: noRefs },
+  meta: { label: "ループ", category: "フロー制御", describe: () => "ループ", refs: noRefs, block: { role: "open", close: "EndLoop", bodyFirst: true, dividers: () => [] } },
   run: () => ({}),
 });
 
@@ -47,7 +47,7 @@ export const loop = defineCommand({
 export const endLoop = defineCommand({
   code: "EndLoop",
   params: empty,
-  meta: { label: "以上繰り返し", category: "フロー制御", describe: () => "以上繰り返し", refs: noRefs },
+  meta: { label: "以上繰り返し", category: "フロー制御", describe: () => "以上繰り返し", refs: noRefs, block: { role: "close" } },
   run(_p, c) {
     const start = enclosingLoop(c.interp.commands, c.interp.pc);
     return start < 0 ? {} : { control: { kind: "jump", pc: start } };

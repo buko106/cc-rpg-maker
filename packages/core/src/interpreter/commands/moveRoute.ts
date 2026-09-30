@@ -90,7 +90,7 @@ function autoPaused(state: GameState, who: string): boolean {
 export const moveStep = defineCommand({
   code: "MoveStep",
   params: stepParams,
-  meta: { label: "移動ルートの 1 歩", category: "移動", describe: (p) => `移動ルート：${p.step.kind}`, refs: () => [] },
+  meta: { label: "移動ルートの 1 歩", category: "移動", describe: (p) => `移動ルート：${p.step.kind}`, refs: () => [], internal: true },
   run(p, c) {
     const ch = characterOf(c.state, p.who);
     if (ch === undefined) return { control: { kind: "exit" } };

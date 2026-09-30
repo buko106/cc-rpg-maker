@@ -95,6 +95,22 @@ describe("DatabaseDialog", () => {
     const ce = t.session.doc.project.database.commonEvents["ce_001" as never] as { commands: { code: string; params: Record<string, unknown> }[] };
     expect(ce.commands).toMatchObject([{ code: "ShowText", params: { text: "共通" } }]);
   });
+
+  it("コモンイベントのコマンド列も、並べ替え・コピー・貼り付けができる", () => {
+    open();
+    tab("コモンイベント");
+    add();
+    const quick = screen.getByLabelText("文章をすぐ追加");
+    fireEvent.change(quick, { target: { value: "一つ目\n\n二つ目" } });
+    fireEvent.keyDown(quick, { key: "Enter" });
+    const texts = () => t.session.doc.project.database.commonEvents["ce_001" as never]!.commands.map((c) => String(c.params["text"]));
+    expect(texts()).toEqual(["一つ目", "二つ目"]);
+    fireEvent.click(screen.getByRole("button", { name: "コマンドを上へ" })); // 最後に入れた「二つ目」が選ばれている
+    expect(texts()).toEqual(["二つ目", "一つ目"]);
+    fireEvent.click(screen.getByRole("button", { name: "コマンドをコピー" }));
+    fireEvent.click(screen.getByRole("button", { name: "コマンドを貼り付け" }));
+    expect(texts()).toEqual(["二つ目", "二つ目", "一つ目"]);
+  });
 });
 
 describe("SystemDialog", () => {

@@ -43,6 +43,7 @@ export const showChoices = defineCommand({
     category: "メッセージ",
     describe: (p) => `選択肢：${p.choices.join(" / ")}`,
     branchLabel: (p, index) => `[${p.choices[index] ?? `選択肢 ${index + 1}`}] のとき`,
+    block: { role: "open", close: "EndBranch", bodyFirst: false, dividers: (p) => p.choices.map((_, index) => ({ code: "ChoiceBranch", params: { index } })) },
     refs: () => [],
   },
   run(p, c) {

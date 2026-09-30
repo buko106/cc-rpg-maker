@@ -60,7 +60,7 @@ export const cmd = {
 ```ts
 export interface EditorSession {
   readonly doc: ProjectDocument;
-  readonly ui: EditorUiState;         // { currentMap, currentLayer, tool, tile, selection, zoom, clipboard, eventTemplate, recentCommands }
+  readonly ui: EditorUiState;         // { currentMap, currentLayer, tool, tile, selection, zoom, clipboard, commandClipboard, eventTemplate, recentCommands }
   readonly dirty: boolean;
   readonly canUndo: boolean; readonly canRedo: boolean;
 
@@ -138,3 +138,14 @@ export interface Diagnostic { severity: "error" | "warning"; code: string; messa
 - **`EditorUiState.eventTemplate`**：イベントツールで空いたセルに置くもの（ひな形の ID。`undefined` は空のイベント）。文書には保存しない。
 - **`splitMessages`**（空行で文章を分ける）は editor-ui から移した（「文章をすぐ追加」とひな形のセリフで共有）。
 - **テスト**：`templates.test.ts`（5 種類のページとコマンドがスキーマと各コマンドの params の zod を通る・ページの形・初期値・`createEventFromTemplate` の Undo と失敗）。
+
+## 実装メモ（コマンド列の構造の操作）
+コマンドリスト（13）の並べ替え・コピー・貼り付け・範囲選択のための、コマンド列（平らな `EventCommand` の並び）の純粋関数（`command-blocks.ts`）。分岐・ループの構造は、各コマンドの `meta.block` / `meta.internal`（03）から引くので、先頭の引数は `BlockRegistry`（`CommandRegistry` の `get` だけ）。組み込みもプラグインのコマンドも同じ扱い。範囲は `Span { at, count }`（添字）。
+- **ひとかたまり**：`blockSpan(reg, commands, i)`＝開始の行はその終端まで、区切り・終端の行はそのブロック全体（`blockOwner` で同じ字下げをさかのぼって開始を探す。別のブロックの終端まで戻ったら無し）、それ以外は 1 行。閉じていないブロックは、字下げが浅くなるところまで（なければ末尾）。`removalRange` は消す・動かす・コピーする範囲（区切り・終端・内部用の行だけは `undefined` ＝ 単独では扱えない。`isPart`）。
+- **範囲選択**：`selectionSpan(reg, commands, a, b)`。間の行が開始・区切り・終端にかかれば、ブロックを切らないよう全体まで広げる（ブロックの本体の中の行だけを選んだときはそのまま）。
+- **並べ替え**：`moveSpan(reg, commands, span, "up" | "down")` は、同じ本体の中の前後のひとかたまり（ブロックなら全体）と入れ替える操作（`CommandOp[]` = 削除 + 挿入）と、動かしたあとの範囲を返す。本体の端・区切りや終端・字下げの違う行は越えない（`undefined`。別の分岐へは切り取りと貼り付け）。
+- **コピーと貼り付け**：`copyRows`（字下げを 0 始まりにして複製）と `pasteRows`（貼る場所の字下げに合わせる）。`insertionPoint(reg, commands, selected)` は、選んだ行の直後に入れる位置と字下げ（本体が続く行 ＝ 条件分岐・ループの開始と区切りならブロックの中、そうでなければ同じ字下げ）。
+- **追加と区切りの数**：`commandTemplate(reg, code, params, indent)` は、開始のコマンドを追加するとき区切りと終端を一緒に返す（`meta.block.dividers`）。設定が不正でも区切りは出す（敵グループが未設定の戦闘の処理など）。`syncDividers(reg, commands, index, params)` は、開始の設定が変わったとき区切りの数を合わせる操作（足りなければ終端の前に空の区切り、多ければ余りを本体ごと消す）。
+- **`applyOps` / `CommandOp`**（挿入・削除・差し替えを順に適用）も、ここ（以前は editor-ui）。
+- **`EditorUiState.commandClipboard`**：コピー／切り取りしたコマンド（字下げ 0 始まり）。文書には保存せず Undo の対象でもない。イベント・ページ・コモンイベントをまたいで貼れる（`clipboard` のコマンド版）。
+- **テスト**：`command-blocks.test.ts`（組み込みとプラグインのブロック、範囲・選択・並べ替え・区切りの数・貼り付け）。

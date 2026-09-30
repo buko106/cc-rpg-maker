@@ -12,7 +12,7 @@ const noRefs = () => [];
 export const elseCommand = defineCommand({
   code: "Else",
   params: empty,
-  meta: { label: "それ以外のとき", category: "フロー制御", describe: () => "それ以外のとき", refs: noRefs },
+  meta: { label: "それ以外のとき", category: "フロー制御", describe: () => "それ以外のとき", refs: noRefs, block: { role: "divider" } },
   run(_p, c) {
     const indent = c.interp.commands[c.interp.pc]?.indent ?? 0;
     return { control: c.interp.branch[indent] === 1 ? { kind: "next" } : { kind: "skipBlock", indent } };
@@ -23,7 +23,7 @@ export const elseCommand = defineCommand({
 export const endBranch = defineCommand({
   code: "EndBranch",
   params: empty,
-  meta: { label: "分岐終了", category: "フロー制御", describe: () => "分岐終了", refs: noRefs },
+  meta: { label: "分岐終了", category: "フロー制御", describe: () => "分岐終了", refs: noRefs, block: { role: "close" } },
   run: () => ({}),
 });
 
@@ -34,7 +34,7 @@ export const endBranch = defineCommand({
 export const choiceBranch = defineCommand({
   code: "ChoiceBranch",
   params: z.strictObject({ index: nonNegativeInt }),
-  meta: { label: "分岐", category: "フロー制御", describe: (p) => `分岐 ${p.index}`, refs: noRefs },
+  meta: { label: "分岐", category: "フロー制御", describe: (p) => `分岐 ${p.index}`, refs: noRefs, block: { role: "divider" } },
   run(p, c) {
     const indent = c.interp.commands[c.interp.pc]?.indent ?? 0;
     return { control: c.interp.branch[indent] === p.index ? { kind: "next" } : { kind: "skipBlock", indent } };

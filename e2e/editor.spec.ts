@@ -153,6 +153,59 @@ test("イベントの入力の手間を減らす：文章をすぐ追加・コ�
   await page.waitForFunction("window.__rpgPlaytest.getState().switches.sw_001 === true");
 });
 
+test("コマンドの並べ替え・複数選択・コピー＆貼り付け → Undo で戻り、テストプレイでは並べ替えた順に話す", async ({ page }) => {
+  await createProject(page, "並べ替え");
+  await page.getByRole("radio", { name: "イベント" }).click();
+  const spot = await cellCenter(page, 5, 6);
+  await page.mouse.click(spot.x, spot.y);
+  await page.getByRole("button", { name: "イベントを編集…" }).click();
+  const rows = page.getByRole("listbox", { name: "イベントコマンド" }).getByRole("option");
+  const status = page.locator(".command-actions").getByRole("status");
+  const texts = () => editor(page, (s) => Object.values(Object.values(s.doc.maps)[0]!.events)[0]!.pages[0]!.commands.map((c) => String(c.params["text"])));
+
+  const quick = page.getByLabel("文章をすぐ追加");
+  for (const line of ["一つ目", "二つ目", "三つ目"]) {
+    await quick.fill(line);
+    await quick.press("Enter");
+  }
+  expect(await texts()).toEqual(["一つ目", "二つ目", "三つ目"]);
+
+  // 「二つ目」を上へ → ボタンで入れ替わり、選択も一緒に動く
+  await rows.nth(1).click();
+  await page.getByRole("button", { name: "コマンドを上へ" }).click();
+  expect(await texts()).toEqual(["二つ目", "一つ目", "三つ目"]);
+  await expect(rows.nth(0)).toHaveAttribute("aria-selected", "true");
+
+  // Shift+↓ で先頭から 2 行を選び、Ctrl+C。最後の行を選んで Ctrl+V → 後ろに 2 行が並ぶ
+  await rows.nth(0).click();
+  await page.keyboard.press("Shift+ArrowDown");
+  await expect(rows.nth(1)).toHaveAttribute("aria-selected", "true");
+  await expect(status).toContainText("2 行を選択中");
+  await page.keyboard.press("Control+c");
+  await expect(status).toContainText("クリップボード：2 行");
+  await rows.nth(2).click();
+  await page.keyboard.press("Control+v");
+  expect(await texts()).toEqual(["二つ目", "一つ目", "三つ目", "二つ目", "一つ目"]);
+
+  // Alt+↑ で貼った範囲をひとつ上へ。Undo を 2 回で貼り付けの前に戻る
+  await page.keyboard.press("Alt+ArrowUp");
+  expect(await texts()).toEqual(["二つ目", "一つ目", "二つ目", "一つ目", "三つ目"]);
+  await page.keyboard.press("Control+z");
+  await page.keyboard.press("Control+z");
+  expect(await texts()).toEqual(["二つ目", "一つ目", "三つ目"]);
+  await page.getByRole("button", { name: /^イベント：.*を閉じる$/ }).click();
+
+  // テストプレイ：話しかけると、並べ替えた順（二つ目が最初）に出る
+  await page.getByRole("button", { name: "テストプレイ", exact: true }).click();
+  await page.waitForFunction(() => window.__rpgPlaytest !== undefined && window.__rpgPlaytest.getState().scene.kind === "title");
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(() => window.__rpgPlaytest.getState().scene.kind === "map");
+  await page.waitForTimeout(200);
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(() => window.__rpgPlaytest.getState().message.open);
+  expect(await page.evaluate(() => window.__rpgPlaytest.getState().message.text)).toBe("二つ目");
+});
+
 test("イベントのひな形：宝箱（お金）と扉（移動先はマップのクリックで選ぶ）を置く → テストプレイで手に入り、扉で移動する", async ({ page }) => {
   await createProject(page, "ひな形");
   const events = () => editor(page, (s) => Object.values(Object.values(s.doc.maps)[0]!.events));
