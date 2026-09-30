@@ -137,7 +137,7 @@ export const projectArb: fc.Arbitrary<Project> = fc
     const params = fc.record(Object.fromEntries(["mhp", "mmp", "atk", "def", "mat", "mdf", "agi", "luk"].map((p) => [p, smallInt])));
 
     return fc.record({
-      formatVersion: fc.constant(1),
+      formatVersion: fc.constant(2),
       meta: fc.record({ id: idOf("proj"), title: text, createdAt: isoDate, updatedAt: isoDate }),
       system: fc.record({
         startMap: pick(t.mapIds),
@@ -148,6 +148,10 @@ export const projectArb: fc.Arbitrary<Project> = fc
         screen: fc.record({ width: fc.integer({ min: 1, max: 1920 }), height: fc.integer({ min: 1, max: 1080 }) }),
         bgm: fc.record({ title: audioRefArb, battle: audioRefArb }, { requiredKeys: [] }),
         terms: fc.dictionary(fc.stringMatching(/^[a-z]{1,6}$/), text, { maxKeys: 3 }),
+        plugins: fc.array(
+          fc.record({ name: fc.stringMatching(/^[a-z][a-z0-9_-]{0,11}$/), version: fc.constantFrom("1.0.0", "0.2.1"), params: fc.dictionary(fc.stringMatching(/^[a-z]{1,4}$/), smallInt, { maxKeys: 2 }) }),
+          { maxLength: 2 },
+        ),
       }),
       maps: table(t.mapIds, (id) => fc.record({ id: fc.constant(id), name: text, order: fc.integer({ min: -5, max: 5 }) })),
       tilesets: table(t.tilesetIds, (id) =>

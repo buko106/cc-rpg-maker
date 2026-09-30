@@ -32,7 +32,8 @@ describe("battle data in the schema (states, skill effects, enemy graphic)", () 
     };
     const r = parseProject(p);
     expect(r.ok).toBe(true);
-    if (r.ok) expect(serializeProject(r.value)).toEqual(p);
+    // フィクスチャは v1。読み込むと現行のフォーマット（v2）になる
+    if (r.ok) expect(serializeProject(r.value)).toEqual({ ...p, formatVersion: 2, system: { ...p.system, plugins: [] } });
   });
 
   it("requires the states table (it is part of the database)", () => {

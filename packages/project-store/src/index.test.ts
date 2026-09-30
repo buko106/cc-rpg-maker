@@ -1,9 +1,10 @@
 import { IDBFactory, IDBKeyRange } from "fake-indexeddb";
-import { projectRepositoryContract } from "@rpg/test-utils";
+import { loadRawProject, projectRepositoryContract } from "@rpg/test-utils";
 import { describe, expect, it } from "vitest";
 import { createIdbProjectRepository } from "./idb.js";
 import { createMemoryBackend, createMemoryProjectRepository } from "./memory.js";
 import { createRepository } from "./repository.js";
+import { writeZip } from "./zip.js";
 
 projectRepositoryContract("memory", () => createMemoryProjectRepository());
 projectRepositoryContract("idb (fake-indexeddb)", () => createIdbProjectRepository({ indexedDB: new IDBFactory(), keyRange: IDBKeyRange }));
@@ -108,5 +109,44 @@ describe("createRepository（共通の振る舞い）", () => {
     expect(!r.ok && r.error.kind).toBe("schema");
     const broken = createRepository({ ...backend, getProject: () => Promise.reject(new Error("読めない")) });
     expect(await broken.exportZip(doc.project.meta.id)).toEqual({ ok: false, error: { kind: "io", message: "読めない" } });
+  });
+
+  describe("古い formatVersion（v1 のフィクスチャ）", () => {
+    const old = loadRawProject("minimal"); // formatVersion 1
+    const enc = (v: unknown) => new TextEncoder().encode(JSON.stringify(v));
+
+    it("importZip は v1 の ZIP を現行のフォーマットに変換して保存する", async () => {
+      const repo = createMemoryProjectRepository();
+      const zip = writeZip([
+        { name: "project.json", bytes: enc(old.project) },
+        ...Object.entries(old.maps).map(([id, json]) => ({ name: `maps/${id}.json`, bytes: enc(json) })),
+      ]);
+      const r = await repo.importZip(zip);
+      expect(r.ok && r.value.formatVersion).toBe(2);
+      if (!r.ok) return;
+      const loaded = await repo.load(r.value.id);
+      expect(loaded.ok && loaded.value.project.formatVersion).toBe(2);
+      expect(loaded.ok && loaded.value.project.system.plugins).toEqual([]);
+      expect(loaded.ok && Object.keys(loaded.value.maps)).toEqual(["map_start"]);
+    });
+
+    it("load は v1 で保存されていた文書を変換し、直ちに保存し直す（revision が 1 進む。2 回目以降は保存し直さない）", async () => {
+      const backend = createMemoryBackend();
+      const project = { ...(old.project as Record<string, any>) };
+      const id = "old-project";
+      await backend.commit(id, {
+        project,
+        maps: { map_start: old.maps["map_start"] },
+        meta: { title: "old", updatedAt: "2026-01-01T00:00:00.000Z", formatVersion: 1, revision: 4, sizeBytes: 1, mapSizes: { map_start: 1 } },
+      });
+      const repo = createRepository(backend);
+      const first = await repo.load(id);
+      expect(first.ok && first.value.revision).toBe(5);
+      expect(first.ok && first.value.project.formatVersion).toBe(2);
+      expect((await backend.getProject(id) as { formatVersion: number }).formatVersion).toBe(2);
+      expect((await backend.getMeta(id))?.formatVersion).toBe(2);
+      const second = await repo.load(id);
+      expect(second.ok && second.value.revision).toBe(5);
+    });
   });
 });
