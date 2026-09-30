@@ -1,3 +1,4 @@
+import { samplePlugins } from "@rpg/plugin-samples";
 import { bootPlayer } from "./boot.js";
 import type { EmbeddedData } from "./embedded-project-source.js";
 
@@ -15,7 +16,7 @@ const embeddedElement = document.getElementById("rpg-embedded");
 const debug = params.has("debug");
 let config: Parameters<typeof bootPlayer>[1];
 try {
-  config = embeddedElement === null ? { projectUrl: params.get("project") ?? "project/project.json", debug } : { embedded: JSON.parse(embeddedElement.textContent ?? "") as EmbeddedData, debug };
+  config = embeddedElement === null ? { projectUrl: params.get("project") ?? "project/project.json", debug, plugins: samplePlugins } : { embedded: JSON.parse(embeddedElement.textContent ?? "") as EmbeddedData, debug, plugins: samplePlugins };
 } catch (e) {
   // 埋め込みの JSON が壊れているときも、白い画面ではなくエラー画面を出す
   root.textContent = `エラーが発生しました\n${e instanceof Error ? e.message : String(e)}`;

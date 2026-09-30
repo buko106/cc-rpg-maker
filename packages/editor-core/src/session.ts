@@ -40,6 +40,8 @@ export interface EditorSessionDeps {
   commands: CommandRegistry;
   /** 指定すると、編集の `debounceMs` 後に自動で保存する。 */
   autosave?: { debounceMs: number };
+  /** プラグインなどによる追加の診断（`validate()` の結果に足される）。 */
+  diagnostics?: readonly ((doc: ProjectDocument) => Diagnostic[])[];
   /** 現在時刻（Unix ms）。まとめ判定に使う。既定は `Date.now`。 */
   now?: () => number;
   /** タイマー。既定はグローバルの `setTimeout` / `clearTimeout`。 */
@@ -287,7 +289,7 @@ export function createEditorSession(deps: EditorSessionDeps): EditorSession {
         listeners.delete(listener);
       };
     },
-    validate: () => validateDoc(doc, deps.commands),
+    validate: () => validateDoc(doc, deps.commands, deps.diagnostics),
     impactOf: (target) => computeImpact(doc, resolve, target),
     save,
     async importAsset(bytes, name, kind) {

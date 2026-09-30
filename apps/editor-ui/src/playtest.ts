@@ -1,5 +1,5 @@
 import { createRuntime } from "@rpg/runtime";
-import type { AssetSource, AudioOut, InputSource, Logger, ProjectSource, Renderer, Runtime, Scheduler } from "@rpg/runtime";
+import type { AssetSource, AudioOut, InputSource, Logger, ProjectSource, Renderer, Runtime, RuntimeExtensions, Scheduler } from "@rpg/runtime";
 import { createMemorySaveRepository } from "@rpg/save-store";
 import type { DocProjectSource, EditorSession } from "@rpg/editor-core";
 import type { MapId } from "@rpg/schema";
@@ -27,6 +27,8 @@ export interface PlaytestDeps {
   onError?: (error: unknown) => void;
   /** 乱数の種。省略すると開始時刻。 */
   seed?: string;
+  /** プロジェクトが有効にしているプラグイン。 */
+  extensions?: RuntimeExtensions;
 }
 
 /**
@@ -58,6 +60,7 @@ export async function startPlaytest(session: EditorSession, deps: PlaytestDeps, 
     title: start === undefined,
     clock: Date.now,
     ...(deps.seed === undefined ? {} : { seed: deps.seed }),
+    ...(deps.extensions === undefined ? {} : { extensions: deps.extensions }),
     ...(deps.logger === undefined ? {} : { logger: deps.logger }),
     ...(deps.onError === undefined ? {} : { onError: deps.onError }),
   });

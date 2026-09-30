@@ -65,6 +65,9 @@ importers:
       '@rpg/plugin-api':
         specifier: workspace:*
         version: link:../../packages/plugin-api
+      '@rpg/plugin-samples':
+        specifier: workspace:*
+        version: link:../../packages/plugin-samples
       '@rpg/project-store':
         specifier: workspace:*
         version: link:../../packages/project-store
@@ -135,6 +138,9 @@ importers:
       '@rpg/plugin-api':
         specifier: workspace:*
         version: link:../../packages/plugin-api
+      '@rpg/plugin-samples':
+        specifier: workspace:*
+        version: link:../../packages/plugin-samples
       '@rpg/project-store':
         specifier: workspace:*
         version: link:../../packages/project-store

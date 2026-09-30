@@ -4,8 +4,11 @@ import { createCommandRegistry, registerBuiltins } from "@rpg/core";
 import type { EditorSession } from "@rpg/editor-core";
 import { createBrowserInput } from "@rpg/input-browser";
 import { createCanvas2dRenderer } from "@rpg/render-canvas2d";
+import type { PluginModule } from "@rpg/plugin-api";
+import { samplePlugins } from "@rpg/plugin-samples";
 import type { AssetManifest } from "@rpg/runtime";
 import type { EditorEnv } from "./hooks.js";
+import { createPluginEnv } from "./plugin-env.js";
 import { startPlaytest } from "./playtest.js";
 import { createRafScheduler } from "./raf-scheduler.js";
 
@@ -21,13 +24,15 @@ const liveManifest = (session: EditorSession): AssetManifest => ({
  * Canvas2D レンダラ、ProjectRepository が持つアセットのバイト列、ブラウザ入力、rAF、配布物の書き出し（プレイヤー本体の取得とダウンロード）。
  * テストプレイの音は、この版では出さない（audio-null）。
  */
-export function createBrowserEnv(options: { playerUrl?: string } = {}): EditorEnv {
+export async function createBrowserEnv(options: { playerUrl?: string; plugins?: readonly PluginModule[] } = {}): Promise<EditorEnv> {
   const commands = createCommandRegistry();
   registerBuiltins(commands);
+  const pluginEnv = await createPluginEnv(options.plugins ?? samplePlugins, commands, { debug() {}, info() {}, warn: (m) => console.warn(`[plugin] ${m}`), error: (m) => console.error(`[plugin] ${m}`) });
   const createAssets = (session: EditorSession) => createAssetSource(session.assetStore().bytesSource(), liveManifest(session), { verifyHash: true });
   return {
+    ...pluginEnv,
     commands,
-    formOverrides: {},
+    formOverrides: pluginEnv.pluginForms,
     async loadPlayerBundle() {
       const url = options.playerUrl ?? "player/player.js";
       const res = await fetch(url);
@@ -46,10 +51,11 @@ export function createBrowserEnv(options: { playerUrl?: string } = {}): EditorEn
     },
     createRenderer: (canvas) => createCanvas2dRenderer(canvas, { pixelated: true }),
     createAssets,
-    startPlaytest: (session, canvas, start) =>
+    startPlaytest: async (session, canvas, start) =>
       startPlaytest(
         session,
         {
+          extensions: await pluginEnv.createExtensions(session.doc.project.system.plugins, { debug() {}, info() {}, warn: (m) => console.warn(`[playtest] ${m}`), error: (m) => console.error(`[playtest] ${m}`) }),
           scheduler: createRafScheduler(),
           renderer: createCanvas2dRenderer(canvas, { pixelated: true }),
           audio: createNullAudioOut(),

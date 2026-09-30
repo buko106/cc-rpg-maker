@@ -3,6 +3,10 @@ import type { CommandRegistry } from "@rpg/core";
 import { parse } from "@rpg/core";
 import type { EditorSession } from "@rpg/editor-core";
 import type { PlayerBundle } from "@rpg/exporter";
+import type { CommandFormOverrideProps } from "./command-form.js";
+import type { PluginEnv } from "./plugin-env.js";
+
+export type { CommandFormOverrideProps } from "./command-form.js";
 import type { ProjectRepository } from "@rpg/project-store";
 import type { AssetSource, Renderer } from "@rpg/runtime";
 import type { ComponentType } from "react";
@@ -10,18 +14,11 @@ import type { FormContext } from "./schema-form/SchemaForm.js";
 import type { RefOptions } from "./schema-form/values.js";
 import type { Playtest, PlaytestStart } from "./playtest.js";
 
-/** コマンドごとに標準のフォームを差し替える部品の props（プラグインも同じ仕組みで差し替える）。 */
-export interface CommandFormOverrideProps {
-  params: Record<string, unknown>;
-  onCommit: (params: Record<string, unknown>) => void;
-  ctx: FormContext;
-}
-
 /** エディタが外の世界に頼ること。具象アダプタはここ（composition root）でだけ作る。 */
-export interface EditorEnv {
+export interface EditorEnv extends PluginEnv {
   commands: CommandRegistry;
   /** コマンドコード → 専用フォーム（無いコマンドは `params` の zod から自動生成） */
-  formOverrides: Readonly<Record<string, ComponentType<CommandFormOverrideProps>>>;
+  formOverrides: Readonly<Record<string, ComponentType<CommandFormOverrideProps>>>; // プラグインのフォーム（`pluginForms`）を含む
   createRenderer(canvas: HTMLCanvasElement): Renderer;
   createAssets(session: EditorSession): AssetSource;
   startPlaytest(session: EditorSession, canvas: HTMLCanvasElement, start?: PlaytestStart): Promise<Playtest>;

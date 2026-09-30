@@ -29,7 +29,7 @@ export function App({ env, repo }: AppProps): ReactElement {
   );
 
   const open = (doc: ProjectDocument): void => {
-    const next = createEditorSession({ repo, doc, commands: env.commands, autosave: { debounceMs: AUTOSAVE_MS } });
+    const next = createEditorSession({ repo, doc, commands: env.commands, diagnostics: env.pluginDiagnostics, autosave: { debounceMs: AUTOSAVE_MS } });
     (window as unknown as { __editor?: EditorSession }).__editor = next; // E2E とデバッグ用
     setSession(next);
   };
