@@ -140,3 +140,25 @@ test("イベントの自律移動：ページで「自律移動する」を入�
     { timeout: 15000 },
   );
 });
+
+test("イベントのコピー＆ペースト：Ctrl+C / Ctrl+V で別のセルに複製でき、Undo で消える", async ({ page }) => {
+  await createProject(page, "コピペ");
+  await page.getByRole("radio", { name: "イベント" }).click();
+  const origin = await cellCenter(page, 4, 3);
+  await page.mouse.click(origin.x, origin.y); // 空きセルなので作って選択する
+  const events = (): Promise<{ x: number; y: number }[]> => editor(page, (s) => Object.values(Object.values(s.doc.maps)[0]!.events));
+
+  await page.keyboard.press("Control+c");
+  const target = await cellCenter(page, 9, 6);
+  await page.mouse.move(target.x, target.y);
+  await page.keyboard.press("Control+v");
+  expect((await events()).map((e) => [e.x, e.y]).sort()).toEqual([[4, 3], [9, 6]]);
+
+  // 同じセルには重ねられない（エラーが出て、増えない）
+  await page.keyboard.press("Control+v");
+  await expect(page.getByRole("alert")).toContainText("既にイベント");
+  expect(await events()).toHaveLength(2);
+
+  await page.keyboard.press("Control+z");
+  expect(await events()).toHaveLength(1);
+});

@@ -1,4 +1,4 @@
-import type { EventId, MapId } from "@rpg/schema";
+import type { EventId, MapEvent, MapId } from "@rpg/schema";
 import type { ProjectDocument } from "@rpg/project-store";
 
 export type Tool = "pencil" | "eraser" | "fill" | "event" | "select";
@@ -14,11 +14,13 @@ export interface EditorUiState {
   tile: number;
   selection: Selection;
   zoom: number;
+  /** コピー／切り取りしたイベント（スナップショット。文書には保存されず、マップをまたいで貼れる） */
+  clipboard: MapEvent | undefined;
 }
 
 /** 文書を開いたときの表示状態：開始マップ、下層、鉛筆。 */
 export function initialUiState(doc: ProjectDocument): EditorUiState {
   const first = Object.keys(doc.project.maps)[0] as MapId | undefined;
   const start = Object.hasOwn(doc.project.maps, doc.project.system.startMap) ? doc.project.system.startMap : first;
-  return { currentMap: start, currentLayer: 0, tool: "pencil", tile: 1, selection: { kind: "none" }, zoom: 1 };
+  return { currentMap: start, currentLayer: 0, tool: "pencil", tile: 1, selection: { kind: "none" }, zoom: 1, clipboard: undefined };
 }

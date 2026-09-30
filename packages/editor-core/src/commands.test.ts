@@ -153,6 +153,41 @@ describe("event commands", () => {
     expect(cmd.setEventName(M1, ev, "EV001").apply(doc)).toEqual({ ok: true, value: doc });
   });
 
+  it("pasteEvent：ページを複製して新しい ID で置く。別のマップにも貼れて、元の編集の影響を受けない", () => {
+    const M2 = "map_new" as MapId;
+    let doc = applied(cmd.setEventPage(M1, ev, 0, page()), withEvent());
+    doc = applied(cmd.setEventName(M1, ev, "看板"), doc);
+    const source = doc.maps[M1]!.events[ev]!;
+    const pasted = applied(cmd.pasteEvent(M1, source, 6, 7, "ev_b" as EventId), doc);
+    const copy = pasted.maps[M1]!.events["ev_b" as EventId]!;
+    expect(copy).toMatchObject({ id: "ev_b", name: "看板", x: 6, y: 7 });
+    expect(copy.pages).toEqual(source.pages);
+    expect(copy.pages).not.toBe(source.pages);
+    expect(copy.pages[0]!.commands[0]).not.toBe(source.pages[0]!.commands[0]);
+    // 元を削除・編集しても、スナップショットからは貼れる
+    const gone = applied(cmd.deleteEvent(M1, ev), pasted);
+    expect(applied(cmd.pasteEvent(M1, source, 3, 4, "ev_c" as EventId), gone).maps[M1]!.events["ev_c" as EventId]).toMatchObject({ name: "看板", x: 3, y: 4 });
+    // ID を省略すると採番される（元の ID とは別）
+    const auto = applied(cmd.pasteEvent(M1, source, 0, 0), doc);
+    expect(Object.keys(auto.maps[M1]!.events)).toHaveLength(2);
+    // 別のマップへ
+    const other = applied(cmd.createMap({ name: "新しい", order: 1 }, { width: 5, height: 4 }, M2), doc);
+    expect(Object.values(applied(cmd.pasteEvent(M2, source, 4, 3), other).maps[M2]!.events)).toEqual([expect.objectContaining({ name: "看板", x: 4, y: 3 })]);
+  });
+
+  it("pasteEvent：範囲外・別のイベントがあるセル・ID の重複・マップが無いときはエラー。Undo で戻る", () => {
+    const doc = withEvent();
+    const source = doc.maps[M1]!.events[ev]!;
+    expect(failure(cmd.pasteEvent(M1, source, 20, 0), doc).kind).toBe("invalid");
+    expect(failure(cmd.pasteEvent(M1, source, 3, 4, "ev_b" as EventId), doc)).toMatchObject({ kind: "duplicate" }); // 元と同じセルには重ねられない
+    expect(failure(cmd.pasteEvent(M1, source, 0, 0, ev), doc).kind).toBe("duplicate");
+    expect(failure(cmd.pasteEvent("nope" as MapId, source, 0, 0), doc).kind).toBe("notFound");
+    const c = cmd.pasteEvent(M1, source, 1, 1, "ev_b" as EventId);
+    const after = applied(c, doc);
+    expect(c.touchedMaps()).toEqual([M1]);
+    expect(c.invert(doc, after).apply(after)).toMatchObject({ ok: true });
+  });
+
   it("moveEvent と setEventName は同じイベントの連続だけまとまる", () => {
     const a = cmd.moveEvent(M1, ev, 1, 1);
     const b = cmd.moveEvent(M1, ev, 2, 2);

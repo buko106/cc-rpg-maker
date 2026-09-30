@@ -14,7 +14,8 @@ type Stroke = { kind: "paint"; last: Cell } | { kind: "drag"; eventId: EventId; 
 /**
  * マップキャンバス。下のキャンバスに `Renderer`（ゲームと同じ描画）でマップを描き、上のキャンバスにグリッド・イベント枠を重ねる。
  * 操作はすべて EditorCommand（`paintTiles` / `fillTiles` / `createEvent` / `moveEvent` / `deleteEvent`）として `session.execute` に渡す。
- * キーボード：矢印でセルを移動、Enter でツールを適用、O でイベントを開く、Delete で選択中のイベントを削除。
+ * キーボード：矢印でセルを移動、Enter でツールを適用、O でイベントを開く、Delete で選択中のイベントを削除、
+ * Ctrl/⌘ + C・X・V で選択中のイベントのコピー・切り取り・貼り付け（貼り付け先はカーソルのあるセル）。
  */
 export function MapCanvas({ grid, onOpenEvent }: { grid: boolean; onOpenEvent: (eventId: EventId) => void }): ReactElement {
   const session = useSession();
@@ -25,6 +26,8 @@ export function MapCanvas({ grid, onOpenEvent }: { grid: boolean; onOpenEvent: (
   const engine = useRef<{ renderer: Renderer; assets: AssetSource; ready: boolean; loaded: Set<string>; lastFrame?: ReturnType<typeof projectMapForEditor> } | undefined>(undefined);
   const stroke = useRef<Stroke | undefined>(undefined);
   const [hover, setHover] = useState<Cell | undefined>();
+  /** 最後にカーソルがあったセル（ボタンから貼るときの貼り付け先。キャンバスの外へ出ても残る） */
+  const lastCell = useRef<Cell | undefined>(undefined);
   const [readyTick, setReadyTick] = useState(0);
 
   const { ui, doc } = session;
@@ -81,6 +84,23 @@ export function MapCanvas({ grid, onOpenEvent }: { grid: boolean; onOpenEvent: (
     overlay.height = height;
     drawOverlay(ctx, overlayModel(doc.project, map, { selected: ui.selection.kind === "event" ? ui.selection.eventId : undefined, hover, grid }));
   }, [doc.project, map, ui.selection, hover, grid, width, height]);
+
+  const selected = ui.selection.kind === "event" ? map?.events[ui.selection.eventId] : undefined;
+
+  const copyEvent = (): void => {
+    if (selected !== undefined) session.setUi({ clipboard: selected });
+  };
+  const cutEvent = (): void => {
+    if (selected === undefined || ui.currentMap === undefined) return;
+    session.setUi({ clipboard: selected });
+    run(cmd.deleteEvent(ui.currentMap, selected.id));
+  };
+  const pasteEvent = (): void => {
+    const cell = hover ?? lastCell.current ?? { x: 0, y: 0 };
+    if (ui.clipboard === undefined || ui.currentMap === undefined) return;
+    const id = newId<"EventId">("ev");
+    if (run(cmd.pasteEvent(ui.currentMap, ui.clipboard, cell.x, cell.y, id))) session.setUi({ selection: { kind: "event", eventId: id } });
+  };
 
   const cellOf = (e: { clientX: number; clientY: number }): Cell | undefined => {
     const el = overlayRef.current;
@@ -139,6 +159,7 @@ export function MapCanvas({ grid, onOpenEvent }: { grid: boolean; onOpenEvent: (
   const onPointerMove = (e: PointerEvent<HTMLCanvasElement>): void => {
     const cell = cellOf(e);
     setHover((h) => (h?.x === cell?.x && h?.y === cell?.y ? h : cell));
+    if (cell !== undefined) lastCell.current = cell;
     const s = stroke.current;
     if (cell === undefined || s === undefined || ui.currentMap === undefined) return;
     if (s.kind === "paint") {
@@ -156,10 +177,20 @@ export function MapCanvas({ grid, onOpenEvent }: { grid: boolean; onOpenEvent: (
 
   const onKeyDown = (e: KeyboardEvent<HTMLCanvasElement>): void => {
     if (map === undefined) return;
-    const at = hover ?? { x: 0, y: 0 };
+    const at = hover ?? lastCell.current ?? { x: 0, y: 0 };
+    const shortcut = e.ctrlKey || e.metaKey ? e.key.toLowerCase() : undefined;
+    if (shortcut === "c" || shortcut === "x" || shortcut === "v") {
+      if (shortcut === "c") copyEvent();
+      else if (shortcut === "x") cutEvent();
+      else pasteEvent();
+      e.preventDefault();
+      return;
+    }
     const move = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
     if (move !== undefined && move.length === 2) {
-      setHover({ x: Math.min(map.width - 1, Math.max(0, at.x + move[0]!)), y: Math.min(map.height - 1, Math.max(0, at.y + move[1]!)) });
+      const next = { x: Math.min(map.width - 1, Math.max(0, at.x + move[0]!)), y: Math.min(map.height - 1, Math.max(0, at.y + move[1]!)) };
+      lastCell.current = next;
+      setHover(next);
     } else if (e.key === "Enter" || e.key === " ") {
       apply(at);
     } else if (e.key.toLowerCase() === "o") {
@@ -186,7 +217,7 @@ export function MapCanvas({ grid, onOpenEvent }: { grid: boolean; onOpenEvent: (
             style={shown}
             tabIndex={0}
             role="application"
-            aria-label={`マップ「${session.doc.project.maps[map.id]?.name ?? map.id}」の編集キャンバス。矢印キーでセルを移動、Enter でツールを適用、O でイベントを開く`}
+            aria-label={`マップ「${session.doc.project.maps[map.id]?.name ?? map.id}」の編集キャンバス。矢印キーでセルを移動、Enter でツールを適用、O でイベントを開く、Ctrl+C・X・V でイベントをコピー・切り取り・貼り付け`}
             onPointerDown={onPointerDown}
             onPointerMove={onPointerMove}
             onPointerUp={endStroke}
@@ -200,6 +231,18 @@ export function MapCanvas({ grid, onOpenEvent }: { grid: boolean; onOpenEvent: (
             onKeyDown={onKeyDown}
           />
         </div>
+      </div>
+      <div className="clipboard-bar" role="toolbar" aria-label="イベントのコピーと貼り付け">
+        <button type="button" disabled={selected === undefined} title="選んでいるイベントをコピー（Ctrl+C）" onClick={copyEvent}>
+          コピー
+        </button>
+        <button type="button" disabled={selected === undefined} title="選んでいるイベントを切り取り（Ctrl+X）" onClick={cutEvent}>
+          切り取り
+        </button>
+        <button type="button" disabled={ui.clipboard === undefined} title="最後にカーソルがあったセルに貼り付け（Ctrl+V）" onClick={pasteEvent}>
+          貼り付け
+        </button>
+        {ui.clipboard !== undefined && <span className="muted">クリップボード：「{ui.clipboard.name}」</span>}
       </div>
       <p className="muted status-line" aria-live="polite">
         {hover === undefined ? "" : `(${hover.x}, ${hover.y})`}

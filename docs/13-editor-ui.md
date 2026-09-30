@@ -63,15 +63,19 @@
 - **テストプレイ**：`startPlaytest(session, deps, start?)`。編集中の文書のスナップショット（`session.projectSource()`）で `createRuntime` を起動し、セーブはメモリ（`createMemorySaveRepository`）。「選択位置から」は開始マップ・位置を差し替えてタイトルを飛ばす（`TransferPlayer` の dispatch はしない）。音は出さない（`audio-null`）。rAF の `Scheduler` は player のものと同じ実装を持っている（共有は M7 で検討）。
 - **キーボード・確認**：Ctrl+Z / Ctrl+Shift+Z（Ctrl+Y）/ Ctrl+S はどの画面でも `session` に届く（テストプレイ中はゲームに任せる）。未保存のまま閉じようとすると `beforeunload` で確認。ダイアログは Esc で閉じ、開いたら中の最初の操作部品にフォーカスして、閉じたら戻す。削除で参照が残るときは影響範囲つきの確認を出す。
 - **テスト**：フォーム生成（組み込みコマンド全部で描画でき、既定値が `params` の zod を通る）、各画面のコンポーネントテスト（jsdom + Testing Library。`EditorSession` はモックせず、メモリのリポジトリの本物を使う）、`projectMapForEditor` / ヒットテスト / オーバーレイ、`startPlaytest`、E2E（`e2e/editor.spec.ts`：作成 → ドラッグで描画 → Undo/Redo → イベント作成と ShowText → 保存 → リロード → テストプレイでメッセージ、自動保存、データベースと削除の確認）。jsdom に無い `PointerEvent` / `Blob.arrayBuffer` / Canvas の `getContext` は `test-env.tsx` で補う。テストで `session` を直接操作するときは `act()` で包む。
-- **未対応**：移動ルートの編集（対応するコマンドが M6）、テストプレイの音、タイルセットの追加・画像差し替え、アセットの一括インポート（ZIP は M6）、イベントの複製・コピー&ペースト、矩形選択ツール、キャンバスのスクロール位置を保った拡大、`doc` への代入を禁じる lint ルール（UI は `session.execute` 以外で文書を書き換えない — テストで確認）。
+- **未対応**：移動ルートの編集（対応するコマンドが M6）、テストプレイの音、タイルセットの追加・画像差し替え、アセットの一括インポート（ZIP は M6）、矩形選択ツール、キャンバスのスクロール位置を保った拡大、`doc` への代入を禁じる lint ルール（UI は `session.execute` 以外で文書を書き換えない — テストで確認）。
 
 ## 実装メモ（M6 で確定した点）
 - **配布物の書き出し**（`ExportDialog`）：メニューバーの「配布物を書き出す…」。形式（フォルダ形式の ZIP / 単一 HTML）と「JSON を圧縮する」を選び、書き出す前に `session.save()` で未保存の変更を保存する（保存できなければ書き出さない）。`@rpg/exporter` の `exportGame` を、ストアの内容（`RepoContext` の `repo`）から呼ぶ。`EditorEnv` に `loadPlayerBundle()`（ブラウザでは同じオリジンの `player/player.js` を fetch）と `saveFile(name, bytes, mime)`（ダウンロード）を足した。エディタのビルド（`build-web.mjs`）は `apps/player` の `main.ts` を `dist-web/player/player.js` にもバンドルする。
 - **コマンドリスト**：props を `onEdit(ops: CommandOp[])` に一本化した（挿入・削除・差し替えの列。複数なら `cmd.batch` で 1 回の Undo にまとめる）。`Loop` は `EndLoop` と、`ShowChoices` は選択肢の数だけの `ChoiceBranch` と `EndBranch` と一緒に入る。選択肢の数を増減すると、対になる `ChoiceBranch` も増減する（減らすときは余った分岐を本体ごと消す）。`Loop` の直後はループの中に入り、`Loop` / `ShowChoices` は丸ごと消える。`EndLoop` / `MoveStep`（内部用）は単独では追加も削除もできない。
 - **移動ルートの編集**は、`SetMoveRoute` コマンドの標準フォーム（手順の配列。種類を選ぶ）で行う。専用のエディタは無い。ページの `moveRoute`（自律移動）は、イベントダイアログの「自律移動（ページが有効な間、勝手に動く）」で、「自律移動する」を入れると初期ルート（ランダムに 1 歩、60 フレーム待つ、を繰り返す）が付き、同じ標準フォームで手順・繰り返し・動けなければ飛ばすを編集する（外すと `moveRoute` を消す）。`e2e/editor.spec.ts` が、入れたイベントがテストプレイで動き出すことを確かめる。
-- **未対応**：テストプレイの音、タイルセットの追加・画像差し替え、アセットの一括インポート（ZIP の import は project-store にあるが、UI からはまだ呼べない）、イベントの複製・コピー&ペースト、矩形選択、キャンバスのスクロール位置を保った拡大。
+- **未対応**：テストプレイの音、タイルセットの追加・画像差し替え、アセットの一括インポート（ZIP の import は project-store にあるが、UI からはまだ呼べない）、矩形選択、キャンバスのスクロール位置を保った拡大。
 
 ## 実装メモ（M7 で確定した点）
 - **プラグイン**：システム設定に「プラグイン」タブ（ビルドに入っているプラグインの有効/無効、設定の JSON、入っていないプラグインの一覧と外す操作、読み込めなかったプラグインの表示）。`EditorEnv` は `PluginEnv`（`pluginCatalog` / `pluginDiagnostics` / `pluginForms` / `pluginFailures` / `createExtensions`）を持つ。`createBrowserEnv()` は非同期になった（プラグインの `register` が非同期でもよいため）。詳しくは 14。
 - **書き出しダイアログ**に描画方式（自動 / WebGL / Canvas2D）とオフライン対応（フォルダ形式のみ）を追加。
 - **保存先**：既定は IndexedDB、`?storage=opfs` で OPFS。File System Access API があるブラウザでは、プロジェクト一覧の「保存先：…」の横の「フォルダを選ぶ…」で利用者のフォルダに切り替えられる（`App` の `pickFolder` / `storageLabel`。選ぶのをやめた `AbortError` は無視し、他の失敗はメッセージに出す）。選んだフォルダはそのタブの間だけ有効で、リロードすると既定の保存先に戻る（`FileSystemDirectoryHandle` の永続化と権限の再確認は未実装）。`e2e/folder.spec.ts` は `showDirectoryPicker` を OPFS のフォルダを返すスタブにして確かめる。
+
+## 実装メモ（イベントのコピー＆ペースト）
+- **`MapCanvas`**：選んでいるイベントを Ctrl/⌘ + C（コピー）・X（切り取り）、カーソルのあるセルへ V（貼り付け）。貼ったイベントが選択される。キャンバスの下の「コピー / 切り取り / 貼り付け」ボタンでも同じ（貼り付け先は、最後にカーソルがあったセル。無ければ (0, 0)）。クリップボードの中身（イベント名）は横に出る。重なるセルへの貼り付けは、エディタのお知らせに出して何もしない。
+- 編集の実体は `cmd.pasteEvent`（12）で、1 回の貼り付けが 1 回の Undo。テスト：`commands.test.ts`（複製・別マップ・エラー・Undo）、`MapCanvas.test.tsx`（キー・ボタン・重なり）、E2E `e2e/editor.spec.ts`。
