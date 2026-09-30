@@ -7,13 +7,23 @@ export type TitleScreen = "main" | "continue";
 export type MenuScreen = "main" | "item" | "status" | "save" | "load";
 
 /**
+ * セーブ/ロード画面の確認ダイアログ（上書き・進行の破棄）。`cursor` は 0 = はい / 1 = いいえ（誤操作しにくいよう「いいえ」から始める）。
+ * 出すかどうかの判断は runtime が行い（`askConfirm`）、core は選択だけを扱う。
+ */
+export interface MenuConfirm {
+  readonly kind: "save" | "load";
+  readonly slot: number;
+  readonly cursor: 0 | 1;
+}
+
+/**
  * どのシーンにいるか。タイトルとメニューの UI 状態（画面・カーソル）は GameState の一部なので、
  * UI 操作も入力列から再現できる（リプレイ可能）。
  */
 export type SceneState =
   | { readonly kind: "map" }
   | { readonly kind: "title"; readonly screen: TitleScreen; readonly cursor: number }
-  | { readonly kind: "menu"; readonly screen: MenuScreen; readonly cursor: number }
+  | { readonly kind: "menu"; readonly screen: MenuScreen; readonly cursor: number; readonly confirm?: MenuConfirm }
   | { readonly kind: "battle" | "gameover" };
 
 /** 移動できるもの（プレイヤー・イベント・フォロワー）。タイル座標。 */

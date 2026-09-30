@@ -44,6 +44,9 @@ export function dispatch(state: GameState, action: Action, ctx: Ctx): StepResult
       const transfer = r.value.map.transfer;
       return { state: transfer === undefined ? r.value : { ...r.value, map: { ...r.value.map, transfer: { ...transfer, requested: false } } }, effects: [] };
     }
+    case "askConfirm":
+      if (state.scene.kind !== "menu") return { state, effects: [] };
+      return { state: { ...state, scene: { ...state.scene, confirm: { kind: action.kind, slot: action.slot, cursor: 1 } } }, effects: [] };
     case "interpreter":
       if (action.op === "terminate") {
         return { state: { ...state, interpreters: state.interpreters.filter((i) => i.id !== action.id) }, effects: [] };

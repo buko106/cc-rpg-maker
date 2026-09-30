@@ -45,6 +45,27 @@ export function stripTransient(s: GameState): SerializedGameState {
   return { ...rest, scene, map: { ...s.map, player: snapCharacter(s.map.player), events, followers: s.map.followers.map(snapCharacter) } };
 }
 
+/** キーの順序に依存しない JSON 文字列（値が同じなら同じ文字列）。 */
+function stableStringify(value: unknown): string {
+  if (value === null || typeof value !== "object") return JSON.stringify(value) ?? "null";
+  if (Array.isArray(value)) return `[${value.map(stableStringify).join(",")}]`;
+  const obj = value as Record<string, unknown>;
+  const entries = Object.keys(obj)
+    .filter((k) => obj[k] !== undefined)
+    .sort()
+    .map((k) => `${JSON.stringify(k)}:${stableStringify(obj[k])}`);
+  return `{${entries.join(",")}}`;
+}
+
+/**
+ * 「セーブに値する進行」の指紋。セーブ時に残る状態（`stripTransient`）から、時間だけで進む `tick` / `playtimeTicks` を除いたもの。
+ * 保存した直後の状態とは一致し、歩く・アイテムを拾う・スイッチが変わるなどで変わる（メニューを開閉しただけでは変わらない）。
+ */
+export function progressFingerprint(s: GameState): string {
+  const { tick: _tick, playtimeTicks: _playtime, ...rest } = stripTransient(s);
+  return stableStringify(rest);
+}
+
 export function toSnapshot(s: GameState, meta: { projectId: string; projectHash: string; savedAt: string }): SaveSnapshot {
   const state = stripTransient(s);
   const first = state.party.members[0];

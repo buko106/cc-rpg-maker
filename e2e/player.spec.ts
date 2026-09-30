@@ -8,7 +8,7 @@ import type { Page } from "@playwright/test";
 
 interface State {
   tick: number;
-  scene: { kind: string; screen?: string; cursor?: number };
+  scene: { kind: string; screen?: string; cursor?: number; confirm?: { kind: string; slot: number; cursor: number } };
   map: { mapId: string; name: string; player: { x: number; y: number; moving: boolean } };
   message: { open: boolean; text: string };
   variables: Record<string, number>;
@@ -259,10 +259,52 @@ test("メニューのロードで、保存した位置に戻る。空のスロ�
   await page.evaluate(() => window.__rpg.settled());
   expect((await state(page)).scene).toMatchObject({ kind: "menu", screen: "load" });
   await press(page, "ArrowUp");
-  await press(page, "Enter"); // スロット 1
+  await press(page, "Enter"); // スロット 1（保存後に歩いたので、破棄してよいか確認が出る）
+  await page.waitForFunction(() => window.__rpg.getState().scene.confirm?.kind === "load");
+  await page.waitForTimeout(100);
+  await page.screenshot({ path: "test-results/player-confirm-load.png" });
+  await press(page, "Enter"); // いいえ（初期カーソル）
+  await page.waitForFunction(() => window.__rpg.getState().scene.confirm === undefined);
+  expect((await state(page)).scene).toMatchObject({ kind: "menu", screen: "load" });
+  expect((await state(page)).map.player).toMatchObject({ x: 4, y: 5 });
+  await press(page, "Enter");
+  await page.waitForFunction(() => window.__rpg.getState().scene.confirm?.kind === "load");
+  await press(page, "ArrowUp"); // はい
+  await press(page, "Enter");
   await page.evaluate(() => window.__rpg.settled());
   await page.waitForFunction(() => window.__rpg.getState().scene.kind === "map");
   expect((await state(page)).map.player).toMatchObject({ x: 4, y: 3 });
+});
+
+test("ロードしたのと違うスロットに上書きしようとすると確認が挟まる", async ({ page }) => {
+  await open(page);
+  await hold(page, "ArrowRight", "s.map.player.x === 4");
+  // スロット 1 と 2 に保存（どちらも空きなので確認なし）
+  await press(page, "m");
+  await press(page, "ArrowDown");
+  await press(page, "ArrowDown");
+  await press(page, "Enter");
+  await press(page, "Enter");
+  await page.evaluate(() => window.__rpg.settled());
+  await press(page, "ArrowDown");
+  await press(page, "Enter");
+  await page.evaluate(() => window.__rpg.settled());
+  expect((await state(page)).scene.confirm).toBeUndefined();
+
+  // 直近に保存したのは 2。スロット 1 への保存は確認が出て、はいで上書きされる
+  await press(page, "ArrowUp");
+  await press(page, "Enter");
+  await page.waitForFunction(() => window.__rpg.getState().scene.confirm?.kind === "save");
+  await page.waitForTimeout(100);
+  await page.screenshot({ path: "test-results/player-confirm-save.png" });
+  await press(page, "ArrowUp");
+  await press(page, "Enter");
+  await page.evaluate(() => window.__rpg.settled());
+  await page.waitForFunction(() => window.__rpg.getState().scene.confirm === undefined);
+  // 保存した直後なので、同じスロットへの保存はもう確認しない
+  await press(page, "Enter");
+  await page.evaluate(() => window.__rpg.settled());
+  expect((await state(page)).scene.confirm).toBeUndefined();
 });
 
 // ---- 戦闘（M4） ----

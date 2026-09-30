@@ -27,8 +27,8 @@ function setup() {
     error: (m: string) => logs.push(`error:${m}`),
   };
   const sinks: EffectSinks = { audio: out, logger, visual: (e) => visual.push(e.kind), plugin: (e) => plugins.push(`${e.name}:${JSON.stringify(e.payload)}`), loadMap: (id) => loads.push(id),
-    save: (slot) => saves.push(`save:${String(slot)}`),
-    load: (slot) => saves.push(`load:${String(slot)}`),
+    save: (slot, confirmed) => saves.push(`save:${String(slot)}${confirmed ? ":ok" : ""}`),
+    load: (slot, confirmed) => saves.push(`load:${String(slot)}${confirmed ? ":ok" : ""}`),
   };
   return { out, logs, visual, loads, saves, plugins, sinks };
 }
@@ -66,7 +66,9 @@ describe("distributeEffect", () => {
     distributeEffect({ kind: "requestSave", slot: 3 }, sinks);
     distributeEffect({ kind: "requestSave" }, sinks);
     distributeEffect({ kind: "requestLoad", slot: 1 }, sinks);
-    expect(saves).toEqual(["save:3", "save:undefined", "load:1"]);
+    distributeEffect({ kind: "requestSave", slot: 2, confirmed: true }, sinks);
+    distributeEffect({ kind: "requestLoad", slot: 4, confirmed: true }, sinks);
+    expect(saves).toEqual(["save:3", "save:undefined", "load:1", "save:2:ok", "load:4:ok"]);
     expect(logs).toEqual([]);
   });
 

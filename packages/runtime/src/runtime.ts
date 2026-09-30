@@ -1,4 +1,4 @@
-import { createCtx, createProjectView, dispatch as coreDispatch, initialState, SAVE_SLOT_FIRST, step, titleState, toSnapshot } from "@rpg/core";
+import { createCtx, createProjectView, dispatch as coreDispatch, initialState, progressFingerprint, SAVE_SLOT_FIRST, step, titleState, toSnapshot } from "@rpg/core";
 import type { Action, Ctx, Effect, GameState } from "@rpg/core";
 import type { MapData, MapId } from "@rpg/schema";
 import { distributeEffect } from "./effects.js";
@@ -15,6 +15,8 @@ import type { Logger } from "./ports/logger.js";
 import type { ProjectSource } from "./ports/project-source.js";
 import type { Renderer } from "./ports/renderer.js";
 import type { SaveRepository, SlotMeta } from "./ports/saves.js";
+import { loadNeedsConfirm, saveNeedsConfirm } from "./save-guard.js";
+import type { SaveOrigin } from "./save-guard.js";
 import type { Scheduler } from "./ports/scheduler.js";
 import { applyFxEffect, NO_FX, tickFx } from "./visual-fx.js";
 import type { VisualFx } from "./visual-fx.js";
@@ -90,6 +92,8 @@ export function createRuntime(deps: RuntimeDeps): Runtime {
   let projectHash = "";
   /** `listSlots` のキャッシュ（セーブ/ロード画面の表示用）。 */
   let slots: readonly SlotMeta[] = [];
+  /** 今のプレイの元になっているセーブ（確認ダイアログの要否の判断に使う）。タイトルに戻ると無くなる。 */
+  let origin: SaveOrigin | undefined;
   /** 見た目だけの一時状態（GameState に入れない）：セーブ結果などのお知らせ。 */
   let notice: { key: NoticeKey; steps: number } | undefined;
   const inflight = new Set<Promise<unknown>>();
@@ -155,11 +159,13 @@ export function createRuntime(deps: RuntimeDeps): Runtime {
     const { state: s } = current();
     const now = clock();
     const snap = toSnapshot(s, { projectId, projectHash, savedAt: new Date(Number.isFinite(now) ? now : 0).toISOString() });
+    const fingerprint = progressFingerprint(s);
     track(
       saves
         .write(slot, snap)
         .then(async (r) => {
           if (r.ok) {
+            origin = { slot, fingerprint };
             setNotice("saved");
             await refreshSlots();
           } else {
@@ -205,10 +211,15 @@ export function createRuntime(deps: RuntimeDeps): Runtime {
       return;
     }
     state = result.state;
+    origin = { slot, fingerprint: progressFingerprint(result.state) };
     fx = NO_FX;
     notice = undefined;
     if (before.scene.kind === "title") audio.stopBgm(500);
   }
+
+  /** 確認ダイアログを出せるのはメニューの中だけ（タイトルからのロードやプラグイン経由の要求は、そのまま実行する）。 */
+  const inMenu = (): boolean => current().state.scene.kind === "menu";
+  const askConfirm = (kind: "save" | "load", slot: number): void => runtimeApi.dispatch({ type: "askConfirm", kind, slot });
 
   const sinks: EffectSinks = {
     audio,
@@ -237,8 +248,16 @@ export function createRuntime(deps: RuntimeDeps): Runtime {
         maps[mapId] = await projectSource.mapData(mapId);
       });
     },
-    save: (slot) => saveSlot(slot ?? SAVE_SLOT_FIRST),
-    load: (slot) => runLoading(() => loadSlot(slot ?? SAVE_SLOT_FIRST)),
+    save(slot, confirmed) {
+      const target = slot ?? SAVE_SLOT_FIRST;
+      if (!confirmed && inMenu() && saveNeedsConfirm(slots, target, origin)) askConfirm("save", target);
+      else saveSlot(target);
+    },
+    load(slot, confirmed) {
+      const target = slot ?? SAVE_SLOT_FIRST;
+      if (!confirmed && inMenu() && loadNeedsConfirm(slots, target, origin, progressFingerprint(current().state))) askConfirm("load", target);
+      else runLoading(() => loadSlot(target));
+    },
   };
 
   function handleEffect(effect: Effect): void {
@@ -258,6 +277,7 @@ export function createRuntime(deps: RuntimeDeps): Runtime {
     while (status === "running" && acc + EPSILON >= STEP_MS && steps < MAX_STEPS_PER_FRAME) {
       const result = step(current().state, input.poll(), c);
       state = result.state;
+      if (state.scene.kind === "title") origin = undefined;
       fx = tickFx(fx);
       if (notice !== undefined) notice = notice.steps <= 1 ? undefined : { ...notice, steps: notice.steps - 1 };
       acc -= STEP_MS;
