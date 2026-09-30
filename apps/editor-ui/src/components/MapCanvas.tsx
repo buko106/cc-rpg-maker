@@ -17,7 +17,7 @@ type Stroke = { kind: "paint"; last: Cell } | { kind: "drag"; eventId: EventId; 
  * マップキャンバス。下のキャンバスに `Renderer`（ゲームと同じ描画）でマップを描き、上のキャンバスにグリッド・イベント枠を重ねる。
  * 操作はすべて EditorCommand（`paintTiles` / `fillTiles` / `createEvent` / `createEventFromTemplate` / `moveEvent` / `deleteEvent`）として `session.execute` に渡す。
  * 「置くイベント」でひな形を選んでいると、空いたセルではひな形の入力ダイアログ（`EventTemplateDialog`）を出す。
- * キーボード：矢印でセルを移動、Enter でツールを適用、O でイベントを開く、Delete で選択中のイベントを削除、
+ * キーボード：矢印でセルを移動、Enter でツールを適用、O でイベントを開く、Delete / Backspace で選択中のイベントを削除、
  * Ctrl/⌘ + C・X・V で選択中のイベントのコピー・切り取り・貼り付け（貼り付け先はカーソルのあるセル）。
  */
 export function MapCanvas({ grid, onOpenEvent }: { grid: boolean; onOpenEvent: (eventId: EventId) => void }): ReactElement {

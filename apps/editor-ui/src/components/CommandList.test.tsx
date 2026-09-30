@@ -165,6 +165,33 @@ describe("複数選択", () => {
   });
 });
 
+describe("削除のキー", () => {
+  it("Delete でも Backspace でも、選んだ行（ブロック・範囲）が消える。入力欄の中の Backspace は文字を消すだけ", () => {
+    pick(A);
+    key("Backspace");
+    expect(order()).toEqual(SEED.slice(1));
+    pick(/条件分岐/);
+    key("Backspace"); // 分岐の開始なら、ブロックごと
+    expect(order()).toEqual(["b", "e"]);
+    pick("文章：b");
+    pick(E, true);
+    key("Backspace"); // 範囲
+    expect(order()).toEqual([]);
+    expect(t.session.undoLabel).toBe("コマンドの削除");
+    act(() => t.session.undo());
+    expect(order()).toEqual(["b", "e"]);
+    // 入力欄の中では行の操作にならない
+    fireEvent.keyDown(screen.getByLabelText("文章をすぐ追加"), { key: "Backspace" });
+    expect(order()).toEqual(["b", "e"]);
+  });
+
+  it("区切り・終端の行だけを選んでいるときは、Backspace でも消えない", () => {
+    pick("それ以外のとき");
+    key("Backspace");
+    expect(order()).toEqual(SEED);
+  });
+});
+
 describe("コピー・切り取り・貼り付け", () => {
   it("コピーした行を別の行の後ろに貼れる。貼った行が選ばれ、1 回の Undo で消える", () => {
     expect(button("コマンドを貼り付け").disabled).toBe(true);
