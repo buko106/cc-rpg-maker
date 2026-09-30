@@ -41,6 +41,9 @@
       "path": "./packages/save-store"
     },
     {
+      "path": "./packages/exporter"
+    },
+    {
       "path": "./packages/editor-core"
     },
     {
