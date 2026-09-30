@@ -3,7 +3,9 @@ import type { AssetId, IdSource, MapData, MapId, Result } from "@rpg/schema";
 import type { CommitBatch, StoreBackend, StoredMeta } from "./backend.js";
 import type { ProjectAssetStore, ProjectDocument, ProjectMeta, ProjectRepository, ProjectStoreError, SaveOptions } from "./ports/projectRepository.js";
 import { createTemplate } from "./template.js";
-import { assetEntryOf, hashBytes } from "./util.js";
+import { assetEntryOf, extensionOf, hashBytes } from "./util.js";
+import { readZip, writeZip } from "./zip.js";
+import type { ZipFile } from "./zip.js";
 
 export interface RepositoryOptions {
   /** 現在時刻（Unix ms）。既定は `Date.now`。テストで固定する。 */
@@ -139,6 +141,106 @@ export function createRepository(backend: StoreBackend, opts: RepositoryOptions 
     };
   }
 
+  /** 検証に失敗した ZIP のエラー。 */
+  const badZip = (path: string, message: string): Result<never, ProjectStoreError> => err({ kind: "schema", error: { kind: "invalid", issues: [{ path, message }] } });
+
+  async function exportZip(id: string): Promise<Result<Uint8Array<ArrayBuffer>, ProjectStoreError>> {
+    try {
+      const meta = await backend.getMeta(id);
+      if (meta === undefined) return err({ kind: "notFound" });
+      const rawProject = await backend.getProject(id);
+      const json = (value: unknown): Uint8Array => new TextEncoder().encode(JSON.stringify(value, null, 2));
+      const files: ZipFile[] = [{ name: "project.json", bytes: json(rawProject) }];
+      const project = rawProject as { maps?: Record<string, unknown>; assets?: { entries?: Record<string, { name?: string; mime?: string }> } };
+      for (const mapId of Object.keys(project.maps ?? {}).sort()) {
+        const rawMap = await backend.getMap(id, mapId);
+        if (rawMap === undefined) return badZip(`maps.${mapId}`, "マップのデータが無い");
+        files.push({ name: `maps/${mapId}.json`, bytes: json(rawMap) });
+      }
+      for (const [assetId, entry] of Object.entries(project.assets?.entries ?? {}).sort(([a], [b]) => a.localeCompare(b))) {
+        const bytes = await backend.getAsset(id, assetId as AssetId);
+        if (bytes !== undefined) files.push({ name: `assets/${assetId}${extensionOf(entry)}`, bytes: new Uint8Array(bytes) });
+      }
+      files.push({ name: "meta.json", bytes: json({ revision: meta.revision, updatedAt: meta.updatedAt, formatVersion: meta.formatVersion }) });
+      return ok(writeZip(files));
+    } catch (e) {
+      return err(toStoreError(e));
+    }
+  }
+
+  async function importZip(zip: Uint8Array | ArrayBuffer): Promise<Result<ProjectMeta, ProjectStoreError>> {
+    let files: Map<string, Uint8Array>;
+    try {
+      files = await readZip(zip);
+    } catch (e) {
+      return badZip("zip", e instanceof Error ? e.message : String(e));
+    }
+    // ルート直下でも、1 段のフォルダの下でもよい（一番浅い project.json を探す）
+    const roots = [...files.keys()].filter((n) => n === "project.json" || n.endsWith("/project.json")).sort((a, b) => a.length - b.length);
+    if (roots[0] === undefined) return badZip("project.json", "ZIP に project.json が無い");
+    const prefix = roots[0].slice(0, -"project.json".length);
+    const parseJson = (name: string): { ok: true; value: unknown } | { ok: false; message: string } => {
+      const bytes = files.get(name);
+      if (bytes === undefined) return { ok: false, message: "ファイルが無い" };
+      try {
+        return { ok: true, value: JSON.parse(new TextDecoder().decode(bytes)) as unknown };
+      } catch (e) {
+        return { ok: false, message: `JSON として読めない: ${e instanceof Error ? e.message : String(e)}` };
+      }
+    };
+
+    const rawProject = parseJson(`${prefix}project.json`);
+    if (!rawProject.ok) return badZip("project.json", rawProject.message);
+    const project = parseProject(rawProject.value);
+    if (!project.ok) return err({ kind: "schema", error: project.error });
+    const formatVersion = (rawProject.value as { formatVersion: number }).formatVersion;
+
+    const maps: Record<string, MapData> = {};
+    for (const mapId of Object.keys(project.value.maps)) {
+      const raw = parseJson(`${prefix}maps/${mapId}.json`);
+      if (!raw.ok) return badZip(`maps/${mapId}.json`, raw.message);
+      const map = parseMapData(raw.value, formatVersion);
+      if (!map.ok) return err({ kind: "schema", error: map.error });
+      maps[mapId] = map.value;
+    }
+
+    // アセットは名前ではなく内容で検証する（ID = 内容ハッシュ）。マニフェストに載っていないファイルは取り込まない。
+    const assetFiles = new Map<string, Uint8Array>();
+    for (const [name, bytes] of files) {
+      const m = name.startsWith(`${prefix}assets/`) ? /^([0-9a-f]{16})(?:\.[A-Za-z0-9]+)?$/.exec(name.slice(`${prefix}assets/`.length)) : null;
+      if (m?.[1] !== undefined) assetFiles.set(m[1], bytes);
+    }
+    const imported: { id: AssetId; bytes: ArrayBuffer }[] = [];
+    for (const assetId of Object.keys(project.value.assets.entries)) {
+      const bytes = assetFiles.get(assetId);
+      if (bytes === undefined) continue;
+      const copy = bytes.slice().buffer as ArrayBuffer;
+      const actual = await hashBytes(copy);
+      if (actual !== assetId) return badZip(`assets/${assetId}`, `内容のハッシュ（${actual}）が ID と一致しない`);
+      imported.push({ id: assetId as AssetId, bytes: copy });
+    }
+
+    const id = newId<"ProjectId">("prj", opts.idSource);
+    const at = isoOf(now());
+    const doc: ProjectDocument = {
+      project: { ...project.value, meta: { ...project.value.meta, id, updatedAt: at } },
+      maps: maps as Record<MapId, MapData>,
+      revision: 1,
+    };
+    try {
+      for (const a of imported) await backend.putAsset(id, a.id, a.bytes);
+      const saved = await commitDoc(id, doc, undefined, undefined, 1);
+      if (!saved.ok) {
+        await backend.removeProject(id);
+        return saved;
+      }
+      return ok(metaOf(saved.value, id));
+    } catch (e) {
+      await backend.removeProject(id).catch(() => undefined);
+      return err(toStoreError(e));
+    }
+  }
+
   return {
     async list() {
       const all = await backend.listMeta();
@@ -158,5 +260,7 @@ export function createRepository(backend: StoreBackend, opts: RepositoryOptions 
       await backend.removeProject(id);
     },
     assets,
+    exportZip,
+    importZip,
   };
 }

@@ -70,3 +70,25 @@ export function base64ToBytes(base64: string): ArrayBuffer {
   for (let i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
   return out.buffer;
 }
+
+const EXTENSION_BY_MIME: Readonly<Record<string, string>> = {
+  "image/png": ".png",
+  "image/jpeg": ".jpg",
+  "image/webp": ".webp",
+  "image/gif": ".gif",
+  "audio/ogg": ".ogg",
+  "audio/mpeg": ".mp3",
+  "audio/wav": ".wav",
+  "audio/mp4": ".m4a",
+  "font/ttf": ".ttf",
+  "font/otf": ".otf",
+  "font/woff": ".woff",
+  "font/woff2": ".woff2",
+};
+
+/** アセットの書き出し用の拡張子（`.png` など）。名前の拡張子を優先し、無ければ MIME から。分からなければ空。 */
+export function extensionOf(entry: { name?: string; mime?: string }): string {
+  const fromName = /\.([A-Za-z0-9]+)$/.exec(entry.name ?? "")?.[1];
+  if (fromName !== undefined) return `.${fromName.toLowerCase()}`;
+  return EXTENSION_BY_MIME[entry.mime ?? ""] ?? "";
+}

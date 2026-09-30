@@ -85,4 +85,28 @@ describe("createRepository（共通の振る舞い）", () => {
     expect(doc.project.meta.createdAt).toBe("2026-01-02T00:00:00.000Z");
     expect(doc.project.meta.id).toBe("prj_00000000000000000000000000");
   });
+
+  it("importZip の commit が失敗したら、書きかけのアセットも残さず、io エラーを返す", async () => {
+    const backend = createMemoryBackend();
+    let fail = false;
+    const flaky = { ...backend, commit: (id: string, batch: Parameters<typeof backend.commit>[1]) => (fail ? Promise.reject(new Error("容量が足りない (quota)")) : backend.commit(id, batch)) };
+    const repo = createRepository(flaky);
+    const doc = await repo.create("a");
+    const zip = await repo.exportZip(doc.project.meta.id);
+    if (!zip.ok) throw new Error("export に失敗");
+    fail = true;
+    const r = await repo.importZip(zip.value);
+    expect(r).toEqual({ ok: false, error: { kind: "quota" } });
+    expect((await repo.list()).map((m) => m.id)).toEqual([doc.project.meta.id]);
+  });
+
+  it("exportZip は保存されたマップが欠けていると schema エラー、バックエンドが例外を投げたら io", async () => {
+    const backend = createMemoryBackend();
+    const repo = createRepository({ ...backend, getMap: () => Promise.resolve(undefined) });
+    const doc = await repo.create("a");
+    const r = await repo.exportZip(doc.project.meta.id);
+    expect(!r.ok && r.error.kind).toBe("schema");
+    const broken = createRepository({ ...backend, getProject: () => Promise.reject(new Error("読めない")) });
+    expect(await broken.exportZip(doc.project.meta.id)).toEqual({ ok: false, error: { kind: "io", message: "読めない" } });
+  });
 });
