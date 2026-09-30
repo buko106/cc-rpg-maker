@@ -1,5 +1,5 @@
 import { createAssetSource, createEmbeddedBytesSource, createHttpBytesSource } from "@rpg/assets";
-import { createBrowserInput } from "@rpg/input-browser";
+import { createBrowserInput, createTouchInput, mergeInputSources } from "@rpg/input-browser";
 import { createPluginRegistry, loadPlugins, selectPlugins, toRuntimeExtensions } from "@rpg/plugin-api";
 import type { PluginModule } from "@rpg/plugin-api";
 import { createCanvas2dRenderer } from "@rpg/render-canvas2d";
@@ -14,6 +14,8 @@ import { createHttpProjectSource } from "./http-project-source.js";
 import { collectStartAssets } from "./preload.js";
 import { createRafScheduler } from "./raf-scheduler.js";
 import { createScreens } from "./screens.js";
+import { isCoarsePointer, mountTouchPad, shouldShowTouchPad } from "./touch-pad.js";
+import type { TouchPadMode } from "./touch-pad.js";
 
 /**
  * プレイヤーの設定。フォルダ形式（`projectUrl`：`project/` + `assets/`）か、単一 HTML（`embedded`）のどちらか。
@@ -41,6 +43,8 @@ export interface PlayerConfig {
   debug?: boolean;
   /** ビルドに入っているプラグインの一覧。プロジェクトの `system.plugins` で有効にされたものだけが読み込まれる。 */
   plugins?: readonly PluginModule[];
+  /** スマホ用の操作パッド（十字キー・決定・キャンセル・メニュー）。`auto`（既定）は主入力が指の端末だけ、`on` / `off` で固定。 */
+  touchPad?: TouchPadMode;
   /** 同じオリジンで複数のゲームを配るときの、セーブの保存先を分けるキー。 */
   saveScope?: string;
 }
@@ -76,7 +80,7 @@ export async function bootPlayer(root: HTMLElement, config: PlayerConfig): Promi
     const projectSource = config.embedded !== undefined ? createEmbeddedProjectSource(config.embedded) : createHttpProjectSource(projectUrl!);
     const project = await projectSource.project();
     const { width, height } = project.system.screen;
-    canvas.style.cssText = `display:block;margin:0 auto;width:${width * ZOOM}px;max-width:100%;height:auto;aspect-ratio:${width}/${height};image-rendering:pixelated;background:#000`;
+    canvas.style.cssText = `display:block;margin:0 auto;width:min(${width * ZOOM}px,100%,calc(100vh * ${width} / ${height}));height:auto;aspect-ratio:${width}/${height};image-rendering:pixelated;background:#000`;
     document.title = project.meta.title;
 
     const bytes =
@@ -101,7 +105,11 @@ export async function bootPlayer(root: HTMLElement, config: PlayerConfig): Promi
       prefix: `rpg-save${scope}`,
     });
 
-    const input = createBrowserInput(window, { gamepad: true });
+    // キーボード・ゲームパッドに、（出すときは）タッチの操作パッドを足す。判定は @rpg/input-browser、ここは結線だけ
+    const keyboard = createBrowserInput(window, { gamepad: true });
+    const touch = shouldShowTouchPad(config.touchPad, isCoarsePointer) ? createTouchInput() : undefined;
+    const input = touch === undefined ? keyboard : mergeInputSources(keyboard, touch);
+    const touchPad = touch === undefined ? undefined : mountTouchPad(root, touch);
     const logger = consoleLogger(debug);
     // プラグイン：プロジェクトが有効にしたものだけを読み込む。読み込めなくてもゲームは始める（警告だけ）
     const selection = selectPlugins(config.plugins ?? [], project.system.plugins);
@@ -126,6 +134,7 @@ export async function bootPlayer(root: HTMLElement, config: PlayerConfig): Promi
       logger,
       extensions: toRuntimeExtensions(registry, logger),
       onError: (e) => {
+        touchPad?.dispose();
         input.dispose();
         audio.dispose();
         screens.error(e, debug);

@@ -12,7 +12,7 @@ export interface EmbeddedGame {
 
 const escapeHtml = (s: string): string => s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
-const STYLE = `html, body { margin: 0; height: 100%; background: #111; }
+const STYLE = `html, body { margin: 0; height: 100%; background: #111; overscroll-behavior: none; }
 #app { min-height: 100%; display: flex; flex-direction: column; justify-content: center; }`;
 
 /** 書き出しで選べる描画方式（プレイヤーの `data-renderer` になる）。 */
@@ -24,7 +24,7 @@ export function renderIndexHtml(title: string, renderer: RendererKind = "auto", 
 <html lang="ja">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <title>${escapeHtml(title)}</title>
     <style>
 ${STYLE}
@@ -48,7 +48,7 @@ export function renderSingleHtml(title: string, embeddedJson: string, playerJs: 
 <html lang="ja">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <link rel="icon" href="data:," />
     <title>${escapeHtml(title)}</title>
     <style>
