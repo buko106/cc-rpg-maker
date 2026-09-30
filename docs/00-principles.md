@@ -37,7 +37,7 @@ audio-*       → runtime（ポート型のみ）
 input-*       → runtime（ポート型のみ）
 assets        → runtime（ポート型のみ）
 project-store → schema
-save-store    → core（Snapshot 型のみ）
+save-store    → core（Snapshot 型・マイグレーション）, runtime（ポート型のみ）
 editor-core   → schema, project-store（ポート型のみ）
 plugin-api    → core, runtime, editor-core（公開型のみ）
 editor-ui     → editor-core, runtime, plugin-api, 任意のアダプタ

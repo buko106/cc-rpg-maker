@@ -15,6 +15,7 @@
     "@rpg/input-script": "workspace:*",
     "@rpg/render-null": "workspace:*",
     "@rpg/runtime": "workspace:*",
+    "@rpg/save-store": "workspace:*",
     "@rpg/schema": "workspace:*"
   }
 }

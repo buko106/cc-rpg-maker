@@ -87,11 +87,14 @@ function advanceMovement(state: GameState, map: MapData): GameState {
 }
 
 /**
- * 時間を 1 フレーム進める。順序：tick 加算 → イベントページ更新 → 自動実行/並列イベントの起動 →
+ * 時間を 1 フレーム進める。タイトル・メニューの間は `tick`（とメニューではプレイ時間）だけ進む。順序：tick 加算 → イベントページ更新 → 自動実行/並列イベントの起動 →
  * インタプリタ実行 → イベントページ更新 → 場所移動 → 移動の補間 → カメラ。
  */
 export function handleTick(state: GameState, input: InputFrame, ctx: Ctx): StepResult {
   const effects: Effect[] = [];
+  // タイトル・メニューの間は世界が止まる（時間だけ進む。プレイ時間はメニュー中も数える）
+  if (state.scene.kind === "title") return { state: { ...state, tick: state.tick + 1 }, effects };
+  if (state.scene.kind === "menu") return { state: { ...state, tick: state.tick + 1, playtimeTicks: state.playtimeTicks + 1 }, effects };
   let s: GameState = { ...state, tick: state.tick + 1, playtimeTicks: state.playtimeTicks + 1 };
 
   const mapAtStart = s.scene.kind === "map" ? ctx.project.map(s.map.mapId) : undefined;

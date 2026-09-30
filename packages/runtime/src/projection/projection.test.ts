@@ -129,9 +129,9 @@ describe("projectFrame（マップシーン）", () => {
     expect(f.layers).toEqual([]);
   });
 
-  it("マップシーン以外（タイトル・戦闘など）は今のところ空の画面", async () => {
+  it("戦闘・ゲームオーバーのシーンは今のところ空の画面（M4）", async () => {
     const h = await boot();
-    const f = projectFrame({ ...h.runtime.getState(), scene: { kind: "title" } }, view(h));
+    const f = projectFrame({ ...h.runtime.getState(), scene: { kind: "battle" } }, view(h));
     expect(f).toMatchObject({ layers: [], ui: [], camera: { x: 0, y: 0 } });
   });
 });

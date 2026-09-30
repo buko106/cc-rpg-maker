@@ -1,0 +1,28 @@
+{
+  "project": "fixtures/projects/v1/minimal",
+  "seed": "menu",
+  "inputs": [
+    { "wait": 5 },
+    { "press": "menu" },
+    { "press": "down" },
+    { "press": "down" },
+    { "press": "ok" },
+    { "press": "ok" },
+    { "press": "down" },
+    { "press": "ok" },
+    { "press": "cancel" },
+    { "press": "cancel" },
+    { "wait": 3 },
+    { "hold": "right", "frames": 16 }
+  ],
+  "expect": { "finalStateHash": "2dceb520b8b13b945b840de97b4fcf6e36e9284de6d794fb256111445344fb47", "effects": { "requestSave": 2, "requestLoad": 0 } },
+  "assertions": [
+    { "atTick": 6, "path": "scene.kind", "equals": "menu" },
+    { "atTick": 9, "path": "scene.screen", "equals": "save" },
+    { "atTick": 11, "path": "scene.cursor", "equals": 1 },
+    { "atTick": 13, "path": "scene.screen", "equals": "main" },
+    { "atTick": 14, "path": "scene.kind", "equals": "map" },
+    { "atTick": 14, "path": "map.player.x", "equals": 2 },
+    { "atTick": 33, "path": "map.player.x", "equals": 3 }
+  ]
+}

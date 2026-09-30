@@ -54,6 +54,9 @@
       "path": "../../packages/save-store"
     },
     {
+      "path": "../../packages/save-store"
+    },
+    {
       "path": "../../packages/schema"
     }
   ]

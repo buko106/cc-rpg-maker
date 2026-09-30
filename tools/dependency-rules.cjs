@@ -59,7 +59,7 @@ const ALLOWED = {
   "input-script": ["runtime"],
   assets: ["runtime"],
   "project-store": ["schema"],
-  "save-store": ["core"],
+  "save-store": ["core", "runtime"],
   "editor-core": ["schema", "project-store"],
   "plugin-api": ["core", "runtime", "editor-core"],
   "editor-ui": ["editor-core", "runtime", "plugin-api", ...ADAPTERS],

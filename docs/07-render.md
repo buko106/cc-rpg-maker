@@ -57,5 +57,6 @@ export function createNullRenderer(): NullRenderer;
 - `createNullRenderer()` は `frames` / `last()` / `clear()` に加えて `initOpts` / `size` / `disposed` を持つ。`dispose` 後は `render` / `resize` / `init` が何も記録しない。
 - `createCanvas2dRenderer(canvas, { pixelated = true, dpr = 1 })`：`init` で canvas の実サイズを `width * dpr` × `height * dpr` にする（画面への拡大は CSS で行う）。`ImageHandle` は `ImageBitmap`（描画可能な `width` / `height` を持つもの）として扱う。
 - 未ロードの画像は、そのフレームでは描かずに `AssetSource.loadImage` を一度だけ呼ぶ。失敗した画像は再試行しない。`tiles` は見えている範囲だけ描き、空タイルと画像範囲外のセルは飛ばす。`ui.text` は `maxWidth` で 1 文字ずつ折り返す（`measureText`）。`runs` のある行は折り返さない。`cursor` の `blink` は M2 では点滅しない。
+- **M3 の変更（canvas2d）**：`cursor` は半透明の白い塗り + 枠で描く（選択行のハイライト。`blink` は引き続き無視）。`gauge` / `text` の `align`（`center` / `right` は `x` が基準点）はタイトル・メニューで使い始めた。`FrameSpec` の型は変わっていない。
 - **契約テスト**：`rendererContract(name, make)` は不変条件 1〜3（例外を出さない・`FrameSpec` を変更しない・`dispose` 後は no-op）を検証する。壊れた値（NaN、負のタイルサイズ、短すぎるタイル配列）と未ロードアセットも投げる。不変条件 4 は WebGL が入る M7 で。
 - **canvas2d のテスト**：Node では呼び出しを記録するモックコンテキストで、描画順・カリング・スキップ→次フレーム描画・overlay の順序を検証する。ピクセルの確認は `e2e/player.spec.ts`（demo プロジェクトのタイル・スプライト・ウィンドウの色）で行う。`fixtures/frames/*.json` → PNG スナップショットは、`FrameSpec` の見た目が安定した後（M3〜）。
