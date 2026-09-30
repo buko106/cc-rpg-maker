@@ -15,7 +15,7 @@
 > プロジェクトの保存先は IndexedDB のほか、OPFS / 利用者が選んだフォルダ（File System Access API。一覧の「フォルダを選ぶ…」）も使えます。
 > 設計は [`docs/`](./docs/) にあります。
 
-**公開中：https://www.buko106.tokyo/cc-rpg-maker/**（ランディング、[エディタ](https://www.buko106.tokyo/cc-rpg-maker/editor/)、[デモ](https://www.buko106.tokyo/cc-rpg-maker/demo/)。`main` に入るたびに GitHub Pages へ自動で公開します）
+**公開中**： [ランディング](https://www.buko106.tokyo/cc-rpg-maker/) / [エディタ](https://www.buko106.tokyo/cc-rpg-maker/editor/) / [デモ](https://www.buko106.tokyo/cc-rpg-maker/demo/)（`main` に入るたびに GitHub Pages へ自動で公開します）
 
 ## 作るもの
 
