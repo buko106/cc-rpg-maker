@@ -1,6 +1,6 @@
 import { cmd, defaultPage } from "@rpg/editor-core";
 import { eventPageSchema } from "@rpg/schema";
-import type { EventCommand, EventId, EventPage, MapId } from "@rpg/schema";
+import type { EventId, EventPage, MapId } from "@rpg/schema";
 import { useCallback, useMemo, useState } from "react";
 import type { ReactElement } from "react";
 import type { z } from "zod";
@@ -103,9 +103,13 @@ export function EventDialog({ mapId, eventId, onClose }: { mapId: MapId; eventId
         <h3>コマンド</h3>
         <CommandList
           commands={page.commands}
-          onInsert={(at, commands: EventCommand[]) => run(cmd.insertCommands(mapId, eventId, index, at, commands))}
-          onRemove={(at, count) => run(cmd.removeCommands(mapId, eventId, index, at, count))}
-          onReplace={(at, command) => run(cmd.replaceCommand(mapId, eventId, index, at, command))}
+          onEdit={(ops) => {
+            const edits = ops.map((o) =>
+              o.op === "insert" ? cmd.insertCommands(mapId, eventId, index, o.at, o.commands) : o.op === "remove" ? cmd.removeCommands(mapId, eventId, index, o.at, o.count) : cmd.replaceCommand(mapId, eventId, index, o.at, o.command),
+            );
+            // 1 つなら（入力中の文字のまとめなど）そのまま、複数なら 1 回の Undo で戻せるようにまとめる
+            run(edits.length === 1 ? edits[0]! : cmd.batch("コマンドの編集", edits));
+          }}
         />
       </div>
       {dialog}

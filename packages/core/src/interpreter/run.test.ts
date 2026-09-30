@@ -42,9 +42,17 @@ const call = defineCommand({
 });
 
 describe("registry", () => {
-  it("registers the builtin commands (M1 + M4)", () => {
+  it("registers every builtin command in docs/03 (M1 + M4 + M6)", () => {
     const codes = loadFixtureProject("minimal").ctx.commands.list().map((h) => h.code).sort();
-    expect(codes).toEqual(["Else", "ConditionalBranch", "ControlSwitches", "ControlVariables", "EndBranch", "ChoiceBranch", "BattleProcessing", "ShowText", "TransferPlayer", "Wait"].sort());
+    // docs/03-interpreter.md の組み込みコマンド一覧（内部用の ChoiceBranch / MoveStep を含む）
+    const documented = [
+      "ShowText", "ShowChoices", "ChoiceBranch", "InputNumber", "SelectItem", "ControlSwitches", "ControlVariables", "ControlSelfSwitch", "ControlTimer",
+      "ConditionalBranch", "Else", "EndBranch", "Loop", "BreakLoop", "EndLoop", "ExitEventProcessing", "CallCommonEvent", "Label", "JumpToLabel", "Wait",
+      "TransferPlayer", "SetMoveRoute", "MoveStep", "ChangeGold", "ChangeItems", "ChangeParty", "ChangeHp", "ChangeMp", "ChangeExp", "ChangeLevel",
+      "ChangeBgm", "PlaySe", "FadeoutBgm", "ShakeScreen", "FlashScreen", "TintScreen", "Fadein", "Fadeout", "BattleProcessing", "ShopProcessing",
+      "SaveGame", "LoadGame", "GameOver", "ReturnToTitle", "Script", "Comment",
+    ].sort();
+    expect(codes).toEqual(documented);
   });
 
   it("rejects duplicate registration", () => {

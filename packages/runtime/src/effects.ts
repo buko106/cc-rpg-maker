@@ -7,8 +7,8 @@ import type { Logger } from "./ports/logger.js";
 export interface EffectSinks {
   audio: AudioOut;
   logger: Logger;
-  /** シェイク・フラッシュ（見た目だけの一時状態）。 */
-  visual(effect: Extract<Effect, { kind: "screenShake" | "screenFlash" }>): void;
+  /** シェイク・フラッシュ・色調・暗転（見た目だけの一時状態）。 */
+  visual(effect: Extract<Effect, { kind: "screenShake" | "screenFlash" | "screenTint" | "screenFade" }>): void;
   /** マップの遅延ロードを始める。 */
   loadMap(mapId: MapId): void;
   /** 現在の状態を `slot` に保存する。`slot` 省略時は最初のスロット。 */
@@ -34,6 +34,8 @@ export function distributeEffect(effect: Effect, sinks: EffectSinks): void {
       return;
     case "screenShake":
     case "screenFlash":
+    case "screenTint":
+    case "screenFade":
       sinks.visual(effect);
       return;
     case "requestMapData":

@@ -43,6 +43,16 @@ export function startInterpreter(
   return { ...state, nextInterpreterId: state.nextInterpreterId + 1, interpreters: [...state.interpreters, interp] };
 }
 
+/** `undefined` の値のキーは取り除く。 */
+function mergeLocals(base: Readonly<Record<string, unknown>>, patch: Readonly<Record<string, unknown>>): Record<string, unknown> {
+  const out = { ...base };
+  for (const [k, v] of Object.entries(patch)) {
+    if (v === undefined) delete out[k];
+    else out[k] = v;
+  }
+  return out;
+}
+
 const isWaiting = (i: InterpreterState): boolean => i.wait.kind !== "none";
 
 function replace(state: GameState, id: string, f: (i: InterpreterState) => InterpreterState | null): GameState {
@@ -90,20 +100,28 @@ function defaultResume(c: CommandCtx): CommandResult {
   }
 }
 
+function evaluateIn(state: GameState, rng: Random, ctx: Ctx, expr: string, mode: Scope["mode"], vars: Record<string, Value>) {
+  const parsed = parse(expr);
+  if (!parsed.ok) return err({ kind: "argument" as const, message: `構文エラー: ${parsed.error.message}`, pos: parsed.error.pos });
+  const scope: Scope = {
+    vars,
+    variable: (id) => (Object.hasOwn(state.variables, id) ? (state.variables[id] as number) : 0),
+    switch: (id) => Object.hasOwn(state.switches, id) && state.switches[id] === true,
+    rng,
+    mode,
+  };
+  return evaluate(parsed.value, scope, ctx.formulas);
+}
+
 function makeEval(state: GameState, rng: Random, ctx: Ctx): CommandCtx["eval"] {
-  return (expr, vars: Record<string, Value> = {}) => {
-    const parsed = parse(expr);
-    if (!parsed.ok) return err({ kind: "argument", message: `構文エラー: ${parsed.error.message}`, pos: parsed.error.pos });
-    const scope: Scope = {
-      vars,
-      variable: (id) => (Object.hasOwn(state.variables, id) ? (state.variables[id] as number) : 0),
-      switch: (id) => Object.hasOwn(state.switches, id) && state.switches[id] === true,
-      rng,
-      mode: "condition",
-    };
-    const r = evaluate(parsed.value, scope, ctx.formulas);
+  return (expr, vars = {}) => {
+    const r = evaluateIn(state, rng, ctx, expr, "condition", vars);
     return r.ok ? ok(r.value.value) : r;
   };
+}
+
+function makeScript(state: GameState, rng: Random, ctx: Ctx): CommandCtx["script"] {
+  return (expr) => evaluateIn(state, rng, ctx, expr, "script", {});
 }
 
 /** 1 フレーム分、全インタプリタを進める。`normal` も `parallel` も、配列の順に処理する。 */
@@ -148,7 +166,7 @@ export function runInterpreters(state: GameState, input: InputFrame, ctx: Ctx): 
         continue;
       }
 
-      const cctx: CommandCtx = { state: s, interp, project: ctx.project, rng, eval: makeEval(s, rng, ctx), input };
+      const cctx: CommandCtx = { state: s, interp, project: ctx.project, rng, eval: makeEval(s, rng, ctx), script: makeScript(s, rng, ctx), input };
       const waiting = isWaiting(interp);
       const result = !waiting ? handler.run(params.data, cctx) : handler.resume ? handler.resume(params.data, cctx) : defaultResume(cctx);
       if (!waiting) budget--;
@@ -158,7 +176,9 @@ export function runInterpreters(state: GameState, input: InputFrame, ctx: Ctx): 
       // 制御の適用。`pc` は待機中は変化しない。
       const control = result.control ?? { kind: "next" };
       const branch = result.setBranch;
-      s = replace(s, id, (i) => {
+      const locals = result.setLocals;
+      s = replace(s, id, (i0) => {
+        const i = locals ? { ...i0, locals: mergeLocals(i0.locals, locals) } : i0;
         const merged = branch ? { ...i.branch, ...branch } : i.branch;
         switch (control.kind) {
           case "next":

@@ -85,7 +85,12 @@ export interface MessageState {
   readonly face: AssetRef | null;
   readonly position: "top" | "middle" | "bottom";
   readonly background: "window" | "dim" | "transparent";
+  /** 選択肢（`ShowChoices` / `SelectItem` / `ShopProcessing`）。表示中は `text` が見出しになる。 */
   readonly choices: readonly string[] | null;
+  /** 選択肢のカーソル位置、または数値入力で編集中の桁（左端 = 0）。選択肢・数値入力のとき以外は無い。 */
+  readonly cursor?: number;
+  /** 数値入力（`InputNumber`）。`value` は現在の値（`digits` 桁）。 */
+  readonly numberInput?: { readonly digits: number; readonly value: number };
 }
 
 export interface TimerState {

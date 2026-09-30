@@ -100,6 +100,8 @@ export function handleTick(state: GameState, input: InputFrame, ctx: Ctx): StepR
   // 戦闘中はマップの世界（イベント・移動・並列処理）が止まる。BattleProcessing を待つインタプリタも戦闘が終わるまで動かない。
   if (state.scene.kind === "battle") return battleTick({ ...state, tick: state.tick + 1, playtimeTicks: state.playtimeTicks + 1 }, ctx);
   let s: GameState = { ...state, tick: state.tick + 1, playtimeTicks: state.playtimeTicks + 1 };
+  // タイマー（`ControlTimer`）：残りフレームを数え、0 になったら止まる
+  if (s.timers.active) s = { ...s, timers: s.timers.ticks <= 1 ? { active: false, ticks: 0 } : { active: true, ticks: s.timers.ticks - 1 } };
 
   const mapAtStart = s.scene.kind === "map" ? ctx.project.map(s.map.mapId) : undefined;
   if (mapAtStart) {

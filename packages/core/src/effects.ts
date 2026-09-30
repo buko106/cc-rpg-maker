@@ -17,6 +17,10 @@ export type Effect =
   | { readonly kind: "stopBgm"; readonly fadeMs?: number }
   | { readonly kind: "screenShake"; readonly power: number; readonly durationTicks: number }
   | { readonly kind: "screenFlash"; readonly color: RGBA; readonly durationTicks: number }
+  /** 画面の色調を `durationTicks` かけて変える（`a` = 0 で元に戻る）。見た目だけの状態で、セーブされない。 */
+  | { readonly kind: "screenTint"; readonly color: RGBA; readonly durationTicks: number }
+  /** 画面を `durationTicks` かけて暗転（`to` = 1）/明転（`to` = 0）する。暗転は明転を指示するまで続く。 */
+  | { readonly kind: "screenFade"; readonly to: 0 | 1; readonly durationTicks: number }
   | { readonly kind: "requestSave"; readonly slot?: number }
   | { readonly kind: "requestLoad"; readonly slot?: number }
   /** 遅延ロード。runtime が Ctx に供給してから再開する。 */

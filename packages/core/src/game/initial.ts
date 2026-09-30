@@ -27,7 +27,7 @@ export function enterMap(map: MapData, name: string, player: MapState["player"])
  * 開始マップがロード済みなら最初からその上にいる。未ロードなら開始位置への場所移動を予約し、
  * 最初の `tick` で `requestMapData` が発行される。
  */
-export function initialState(ctx: Ctx, seed: string): GameState {
+export function initialState(ctx: Pick<Ctx, "project">, seed: string): GameState {
   const { system, database } = ctx.project.project;
   const actors: GameState["actors"] = {};
   for (const actor of Object.values(database.actors)) actors[actor.id] = initialActor(actor, ctx.project.class(actor.classId));
@@ -68,6 +68,6 @@ export function initialState(ctx: Ctx, seed: string): GameState {
 }
 
 /** タイトル画面から始まる状態（ニューゲームで `initialState` から作り直す）。 */
-export function titleState(ctx: Ctx, seed: string): GameState {
+export function titleState(ctx: Pick<Ctx, "project">, seed: string): GameState {
   return { ...initialState(ctx, seed), scene: { kind: "title", screen: "main", cursor: 0 } };
 }

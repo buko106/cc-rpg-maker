@@ -65,6 +65,30 @@ describe("EventDialog", () => {
     expect(page().commands.map((c) => c.code)).toEqual(["BattleProcessing", "ChoiceBranch", "ChoiceBranch", "ChoiceBranch", "EndBranch"]);
   });
 
+  it("選択肢の表示は ChoiceBranch と EndBranch が付き、選択肢を増減すると分岐も 1 回の Undo で増減する", () => {
+    addCommand("選択肢の表示");
+    expect(page().commands.map((c) => c.code)).toEqual(["ShowChoices", "ChoiceBranch", "EndBranch"]);
+    fireEvent.click(screen.getByRole("button", { name: /^＋ 選択肢を追加$/ }));
+    expect(page().commands.map((c) => c.code)).toEqual(["ShowChoices", "ChoiceBranch", "ChoiceBranch", "EndBranch"]);
+    expect((page().commands[0]!.params["choices"] as string[]).length).toBe(2);
+    act(() => t.session.undo());
+    expect(page().commands.map((c) => c.code)).toEqual(["ShowChoices", "ChoiceBranch", "EndBranch"]);
+    expect(page().commands.map((c) => c.params).at(0)).toMatchObject({ choices: [""] });
+  });
+
+  it("ループは EndLoop と一緒に入り、ループごと消える。MoveStep は選べない", () => {
+    addCommand("ループ");
+    expect(page().commands.map((c) => c.code)).toEqual(["Loop", "EndLoop"]);
+    addCommand("ループの中断");
+    expect(page().commands.map((c) => [c.code, c.indent])).toEqual([["Loop", 0], ["BreakLoop", 1], ["EndLoop", 0]]);
+    fireEvent.click(screen.getByRole("button", { name: "コマンドを追加…" }));
+    expect(within(screen.getByRole("dialog", { name: "コマンドの追加" })).queryByRole("button", { name: "移動ルートの 1 歩" })).toBeNull();
+    fireEvent.click(within(screen.getByRole("dialog", { name: "コマンドの追加" })).getByRole("button", { name: "コマンドの追加を閉じる" }));
+    fireEvent.click(screen.getByRole("option", { name: /^ループ$/ }));
+    fireEvent.click(screen.getByRole("button", { name: "削除" }));
+    expect(page().commands).toEqual([]);
+  });
+
   it("キーボード：矢印で選択、Enter で編集、Delete で削除", () => {
     addCommand("ウェイト");
     addCommand("ウェイト");

@@ -3,6 +3,7 @@ import { loadFixtureProject, reachableStateArb } from "@rpg/test-utils";
 import { describe, expect, it } from "vitest";
 import { dispatch, initialState, step } from "./game/index.js";
 import { emptyInput, inputFrame } from "./input.js";
+import { startInterpreter } from "./interpreter/index.js";
 import { fromSnapshot, migrateSnapshot, SNAPSHOT_VERSION, snapshotMigrations, stripTransient, toSnapshot } from "./snapshot.js";
 import type { SaveSnapshot } from "./snapshot.js";
 import type { GameState } from "./state.js";
@@ -188,5 +189,52 @@ describe("dispatch loadSnapshot", () => {
     const r = dispatch(s, { type: "loadSnapshot", snapshot: { version: 99 } as never }, ctx);
     expect(r.state).toBe(s);
     expect(r.effects).toEqual([expect.objectContaining({ kind: "log", level: "warn" })]);
+  });
+});
+
+describe("選択肢・数値入力・タイマー・移動ルート（M6）の状態", () => {
+  it("survives a save/load round trip while a choice window, a number input and a timer are active", () => {
+    const base = walked();
+    const withChoices: GameState = {
+      ...base,
+      message: { ...base.message, open: true, owner: "i0", text: "どうする？", choices: ["A", "B"], cursor: 1 },
+      timers: { active: true, ticks: 100 },
+    };
+    const back = load(clone(toSnapshot(withChoices, meta)));
+    expect(back.ok && back.value.message).toMatchObject({ choices: ["A", "B"], cursor: 1 });
+    expect(back.ok && back.value.timers).toEqual({ active: true, ticks: 100 });
+
+    const withNumber: GameState = { ...base, message: { ...base.message, open: true, owner: "i0", numberInput: { digits: 3, value: 42 }, cursor: 2 } };
+    const back2 = load(clone(toSnapshot(withNumber, meta)));
+    expect(back2.ok && back2.value.message).toMatchObject({ numberInput: { digits: 3, value: 42 }, cursor: 2 });
+  });
+
+  it("older saves without cursor / numberInput still load", () => {
+    const snap = clone(toSnapshot(walked(), meta));
+    expect(snap.state.message).not.toHaveProperty("cursor");
+    expect(load(snap).ok).toBe(true);
+  });
+
+  it("rejects a number input with an impossible digit count", () => {
+    const snap = clone(toSnapshot(walked(), meta)) as unknown as { state: { message: Record<string, unknown> } };
+    snap.state.message["numberInput"] = { digits: 0, value: 0 };
+    expect(load(snap).ok).toBe(false);
+  });
+
+  it("a running move route resumes identically after a save/load round trip", () => {
+    const route = { code: "SetMoveRoute", params: { target: "player", wait: false, route: { repeat: true, skippable: true, steps: [{ kind: "move", dir: "right" }, { kind: "wait", frames: 3 }, { kind: "move", dir: "left" }] } }, indent: 0 };
+    let s = startInterpreter(initialState(ctx, "route"), { kind: "plugin", name: "t" }, [route], "normal");
+    for (let i = 0; i < 20; i++) s = step(s, emptyInput(), ctx).state;
+    expect(s.interpreters.some((i) => i.origin.kind === "plugin" && i.origin.name.startsWith("moveRoute"))).toBe(true);
+
+    const restored = load(clone(toSnapshot(s, meta)));
+    expect(restored.ok).toBe(true);
+    let a = stripTransient(s);
+    let b = restored.ok ? restored.value : a;
+    for (let i = 0; i < 60; i++) {
+      a = step(a, emptyInput(), ctx).state;
+      b = step(b, emptyInput(), ctx).state;
+    }
+    expect(b).toEqual(a);
   });
 });

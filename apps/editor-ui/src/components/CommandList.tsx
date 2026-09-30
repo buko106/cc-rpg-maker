@@ -2,7 +2,8 @@ import { createProjectView } from "@rpg/core";
 import type { EventCommand } from "@rpg/schema";
 import { useMemo, useState } from "react";
 import type { KeyboardEvent, ReactElement } from "react";
-import { commandTemplate, insertionPoint, removalRange } from "../command-templates.js";
+import { BLOCK_PARTS, commandTemplate, insertionPoint, removalRange, syncChoiceBranches } from "../command-templates.js";
+import type { CommandOp } from "../command-templates.js";
 import { FormEditor } from "../form-editor.js";
 import { useEnv, useFormContext, useSession } from "../hooks.js";
 import { describeSchema } from "../schema-form/introspect.js";
@@ -11,12 +12,8 @@ import { Dialog } from "./Dialog.js";
 
 export interface CommandListProps {
   commands: readonly EventCommand[];
-  /** 位置 `at` に挿入する */
-  onInsert(at: number, commands: EventCommand[]): void;
-  /** 位置 `at` から `count` 個を削除する */
-  onRemove(at: number, count: number): void;
-  /** 位置 `at` のコマンドを差し替える */
-  onReplace(at: number, command: EventCommand): void;
+  /** 編集操作（挿入・削除・差し替え）を順に適用する。複数のときは 1 回の Undo で戻せるようにまとめる。 */
+  onEdit(ops: CommandOp[]): void;
 }
 
 /** 追加できるコマンドの一覧（分岐の部品は、対になるコマンドと一緒に入るので出さない）。 */
@@ -24,7 +21,7 @@ function CommandPicker({ onPick, onClose }: { onPick: (code: string) => void; on
   const env = useEnv();
   const groups = new Map<string, { code: string; label: string }[]>();
   for (const h of env.commands.list()) {
-    if (h.code === "Else" || h.code === "EndBranch" || h.code === "ChoiceBranch") continue;
+    if (BLOCK_PARTS.has(h.code)) continue;
     const list = groups.get(h.meta.category) ?? [];
     list.push({ code: h.code, label: h.meta.label });
     groups.set(h.meta.category, list);
@@ -72,7 +69,7 @@ export function CommandForm({ command, onCommit }: { command: EventCommand; onCo
  * イベントコマンドのリスト。行を選んで「追加」「編集」「削除」する。
  * 矢印キーで行を移動、Enter で編集、Delete で削除。文書の変更は親が渡す `onInsert` などを通して行う。
  */
-export function CommandList({ commands, onInsert, onRemove, onReplace }: CommandListProps): ReactElement {
+export function CommandList({ commands, onEdit }: CommandListProps): ReactElement {
   const env = useEnv();
   const session = useSession();
   const ctx = useFormContext();
@@ -94,7 +91,7 @@ export function CommandList({ commands, onInsert, onRemove, onReplace }: Command
     const point = insertionPoint(commands, selected);
     const raw = defaultValue(describeSchema(h.params), ctx.refOptions) ?? {};
     const parsed = h.params.safeParse(raw);
-    onInsert(point.at, commandTemplate(code, (parsed.success ? parsed.data : raw) as Record<string, unknown>, point.indent));
+    onEdit([{ op: "insert", at: point.at, commands: commandTemplate(code, (parsed.success ? parsed.data : raw) as Record<string, unknown>, point.indent) }]);
     setSelected(point.at);
     setPicking(false);
     setEditing(true);
@@ -104,9 +101,16 @@ export function CommandList({ commands, onInsert, onRemove, onReplace }: Command
     if (selected === undefined) return;
     const range = removalRange(commands, selected);
     if (range === undefined) return;
-    onRemove(range.at, range.count);
+    onEdit([{ op: "remove", at: range.at, count: range.count }]);
     setSelected(undefined);
     setEditing(false);
+  };
+
+  /** 設定フォームの確定。選択肢の数が変わったら、対になる分岐の数も合わせる。 */
+  const commit = (index: number, command: EventCommand, params: Record<string, unknown>): void => {
+    const next = { ...command, params };
+    const sync = command.code === "ShowChoices" && Array.isArray(params["choices"]) ? syncChoiceBranches(commands, index, (params["choices"] as unknown[]).length) : [];
+    onEdit([{ op: "replace", at: index, command: next }, ...sync]);
   };
 
   const onKeyDown = (e: KeyboardEvent<HTMLElement>): void => {
@@ -158,7 +162,7 @@ export function CommandList({ commands, onInsert, onRemove, onReplace }: Command
       {editing && current !== undefined && selected !== undefined && (
         <div className="command-editor" aria-label="コマンドの設定">
           <h4>{env.commands.get(current.code)?.meta.label ?? current.code}</h4>
-          <CommandForm command={current} onCommit={(params) => onReplace(selected, { ...current, params })} />
+          <CommandForm command={current} onCommit={(params) => commit(selected, current, params)} />
         </div>
       )}
     </div>
