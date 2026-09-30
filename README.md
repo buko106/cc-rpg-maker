@@ -15,6 +15,8 @@
 > プロジェクトの保存先は IndexedDB のほか、OPFS / 利用者が選んだフォルダ（File System Access API。一覧の「フォルダを選ぶ…」）も使えます。
 > 設計は [`docs/`](./docs/) にあります。
 
+**公開中：https://www.buko106.tokyo/cc-rpg-maker/**（ランディング、[エディタ](https://www.buko106.tokyo/cc-rpg-maker/editor/)、[デモ](https://www.buko106.tokyo/cc-rpg-maker/demo/)。`main` に入るたびに GitHub Pages へ自動で公開します）
+
 ## 作るもの
 
 ### エディタ（`apps/editor-ui`）
@@ -134,6 +136,7 @@ pnpm test:coverage  # 上記 + カバレッジ閾値（schema / core 90%、他�
 pnpm test:browser   # Playwright（Chromium。E2E）。プレイヤー（demo 付き）とエディタをビルドして配信する
 pnpm demo           # デモゲームをビルドして http://127.0.0.1:4173/ で配信（矢印/WASD で移動、Z/Enter/Space で決定）
 pnpm editor         # エディタをビルドして http://127.0.0.1:4174/ で配信（プロジェクトはブラウザの IndexedDB に保存）
+pnpm site           # 公開するサイト（ランディング + editor/ + demo/）をビルドして http://127.0.0.1:4175/ で配信
 pnpm lint:deps      # 依存ルール検査（dependency-cruiser + package.json 検査）
 ```
 
