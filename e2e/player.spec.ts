@@ -11,6 +11,7 @@ interface State {
   scene: { kind: string; screen?: string; cursor?: number; quantity?: number; confirm?: { kind: string; slot: number; cursor: number } };
   map: { mapId: string; name: string; player: { x: number; y: number; moving: boolean } };
   message: { open: boolean; text: string };
+  interpreters: unknown[];
   variables: Record<string, number>;
   switches: Record<string, boolean>;
   party: { gold: number; items: Record<string, number> };
