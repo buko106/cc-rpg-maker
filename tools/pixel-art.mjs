@@ -75,6 +75,62 @@ export const lcg = (seed) => {
 
 export const shade = ([r, g, b], d) => [r + d, g + d, b + d].map((v) => Math.max(0, Math.min(255, v)));
 
+// ── 描き足し・合成 ────────────────────────────────────────────────────
+/** `image()` に楕円・線・左右対称の描画を足したもの。 */
+export function canvas(w, h) {
+  const img = image(w, h);
+  const ellipse = (cx, cy, rx, ry, c) => {
+    for (let j = -ry; j <= ry; j++) for (let i = -rx; i <= rx; i++) if ((i * i) / (rx * rx || 1) + (j * j) / (ry * ry || 1) <= 1) img.set(cx + i, cy + j, c);
+  };
+  const line = (x0, y0, x1, y1, c, r = 0) => {
+    const n = Math.max(Math.abs(x1 - x0), Math.abs(y1 - y0), 1);
+    for (let i = 0; i <= n; i++) {
+      const x = x0 + ((x1 - x0) * i) / n;
+      const y = y0 + ((y1 - y0) * i) / n;
+      if (r === 0) img.set(x, y, c);
+      else img.disc(Math.round(x), Math.round(y), r, c);
+    }
+  };
+  /** 左右対称に点を打つ（`x` と `w - 1 - x`）。 */
+  const sym = (x, y, c) => {
+    img.set(x, y, c);
+    img.set(w - 1 - x, y, c);
+  };
+  const symRect = (x, y, rw, rh, c) => {
+    img.rect(x, y, rw, rh, c);
+    img.rect(w - x - rw, y, rw, rh, c);
+  };
+  return { ...img, ellipse, line, sym, symRect };
+}
+
+/** `src` を `dst` の (dx, dy) に重ねる（透明な画素は飛ばす）。 */
+export function blit(dst, src, dx, dy) {
+  for (let y = 0; y < src.height; y++) {
+    for (let x = 0; x < src.width; x++) {
+      const c = src.get(x, y);
+      if (c[3] > 0) dst.set(dx + x, dy + y, c);
+    }
+  }
+}
+
+/** 最近傍で `k` 倍に拡大する（戦闘画面の敵の絵）。 */
+export function scale(src, k) {
+  const out = image(src.width * k, src.height * k);
+  for (let y = 0; y < out.height; y++) for (let x = 0; x < out.width; x++) {
+    const c = src.get(Math.floor(x / k), Math.floor(y / k));
+    if (c[3] > 0) out.set(x, y, c);
+  }
+  return out;
+}
+
+/** キャラクターを `perRow` 体ずつ並べたシート（1 体 = 3 パターン × 4 方向）。 */
+export function sheet(perRow, chars) {
+  const rows = Math.ceil(chars.length / perRow);
+  const out = image(TILE * 3 * perRow, TILE * 4 * rows);
+  chars.forEach((ch, i) => blit(out, ch, (i % perRow) * TILE * 3, Math.floor(i / perRow) * TILE * 4));
+  return out;
+}
+
 // ── キャラクターシート：3 パターン × 4 方向（下・左・右・上）、コマは 32x32 ─────
 export function character({ shirt, hair, skin }) {
   const img = image(TILE * 3, TILE * 4);
