@@ -1,0 +1,199 @@
+{
+  "formatVersion": 1,
+  "meta": {
+    "id": "mansion",
+    "title": "デモ：謎解きの館",
+    "createdAt": "2026-10-01T00:00:00Z",
+    "updatedAt": "2026-10-01T00:00:00Z"
+  },
+  "system": {
+    "startMap": "map_hall",
+    "startX": 6,
+    "startY": 7,
+    "initialParty": [
+      "actor_hero"
+    ],
+    "tileSize": 32,
+    "screen": {
+      "width": 416,
+      "height": 320
+    },
+    "bgm": {},
+    "terms": {
+      "newGame": "ニューゲーム"
+    }
+  },
+  "maps": {
+    "map_hall": {
+      "id": "map_hall",
+      "name": "玄関ホール",
+      "order": 0
+    },
+    "map_study": {
+      "id": "map_study",
+      "name": "書斎",
+      "order": 1
+    },
+    "map_dining": {
+      "id": "map_dining",
+      "name": "食堂",
+      "order": 2
+    },
+    "map_bedroom": {
+      "id": "map_bedroom",
+      "name": "寝室",
+      "order": 3
+    }
+  },
+  "tilesets": {
+    "ts_mansion": {
+      "id": "ts_mansion",
+      "name": "館",
+      "image": {
+        "asset": "0e76104ef43f591b"
+      },
+      "passage": [15, 15, 15, 0, 0, 0, 15, 15, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+  },
+  "database": {
+    "actors": {
+      "actor_hero": {
+        "id": "actor_hero",
+        "name": "旅人",
+        "classId": "class_hero",
+        "initialLevel": 1,
+        "walk": {
+          "asset": "bb2e23b45d1f4d4d"
+        },
+        "equips": {}
+      }
+    },
+    "classes": {
+      "class_hero": {
+        "id": "class_hero",
+        "name": "旅人",
+        "skills": [],
+        "params": {
+          "mhp": {
+            "base": 100,
+            "growth": 2
+          },
+          "mmp": {
+            "base": 20,
+            "growth": 2
+          },
+          "atk": {
+            "base": 10,
+            "growth": 2
+          },
+          "def": {
+            "base": 10,
+            "growth": 2
+          },
+          "mat": {
+            "base": 10,
+            "growth": 2
+          },
+          "mdf": {
+            "base": 10,
+            "growth": 2
+          },
+          "agi": {
+            "base": 10,
+            "growth": 2
+          },
+          "luk": {
+            "base": 10,
+            "growth": 2
+          }
+        }
+      }
+    },
+    "skills": {},
+    "items": {
+      "key_bedroom": {
+        "id": "key_bedroom",
+        "name": "寝室の鍵",
+        "kind": "key",
+        "price": 0,
+        "effects": []
+      },
+      "key_front": {
+        "id": "key_front",
+        "name": "玄関の鍵",
+        "kind": "key",
+        "price": 0,
+        "effects": []
+      },
+      "key_letter": {
+        "id": "key_letter",
+        "name": "招待状",
+        "kind": "key",
+        "price": 0,
+        "effects": []
+      }
+    },
+    "enemies": {},
+    "troops": {},
+    "states": {},
+    "commonEvents": {}
+  },
+  "assets": {
+    "entries": {
+      "0e76104ef43f591b": {
+        "name": "mansion_tileset.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 3133,
+        "width": 800,
+        "height": 32
+      },
+      "bb2e23b45d1f4d4d": {
+        "name": "hero.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 660,
+        "width": 96,
+        "height": 128
+      },
+      "dfc0ad9ceba17b93": {
+        "name": "props.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 6767,
+        "width": 384,
+        "height": 512
+      },
+      "96d90b7571e30700": {
+        "name": "cat.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 1040,
+        "width": 96,
+        "height": 128
+      }
+    }
+  },
+  "switches": {
+    "sw_riddle": {
+      "name": "なぞなぞに正解した"
+    },
+    "sw_candles": {
+      "name": "ろうそくがそろった"
+    }
+  },
+  "variables": {
+    "var_stage": {
+      "name": "進み具合（ネコの手がかり）"
+    },
+    "var_candle": {
+      "name": "灯したろうそくの数"
+    },
+    "var_code": {
+      "name": "金庫に入れた番号"
+    },
+    "var_item": {
+      "name": "玄関で選んだ鍵（アイテム番号）"
+    }
+  }
+}

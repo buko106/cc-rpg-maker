@@ -60,7 +60,7 @@ export function createAssetSource(bytes: AssetBytesSource, manifest: AssetManife
 - `createHttpBytesSource(baseUrl, manifest, { fetch? })`：URL は `baseUrl/{id}.{ext}`。拡張子はマニフェストの `name` から（無ければ MIME から推測）。マニフェストに無い ID は通信せず `undefined`、404 も `undefined`、それ以外の失敗は reject。
 - `createAssetSource` の追加オプション：`decodeImage`（既定は `createImageBitmap`。Node のテストでは差し替える）。1 つで `maxCacheBytes` を超えるアセットはキャッシュしない。`verifyHash` の既定は false（`bootPlayer` も false。ID がそのままファイル名なので、エディタ側の取り込み時に検証する）。**pin（`preload` したものを退避させない）は未実装**。
 - 契約テスト：`assetBytesSourceContract(name, make)` の `make` は `{ source, entries, missingId }` を返す。
-- デモ用アセット（`fixtures/projects/v1/demo/assets/`・`fixtures/projects/v1/maze/assets/`・`fixtures/projects/v1/tower/assets/`）は `tools/make-demo-assets.mjs`・`tools/make-maze-demo.mjs`・`tools/make-tower-demo.mjs` で生成した PNG（バトルタワーの戦闘 BGM は、はじまりの村の WAV と同じもの）。ファイル名が内容ハッシュと一致することは `apps/player/src/demo-fixture.test.ts` で検証している。
+- デモ用アセット（`fixtures/projects/v1/demo/assets/`・`fixtures/projects/v1/maze/assets/`・`fixtures/projects/v1/tower/assets/`・`fixtures/projects/v1/mansion/assets/`）は `tools/make-demo-assets.mjs`・`tools/make-maze-demo.mjs`・`tools/make-tower-demo.mjs`・`tools/make-mansion-demo.mjs` で生成した PNG（バトルタワーの戦闘 BGM と謎解きの館のネコは、はじまりの村のものと同じ）。ファイル名が内容ハッシュと一致することは `apps/player/src/demo-fixture.test.ts` で検証している。
 
 ## 実装メモ（M5 で確定した点）
 - **追加**：`createZipBytesSource(zip: Blob)`（ZIP 内の `assets/<AssetId>.<ext>` を読む。store と deflate に対応。`DecompressionStream`）と、その下地の `readZip` / `writeZip`（無圧縮の ZIP を作る。M6 のエクスポートで使う）、`createOpfsBytesSource(dir)`（`<AssetId>.<ext>` を走査して読む。呼び出しのたびに走査するので、書き足したファイルがすぐ見える）。`crc32` も公開。

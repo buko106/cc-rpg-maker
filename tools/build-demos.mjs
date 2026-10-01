@@ -44,6 +44,14 @@ export const DEMOS = [
     description: "各階の番人を倒して塔の屋上を目指す。ゴブリン、毒の大グモ、固いゴーレム、眠りの魔術師、そして炎の竜。途中で僧侶が仲間に。負けても入口から何度でも挑めます。",
     tags: ["戦闘", "ボス", "仲間", "スキル"],
   },
+  {
+    slug: "mansion",
+    project: "fixtures/projects/v1/mansion",
+    title: "謎解きの館",
+    image: "site/img/mansion.png",
+    description: "閉じこめられた古い館から脱出する。甲冑のなぞなぞ、順番どおりに灯すろうそく、4 けたの金庫、鍵選び。手がかりは館のあちこちに。困ったらネコに聞いてみて。",
+    tags: ["謎解き", "脱出", "戦闘なし"],
+  },
 ];
 
 const escape = (s) => s.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
