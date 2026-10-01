@@ -103,7 +103,7 @@ const eventRuntimeSchema = z.strictObject({
   ...characterShape,
   id: eventIdSchema,
   pageIndex: nonNegativeInt.nullable(),
-  trigger: z.enum(["action", "touch", "eventTouch", "autorun", "parallel"]).nullable(),
+  trigger: z.enum(["action", "touch", "eventTouch", "eventSight", "autorun", "parallel"]).nullable(),
   priority: z.enum(["below", "same", "above"]),
 });
 

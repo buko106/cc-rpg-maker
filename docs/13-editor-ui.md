@@ -83,7 +83,7 @@
 ## 実装メモ（イベント入力の手間を減らす）
 コマンドを 1 行ずつ組み立てるときの手間を減らした。文書の形式（`EventCommand` の平らな列）とインタプリタは変えていない。
 - **表示**：フォームのラベルを日本語に揃えた（出現条件・すり抜け・プライオリティ・オペランド など。`labels.ts`）。列挙の表示名は、値だけでは決まらないもの（`ControlVariables.op` の 代入（＝）/ 加算（＋）… と `ChangeParty.op` の 加える）をスキーマのメタデータ `.meta({ labels })` に持たせた。union の種類の見出しは、リテラルならその表示名（パーティ全員・キャンセルできない）、ID なら種類の名前（アクター）、ただの文字列なら「直接入力」。リテラルと列挙だけの union（`TransferPlayer.dir` の 向き | そのまま など）は 1 つの選択肢の一覧にまとめる。入力の問題は `conditions.0.id` ではなく「出現条件 1 ID：未設定です」のように出す（空のままの欄は「未設定です」）。
-- **トリガの表示名**：`touch` は「プレイヤーから接触」、`eventTouch` は「イベントから接触」（RPG ツクールと同じ呼び方。`labels.ts`）。
+- **トリガの表示名**：`touch` は「プレイヤーから接触」、`eventTouch` は「イベントから接触」、`eventSight` は「視界に入ったとき（イベントから接触を含む）」（RPG ツクールと同じ呼び方。`labels.ts`）。`sightRange` は「視界の長さ」、移動の `chase` は「追いかける（道を探す）」。
 - **分岐の行の見出し**：`ChoiceBranch` の行は、分岐の開始行のコマンドの `meta.branchLabel`（03）で「[はい] のとき」「勝ったとき / 逃げたとき / 負けたとき」と出す（開始行は `blockOwner`）。スイッチ・変数は、1 行表示でも名前があれば名前で出す（`ControlSwitches` / `ControlVariables` / `ConditionalBranch`）。
 - **有効な初期値**：スキーマのメタデータ `.meta({ initial })` を、新しく作るときの初期値に使う（`.default()` より優先。検証には影響しない）。選択肢は「はい / いいえ」、スイッチの操作・条件分岐・出現条件のスイッチ/セルフスイッチは ON。条件分岐の種類は スイッチ / 変数 / 式 の順にし、既定をスイッチの条件にした。
 - **追加を 1 手に**：コマンドを追加すると設定のフォームが開き、最初の欄にフォーカスが移る（文字の欄は中身を選択）。「コマンドの追加」の上の欄で名前・分類を絞り込み、Enter で先頭を追加する（IME の確定の Enter では追加しない）。追加したコマンドは「最近使ったもの」として上に出る（`EditorUiState.recentCommands`、6 件。文書には保存しない）。
@@ -115,7 +115,7 @@
 
 ## 実装メモ（サンプルと、編集データの ZIP）
 デモのゲームを、エディタで中身を見て作り変えられるサンプルにした。編集データの ZIP は project-store の `exportZip` / `importZip`（10）をそのまま使う。
-- **サンプルの同梱**：エディタのビルド（`scripts/build-web.mjs`）が、`tools/build-demos.mjs` の `DEMOS`（はじまりの村・地下迷宮・バトルタワー・謎解きの館・おばけ屋敷の追いかけっこ。デモを選ぶページと同じ一覧・タイトル・説明・タグ・画面写真）の編集データを `samples/<id>/`（`fixtures/projects/v1/<name>` の project.json + maps/ + assets/ をそのまま）に、画面写真を `samples/<id>.png` に置き、一覧 `samples/index.json`（id・タイトル・説明・タグ・画面写真・ファイルの一覧）を書く。サイト（`tools/build-site.mjs`）では `editor/samples/` になる。
+- **サンプルの同梱**：エディタのビルド（`scripts/build-web.mjs`）が、`tools/build-demos.mjs` の `DEMOS`（はじまりの村・地下迷宮・バトルタワー・謎解きの館・おばけ屋敷の追いかけっこ・忍び込み。デモを選ぶページと同じ一覧・タイトル・説明・タグ・画面写真）の編集データを `samples/<id>/`（`fixtures/projects/v1/<name>` の project.json + maps/ + assets/ をそのまま）に、画面写真を `samples/<id>.png` に置き、一覧 `samples/index.json`（id・タイトル・説明・タグ・画面写真・ファイルの一覧）を書く。サイト（`tools/build-site.mjs`）では `editor/samples/` になる。
 - **`EditorEnv`**：`listSamples(): Promise<ProjectSample[]>`（一覧。無ければ空）と `loadSample(id)`（編集データを `importZip` で読める ZIP のバイト列にして返す）を足した。ブラウザでは `createSampleSource("samples/")`（`browser-env.ts`）が、`index.json` を取り（404 ならサンプルは無い。失敗したら次に呼んだときに取り直す）、サンプルのファイルを取って `writeZip` でまとめる。取り込みは UI が `repo.importZip` で行うので、保存先（IndexedDB / OPFS / 選んだフォルダ）を選ばない。
 - **プロジェクト一覧**（`ProjectList`）：「サンプルから作る」（画面写真・タイトル・説明・タグのカード。「このサンプルから作る」で取り込んで、そのまま開く。サンプルが無ければ節ごと出さない）、「ZIP から読み込む…」（ファイルを選ぶと `importZip` で新しいプロジェクトにして開く）、プロジェクトごとの「ZIP」（`exportZip` の結果を `<タイトル>.zip` で `saveFile`）。取り込みは新しい ID になるので、同じサンプルを何度取り込んでもよい。取り込み中はほかの取り込みを押せない。失敗は理由（ZIP の中身の問題なら最初の 1 つ）を出し、一覧に留まる。
 - **テスト**：`samples.test.tsx`（すべてのデモの fixture を ZIP にして取り込むと、マップ・アセットごと同じ内容の新しいプロジェクトとして開く。サンプルが無いとき・読めないとき。ZIP の書き出し → 読み込み、壊れた ZIP、書き出しの失敗。`createSampleSource` の一覧・ZIP・404・欠けたファイル・取り直し）、`tools/build-site.test.ts`（`editor/samples/` に全デモの編集データがある）、E2E `e2e/samples.spec.ts`（画面写真つきで並ぶ → 地下迷宮から作ってテストプレイで第 1 の間に立つ。はじまりの村から作って ZIP に書き出し、別実装の unzip で中身を確かめて、読み込み直す）。ヘッドレスの Chromium は ASCII 以外のダウンロードのファイル名を "download" にするので、E2E ではファイル名を確かめない。

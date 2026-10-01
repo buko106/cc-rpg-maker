@@ -50,7 +50,7 @@ function eventPageArb(refs: { switches: string[]; variables: string[] }): fc.Arb
     {
       conditions: fc.array(fc.oneof(...conditions), { maxLength: 3 }),
       graphic: fc.record({ asset: assetIdArb, index: smallInt, direction: directionArb }),
-      trigger: fc.constantFrom("action", "touch", "eventTouch", "autorun", "parallel" as const),
+      trigger: fc.constantFrom("action", "touch", "eventTouch", "eventSight", "autorun", "parallel" as const),
       through: fc.boolean(),
       priority: fc.constantFrom("below", "same", "above" as const),
       moveRoute: fc.record({

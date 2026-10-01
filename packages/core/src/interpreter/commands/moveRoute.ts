@@ -2,7 +2,7 @@ import { eventIdSchema, moveRouteSchema, moveStepSchema } from "@rpg/schema";
 import type { Direction, EventCommand, EventId, MoveRoute } from "@rpg/schema";
 import { z } from "zod";
 import { warn } from "../../effects.js";
-import { canPass, DIRECTION_VECTOR, moveCharacter } from "../../map/index.js";
+import { canPass, chaseDirection, DIRECTION_VECTOR, moveCharacter, startsOnEventTouch } from "../../map/index.js";
 import type { PassabilityCtx } from "../../map/index.js";
 import type { Character, EventRuntime, GameState } from "../../state.js";
 import { defineCommand } from "../handler.js";
@@ -32,26 +32,33 @@ function withCharacter(state: GameState, who: string, ch: Character): GameState 
   return ev === undefined ? state : { ...state, map: { ...state.map, events: { ...state.map.events, [id]: { ...ev, ...ch } } } };
 }
 
-/** 歩む方向：`toward` / `away` はプレイヤーとの位置関係で（大きい軸の側）、`random` は共有の乱数から決める。 */
-function pickDirection(dir: Direction | "random" | "toward" | "away", who: string, ch: Character, c: CommandCtx): Direction {
+/**
+ * 歩む方向：`toward` / `away` はプレイヤーとの位置関係で（大きい軸の側）、`chase` は通れる道をたどる最短経路の最初の 1 歩
+ * （たどり着けないときは `toward` と同じ）、`random` は共有の乱数から決める。
+ */
+function pickDirection(dir: Direction | "random" | "toward" | "away" | "chase", who: string, ch: Character, c: CommandCtx, pass: PassabilityCtx): Direction {
   if (dir === "random") return (["down", "left", "right", "up"] as const)[c.rng.int(0, 3)]!;
-  if (dir !== "toward" && dir !== "away") return dir;
+  if (dir !== "toward" && dir !== "away" && dir !== "chase") return dir;
   const p = c.state.map.player;
   const dx = p.x - ch.x;
   const dy = p.y - ch.y;
   if (who === "player" || (dx === 0 && dy === 0)) return ch.direction;
+  if (dir === "chase") {
+    const path = chaseDirection(ch, p, pass);
+    if (path !== undefined) return path;
+  }
   const toward: Direction = Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? "right" : "left") : dy > 0 ? "down" : "up";
-  return dir === "toward" ? toward : ({ up: "down", down: "up", left: "right", right: "left" } as const)[toward];
+  return dir === "away" ? ({ up: "down", down: "up", left: "right", right: "left" } as const)[toward] : toward;
 }
 
 /**
- * 「イベントから接触」（`eventTouch`）のイベントが、`dir` へ歩むとプレイヤーの居るタイルに入るところか。
+ * 「イベントから接触」（`eventTouch` / `eventSight`）のイベントが、`dir` へ歩むとプレイヤーの居るタイルに入るところか。
  * 通常プライオリティのイベントだけ。プレイヤーが居なければ進めるとき（壁越しではない）に限る。`through` でも触れる。
  */
 function reachesPlayer(state: GameState, who: string, dir: Direction, ctx: PassabilityCtx): EventRuntime | undefined {
   if (who === "player" || !Object.hasOwn(state.map.events, who)) return undefined;
   const ev = state.map.events[who as EventId]!;
-  if (ev.pageIndex === null || ev.trigger !== "eventTouch" || ev.priority !== "same") return undefined;
+  if (ev.pageIndex === null || !startsOnEventTouch(ev.trigger) || ev.priority !== "same") return undefined;
   const { dx, dy } = DIRECTION_VECTOR[dir];
   const { player } = state.map;
   if (ev.x + dx !== player.x || ev.y + dy !== player.y) return undefined;
@@ -132,8 +139,8 @@ export const moveStep = defineCommand({
       case "move": {
         const map = c.project.map(c.state.map.mapId);
         if (map === undefined) return {};
-        const dir = pickDirection(step.dir, p.who, ch, c);
         const pass: PassabilityCtx = { map, tileset: c.project.tileset(map.tileset) ?? { id: "" as never, name: "", passage: [] }, events: c.state.map.events };
+        const dir = pickDirection(step.dir, p.who, ch, c, pass);
         // 「イベントから接触」のイベントは、プレイヤーに触れたらそのページを始める（入らずに、その場でプレイヤーの方を向く）
         const touching = reachesPlayer(c.state, p.who, dir, pass);
         let moved = touching === undefined ? moveCharacter(ch, dir, pass) : { ...ch, direction: dir };

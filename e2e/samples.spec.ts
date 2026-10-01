@@ -18,16 +18,17 @@ test.beforeEach(async ({ page }) => {
   await page.reload();
 });
 
-test("サンプル（はじまりの村・地下迷宮・バトルタワー・謎解きの館・おばけ屋敷の追いかけっこ）が画面写真つきで並び、地下迷宮から作るとテストプレイで遊べる", async ({ page }) => {
+test("サンプル（はじまりの村・地下迷宮・バトルタワー・謎解きの館・おばけ屋敷の追いかけっこ・忍び込み）が画面写真つきで並び、地下迷宮から作るとテストプレイで遊べる", async ({ page }) => {
   const samples = page.getByRole("list", { name: "サンプル" });
-  await expect(samples.getByRole("listitem")).toHaveCount(5);
+  await expect(samples.getByRole("listitem")).toHaveCount(6);
   await expect(samples.getByText("はじまりの村", { exact: true })).toBeVisible();
   await expect(samples.getByText("地下迷宮", { exact: true })).toBeVisible();
   await expect(samples.getByText("バトルタワー", { exact: true })).toBeVisible();
   await expect(samples.getByText("謎解きの館", { exact: true })).toBeVisible();
   await expect(samples.getByText("おばけ屋敷の追いかけっこ", { exact: true })).toBeVisible();
+  await expect(samples.getByText("忍び込み！月影の宝物庫", { exact: true })).toBeVisible();
   // 画面写真が読み込めている
-  await expect.poll(() => samples.locator("img").evaluateAll((imgs) => imgs.map((i) => (i as HTMLImageElement).naturalWidth > 0))).toEqual([true, true, true, true, true]);
+  await expect.poll(() => samples.locator("img").evaluateAll((imgs) => imgs.map((i) => (i as HTMLImageElement).naturalWidth > 0))).toEqual([true, true, true, true, true, true]);
 
   await page.getByRole("button", { name: "地下迷宮 のサンプルから作る" }).click();
   await expect(page.getByRole("application")).toBeVisible();

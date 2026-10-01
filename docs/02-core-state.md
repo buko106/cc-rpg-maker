@@ -139,7 +139,7 @@ export function canPass(map: MapData, tileset: Tileset, events: Record<EventId, 
                         ch: Character, dir: Direction): boolean;
 export function moveCharacter(ch: Character, dir: Direction, ctx: PassabilityCtx): Character;
 export function activePage(ev: MapEvent, state: GameState, mapId: MapId): EventPage | undefined;
-export function eventsToTrigger(state: GameState, ctx: Ctx, kind: "action"|"touch"|"eventTouch"|"autorun"|"parallel"): EventId[];
+export function eventsToTrigger(state: GameState, ctx: Ctx, kind: "action"|"touch"|"eventTouch"|"eventSight"|"autorun"|"parallel"): EventId[];
 ```
 
 ### Snapshot
@@ -185,7 +185,7 @@ export const snapshotMigrations: readonly { from: number; to: number; migrate(s:
 - **`EventRuntime`** = `Character` + `id` / `pageIndex`（無効なら `null`）/ `trigger` / `priority`。有効ページの内容（`through`・`graphic`・`direction`）を毎フレーム写す。ページが無効なイベントは衝突も起動もしない。
 - **場所移動**：`transfer` を予約し、次の `tick` で適用する。移動先が未ロードなら `requestMapData` を一度だけ発行して待つ。`initialState` も開始マップが未ロードなら開始位置への場所移動を予約する。
 - **移動速度**：1 フレームに `2^speed / 256` タイル（speed 4 で 16 フレーム/タイル）。方向キーの同時押しは 下 > 左 > 右 > 上。
-- **イベント起動**：決定ボタンは「足元の（`same` 以外の）アクションイベント」→「目の前の `same` のアクションイベント」の順。接触イベント（`touch` と `eventTouch`）は、`same` は突き当たったとき、それ以外は足元に到着したときに起動する。`eventTouch` の `same` のイベントは、移動ルートでプレイヤーのタイルへ進もうとしたときにも起動する（03 の `MoveStep`）。自動実行は通常のインタプリタが動いていないときに起動し、ページが有効な間は繰り返す。並列処理は有効ページごとに 1 つ起動し、ページが無効になると止まる。
+- **イベント起動**：決定ボタンは「足元の（`same` 以外の）アクションイベント」→「目の前の `same` のアクションイベント」の順。接触イベント（`touch` と `eventTouch`・`eventSight`）は、`same` は突き当たったとき、それ以外は足元に到着したときに起動する。`eventTouch`・`eventSight` の `same` のイベントは、移動ルートでプレイヤーのタイルへ進もうとしたときにも起動する（03 の `MoveStep`）。`eventSight` は、さらに視界にプレイヤーが入ったときにも起動する（毎フレームの「移動の補間」のあと。03）。自動実行は通常のインタプリタが動いていないときに起動し、ページが有効な間は繰り返す。並列処理は有効ページごとに 1 つ起動し、ページが無効になると止まる。
 - **`Snapshot`**：「一時状態」= 移動の補間中の位置（`realX/realY/moving`）。`toSnapshot` は目的のタイルに確定させて保存する（`stripTransient`）。`fromSnapshot` は zod で構造を検証し、壊れていれば `Err`。マイグレーションは `migrateSnapshot(snap, version, target?, registry?)`。
 - **`Random`**：xoshiro128**（参照実装の既知ベクトルで検証）。`fork(label)` は元のシードとラベルだけで決まる。
 - `ProjectView` は `createProjectView(project, maps)` で作れる。`maps` は参照で保持され、後から追加すれば遅延ロードの完了として反映される。`createCtx(view)` は組み込みコマンドと式関数を登録済みの `Ctx` を返す。

@@ -23,7 +23,7 @@ export const pageConditionSchema = z.discriminatedUnion("kind", [
 export type PageCondition = z.infer<typeof pageConditionSchema>;
 
 export const moveStepSchema = z.discriminatedUnion("kind", [
-  z.strictObject({ kind: z.literal("move"), dir: z.union([directionSchema, z.enum(["random", "toward", "away"])]) }),
+  z.strictObject({ kind: z.literal("move"), dir: z.union([directionSchema, z.enum(["random", "toward", "away", "chase"])]) }),
   z.strictObject({ kind: z.literal("turn"), dir: directionSchema }),
   z.strictObject({ kind: z.literal("wait"), frames: nonNegativeInt }),
   z.strictObject({ kind: z.literal("speed"), value: z.number().int().min(1).max(6) }),
@@ -44,8 +44,11 @@ export const eventPageSchema = z.strictObject({
   /**
    * いつ始まるか。`touch` はプレイヤーから触れたとき（突き当たる・上に乗る）、`eventTouch` はそれに加えて、
    * このイベント（通常プライオリティ）が移動ルートでプレイヤーの居るタイルへ進もうとしたとき（向こうから触れてきたとき）。
+   * `eventSight` は `eventTouch` に加えて、プレイヤーが `sightRange` タイル以内の正面に見えたとき（見張りの視界）。
    */
-  trigger: z.enum(["action", "touch", "eventTouch", "autorun", "parallel"]),
+  trigger: z.enum(["action", "touch", "eventTouch", "eventSight", "autorun", "parallel"]),
+  /** `eventSight` の視界の長さ（タイル数、既定 4）。向いている方向の直線で、通れないタイル・イベントがあるとそこでさえぎられる。 */
+  sightRange: z.number().int().min(1).max(20).optional(),
   through: z.boolean(),
   priority: z.enum(["below", "same", "above"]),
   moveRoute: moveRouteSchema.optional(),

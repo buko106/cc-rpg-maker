@@ -20,8 +20,11 @@ function holds(cond: PageCondition, state: GameState, mapId: MapId, eventId: Eve
   }
 }
 
-/** プレイヤーから触れたときに始まるトリガか（`touch` と、向こうからも触れてくる `eventTouch`）。 */
-export const startsOnPlayerTouch = (trigger: EventPage["trigger"] | null): boolean => trigger === "touch" || trigger === "eventTouch";
+/** プレイヤーから触れたときに始まるトリガか（`touch` と、向こうからも触れてくる `eventTouch` / `eventSight`）。 */
+export const startsOnPlayerTouch = (trigger: EventPage["trigger"] | null): boolean => trigger === "touch" || startsOnEventTouch(trigger);
+
+/** 向こう（イベント）から触れてきたときにも始まるトリガか（`eventTouch` と、視界のある `eventSight`）。 */
+export const startsOnEventTouch = (trigger: EventPage["trigger"] | null): boolean => trigger === "eventTouch" || trigger === "eventSight";
 
 /** 現在有効なページの番号。後ろのページほど優先され、どれも満たさなければ `undefined`。 */
 export function activePageIndex(ev: MapEvent, state: GameState, mapId: MapId): number | undefined {
