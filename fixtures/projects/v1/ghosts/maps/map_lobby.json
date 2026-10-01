@@ -1,0 +1,1162 @@
+{
+  "id": "map_lobby",
+  "width": 13,
+  "height": 10,
+  "tileset": "ts_ghosts",
+  "layers": [
+    {
+      "name": "ground",
+      "tiles": [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 12, 15, 6, 9, 16, 9, 6, 17, 12, 6, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 1, 1, 1, 1, 4, 4, 4, 1, 1, 1, 1, 5, 5, 1, 1, 1, 1, 4, 4, 4, 1, 1, 1, 1, 5, 5, 1, 1, 1, 1, 4, 4, 4, 1, 1, 1, 1, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+    },
+    {
+      "name": "objects",
+      "tiles": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+  ],
+  "events": {
+    "ev_intro": {
+      "id": "ev_intro",
+      "name": "はじまり",
+      "x": 0,
+      "y": 9,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "autorun",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "古いお屋敷の 夜。\nおばけの 子どもたちが 部屋じゅうを 逃げまわって いる。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "管理人の じいさんが あなたを 呼んでいる。\n（まんなかの じいさんに 話しかけてみよう）",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSelfSwitch",
+              "params": {
+                "key": "A",
+                "value": true
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "selfSwitch",
+              "key": "A",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "commands": []
+        }
+      ]
+    },
+    "ev_keeper": {
+      "id": "ev_keeper",
+      "name": "管理人",
+      "x": 6,
+      "y": 5,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "39354ce1d395a47e",
+            "index": 4,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おお、よく来てくれた！\nおばけの 子らが 夜になると 逃げまわって こまって おる。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "あそびかたを 聞くかね？",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "聞く",
+                  "いや、いい"
+                ],
+                "cancel": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おばけに ぶつかると、つかまえられる。\n制限時間の 間に、ぜんいん つかまえれば クリアだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おばけは あなたから 逃げていく。\nすみっこや 家具の かげに 追いこもう！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "のこり時間は 画面の 右上に 出ている。\n階の どこかに ある くつを 拾うと、足が はやくなるぞ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "variable",
+              "id": "var_cleared",
+              "op": ">=",
+              "value": 1
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "39354ce1d395a47e",
+            "index": 4,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おみごと！ 1かいは すっかり しずかに なった。\n奥の 2の扉が 開いたぞ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "あそびかたを 聞くかね？",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "聞く",
+                  "いや、いい"
+                ],
+                "cancel": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おばけに ぶつかると、つかまえられる。\n制限時間の 間に、ぜんいん つかまえれば クリアだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おばけは あなたから 逃げていく。\nすみっこや 家具の かげに 追いこもう！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "のこり時間は 画面の 右上に 出ている。\n階の どこかに ある くつを 拾うと、足が はやくなるぞ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "variable",
+              "id": "var_cleared",
+              "op": ">=",
+              "value": 2
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "39354ce1d395a47e",
+            "index": 4,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "さすがじゃ！ 次は 地下の 3の扉へ。\nちか室の おばけは すばしこいぞ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "あそびかたを 聞くかね？",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "聞く",
+                  "いや、いい"
+                ],
+                "cancel": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おばけに ぶつかると、つかまえられる。\n制限時間の 間に、ぜんいん つかまえれば クリアだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おばけは あなたから 逃げていく。\nすみっこや 家具の かげに 追いこもう！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "のこり時間は 画面の 右上に 出ている。\n階の どこかに ある くつを 拾うと、足が はやくなるぞ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "variable",
+              "id": "var_cleared",
+              "op": ">=",
+              "value": 3
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "39354ce1d395a47e",
+            "index": 4,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "すべての おばけを つかまえて くれた！\nもっと はやく つかまえられるか、きろくに ちょうせんじゃ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "あそびかたを 聞くかね？",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "聞く",
+                  "いや、いい"
+                ],
+                "cancel": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おばけに ぶつかると、つかまえられる。\n制限時間の 間に、ぜんいん つかまえれば クリアだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おばけは あなたから 逃げていく。\nすみっこや 家具の かげに 追いこもう！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "のこり時間は 画面の 右上に 出ている。\n階の どこかに ある くつを 拾うと、足が はやくなるぞ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_board": {
+      "id": "ev_board",
+      "name": "きろく",
+      "x": 1,
+      "y": 2,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "【ベストきろく】\n（つかまえたとき、のこり時間が 多いほど いい）",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_best1",
+                  "op": ">=",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "1かい：のこり \\V[var_best1]びょう",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "1かい：まだ",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_best2",
+                  "op": ">=",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "2かい：のこり \\V[var_best2]びょう",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "2かい：まだ",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_best3",
+                  "op": ">=",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "3かい：のこり \\V[var_best3]びょう",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "3かい：まだ",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_door_1": {
+      "id": "ev_door_1",
+      "name": "1かいの扉",
+      "x": 3,
+      "y": 1,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]1かい：リビング\\C[0]\nおばけ 4ひき・制限時間 50びょう",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_best1",
+                  "op": ">=",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ベストきろく：のこり \\V[var_best1]びょう",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "はじめる？",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "はじめる",
+                  "やめておく"
+                ],
+                "cancel": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_g1_1",
+                  "sw_g1_2",
+                  "sw_g1_3",
+                  "sw_g1_4",
+                  "sw_g2_1",
+                  "sw_g2_2",
+                  "sw_g2_3",
+                  "sw_g2_4",
+                  "sw_g2_5",
+                  "sw_g3_1",
+                  "sw_g3_2",
+                  "sw_g3_3",
+                  "sw_g3_4",
+                  "sw_g3_5",
+                  "sw_g3_6",
+                  "sw_ready",
+                  "sw_playing",
+                  "sw_clear",
+                  "sw_timeup"
+                ],
+                "value": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_ready"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_left"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "constant",
+                  "value": 4
+                }
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_time"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "constant",
+                  "value": 50
+                }
+              },
+              "indent": 1
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_floor1",
+                "x": 14,
+                "y": 10,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_door_2": {
+      "id": "ev_door_2",
+      "name": "2かいの扉",
+      "x": 6,
+      "y": 1,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_cleared",
+                  "op": "<=",
+                  "value": 0
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "2かいへの 扉には かぎが かかっている。\n\\C[2]1かい\\C[0]の おばけを ぜんいん つかまえると 開くようだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]2かい：ろうか\\C[0]\nおばけ 5ひき・制限時間 60びょう",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_best2",
+                  "op": ">=",
+                  "value": 1
+                }
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ベストきろく：のこり \\V[var_best2]びょう",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "はじめる？",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "はじめる",
+                  "やめておく"
+                ],
+                "cancel": 1
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_g1_1",
+                  "sw_g1_2",
+                  "sw_g1_3",
+                  "sw_g1_4",
+                  "sw_g2_1",
+                  "sw_g2_2",
+                  "sw_g2_3",
+                  "sw_g2_4",
+                  "sw_g2_5",
+                  "sw_g3_1",
+                  "sw_g3_2",
+                  "sw_g3_3",
+                  "sw_g3_4",
+                  "sw_g3_5",
+                  "sw_g3_6",
+                  "sw_ready",
+                  "sw_playing",
+                  "sw_clear",
+                  "sw_timeup"
+                ],
+                "value": false
+              },
+              "indent": 2
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_ready"
+                ],
+                "value": true
+              },
+              "indent": 2
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_left"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "constant",
+                  "value": 5
+                }
+              },
+              "indent": 2
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_time"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "constant",
+                  "value": 60
+                }
+              },
+              "indent": 2
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_floor2",
+                "x": 18,
+                "y": 9,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_door_3": {
+      "id": "ev_door_3",
+      "name": "3かいの扉",
+      "x": 9,
+      "y": 1,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_cleared",
+                  "op": "<=",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "3かいへの 扉には かぎが かかっている。\n\\C[2]2かい\\C[0]の おばけを ぜんいん つかまえると 開くようだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]3かい：ちか室\\C[0]\nおばけ 6ひき・制限時間 75びょう",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_best3",
+                  "op": ">=",
+                  "value": 1
+                }
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ベストきろく：のこり \\V[var_best3]びょう",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "はじめる？",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "はじめる",
+                  "やめておく"
+                ],
+                "cancel": 1
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_g1_1",
+                  "sw_g1_2",
+                  "sw_g1_3",
+                  "sw_g1_4",
+                  "sw_g2_1",
+                  "sw_g2_2",
+                  "sw_g2_3",
+                  "sw_g2_4",
+                  "sw_g2_5",
+                  "sw_g3_1",
+                  "sw_g3_2",
+                  "sw_g3_3",
+                  "sw_g3_4",
+                  "sw_g3_5",
+                  "sw_g3_6",
+                  "sw_ready",
+                  "sw_playing",
+                  "sw_clear",
+                  "sw_timeup"
+                ],
+                "value": false
+              },
+              "indent": 2
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_ready"
+                ],
+                "value": true
+              },
+              "indent": 2
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_left"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "constant",
+                  "value": 6
+                }
+              },
+              "indent": 2
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_time"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "constant",
+                  "value": 75
+                }
+              },
+              "indent": 2
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_floor3",
+                "x": 18,
+                "y": 14,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

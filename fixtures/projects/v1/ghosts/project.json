@@ -1,0 +1,234 @@
+{
+  "formatVersion": 1,
+  "meta": {
+    "id": "ghosts",
+    "title": "デモ：おばけ屋敷の鬼ごっこ",
+    "createdAt": "2026-10-01T00:00:00Z",
+    "updatedAt": "2026-10-01T00:00:00Z"
+  },
+  "system": {
+    "startMap": "map_lobby",
+    "startX": 6,
+    "startY": 7,
+    "initialParty": [
+      "actor_hero"
+    ],
+    "tileSize": 32,
+    "screen": {
+      "width": 416,
+      "height": 320
+    },
+    "bgm": {},
+    "terms": {
+      "newGame": "ニューゲーム"
+    }
+  },
+  "maps": {
+    "map_lobby": {
+      "id": "map_lobby",
+      "name": "玄関ホール",
+      "order": 0
+    },
+    "map_floor1": {
+      "id": "map_floor1",
+      "name": "1かい：リビング",
+      "order": 1
+    },
+    "map_floor2": {
+      "id": "map_floor2",
+      "name": "2かい：ろうか",
+      "order": 2
+    },
+    "map_floor3": {
+      "id": "map_floor3",
+      "name": "3かい：ちか室",
+      "order": 3
+    }
+  },
+  "tilesets": {
+    "ts_ghosts": {
+      "id": "ts_ghosts",
+      "name": "おばけ屋敷",
+      "image": {
+        "asset": "b364e9b0d696e199"
+      },
+      "passage": [15, 15, 15, 15, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+  },
+  "database": {
+    "actors": {
+      "actor_hero": {
+        "id": "actor_hero",
+        "name": "鬼",
+        "classId": "class_hero",
+        "initialLevel": 1,
+        "walk": {
+          "asset": "bb2e23b45d1f4d4d"
+        },
+        "equips": {}
+      }
+    },
+    "classes": {
+      "class_hero": {
+        "id": "class_hero",
+        "name": "鬼",
+        "skills": [],
+        "params": {
+          "mhp": {
+            "base": 100,
+            "growth": 2
+          },
+          "mmp": {
+            "base": 20,
+            "growth": 2
+          },
+          "atk": {
+            "base": 10,
+            "growth": 2
+          },
+          "def": {
+            "base": 10,
+            "growth": 2
+          },
+          "mat": {
+            "base": 10,
+            "growth": 2
+          },
+          "mdf": {
+            "base": 10,
+            "growth": 2
+          },
+          "agi": {
+            "base": 10,
+            "growth": 2
+          },
+          "luk": {
+            "base": 10,
+            "growth": 2
+          }
+        }
+      }
+    },
+    "skills": {},
+    "items": {},
+    "enemies": {},
+    "troops": {},
+    "states": {},
+    "commonEvents": {}
+  },
+  "assets": {
+    "entries": {
+      "b364e9b0d696e199": {
+        "name": "ghosts_tileset.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 4075,
+        "width": 960,
+        "height": 32
+      },
+      "bb2e23b45d1f4d4d": {
+        "name": "hero.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 660,
+        "width": 96,
+        "height": 128
+      },
+      "39354ce1d395a47e": {
+        "name": "ghosts.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 6643,
+        "width": 480,
+        "height": 128
+      },
+      "787397abb65bcac4": {
+        "name": "props.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 661,
+        "width": 96,
+        "height": 128
+      }
+    }
+  },
+  "switches": {
+    "sw_ready": {
+      "name": "階のはじめ（よーい）"
+    },
+    "sw_playing": {
+      "name": "鬼ごっこ中"
+    },
+    "sw_clear": {
+      "name": "ぜんいんつかまえた"
+    },
+    "sw_timeup": {
+      "name": "時間切れ"
+    },
+    "sw_g1_1": {
+      "name": "1かいの 1ひき目をつかまえた"
+    },
+    "sw_g1_2": {
+      "name": "1かいの 2ひき目をつかまえた"
+    },
+    "sw_g1_3": {
+      "name": "1かいの 3ひき目をつかまえた"
+    },
+    "sw_g1_4": {
+      "name": "1かいの 4ひき目をつかまえた"
+    },
+    "sw_g2_1": {
+      "name": "2かいの 1ひき目をつかまえた"
+    },
+    "sw_g2_2": {
+      "name": "2かいの 2ひき目をつかまえた"
+    },
+    "sw_g2_3": {
+      "name": "2かいの 3ひき目をつかまえた"
+    },
+    "sw_g2_4": {
+      "name": "2かいの 4ひき目をつかまえた"
+    },
+    "sw_g2_5": {
+      "name": "2かいの 5ひき目をつかまえた"
+    },
+    "sw_g3_1": {
+      "name": "3かいの 1ひき目をつかまえた"
+    },
+    "sw_g3_2": {
+      "name": "3かいの 2ひき目をつかまえた"
+    },
+    "sw_g3_3": {
+      "name": "3かいの 3ひき目をつかまえた"
+    },
+    "sw_g3_4": {
+      "name": "3かいの 4ひき目をつかまえた"
+    },
+    "sw_g3_5": {
+      "name": "3かいの 5ひき目をつかまえた"
+    },
+    "sw_g3_6": {
+      "name": "3かいの 6ひき目をつかまえた"
+    }
+  },
+  "variables": {
+    "var_left": {
+      "name": "のこりのおばけ"
+    },
+    "var_time": {
+      "name": "のこり時間（秒）"
+    },
+    "var_cleared": {
+      "name": "クリアした階の数"
+    },
+    "var_best1": {
+      "name": "1かいのベスト（のこり秒）"
+    },
+    "var_best2": {
+      "name": "2かいのベスト（のこり秒）"
+    },
+    "var_best3": {
+      "name": "3かいのベスト（のこり秒）"
+    }
+  }
+}

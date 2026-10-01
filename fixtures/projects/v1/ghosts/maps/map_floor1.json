@@ -1,0 +1,1269 @@
+{
+  "id": "map_floor1",
+  "width": 19,
+  "height": 14,
+  "tileset": "ts_ghosts",
+  "layers": [
+    {
+      "name": "ground",
+      "tiles": [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 9, 6, 6, 12, 6, 6, 9, 6, 6, 12, 6, 6, 9, 6, 6, 12, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 6, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 6, 1, 6, 6, 6, 6, 6, 6, 5, 6, 6, 6, 6, 6, 6, 1, 6, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 6, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+    },
+    {
+      "name": "objects",
+      "tiles": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 18, 22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 22, 0, 0, 0, 0, 0, 0, 19, 18, 0, 0, 0, 0, 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+  ],
+  "events": {
+    "ev_ready": {
+      "id": "ev_ready",
+      "name": "よーい、スタート",
+      "x": 14,
+      "y": 10,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_ready",
+              "value": true
+            }
+          ],
+          "trigger": "autorun",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "SetMoveRoute",
+              "params": {
+                "target": "player",
+                "route": {
+                  "repeat": false,
+                  "skippable": false,
+                  "steps": [
+                    {
+                      "kind": "speed",
+                      "value": 4
+                    }
+                  ]
+                },
+                "wait": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]1かい：リビング\\C[0]\nおばけを ぜんいん つかまえよう！\n制限時間は 50びょう。よーい……",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_ready"
+                ],
+                "value": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_playing"
+                ],
+                "value": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlTimer",
+              "params": {
+                "op": "start",
+                "seconds": 50
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]スタート！\\C[0]",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_clock": {
+      "id": "ev_clock",
+      "name": "時計",
+      "x": 14,
+      "y": 10,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_playing",
+              "value": true
+            }
+          ],
+          "trigger": "parallel",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "Loop",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "Wait",
+              "params": {
+                "frames": 59
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_time"
+                ],
+                "op": "sub",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 1
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_time",
+                  "op": "<=",
+                  "value": 0
+                }
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_timeup"
+                ],
+                "value": true
+              },
+              "indent": 2
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_playing"
+                ],
+                "value": false
+              },
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "EndLoop",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_win": {
+      "id": "ev_win",
+      "name": "クリア",
+      "x": 14,
+      "y": 10,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_clear",
+              "value": true
+            }
+          ],
+          "trigger": "autorun",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]ぜんいん つかまえた！\\C[0]\nのこり \\V[var_time]びょう！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_time",
+                  "op": ">=",
+                  "value": 25
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]★★★\\C[0] すごい 足の はやさだ！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_time",
+                  "op": ">=",
+                  "value": 13
+                }
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]★★☆\\C[0] なかなか やるな！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 2
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]★☆☆\\C[0] ぎりぎり セーフ！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "v(\"var_time\") > v(\"var_best1\")"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]ベストきろく こうしん！\\C[0]",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_best1"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "expr",
+                  "expr": "v(\"var_time\")"
+                }
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_cleared",
+                  "op": "<=",
+                  "value": 0
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[3]2かいへの 扉が 開いた！\\C[0]",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_cleared"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "expr",
+                  "expr": "max(v(\"var_cleared\"), 1)"
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "SetMoveRoute",
+              "params": {
+                "target": "player",
+                "route": {
+                  "repeat": false,
+                  "skippable": false,
+                  "steps": [
+                    {
+                      "kind": "speed",
+                      "value": 4
+                    }
+                  ]
+                },
+                "wait": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_lobby",
+                "x": 3,
+                "y": 2,
+                "dir": "down",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_timeup": {
+      "id": "ev_timeup",
+      "name": "時間切れ",
+      "x": 14,
+      "y": 10,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_timeup",
+              "value": true
+            }
+          ],
+          "trigger": "autorun",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 255,
+                  "g": 255,
+                  "b": 255,
+                  "a": 0.6
+                },
+                "duration": 12
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]じかんぎれ！\\C[0]\nおばけは あと \\V[var_left]ひき 残っている。\nおばけたちは 逃げていった……",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_timeup"
+                ],
+                "value": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "SetMoveRoute",
+              "params": {
+                "target": "player",
+                "route": {
+                  "repeat": false,
+                  "skippable": false,
+                  "steps": [
+                    {
+                      "kind": "speed",
+                      "value": 4
+                    }
+                  ]
+                },
+                "wait": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_lobby",
+                "x": 3,
+                "y": 2,
+                "dir": "down",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_ghost_1": {
+      "id": "ev_ghost_1",
+      "name": "しろまる",
+      "x": 13,
+      "y": 6,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "39354ce1d395a47e",
+            "index": 0,
+            "direction": "down"
+          },
+          "commands": []
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_playing",
+              "value": true
+            }
+          ],
+          "trigger": "touch",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "39354ce1d395a47e",
+            "index": 0,
+            "direction": "down"
+          },
+          "moveRoute": {
+            "repeat": true,
+            "skippable": true,
+            "steps": [
+              {
+                "kind": "speed",
+                "value": 4
+              },
+              {
+                "kind": "move",
+                "dir": "away"
+              },
+              {
+                "kind": "move",
+                "dir": "random"
+              },
+              {
+                "kind": "move",
+                "dir": "away"
+              },
+              {
+                "kind": "move",
+                "dir": "random"
+              },
+              {
+                "kind": "move",
+                "dir": "random"
+              }
+            ]
+          },
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 255,
+                  "g": 230,
+                  "b": 250,
+                  "a": 0.55
+                },
+                "duration": 10
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_g1_1"
+                ],
+                "value": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_left"
+                ],
+                "op": "sub",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_left",
+                  "op": "<=",
+                  "value": 0
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_clear"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_playing"
+                ],
+                "value": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlTimer",
+              "params": {
+                "op": "stop"
+              },
+              "indent": 1
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[3]しろまる\\C[0]を つかまえた！\nのこり \\V[var_left]ひき",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_g1_1",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "commands": []
+        }
+      ]
+    },
+    "ev_ghost_2": {
+      "id": "ev_ghost_2",
+      "name": "ふわり",
+      "x": 1,
+      "y": 11,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "39354ce1d395a47e",
+            "index": 0,
+            "direction": "down"
+          },
+          "commands": []
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_playing",
+              "value": true
+            }
+          ],
+          "trigger": "touch",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "39354ce1d395a47e",
+            "index": 0,
+            "direction": "down"
+          },
+          "moveRoute": {
+            "repeat": true,
+            "skippable": true,
+            "steps": [
+              {
+                "kind": "speed",
+                "value": 4
+              },
+              {
+                "kind": "move",
+                "dir": "away"
+              },
+              {
+                "kind": "move",
+                "dir": "random"
+              },
+              {
+                "kind": "move",
+                "dir": "away"
+              },
+              {
+                "kind": "move",
+                "dir": "random"
+              },
+              {
+                "kind": "move",
+                "dir": "random"
+              }
+            ]
+          },
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 255,
+                  "g": 230,
+                  "b": 250,
+                  "a": 0.55
+                },
+                "duration": 10
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_g1_2"
+                ],
+                "value": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_left"
+                ],
+                "op": "sub",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_left",
+                  "op": "<=",
+                  "value": 0
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_clear"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_playing"
+                ],
+                "value": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlTimer",
+              "params": {
+                "op": "stop"
+              },
+              "indent": 1
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[3]ふわり\\C[0]を つかまえた！\nのこり \\V[var_left]ひき",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_g1_2",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "commands": []
+        }
+      ]
+    },
+    "ev_ghost_3": {
+      "id": "ev_ghost_3",
+      "name": "ももこ",
+      "x": 3,
+      "y": 4,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "39354ce1d395a47e",
+            "index": 2,
+            "direction": "down"
+          },
+          "commands": []
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_playing",
+              "value": true
+            }
+          ],
+          "trigger": "touch",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "39354ce1d395a47e",
+            "index": 2,
+            "direction": "down"
+          },
+          "moveRoute": {
+            "repeat": true,
+            "skippable": true,
+            "steps": [
+              {
+                "kind": "speed",
+                "value": 3
+              },
+              {
+                "kind": "move",
+                "dir": "away"
+              },
+              {
+                "kind": "wait",
+                "frames": 16
+              },
+              {
+                "kind": "move",
+                "dir": "random"
+              },
+              {
+                "kind": "move",
+                "dir": "random"
+              }
+            ]
+          },
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 255,
+                  "g": 230,
+                  "b": 250,
+                  "a": 0.55
+                },
+                "duration": 10
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_g1_3"
+                ],
+                "value": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_left"
+                ],
+                "op": "sub",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_left",
+                  "op": "<=",
+                  "value": 0
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_clear"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_playing"
+                ],
+                "value": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlTimer",
+              "params": {
+                "op": "stop"
+              },
+              "indent": 1
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[3]ももこ\\C[0]を つかまえた！\nのこり \\V[var_left]ひき",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_g1_3",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "commands": []
+        }
+      ]
+    },
+    "ev_ghost_4": {
+      "id": "ev_ghost_4",
+      "name": "あおすけ",
+      "x": 14,
+      "y": 2,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "39354ce1d395a47e",
+            "index": 1,
+            "direction": "down"
+          },
+          "commands": []
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_playing",
+              "value": true
+            }
+          ],
+          "trigger": "touch",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "39354ce1d395a47e",
+            "index": 1,
+            "direction": "down"
+          },
+          "moveRoute": {
+            "repeat": true,
+            "skippable": true,
+            "steps": [
+              {
+                "kind": "speed",
+                "value": 5
+              },
+              {
+                "kind": "move",
+                "dir": "away"
+              },
+              {
+                "kind": "move",
+                "dir": "away"
+              },
+              {
+                "kind": "move",
+                "dir": "random"
+              },
+              {
+                "kind": "move",
+                "dir": "random"
+              },
+              {
+                "kind": "wait",
+                "frames": 6
+              }
+            ]
+          },
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 255,
+                  "g": 230,
+                  "b": 250,
+                  "a": 0.55
+                },
+                "duration": 10
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_g1_4"
+                ],
+                "value": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_left"
+                ],
+                "op": "sub",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_left",
+                  "op": "<=",
+                  "value": 0
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_clear"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_playing"
+                ],
+                "value": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlTimer",
+              "params": {
+                "op": "stop"
+              },
+              "indent": 1
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[3]あおすけ\\C[0]を つかまえた！\nのこり \\V[var_left]ひき",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_g1_4",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "commands": []
+        }
+      ]
+    },
+    "ev_boots": {
+      "id": "ev_boots",
+      "name": "はやあしのくつ",
+      "x": 7,
+      "y": 9,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": true,
+          "priority": "below",
+          "graphic": {
+            "asset": "787397abb65bcac4",
+            "index": 0,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 255,
+                  "g": 240,
+                  "b": 160,
+                  "a": 0.5
+                },
+                "duration": 12
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]はやあしのくつ\\C[0]を 見つけた！\nこの階の 間、足が はやくなる！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "SetMoveRoute",
+              "params": {
+                "target": "player",
+                "route": {
+                  "repeat": false,
+                  "skippable": false,
+                  "steps": [
+                    {
+                      "kind": "speed",
+                      "value": 5
+                    }
+                  ]
+                },
+                "wait": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSelfSwitch",
+              "params": {
+                "key": "A",
+                "value": true
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "selfSwitch",
+              "key": "A",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "commands": []
+        }
+      ]
+    }
+  }
+}

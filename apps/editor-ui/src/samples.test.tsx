@@ -17,6 +17,7 @@ const SAMPLES = [
   { id: "maze", fixture: "maze", title: "地下迷宮" },
   { id: "tower", fixture: "tower", title: "バトルタワー" },
   { id: "mansion", fixture: "mansion", title: "謎解きの館" },
+  { id: "ghosts", fixture: "ghosts", title: "おばけ屋敷の鬼ごっこ" },
 ] as const;
 const dirOf = (fixture: string): string => join(FIXTURES_ROOT, "projects", "v1", fixture);
 const filesOf = (dir: string): string[] =>
