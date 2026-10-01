@@ -79,7 +79,7 @@
             {
               "code": "ShowText",
               "params": {
-                "text": "泉で 回復と 記録、よろず屋で 買い物、\nかかしで 腕だめしが できます。",
+                "text": "記録できるのは 1F の 泉だけ。\nよろず屋で 買い物、\nかかしで 腕だめしも できます。",
                 "position": "bottom",
                 "background": "window"
               },

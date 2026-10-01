@@ -27,6 +27,7 @@
         "loop": true
       }
     },
+    "menuSave": false,
     "terms": {
       "newGame": "ニューゲーム",
       "attack": "攻撃",
