@@ -37,6 +37,7 @@
 | 15 | [15-player-export.md](./15-player-export.md) | `@rpg/player` | 配布用シェルとエクスポータ |
 | 16 | [16-testing.md](./16-testing.md) | 全体 | テスト戦略、共通テストユーティリティ、契約テスト |
 | 17 | [17-milestones.md](./17-milestones.md) | 全体 | 実装順序、マイルストーン、各段階の完了条件 |
+| 18 | [18-dungeon-plugin.md](./18-dungeon-plugin.md) | `@rpg/plugin-dungeon`（検討中） | 不思議のダンジョンのプラグインと、そのために core に足す汎用の部品 |
 
 ## システム概要
 
