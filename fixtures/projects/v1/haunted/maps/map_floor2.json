@@ -1,0 +1,1585 @@
+{
+  "id": "map_floor2",
+  "width": 21,
+  "height": 13,
+  "tileset": "ts_haunted",
+  "layers": [
+    {
+      "name": "ground",
+      "tiles": [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 10, 7, 13, 7, 10, 7, 13, 7, 7, 31, 7, 7, 13, 7, 10, 7, 13, 7, 10, 5, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 5, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 5, 5, 7, 7, 2, 5, 7, 7, 7, 2, 5, 7, 5, 2, 7, 7, 7, 5, 2, 7, 7, 5, 5, 2, 2, 2, 5, 2, 2, 2, 2, 5, 2, 5, 2, 2, 2, 2, 5, 2, 2, 2, 5, 5, 2, 2, 2, 5, 2, 2, 2, 2, 5, 2, 5, 2, 2, 2, 2, 5, 2, 2, 2, 5, 5, 2, 2, 2, 5, 2, 2, 2, 2, 5, 2, 5, 2, 2, 2, 2, 5, 2, 2, 2, 5, 5, 2, 2, 2, 7, 7, 7, 7, 2, 7, 7, 7, 2, 7, 7, 7, 7, 2, 2, 2, 5, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 5, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 5, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+    },
+    {
+      "name": "objects",
+      "tiles": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 18, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+  ],
+  "events": {
+    "ev_dark": {
+      "id": "ev_dark",
+      "name": "暗がり",
+      "x": 0,
+      "y": 0,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "parallel",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "Loop",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "TintScreen",
+              "params": {
+                "color": {
+                  "r": 8,
+                  "g": 6,
+                  "b": 36,
+                  "a": 0.44
+                },
+                "duration": 0,
+                "wait": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "Wait",
+              "params": {
+                "frames": 60
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndLoop",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_exit": {
+      "id": "ev_exit",
+      "name": "入口の扉",
+      "x": 10,
+      "y": 1,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "玄関ホールに もどる？\n（拾った ろうそくは そのまま）",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "もどる",
+                  "もう少し さがす"
+                ],
+                "cancel": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_hall",
+                "x": 6,
+                "y": 2,
+                "dir": "down",
+                "fade": "black"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_candle_1": {
+      "id": "ev_candle_1",
+      "name": "ろうそく1",
+      "x": 1,
+      "y": 5,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": true,
+          "priority": "below",
+          "graphic": {
+            "asset": "6f854f8a7f70bbb4",
+            "index": 0,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ControlSelfSwitch",
+              "params": {
+                "key": "A",
+                "value": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_c2"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_total"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 255,
+                  "g": 220,
+                  "b": 150,
+                  "a": 0.45
+                },
+                "duration": 10
+              },
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_c2",
+                  "op": ">=",
+                  "value": 5
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]ろうそくを ぜんぶ 集めた！\\C[0]\n回廊の おばけたちが おとなしく なった。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_cleared"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "expr",
+                  "expr": "max(v(\"var_cleared\"), 2)"
+                }
+              },
+              "indent": 1
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_hall",
+                "x": 6,
+                "y": 2,
+                "dir": "down",
+                "fade": "black"
+              },
+              "indent": 1
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_left"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "expr",
+                  "expr": "5 - v(\"var_c2\")"
+                }
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ろうそくを 拾った！\n回廊の ろうそくは あと \\V[var_left]本。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "selfSwitch",
+              "key": "A",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "commands": []
+        }
+      ]
+    },
+    "ev_candle_2": {
+      "id": "ev_candle_2",
+      "name": "ろうそく2",
+      "x": 19,
+      "y": 5,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": true,
+          "priority": "below",
+          "graphic": {
+            "asset": "6f854f8a7f70bbb4",
+            "index": 0,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ControlSelfSwitch",
+              "params": {
+                "key": "A",
+                "value": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_c2"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_total"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 255,
+                  "g": 220,
+                  "b": 150,
+                  "a": 0.45
+                },
+                "duration": 10
+              },
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_c2",
+                  "op": ">=",
+                  "value": 5
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]ろうそくを ぜんぶ 集めた！\\C[0]\n回廊の おばけたちが おとなしく なった。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_cleared"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "expr",
+                  "expr": "max(v(\"var_cleared\"), 2)"
+                }
+              },
+              "indent": 1
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_hall",
+                "x": 6,
+                "y": 2,
+                "dir": "down",
+                "fade": "black"
+              },
+              "indent": 1
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_left"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "expr",
+                  "expr": "5 - v(\"var_c2\")"
+                }
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ろうそくを 拾った！\n回廊の ろうそくは あと \\V[var_left]本。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "selfSwitch",
+              "key": "A",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "commands": []
+        }
+      ]
+    },
+    "ev_candle_3": {
+      "id": "ev_candle_3",
+      "name": "ろうそく3",
+      "x": 7,
+      "y": 7,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": true,
+          "priority": "below",
+          "graphic": {
+            "asset": "6f854f8a7f70bbb4",
+            "index": 0,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ControlSelfSwitch",
+              "params": {
+                "key": "A",
+                "value": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_c2"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_total"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 255,
+                  "g": 220,
+                  "b": 150,
+                  "a": 0.45
+                },
+                "duration": 10
+              },
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_c2",
+                  "op": ">=",
+                  "value": 5
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]ろうそくを ぜんぶ 集めた！\\C[0]\n回廊の おばけたちが おとなしく なった。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_cleared"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "expr",
+                  "expr": "max(v(\"var_cleared\"), 2)"
+                }
+              },
+              "indent": 1
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_hall",
+                "x": 6,
+                "y": 2,
+                "dir": "down",
+                "fade": "black"
+              },
+              "indent": 1
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_left"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "expr",
+                  "expr": "5 - v(\"var_c2\")"
+                }
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ろうそくを 拾った！\n回廊の ろうそくは あと \\V[var_left]本。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "selfSwitch",
+              "key": "A",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "commands": []
+        }
+      ]
+    },
+    "ev_candle_4": {
+      "id": "ev_candle_4",
+      "name": "ろうそく4",
+      "x": 13,
+      "y": 7,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": true,
+          "priority": "below",
+          "graphic": {
+            "asset": "6f854f8a7f70bbb4",
+            "index": 0,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ControlSelfSwitch",
+              "params": {
+                "key": "A",
+                "value": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_c2"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_total"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 255,
+                  "g": 220,
+                  "b": 150,
+                  "a": 0.45
+                },
+                "duration": 10
+              },
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_c2",
+                  "op": ">=",
+                  "value": 5
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]ろうそくを ぜんぶ 集めた！\\C[0]\n回廊の おばけたちが おとなしく なった。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_cleared"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "expr",
+                  "expr": "max(v(\"var_cleared\"), 2)"
+                }
+              },
+              "indent": 1
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_hall",
+                "x": 6,
+                "y": 2,
+                "dir": "down",
+                "fade": "black"
+              },
+              "indent": 1
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_left"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "expr",
+                  "expr": "5 - v(\"var_c2\")"
+                }
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ろうそくを 拾った！\n回廊の ろうそくは あと \\V[var_left]本。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "selfSwitch",
+              "key": "A",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "commands": []
+        }
+      ]
+    },
+    "ev_candle_5": {
+      "id": "ev_candle_5",
+      "name": "ろうそく5",
+      "x": 6,
+      "y": 11,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": true,
+          "priority": "below",
+          "graphic": {
+            "asset": "6f854f8a7f70bbb4",
+            "index": 0,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ControlSelfSwitch",
+              "params": {
+                "key": "A",
+                "value": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_c2"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_total"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 255,
+                  "g": 220,
+                  "b": 150,
+                  "a": 0.45
+                },
+                "duration": 10
+              },
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_c2",
+                  "op": ">=",
+                  "value": 5
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]ろうそくを ぜんぶ 集めた！\\C[0]\n回廊の おばけたちが おとなしく なった。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_cleared"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "expr",
+                  "expr": "max(v(\"var_cleared\"), 2)"
+                }
+              },
+              "indent": 1
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_hall",
+                "x": 6,
+                "y": 2,
+                "dir": "down",
+                "fade": "black"
+              },
+              "indent": 1
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_left"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "expr",
+                  "expr": "5 - v(\"var_c2\")"
+                }
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ろうそくを 拾った！\n回廊の ろうそくは あと \\V[var_left]本。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "selfSwitch",
+              "key": "A",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "commands": []
+        }
+      ]
+    },
+    "ev_ghost_1": {
+      "id": "ev_ghost_1",
+      "name": "ももこ",
+      "x": 2,
+      "y": 3,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "eventTouch",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "cdb98dd61832306b",
+            "index": 2,
+            "direction": "down"
+          },
+          "moveRoute": {
+            "repeat": true,
+            "skippable": false,
+            "steps": [
+              {
+                "kind": "speed",
+                "value": 4
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "wait",
+                "frames": 10
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "wait",
+                "frames": 10
+              }
+            ]
+          },
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 40,
+                  "b": 60,
+                  "a": 0.6
+                },
+                "duration": 16
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 6,
+                "duration": 20,
+                "wait": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_caught"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]ももこ\\C[0]に つかまった！\n入口まで つれもどされる……",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_floor2",
+                "x": 10,
+                "y": 2,
+                "dir": "down",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_ghost_2": {
+      "id": "ev_ghost_2",
+      "name": "かげろう",
+      "x": 10,
+      "y": 6,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "eventTouch",
+          "through": true,
+          "priority": "same",
+          "graphic": {
+            "asset": "cdb98dd61832306b",
+            "index": 4,
+            "direction": "down"
+          },
+          "moveRoute": {
+            "repeat": true,
+            "skippable": true,
+            "steps": [
+              {
+                "kind": "speed",
+                "value": 2
+              },
+              {
+                "kind": "move",
+                "dir": "toward"
+              },
+              {
+                "kind": "wait",
+                "frames": 12
+              }
+            ]
+          },
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 40,
+                  "b": 60,
+                  "a": 0.6
+                },
+                "duration": 16
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 6,
+                "duration": 20,
+                "wait": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_caught"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]かげろう\\C[0]に つかまった！\n入口まで つれもどされる……",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_floor2",
+                "x": 10,
+                "y": 2,
+                "dir": "down",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_ghost_3": {
+      "id": "ev_ghost_3",
+      "name": "さくら",
+      "x": 2,
+      "y": 10,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "eventTouch",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "cdb98dd61832306b",
+            "index": 2,
+            "direction": "down"
+          },
+          "moveRoute": {
+            "repeat": true,
+            "skippable": false,
+            "steps": [
+              {
+                "kind": "speed",
+                "value": 4
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "wait",
+                "frames": 10
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "wait",
+                "frames": 10
+              }
+            ]
+          },
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 40,
+                  "b": 60,
+                  "a": 0.6
+                },
+                "duration": 16
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 6,
+                "duration": 20,
+                "wait": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_caught"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]さくら\\C[0]に つかまった！\n入口まで つれもどされる……",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_floor2",
+                "x": 10,
+                "y": 2,
+                "dir": "down",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_ghost_4": {
+      "id": "ev_ghost_4",
+      "name": "あおすけ",
+      "x": 11,
+      "y": 11,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "eventTouch",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "cdb98dd61832306b",
+            "index": 1,
+            "direction": "down"
+          },
+          "moveRoute": {
+            "repeat": true,
+            "skippable": true,
+            "steps": [
+              {
+                "kind": "speed",
+                "value": 3
+              },
+              {
+                "kind": "move",
+                "dir": "toward"
+              },
+              {
+                "kind": "move",
+                "dir": "toward"
+              },
+              {
+                "kind": "move",
+                "dir": "toward"
+              },
+              {
+                "kind": "move",
+                "dir": "random"
+              }
+            ]
+          },
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 40,
+                  "b": 60,
+                  "a": 0.6
+                },
+                "duration": 16
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 6,
+                "duration": 20,
+                "wait": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_caught"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]あおすけ\\C[0]に つかまった！\n入口まで つれもどされる……",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_floor2",
+                "x": 10,
+                "y": 2,
+                "dir": "down",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

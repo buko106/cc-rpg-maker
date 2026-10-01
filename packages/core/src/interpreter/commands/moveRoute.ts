@@ -2,8 +2,9 @@ import { eventIdSchema, moveRouteSchema, moveStepSchema } from "@rpg/schema";
 import type { Direction, EventCommand, EventId, MoveRoute } from "@rpg/schema";
 import { z } from "zod";
 import { warn } from "../../effects.js";
-import { moveCharacter } from "../../map/index.js";
-import type { Character, GameState } from "../../state.js";
+import { canPass, DIRECTION_VECTOR, moveCharacter } from "../../map/index.js";
+import type { PassabilityCtx } from "../../map/index.js";
+import type { Character, EventRuntime, GameState } from "../../state.js";
 import { defineCommand } from "../handler.js";
 import type { CommandCtx, CommandResult } from "../handler.js";
 import { startInterpreter } from "../run.js";
@@ -41,6 +42,31 @@ function pickDirection(dir: Direction | "random" | "toward" | "away", who: strin
   if (who === "player" || (dx === 0 && dy === 0)) return ch.direction;
   const toward: Direction = Math.abs(dx) >= Math.abs(dy) ? (dx > 0 ? "right" : "left") : dy > 0 ? "down" : "up";
   return dir === "toward" ? toward : ({ up: "down", down: "up", left: "right", right: "left" } as const)[toward];
+}
+
+/**
+ * 「イベントから接触」（`eventTouch`）のイベントが、`dir` へ歩むとプレイヤーの居るタイルに入るところか。
+ * 通常プライオリティのイベントだけ。プレイヤーが居なければ進めるとき（壁越しではない）に限る。`through` でも触れる。
+ */
+function reachesPlayer(state: GameState, who: string, dir: Direction, ctx: PassabilityCtx): EventRuntime | undefined {
+  if (who === "player" || !Object.hasOwn(state.map.events, who)) return undefined;
+  const ev = state.map.events[who as EventId]!;
+  if (ev.pageIndex === null || ev.trigger !== "eventTouch" || ev.priority !== "same") return undefined;
+  const { dx, dy } = DIRECTION_VECTOR[dir];
+  const { player } = state.map;
+  if (ev.x + dx !== player.x || ev.y + dy !== player.y) return undefined;
+  return canPass(ctx.map, ctx.tileset, ctx.events, ev, dir) ? ev : undefined;
+}
+
+/**
+ * 向こうから触れたイベントのページを、通常のイベントとして起動する（プレイヤーから触れたときと同じ）。
+ * 通常のイベントの実行中・メッセージ表示中・場所移動の予約中は起動しない。
+ */
+function startTouchedEvent(state: GameState, ev: EventRuntime, ctx: PassabilityCtx): GameState {
+  if (ev.pageIndex === null || state.message.open || state.map.transfer !== undefined || state.interpreters.some((i) => i.mode === "normal")) return state;
+  const page = ctx.map.events[ev.id]?.pages[ev.pageIndex];
+  if (page === undefined) return state;
+  return startInterpreter(state, { kind: "mapEvent", mapId: state.map.mapId, eventId: ev.id, page: ev.pageIndex }, page.commands, "normal");
 }
 
 const stepParams = z.strictObject({
@@ -107,12 +133,16 @@ export const moveStep = defineCommand({
         const map = c.project.map(c.state.map.mapId);
         if (map === undefined) return {};
         const dir = pickDirection(step.dir, p.who, ch, c);
-        let moved = moveCharacter(ch, dir, { map, tileset: c.project.tileset(map.tileset) ?? { id: "" as never, name: "", passage: [] }, events: c.state.map.events });
+        const pass: PassabilityCtx = { map, tileset: c.project.tileset(map.tileset) ?? { id: "" as never, name: "", passage: [] }, events: c.state.map.events };
+        // 「イベントから接触」のイベントは、プレイヤーに触れたらそのページを始める（入らずに、その場でプレイヤーの方を向く）
+        const touching = reachesPlayer(c.state, p.who, dir, pass);
+        let moved = touching === undefined ? moveCharacter(ch, dir, pass) : { ...ch, direction: dir };
         // 自律移動のイベントは、プレイヤーの居るタイルへは入らない（プレイヤーは通行判定の対象ではないので、ここで見る）
         const player = c.state.map.player;
         if (p.auto && !ch.through && (!("priority" in ch) || ch.priority === "same") && moved.x === player.x && moved.y === player.y) moved = { ...ch, direction: dir };
         const blocked = moved.x === ch.x && moved.y === ch.y;
-        const next = withCharacter(c.state, p.who, moved);
+        const turned = withCharacter(c.state, p.who, moved);
+        const next = touching === undefined ? turned : startTouchedEvent(turned, touching, pass);
         if (!blocked) return { state: next, control: { kind: "wait", wait: { kind: "move", who: p.who } } };
         // 自律移動で `skippable` でないルートは、通れるようになるまで待ち続ける（あきらめると、相対的な歩みの列がずれていく）
         if (p.auto && !p.skippable) return { state: next, control: { kind: "wait", wait: { kind: "frames", left: 1 } }, setLocals: { retry: true } };

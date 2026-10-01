@@ -1,0 +1,1127 @@
+{
+  "id": "map_hall",
+  "width": 13,
+  "height": 10,
+  "tileset": "ts_haunted",
+  "layers": [
+    {
+      "name": "ground",
+      "tiles": [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 6, 12, 15, 6, 9, 16, 9, 6, 17, 12, 6, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 1, 1, 1, 1, 4, 4, 4, 1, 1, 1, 1, 5, 5, 1, 1, 1, 1, 4, 4, 4, 1, 1, 1, 1, 5, 5, 1, 1, 1, 1, 4, 4, 4, 1, 1, 1, 1, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+    },
+    {
+      "name": "objects",
+      "tiles": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 29, 0, 0, 0, 0, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 27, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+  ],
+  "events": {
+    "ev_dark": {
+      "id": "ev_dark",
+      "name": "暗がり",
+      "x": 12,
+      "y": 0,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "parallel",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "Loop",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "TintScreen",
+              "params": {
+                "color": {
+                  "r": 12,
+                  "g": 8,
+                  "b": 30,
+                  "a": 0.3
+                },
+                "duration": 0,
+                "wait": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "Wait",
+              "params": {
+                "frames": 60
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndLoop",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "variable",
+              "id": "var_cleared",
+              "op": ">=",
+              "value": 3
+            }
+          ],
+          "trigger": "parallel",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "Loop",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "TintScreen",
+              "params": {
+                "color": {
+                  "r": 0,
+                  "g": 0,
+                  "b": 0,
+                  "a": 0
+                },
+                "duration": 0,
+                "wait": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "Wait",
+              "params": {
+                "frames": 60
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndLoop",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_intro": {
+      "id": "ev_intro",
+      "name": "はじまり",
+      "x": 0,
+      "y": 9,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "autorun",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "夜の 古いお屋敷。\nろうそくが ぜんぶ 消えて、おばけたちが 目を さました。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "執事の おばけが 何か 言いたそうに している。\n（話しかけてみよう）",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSelfSwitch",
+              "params": {
+                "key": "A",
+                "value": true
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "selfSwitch",
+              "key": "A",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "commands": []
+        }
+      ]
+    },
+    "ev_ending": {
+      "id": "ev_ending",
+      "name": "エンディング",
+      "x": 12,
+      "y": 9,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "variable",
+              "id": "var_cleared",
+              "op": ">=",
+              "value": 3
+            }
+          ],
+          "trigger": "autorun",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "TintScreen",
+              "params": {
+                "color": {
+                  "r": 0,
+                  "g": 0,
+                  "b": 0,
+                  "a": 0
+                },
+                "duration": 60,
+                "wait": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "Wait",
+              "params": {
+                "frames": 60
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "大燭台に 15本の ろうそくが そろった。\nお屋敷じゅうに あかりが ともる……",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おばけたちは あかりの中で すやすやと 眠りについた。\n\\C[6]おめでとう！\\C[0]",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おばけに つかまった 回数：\\V[var_caught]回",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ReturnToTitle",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_butler": {
+      "id": "ev_butler",
+      "name": "執事",
+      "x": 3,
+      "y": 4,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "cdb98dd61832306b",
+            "index": 5,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おお、お客さま。屋敷の ろうそくが ぜんぶ 消えて しまいましてな。\nおばけを よけながら 集めて きてくだされ。まずは 1の扉の 客間から。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おばけの ことを 聞きますかな？",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "聞く",
+                  "いや、いい"
+                ],
+                "cancel": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おばけに さわられると、その階の 入口に\nつれもどされる。拾った ろうそくは なくならん。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "あおい おばけは 近づいてくる。しろい おばけは きまぐれ。\nももいろの おばけは ろうかを 見回っておる。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "むらさきの おばけは 壁を すりぬける。\nあかい おばけは すばやく 近づいては 逃げていく。気をつけてな。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "variable",
+              "id": "var_cleared",
+              "op": ">=",
+              "value": 1
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "cdb98dd61832306b",
+            "index": 5,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "客間が あかるく なりました！\n次は 2の扉の 回廊ですな。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おばけの ことを 聞きますかな？",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "聞く",
+                  "いや、いい"
+                ],
+                "cancel": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おばけに さわられると、その階の 入口に\nつれもどされる。拾った ろうそくは なくならん。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "あおい おばけは 近づいてくる。しろい おばけは きまぐれ。\nももいろの おばけは ろうかを 見回っておる。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "むらさきの おばけは 壁を すりぬける。\nあかい おばけは すばやく 近づいては 逃げていく。気をつけてな。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "variable",
+              "id": "var_cleared",
+              "op": ">=",
+              "value": 2
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "cdb98dd61832306b",
+            "index": 5,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "さすがです！ 最後は 3の扉、地下室。\nいちばん こわい おばけたちが おりますぞ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おばけの ことを 聞きますかな？",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "聞く",
+                  "いや、いい"
+                ],
+                "cancel": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おばけに さわられると、その階の 入口に\nつれもどされる。拾った ろうそくは なくならん。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "あおい おばけは 近づいてくる。しろい おばけは きまぐれ。\nももいろの おばけは ろうかを 見回っておる。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "むらさきの おばけは 壁を すりぬける。\nあかい おばけは すばやく 近づいては 逃げていく。気をつけてな。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "variable",
+              "id": "var_cleared",
+              "op": ">=",
+              "value": 3
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "cdb98dd61832306b",
+            "index": 5,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ありがとうございました。\nもう 屋敷は こわく ありません。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おばけの ことを 聞きますかな？",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "聞く",
+                  "いや、いい"
+                ],
+                "cancel": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おばけに さわられると、その階の 入口に\nつれもどされる。拾った ろうそくは なくならん。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "あおい おばけは 近づいてくる。しろい おばけは きまぐれ。\nももいろの おばけは ろうかを 見回っておる。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "むらさきの おばけは 壁を すりぬける。\nあかい おばけは すばやく 近づいては 逃げていく。気をつけてな。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_candelabrum": {
+      "id": "ev_candelabrum",
+      "name": "大燭台",
+      "x": 6,
+      "y": 5,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "6f854f8a7f70bbb4",
+            "index": 1,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "大きな 燭台。\n集めた ろうそく：\\V[var_total] / 15本",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "variable",
+              "id": "var_cleared",
+              "op": ">=",
+              "value": 1
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "6f854f8a7f70bbb4",
+            "index": 2,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "大きな 燭台。\n集めた ろうそく：\\V[var_total] / 15本",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "variable",
+              "id": "var_cleared",
+              "op": ">=",
+              "value": 2
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "6f854f8a7f70bbb4",
+            "index": 3,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "大きな 燭台。\n集めた ろうそく：\\V[var_total] / 15本",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "variable",
+              "id": "var_cleared",
+              "op": ">=",
+              "value": 3
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "6f854f8a7f70bbb4",
+            "index": 4,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "大きな 燭台。\n集めた ろうそく：\\V[var_total] / 15本",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_board": {
+      "id": "ev_board",
+      "name": "はり紙",
+      "x": 1,
+      "y": 2,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "『ろうそくの ありか』\n1の扉　客間　　 ……ろうそく 4本\n2の扉　回廊　　 ……ろうそく 5本\n3の扉　地下室　 ……ろうそく 6本",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おばけに つかまった 回数：\\V[var_caught]回",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_door_1": {
+      "id": "ev_door_1",
+      "name": "1の扉",
+      "x": 3,
+      "y": 1,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_cleared",
+                  "op": ">=",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "客間の ろうそくは もう ぜんぶ 集めた。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]客間\\C[0]\nろうそく 4本のうち \\V[var_c1]本 集めた。入る？",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "入る",
+                  "やめておく"
+                ],
+                "cancel": 1
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 1
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_floor1",
+                "x": 8,
+                "y": 2,
+                "dir": "down",
+                "fade": "black"
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_door_2": {
+      "id": "ev_door_2",
+      "name": "2の扉",
+      "x": 6,
+      "y": 1,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_cleared",
+                  "op": "<=",
+                  "value": 0
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "扉には かぎが かかっている。\n\\C[2]客間\\C[0]の ろうそくを 集めると 開くようだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_cleared",
+                  "op": ">=",
+                  "value": 2
+                }
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "回廊の ろうそくは もう ぜんぶ 集めた。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 2
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]回廊\\C[0]\nろうそく 5本のうち \\V[var_c2]本 集めた。入る？",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 2
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "入る",
+                  "やめておく"
+                ],
+                "cancel": 1
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 2
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_floor2",
+                "x": 10,
+                "y": 2,
+                "dir": "down",
+                "fade": "black"
+              },
+              "indent": 3
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_door_3": {
+      "id": "ev_door_3",
+      "name": "3の扉",
+      "x": 9,
+      "y": 1,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_cleared",
+                  "op": "<=",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "扉には かぎが かかっている。\n\\C[2]回廊\\C[0]の ろうそくを 集めると 開くようだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_cleared",
+                  "op": ">=",
+                  "value": 3
+                }
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "地下室の ろうそくは もう ぜんぶ 集めた。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 2
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]地下室\\C[0]\nろうそく 6本のうち \\V[var_c3]本 集めた。入る？",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 2
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "入る",
+                  "やめておく"
+                ],
+                "cancel": 1
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 2
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_floor3",
+                "x": 10,
+                "y": 2,
+                "dir": "down",
+                "fade": "black"
+              },
+              "indent": 3
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

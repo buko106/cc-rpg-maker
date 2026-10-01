@@ -41,7 +41,11 @@ export const eventPageSchema = z.strictObject({
   /** すべて満たすと有効 */
   conditions: z.array(pageConditionSchema),
   graphic: z.strictObject({ asset: assetIdSchema.meta({ ref: "asset", assetKind: "image" }), index: nonNegativeInt, direction: directionSchema.meta({ initial: "down" }) }).optional(),
-  trigger: z.enum(["action", "touch", "autorun", "parallel"]),
+  /**
+   * いつ始まるか。`touch` はプレイヤーから触れたとき（突き当たる・上に乗る）、`eventTouch` はそれに加えて、
+   * このイベント（通常プライオリティ）が移動ルートでプレイヤーの居るタイルへ進もうとしたとき（向こうから触れてきたとき）。
+   */
+  trigger: z.enum(["action", "touch", "eventTouch", "autorun", "parallel"]),
   through: z.boolean(),
   priority: z.enum(["below", "same", "above"]),
   moveRoute: moveRouteSchema.optional(),

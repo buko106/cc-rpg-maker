@@ -4,7 +4,7 @@ import { warn } from "../effects.js";
 import type { Effect } from "../effects.js";
 import type { InputFrame } from "../input.js";
 import { isPageRouteOrigin, pageRouteCommands, pageRouteName, runInterpreters, startInterpreter } from "../interpreter/index.js";
-import { advanceCharacter, computeCamera, eventsToTrigger, refreshEventPages } from "../map/index.js";
+import { advanceCharacter, computeCamera, eventsToTrigger, refreshEventPages, startsOnPlayerTouch } from "../map/index.js";
 import { battleTick } from "../battle/index.js";
 import type { GameState, MapState } from "../state.js";
 import type { StepResult } from "./actions.js";
@@ -93,7 +93,7 @@ function advanceMovement(state: GameState, map: MapData): GameState {
 
   if (wasMoving && !player.moving && !hasNormalInterpreter(s) && s.map.transfer === undefined) {
     const here: EventId | undefined = Object.values(s.map.events).find(
-      (ev) => ev.pageIndex !== null && ev.trigger === "touch" && ev.priority !== "same" && ev.x === player.x && ev.y === player.y,
+      (ev) => ev.pageIndex !== null && startsOnPlayerTouch(ev.trigger) && ev.priority !== "same" && ev.x === player.x && ev.y === player.y,
     )?.id;
     if (here !== undefined) s = startMapEvent(s, map, here);
   }

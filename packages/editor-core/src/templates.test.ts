@@ -145,7 +145,7 @@ describe("組み込みのひな形", () => {
       ["EndBranch", 0],
     ]);
     expect(pages[0]!.commands[0]!.params).toEqual({ troop: "tr_slime", canEscape: true, canLose: false });
-    expect(pages[0]).toMatchObject({ trigger: "touch", moveRoute: { steps: [{ kind: "move", dir: "toward" }, { kind: "wait" }] } });
+    expect(pages[0]).toMatchObject({ trigger: "eventTouch", moveRoute: { steps: [{ kind: "move", dir: "toward" }, { kind: "wait" }] } });
     expect(pages[1]).toMatchObject({ conditions: [{ kind: "selfSwitch", key: "A" }], through: true, priority: "below", commands: [] });
     expect(pages[1]).not.toHaveProperty("graphic");
     expect(build("enemy", { ...(SAMPLES["enemy"] as object), move: "random", trigger: "action" }).pages[0]).toMatchObject({ trigger: "action", moveRoute: { steps: [{ dir: "random" }, { kind: "wait" }] } });

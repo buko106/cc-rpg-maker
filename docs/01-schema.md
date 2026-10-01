@@ -95,7 +95,7 @@ export interface MapEvent {
 export interface EventPage {
   conditions: PageCondition[];            // すべて満たすと有効
   graphic?: { asset: AssetId; index: number; direction: Direction };
-  trigger: "action" | "touch" | "autorun" | "parallel";
+  trigger: "action" | "touch" | "eventTouch" | "autorun" | "parallel";  // touch = プレイヤーから接触、eventTouch = イベントから接触
   through: boolean; priority: "below" | "same" | "above";
   moveRoute?: MoveRoute;
   commands: EventCommand[];
@@ -221,3 +221,7 @@ export function findDanglingRefs(...): RefTarget[];
 ## 実装メモ（M7 で確定した点）
 - **`formatVersion` を 2 に上げた**：`system.plugins: { name, version, params }[]`（プロジェクトが使うプラグイン。`name` は英数字・`_`・`-` の 1〜64 文字、`params` は各プラグインが解釈する）を必須で追加した。最初の実マイグレーション `v1 → v2`（`system.plugins = []` を足す。既にあれば残す。マップは変えない）を `migrations` に登録した。`fixtures/projects/v1/*` は旧形式のまま残してあり、読み込むと v2 になる（`parseProject` のテストは「マイグレーション済みの JSON と一致する」ことを確かめる）。プラグインを使う現行形式のフィクスチャは `fixtures/projects/v2/plugin-demo`。
 - `parseMapData(json, formatVersion)` の `formatVersion` は、**書き出されたままの**（マイグレーション前の）値。プレイヤーの `ProjectSource`（HTTP / 埋め込み）は、`project.json` の生の `formatVersion` を覚えて渡す。
+
+## 実装メモ（イベントから接触）
+- **`EventPage.trigger` に `eventTouch`（イベントから接触）を足した**。`touch`（プレイヤーから接触）と同じようにプレイヤーから触れても始まり、加えて、このイベント（通常プライオリティ）が移動ルートでプレイヤーの居るタイルへ進もうとしたときにも始まる（03）。値を足しただけで既存のデータはそのまま読めるので、ページの `moveRoute` を足したときと同じく `formatVersion` は上げていない。`SaveSnapshot` のイベントの `trigger` も同じ値を受け付ける。
+

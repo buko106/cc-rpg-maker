@@ -178,3 +178,96 @@ describe("ページの moveRoute（自律移動）", () => {
     expect(run(a)).toEqual(run(b));
   });
 });
+
+describe("イベントから接触（eventTouch）", () => {
+  // minimal のプレイヤーは (2, 2) から始まる。マップは 10×8 で、まわりが壁
+  const toward = (o: Partial<MoveRoute> = {}) => route([{ kind: "move", dir: "toward" }], { repeat: true, ...o });
+  const caught = (o: Partial<EventPage> = {}) => page({ trigger: "eventTouch", moveRoute: toward(), commands: [cmd("ControlVariables", { ids: ["n"], op: "add", operand: { kind: "constant", value: 1 } })], ...o });
+  const n = (s: GameState): number => (s.variables as Record<string, number>)["n"] ?? 0;
+
+  it("近づいてきたイベントがプレイヤーのタイルへ進もうとすると、そのページが始まる。入らずにプレイヤーの方を向く", () => {
+    const { ctx } = setup(event("ghost", 6, 2, caught({ commands: [cmd("ShowText", { text: "つかまえた！" })] })));
+    let s = initialState(ctx, "s");
+    let started = -1;
+    for (let i = 0; i < 200 && started < 0; i++) {
+      s = step(s, emptyInput(), ctx).state;
+      if (s.interpreters.some((it) => it.mode === "normal")) started = i;
+    }
+    expect(started).toBeGreaterThan(0);
+    expect(at(s, "ghost")).toEqual({ x: 3, y: 2, direction: "left" });
+    s = frames(s, 2, ctx);
+    expect(s.message.open).toBe(true);
+    // 実行中はプレイヤーは動けず、イベントも止まっている
+    s = step(s, inputFrame(["down"], ["down"]), ctx).state;
+    expect(s.map.player).toMatchObject({ x: 2, y: 2 });
+    expect(at(frames(s, 30, ctx), "ghost")).toEqual({ x: 3, y: 2, direction: "left" });
+  });
+
+  it("接触（touch）のイベントは、向こうから触れてきても始まらない", () => {
+    const { ctx } = setup(event("ghost", 6, 2, caught({ trigger: "touch" })));
+    const s = frames(initialState(ctx, "s"), 200, ctx);
+    expect(n(s)).toBe(0);
+    expect(at(s, "ghost")).toMatchObject({ x: 3, y: 2 }); // 隣で待っている
+  });
+
+  it("プレイヤーから触れても始まる（突き当たる・下のプライオリティなら上に乗る）", () => {
+    const still = (o: Partial<EventPage>) => page({ trigger: "eventTouch", commands: [cmd("ControlVariables", { ids: ["n"], op: "add", operand: { kind: "constant", value: 1 } })], ...o });
+    const { ctx } = setup(event("wall", 3, 2, still({})), event("mat", 2, 3, still({ priority: "below" })));
+    let s = frames(initialState(ctx, "s"), 1, ctx);
+    s = step(s, inputFrame(["right"], ["right"]), ctx).state;
+    s = frames(s, 5, ctx);
+    expect(n(s)).toBe(1);
+    expect(s.map.player).toMatchObject({ x: 2, y: 2 });
+    s = step(s, inputFrame(["down"], ["down"]), ctx).state;
+    s = frames(s, 30, ctx);
+    expect(s.map.player).toMatchObject({ x: 2, y: 3 });
+    expect(n(s)).toBe(2);
+  });
+
+  it("壁ごしには触れない。下のプライオリティのイベントは向こうからは触れない", () => {
+    // (2,1) の上は壁の行。上から下りてこられないので、(2,0) のイベントは触れられない
+    const { ctx } = setup(
+      event("behind", 2, 0, caught({ moveRoute: route([{ kind: "move", dir: "down" }], { repeat: true }) })),
+      event("low", 5, 2, caught({ priority: "below" })),
+    );
+    const s = frames(initialState(ctx, "s"), 200, ctx);
+    expect(n(s)).toBe(0);
+    expect(at(s, "behind")).toMatchObject({ x: 2, y: 0 });
+  });
+
+  it("通り抜け（through）のイベントは、壁を抜けてきて触れる", () => {
+    const { ctx } = setup(event("ghost", 2, 7, caught({ through: true })));
+    let s = initialState(ctx, "s");
+    for (let i = 0; i < 300 && n(s) === 0; i++) s = step(s, emptyInput(), ctx).state;
+    expect(n(s)).toBe(1);
+    expect(at(s, "ghost")).toMatchObject({ x: 2, y: 3, direction: "up" });
+  });
+
+  it("終わったあとも、触れ続けていれば何度でも始まる。通常のイベントの実行中は始まらない", () => {
+    const { ctx } = setup(
+      event("ghost", 4, 2, caught()),
+      event("talk", 8, 6, page({ trigger: "autorun", conditions: [{ kind: "switch", id: "done" as never, value: false }], commands: [cmd("Wait", { frames: 60 }), cmd("ControlSwitches", { ids: ["done"], value: true })] })),
+    );
+    let s = frames(initialState(ctx, "s"), 50, ctx);
+    expect(n(s)).toBe(0); // 自動実行の間は（自律移動も）止まっている
+    s = frames(s, 200, ctx);
+    expect(n(s)).toBeGreaterThan(1);
+  });
+
+  it("触れたイベントがプレイヤーを入口へ戻すと、イベントも元の位置からやり直す", () => {
+    const back = cmd("TransferPlayer", { mapId: "map_start", x: 8, y: 6, dir: "up", fade: "none" });
+    const { ctx } = setup(event("ghost", 6, 2, caught({ commands: [back] })));
+    let s = initialState(ctx, "s");
+    for (let i = 0; i < 300 && s.map.player.x === 2; i++) s = step(s, emptyInput(), ctx).state;
+    expect(s.map.player).toMatchObject({ x: 8, y: 6 });
+    expect(at(s, "ghost")).toMatchObject({ x: 6, y: 2 });
+  });
+
+  it("SetMoveRoute で動かしたときも触れる（プレイヤーのタイルへは入らない）", () => {
+    const push = event("push", 8, 6, page({ trigger: "autorun", conditions: [{ kind: "switch", id: "done" as never, value: false }], commands: [cmd("ControlSwitches", { ids: ["done"], value: true }), cmd("SetMoveRoute", { target: "ghost", wait: false, route: route([{ kind: "move", dir: "left" }, { kind: "move", dir: "left" }], { skippable: true }) })] }));
+    const { ctx } = setup(push, event("ghost", 4, 2, page({ trigger: "eventTouch", commands: [cmd("ControlVariables", { ids: ["n"], op: "add", operand: { kind: "constant", value: 1 } })] })));
+    const s = frames(initialState(ctx, "s"), 120, ctx);
+    expect(n(s)).toBe(1);
+    expect(at(s, "ghost")).toMatchObject({ x: 3, y: 2, direction: "left" });
+  });
+});

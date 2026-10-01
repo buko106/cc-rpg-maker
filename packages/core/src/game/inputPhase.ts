@@ -2,7 +2,7 @@ import type { Direction, EventId, MapData, Tileset } from "@rpg/schema";
 import type { Ctx } from "../ctx-types.js";
 import type { InputFrame } from "../input.js";
 import { startInterpreter } from "../interpreter/index.js";
-import { DIRECTION_VECTOR, moveCharacter, REVERSE } from "../map/index.js";
+import { DIRECTION_VECTOR, moveCharacter, REVERSE, startsOnPlayerTouch } from "../map/index.js";
 import type { EventRuntime, GameState } from "../state.js";
 import type { StepResult } from "./actions.js";
 import { battleInput } from "../battle/index.js";
@@ -86,9 +86,9 @@ export function handleInput(state: GameState, input: InputFrame, ctx: Ctx): Step
   const moved = moveCharacter(player, dir, { map, tileset, events: state.map.events });
   let next: GameState = { ...state, map: { ...state.map, player: moved } };
   if (moved.x === player.x && moved.y === player.y) {
-    // 突き当たり：目の前の通常プライオリティの接触イベントを起動
+    // 突き当たり：目の前の通常プライオリティの接触イベント（プレイヤーから / イベントから）を起動
     const { dx, dy } = DIRECTION_VECTOR[dir];
-    const bumped = eventsAt(state, player.x + dx, player.y + dy, (ev) => ev.trigger === "touch" && ev.priority === "same")[0];
+    const bumped = eventsAt(state, player.x + dx, player.y + dy, (ev) => startsOnPlayerTouch(ev.trigger) && ev.priority === "same")[0];
     if (bumped) next = startMapEvent(next, map, bumped.id);
   }
   return { state: next, effects: [] };

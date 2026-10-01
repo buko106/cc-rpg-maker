@@ -1,0 +1,179 @@
+{
+  "formatVersion": 1,
+  "meta": {
+    "id": "haunted",
+    "title": "デモ：おばけ屋敷の追いかけっこ",
+    "createdAt": "2026-10-01T00:00:00Z",
+    "updatedAt": "2026-10-01T00:00:00Z"
+  },
+  "system": {
+    "startMap": "map_hall",
+    "startX": 6,
+    "startY": 7,
+    "initialParty": [
+      "actor_hero"
+    ],
+    "tileSize": 32,
+    "screen": {
+      "width": 416,
+      "height": 320
+    },
+    "bgm": {},
+    "terms": {
+      "newGame": "ニューゲーム"
+    }
+  },
+  "maps": {
+    "map_hall": {
+      "id": "map_hall",
+      "name": "玄関ホール",
+      "order": 0
+    },
+    "map_floor1": {
+      "id": "map_floor1",
+      "name": "1の扉：客間",
+      "order": 1
+    },
+    "map_floor2": {
+      "id": "map_floor2",
+      "name": "2の扉：回廊",
+      "order": 2
+    },
+    "map_floor3": {
+      "id": "map_floor3",
+      "name": "3の扉：地下室",
+      "order": 3
+    }
+  },
+  "tilesets": {
+    "ts_haunted": {
+      "id": "ts_haunted",
+      "name": "おばけ屋敷",
+      "image": {
+        "asset": "06cdcb8fb87b5ff6"
+      },
+      "passage": [15, 15, 15, 15, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+  },
+  "database": {
+    "actors": {
+      "actor_hero": {
+        "id": "actor_hero",
+        "name": "ゆうき",
+        "classId": "class_hero",
+        "initialLevel": 1,
+        "walk": {
+          "asset": "bb2e23b45d1f4d4d"
+        },
+        "equips": {}
+      }
+    },
+    "classes": {
+      "class_hero": {
+        "id": "class_hero",
+        "name": "探検家",
+        "skills": [],
+        "params": {
+          "mhp": {
+            "base": 100,
+            "growth": 2
+          },
+          "mmp": {
+            "base": 20,
+            "growth": 2
+          },
+          "atk": {
+            "base": 10,
+            "growth": 2
+          },
+          "def": {
+            "base": 10,
+            "growth": 2
+          },
+          "mat": {
+            "base": 10,
+            "growth": 2
+          },
+          "mdf": {
+            "base": 10,
+            "growth": 2
+          },
+          "agi": {
+            "base": 10,
+            "growth": 2
+          },
+          "luk": {
+            "base": 10,
+            "growth": 2
+          }
+        }
+      }
+    },
+    "skills": {},
+    "items": {},
+    "enemies": {},
+    "troops": {},
+    "states": {},
+    "commonEvents": {}
+  },
+  "assets": {
+    "entries": {
+      "06cdcb8fb87b5ff6": {
+        "name": "haunted_tileset.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 4526,
+        "width": 1056,
+        "height": 32
+      },
+      "bb2e23b45d1f4d4d": {
+        "name": "hero.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 660,
+        "width": 96,
+        "height": 128
+      },
+      "cdb98dd61832306b": {
+        "name": "ghosts.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 8186,
+        "width": 576,
+        "height": 128
+      },
+      "6f854f8a7f70bbb4": {
+        "name": "props.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 3984,
+        "width": 480,
+        "height": 128
+      }
+    }
+  },
+  "switches": {},
+  "variables": {
+    "var_c1": {
+      "name": "客間のろうそく"
+    },
+    "var_c2": {
+      "name": "回廊のろうそく"
+    },
+    "var_c3": {
+      "name": "地下室のろうそく"
+    },
+    "var_total": {
+      "name": "集めたろうそく"
+    },
+    "var_left": {
+      "name": "この階ののこり"
+    },
+    "var_cleared": {
+      "name": "終えた階の数"
+    },
+    "var_caught": {
+      "name": "つかまった回数"
+    }
+  }
+}
