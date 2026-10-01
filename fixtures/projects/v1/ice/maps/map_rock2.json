@@ -1,0 +1,632 @@
+{
+  "id": "map_rock2",
+  "width": 15,
+  "height": 11,
+  "tileset": "ts_ice",
+  "layers": [
+    {
+      "name": "ground",
+      "tiles": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 4, 4, 4, 4, 4, 4, 1, 4, 4, 4, 4, 4, 4, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 1, 2, 3, 3, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+    },
+    {
+      "name": "objects",
+      "tiles": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 6, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 5, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+  ],
+  "events": {
+    "ev_up": {
+      "id": "ev_up",
+      "name": "奥への階段",
+      "x": 7,
+      "y": 2,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": true,
+          "priority": "below",
+          "graphic": {
+            "asset": "acb4aae032043b8f",
+            "index": 4,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_orb",
+                "x": 7,
+                "y": 8,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_down": {
+      "id": "ev_down",
+      "name": "戻る階段",
+      "x": 7,
+      "y": 9,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "acb4aae032043b8f",
+            "index": 5,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_rock1",
+                "x": 7,
+                "y": 3,
+                "dir": "down",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_rock_a": {
+      "id": "ev_rock_a",
+      "name": "岩",
+      "x": 2,
+      "y": 5,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "acb4aae032043b8f",
+            "index": 0,
+            "direction": "down"
+          },
+          "pushable": true,
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "氷のかたまりだ。冷たくて 重い。\n正面から 押せば 動かせそうだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_rock_b": {
+      "id": "ev_rock_b",
+      "name": "岩",
+      "x": 7,
+      "y": 7,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "acb4aae032043b8f",
+            "index": 0,
+            "direction": "down"
+          },
+          "pushable": true,
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "氷のかたまりだ。冷たくて 重い。\n正面から 押せば 動かせそうだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_plate_1": {
+      "id": "ev_plate_1",
+      "name": "感圧板1",
+      "x": 2,
+      "y": 6,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_open_map_rock2",
+              "value": false
+            },
+            {
+              "kind": "switch",
+              "id": "sw_plate_map_rock2_1",
+              "value": false
+            }
+          ],
+          "trigger": "parallel",
+          "through": true,
+          "priority": "below",
+          "graphic": {
+            "asset": "acb4aae032043b8f",
+            "index": 1,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "(evx(\"ev_rock_a\") == 2 && evy(\"ev_rock_a\") == 6) || (evx(\"ev_rock_b\") == 2 && evy(\"ev_rock_b\") == 6)"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_plate_map_rock2_1"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_open_map_rock2",
+              "value": false
+            },
+            {
+              "kind": "switch",
+              "id": "sw_plate_map_rock2_1",
+              "value": true
+            }
+          ],
+          "trigger": "parallel",
+          "through": true,
+          "priority": "below",
+          "graphic": {
+            "asset": "acb4aae032043b8f",
+            "index": 2,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!((evx(\"ev_rock_a\") == 2 && evy(\"ev_rock_a\") == 6) || (evx(\"ev_rock_b\") == 2 && evy(\"ev_rock_b\") == 6))"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_plate_map_rock2_1"
+                ],
+                "value": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_open_map_rock2",
+              "value": true
+            }
+          ],
+          "trigger": "parallel",
+          "through": true,
+          "priority": "below",
+          "graphic": {
+            "asset": "acb4aae032043b8f",
+            "index": 2,
+            "direction": "down"
+          },
+          "commands": []
+        }
+      ]
+    },
+    "ev_plate_2": {
+      "id": "ev_plate_2",
+      "name": "感圧板2",
+      "x": 6,
+      "y": 7,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_open_map_rock2",
+              "value": false
+            },
+            {
+              "kind": "switch",
+              "id": "sw_plate_map_rock2_2",
+              "value": false
+            }
+          ],
+          "trigger": "parallel",
+          "through": true,
+          "priority": "below",
+          "graphic": {
+            "asset": "acb4aae032043b8f",
+            "index": 1,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "(evx(\"ev_rock_a\") == 6 && evy(\"ev_rock_a\") == 7) || (evx(\"ev_rock_b\") == 6 && evy(\"ev_rock_b\") == 7)"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_plate_map_rock2_2"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_open_map_rock2",
+              "value": false
+            },
+            {
+              "kind": "switch",
+              "id": "sw_plate_map_rock2_2",
+              "value": true
+            }
+          ],
+          "trigger": "parallel",
+          "through": true,
+          "priority": "below",
+          "graphic": {
+            "asset": "acb4aae032043b8f",
+            "index": 2,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!((evx(\"ev_rock_a\") == 6 && evy(\"ev_rock_a\") == 7) || (evx(\"ev_rock_b\") == 6 && evy(\"ev_rock_b\") == 7))"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_plate_map_rock2_2"
+                ],
+                "value": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_open_map_rock2",
+              "value": true
+            }
+          ],
+          "trigger": "parallel",
+          "through": true,
+          "priority": "below",
+          "graphic": {
+            "asset": "acb4aae032043b8f",
+            "index": 2,
+            "direction": "down"
+          },
+          "commands": []
+        }
+      ]
+    },
+    "ev_logic": {
+      "id": "ev_logic",
+      "name": "しかけ",
+      "x": 0,
+      "y": 0,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_open_map_rock2",
+              "value": false
+            }
+          ],
+          "trigger": "parallel",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "s(\"sw_plate_map_rock2_1\") && s(\"sw_plate_map_rock2_2\")"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_open_map_rock2"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 190,
+                  "g": 230,
+                  "b": 255,
+                  "a": 0.55
+                },
+                "duration": 18
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 4,
+                "duration": 30,
+                "wait": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]ゴゴゴゴ……\\C[0]\nどこかで 重い 扉が 開く 音がした。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_door": {
+      "id": "ev_door",
+      "name": "氷の扉",
+      "x": 7,
+      "y": 3,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_open_map_rock2",
+              "value": false
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "acb4aae032043b8f",
+            "index": 3,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "分厚い 氷の扉。ぴったり 閉ざされている。\n床の \\C[6]感圧板\\C[0]に 何か 重い物を のせると、開きそうだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_open_map_rock2",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "commands": []
+        }
+      ]
+    },
+    "ev_rune": {
+      "id": "ev_rune",
+      "name": "魔法陣",
+      "x": 7,
+      "y": 8,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "graphic": {
+            "asset": "acb4aae032043b8f",
+            "index": 6,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "足元の 魔法陣が かすかに 光っている。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "岩を もとに もどす",
+                  "ヒントを 読む",
+                  "やめる"
+                ],
+                "cancel": 2
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 190,
+                  "g": 230,
+                  "b": 255,
+                  "a": 0.55
+                },
+                "duration": 14
+              },
+              "indent": 1
+            },
+            {
+              "code": "SetEventLocation",
+              "params": {
+                "target": "ev_rock_a",
+                "x": 2,
+                "y": 5,
+                "dir": "retain"
+              },
+              "indent": 1
+            },
+            {
+              "code": "SetEventLocation",
+              "params": {
+                "target": "ev_rock_b",
+                "x": 7,
+                "y": 7,
+                "dir": "retain"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "岩が ぜんぶ もとの 位置に もどった。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "板は 2つ。岩も 2つ。どちらの 板にも 岩が のると 扉が 開く。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "岩を 壁ぎわに 押しつけると 動かせなくなる。\n動かせなくなったら、ここの 魔法陣で もとに もどせる。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 2
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

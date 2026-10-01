@@ -1,0 +1,300 @@
+{
+  "id": "map_hall",
+  "width": 15,
+  "height": 11,
+  "tileset": "ts_ice",
+  "layers": [
+    {
+      "name": "ground",
+      "tiles": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+    },
+    {
+      "name": "objects",
+      "tiles": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 6, 0, 0, 0, 6, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+  ],
+  "events": {
+    "ev_intro": {
+      "id": "ev_intro",
+      "name": "はじまり",
+      "x": 7,
+      "y": 8,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "autorun",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "雪山の 奥の \\C[6]氷の神殿\\C[0]。村を すくう 「炎のしずく」は、\nこの 神殿の 最奥に ねむっている。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ふぶきの せいで、もう 引き返せない。\n案内人に 話しかけてから、奥へ すすもう。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSelfSwitch",
+              "params": {
+                "key": "A",
+                "value": true
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "selfSwitch",
+              "key": "A",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "commands": []
+        }
+      ]
+    },
+    "ev_guide": {
+      "id": "ev_guide",
+      "name": "案内人",
+      "x": 6,
+      "y": 5,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "476bb32799ae1d2f",
+            "index": 1,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ようこそ、旅の人。氷の神殿は 頭を つかう 神殿じゃ。\n何を 知りたい？",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "滑る床",
+                  "押せる岩",
+                  "仕掛け",
+                  "やり直し",
+                  "やめる"
+                ],
+                "cancel": 4
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "氷の床は つるつる 滑る。歩きだすと、\\C[6]壁・氷の柱・岩\\C[0]に ぶつかるか、\n\\C[6]雪の床\\C[0]に 着くまで 止まれない。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "滑っているあいだは 操作できん。\n止まる場所を 考えてから 踏みだすんじゃ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]岩\\C[0]は 押すと 1マス 動く。引くことは できんし、\n壁ぎわに 押しつけると もう 動かせん。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "氷の上でも 岩は 滑らん。\n滑る床では、岩が \\C[6]止まる目印\\C[0]にも なる。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 2
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "岩を 床の \\C[6]感圧板\\C[0]に のせると、仕掛けが 動く。\n板が ぜんぶ 押されると、扉が 開くんじゃ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "いちど 開いた 扉は 開いたままじゃ。\n階段や 台座、扉の上には 岩は 押せんぞ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 3
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "岩のある 部屋の 入口には \\C[6]魔法陣\\C[0]が ある。\nそこで 決定ボタンを 押せば、岩を もとの 位置に もどせる。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "メニューから 「ロード」すれば、部屋に 入ったときの\n状態から やり直せる（場所移動のたびに 自動で 保存される）。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 4
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "では、気をつけてな。奥へ すすむ階段は 上じゃ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_up": {
+      "id": "ev_up",
+      "name": "奥への階段",
+      "x": 7,
+      "y": 2,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": true,
+          "priority": "below",
+          "graphic": {
+            "asset": "acb4aae032043b8f",
+            "index": 4,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_slide",
+                "x": 7,
+                "y": 8,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_down": {
+      "id": "ev_down",
+      "name": "戻る階段",
+      "x": 7,
+      "y": 9,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "acb4aae032043b8f",
+            "index": 5,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "外は ふぶきで、とても 出られそうに ない。\n炎のしずくを 見つけるまで 帰れないのだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

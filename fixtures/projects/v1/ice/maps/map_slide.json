@@ -1,0 +1,130 @@
+{
+  "id": "map_slide",
+  "width": 15,
+  "height": 11,
+  "tileset": "ts_ice",
+  "layers": [
+    {
+      "name": "ground",
+      "tiles": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 2, 2, 1, 2, 2, 2, 2, 2, 2, 2, 1, 2, 2, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 2, 2, 1, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 3, 3, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+    },
+    {
+      "name": "objects",
+      "tiles": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 6, 0, 0, 0, 6, 0, 0, 0, 0, 0, 0, 0, 5, 0, 5, 0, 0, 0, 5, 0, 0, 0, 0, 0, 5, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 5, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+  ],
+  "events": {
+    "ev_up": {
+      "id": "ev_up",
+      "name": "奥への階段",
+      "x": 7,
+      "y": 2,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": true,
+          "priority": "below",
+          "graphic": {
+            "asset": "acb4aae032043b8f",
+            "index": 4,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_rock1",
+                "x": 7,
+                "y": 8,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_down": {
+      "id": "ev_down",
+      "name": "戻る階段",
+      "x": 7,
+      "y": 9,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "acb4aae032043b8f",
+            "index": 5,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_hall",
+                "x": 7,
+                "y": 3,
+                "dir": "down",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_hint": {
+      "id": "ev_hint",
+      "name": "石碑の文字",
+      "x": 7,
+      "y": 8,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "graphic": {
+            "asset": "acb4aae032043b8f",
+            "index": 6,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "足元に 文字が きざまれている。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "氷の床は つるつるだ。いちど 滑りだしたら、\\C[6]壁・氷の柱・雪の床\\C[0]に ぶつかるまで 止まれない。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "雪の床は 滑らない。氷の柱の 手前や、\n雪の床で 止まって、次の 向きを 考えよう。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

@@ -24,6 +24,10 @@ export function registerBuiltinFns(r: FormulaRegistry): void {
   r.registerFn("v", (a, scope) => (arity(a, "v", 1), scope.variable(str(a[0], "v", 0) as VariableId)));
   r.registerFn("s", (a, scope) => (arity(a, "s", 1), scope.switch(str(a[0], "s", 0) as SwitchId)));
 
+  // マップイベントの位置（押せる岩が仕掛けの位置に載ったか、など）。そのイベントが居ない（別のマップ・存在しない ID）と -1
+  r.registerFn("evx", (a, scope) => (arity(a, "evx", 1), scope.eventPos?.(str(a[0], "evx", 0))?.x ?? -1));
+  r.registerFn("evy", (a, scope) => (arity(a, "evy", 1), scope.eventPos?.(str(a[0], "evy", 0))?.y ?? -1));
+
   r.registerFn("min", (a) => Math.min(...nums(a, "min")));
   r.registerFn("max", (a) => Math.max(...nums(a, "max")));
   r.registerFn("floor", (a) => (arity(a, "floor", 1), Math.floor(num(a[0], "floor", 0))));

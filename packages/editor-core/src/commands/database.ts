@@ -160,7 +160,7 @@ export function upsertTileset(tileset: Tileset): EditorCommand {
     kind: "upsertTileset",
     label: "タイルセットの編集",
     project: true,
-    apply: (doc) => (tileset.passage.some((v) => !Number.isInteger(v) || v < 0 || v > 15) ? err(invalid("通行設定は 0〜15 の整数")) : ok({ ...doc, project: { ...doc.project, tilesets: withEntry(doc.project.tilesets, tileset.id, tileset) } })),
+    apply: (doc) => (tileset.passage.some((v) => !Number.isInteger(v) || v < 0 || v > 15) ? err(invalid("通行設定は 0〜15 の整数")) : tileset.ice?.some((v) => !Number.isInteger(v) || v < 1) ? err(invalid("氷のタイルは 1 以上の整数")) : ok({ ...doc, project: { ...doc.project, tilesets: withEntry(doc.project.tilesets, tileset.id, tileset) } })),
   });
 }
 

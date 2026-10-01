@@ -109,6 +109,7 @@ function evaluateIn(state: GameState, rng: Random, ctx: Ctx, expr: string, mode:
     vars: { gold: state.party.gold, ...vars },
     variable: (id) => (Object.hasOwn(state.variables, id) ? (state.variables[id] as number) : 0),
     switch: (id) => Object.hasOwn(state.switches, id) && state.switches[id] === true,
+    eventPos: (id) => (Object.hasOwn(state.map.events, id) ? state.map.events[id as keyof typeof state.map.events] : undefined),
     rng,
     mode,
   };

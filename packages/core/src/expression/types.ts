@@ -35,6 +35,8 @@ export interface Scope {
   vars: Record<string, Value>;
   variable(id: VariableId): number;
   switch(id: SwitchId): boolean;
+  /** マップイベントの現在位置（タイル座標）。マップの外の式（戦闘など）では未指定。`evx` / `evy` が使う。 */
+  eventPos?(id: string): { readonly x: number; readonly y: number } | undefined;
   /** `rand()` が使う乱数。評価が進めるのはこれだけ（所有者は呼び出し側）。 */
   rng: Random;
   /** `script` のときだけ副作用関数が使える。 */

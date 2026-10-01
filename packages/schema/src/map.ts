@@ -51,6 +51,11 @@ export const eventPageSchema = z.strictObject({
   sightRange: z.number().int().min(1).max(20).optional(),
   through: z.boolean(),
   priority: z.enum(["below", "same", "above"]),
+  /**
+   * 押せるイベント（岩・箱など）。プレイヤーが突き当たると、押した向きに 1 タイル動く（その先が通れるときだけ）。
+   * 通常プライオリティ（`same`）で `through` でないページに意味がある。
+   */
+  pushable: z.boolean().optional(),
   moveRoute: moveRouteSchema.optional(),
   commands: z.array(eventCommandSchema),
 });

@@ -110,6 +110,7 @@ export function runInterpreters(state: GameState, input: InputFrame, ctx: Ctx): 
 | `Wait` | `{ frames }` | |
 | `TransferPlayer` | `{ mapId, x, y, dir, fade }` | `fade` が `black` / `white` なら `screenFade`（その色）で 15 フレーム暗転 → 場所移動 → 15 フレーム明転（`TRANSFER_FADE_TICKS`。段階は `interp.locals` に持つ）。`none` はすぐ移動。`wait: transfer`。MapData 未ロードなら `requestMapData`（暗転したまま待つ） |
 | `SetMoveRoute` | `{ target, route, wait }` | |
+| `SetEventLocation` | `{ target, x, y, dir }` | イベントを (x, y) へ瞬間移動する |
 | `ChangeGold` / `ChangeItems` / `ChangeParty` / `ChangeHp` / `ChangeLevel` … | | |
 | `ChangeBgm` / `PlaySe` / `FadeoutBgm` | | Effect のみ |
 | `ShakeScreen` / `FlashScreen` / `TintScreen` / `Fadein` / `Fadeout` | | Effect + 一時状態 |
@@ -171,6 +172,9 @@ export function runInterpreters(state: GameState, input: InputFrame, ctx: Ctx): 
 - **視界**：有効なページのトリガが `eventSight` のイベントは、`eventTouch` と同じに触れてきても始まり、加えて**視界**にプレイヤーが入ると、そのページを通常のイベントとして起動する。毎フレーム、移動の補間のあとに、マップ定義の順で見て最初に見えたものだけを起動する（プレイヤーが歩いている途中・通常のイベントの実行中・メッセージ表示中・場所移動の予約中は見ない）。見えるのは、イベントが向いている方向（`direction`）のまっすぐ `sightRange`（既定 4）タイル以内。1 タイルずつ「そこへ進める」間だけ視界が通り、通れないタイル・通れない（有効なページを持つ `same` で `through` でない）イベントがあるとそこでさえぎられる（`through` のイベント自身でも視界は壁を抜けない）。同じタイルに居れば見える。うしろ・よこは見えない。見つけたあとは、ページの `commands` が見張りの反応（スイッチを入れる・メッセージ・移動）を書く。見えている間は、そのイベントが終わるたびにまた始まる（続けて見られているのだから）ので、ふつうは起動したら、スイッチでページを切り替えて視界のページから抜ける。デモ「忍び込み」（`fixtures/projects/v1/stealth`）の見張りがこれで見つけにくる。
 - **経路探索の移動（`chase`）**：`MoveStep` の `dir: "chase"` は、いまの位置からプレイヤーのタイルへ、通れる道（タイルの通行・通れないイベント）をたどる最短経路（幅優先。同じ長さなら下・左・右・上の順に探した方）の最初の 1 歩へ進む。探索するのは `CHASE_SEARCH_LIMIT`（1500）タイルまで。たどり着けない・上限を超えたときは `toward`（大きい軸の側へ近づく）と同じ。すでにプレイヤーの居るタイルに居るときは向きを変えない。`toward` が壁に突き当たって動けなくなるのに対して、`chase` は壁や木箱を回りこんで追う。`eventTouch` / `eventSight` のイベントは、プレイヤーの隣に着いたら（入らずに）触れて起動する。- **音・画面**：`ChangeBgm` / `PlaySe` / `FadeoutBgm` は Effect のみ。`ShakeScreen` / `FlashScreen` / `TintScreen` / `Fadeout` / `Fadein` は Effect を発行し、`wait` が真で時間があればその分待つ（色は r/g/b が 0〜255、a が 0〜1。`Fadeout` / `Fadein` の `wait` の既定は真）。
 - **システム**：`SaveGame` / `LoadGame` はメニューのセーブ/ロード画面を開く（`scene` を `menu` にするだけ。閉じるとマップに戻り、続きから実行される）、`GameOver`（ゲームオーバー画面へ。インタプリタは全部消える）、`ReturnToTitle`（状態を作り直してタイトルへ）、`Script { expr }`（副作用は `setVar` / `setSwitch` / `gainItem` のみ）。
+
+## 実装メモ（イベントの瞬間移動）
+- **`SetEventLocation { target, x, y, dir }`**：`target` は `"this"`（既定。このコマンドを実行しているマップイベント）かイベント ID。いまのマップの (x, y) へ、歩かずに瞬間移動する（`realX` / `realY` も合わせ、`moving` は偽）。`dir` は向き、または `"retain"`（既定。変えない）。マップに居ないイベント・マップの外の座標は、警告してスキップする（あとのコマンドは続く）。押せる岩（`EventPage.pushable`。02）をもとの位置に戻す魔法陣などに使う。状態に足したものは無い。デモ「氷の神殿」（`fixtures/projects/v1/ice`）で使っている。
 
 ## 実装メモ（ショップ画面）
 - **`ShopProcessing { goods, canSell = true }`** は `scene` を `{ kind: "shop", goods, canSell, owner, screen, cursor, quantity? }` にして `wait: { kind: "shop" }` で待つ。存在しないアイテムは並べず、1 つも無ければ警告して飛ばす。マップ以外のシーンでは警告して飛ばし、メッセージ欄が他のインタプリタに使われている間は 1 フレーム待って再試行する。閉じてマップに戻ると `resume` が次のコマンドへ進む（ゲームオーバー/タイトルに移ったときは待ち続ける。戦闘と同じ）。

@@ -2,7 +2,7 @@ import type { Direction, EventId, MapData, Tileset } from "@rpg/schema";
 import type { Ctx } from "../ctx-types.js";
 import type { InputFrame } from "../input.js";
 import { startInterpreter } from "../interpreter/index.js";
-import { DIRECTION_VECTOR, moveCharacter, REVERSE, startsOnPlayerTouch } from "../map/index.js";
+import { DIRECTION_VECTOR, moveCharacter, pushableAt, REVERSE, startsOnPlayerTouch } from "../map/index.js";
 import type { EventRuntime, GameState } from "../state.js";
 import type { StepResult } from "./actions.js";
 import { battleInput } from "../battle/index.js";
@@ -83,9 +83,18 @@ export function handleInput(state: GameState, input: InputFrame, ctx: Ctx): Step
 
   const tileset = ctx.project.tileset(map.tileset) ?? OPEN_TILESET;
   const { player } = state.map;
-  const moved = moveCharacter(player, dir, { map, tileset, events: state.map.events });
+  const pass = { map, tileset, events: state.map.events };
+  const moved = moveCharacter(player, dir, pass);
   let next: GameState = { ...state, map: { ...state.map, player: moved } };
   if (moved.x === player.x && moved.y === player.y) {
+    // 押せる岩：その先が通れるなら、岩を 1 タイル押して、プレイヤーも同じ向きに 1 タイル進む（岩の向きは変えない）
+    const rock = pushableAt(pass, player, dir, (ev) => ev.pageIndex !== null && map.events[ev.id]?.pages[ev.pageIndex]?.pushable === true);
+    if (rock !== undefined) {
+      const { dx, dy } = DIRECTION_VECTOR[dir];
+      const pushed = { ...rock, x: rock.x + dx, y: rock.y + dy, moving: true };
+      const stepped = { ...player, x: player.x + dx, y: player.y + dy, direction: dir, moving: true };
+      return { state: { ...state, map: { ...state.map, player: stepped, events: { ...state.map.events, [rock.id]: pushed } } }, effects: [] };
+    }
     // 突き当たり：目の前の通常プライオリティの接触イベント（プレイヤーから / イベントから）を起動
     const { dx, dy } = DIRECTION_VECTOR[dir];
     const bumped = eventsAt(state, player.x + dx, player.y + dy, (ev) => startsOnPlayerTouch(ev.trigger) && ev.priority === "same")[0];

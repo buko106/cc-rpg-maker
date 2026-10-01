@@ -99,6 +99,7 @@ export interface EventPage {
   trigger: "action" | "touch" | "eventTouch" | "eventSight" | "autorun" | "parallel";  // touch = プレイヤーから接触、eventTouch = イベントから接触、eventSight = 視界に入ったとき（eventTouch を含む）
   sightRange?: number;                    // eventSight の視界の長さ（タイル数 1〜20、既定 4）
   through: boolean; priority: "below" | "same" | "above";
+  pushable?: boolean;                     // 押せるイベント（岩・箱など）。プレイヤーが突き当たると、押した向きに 1 タイル動く（その先が通れるときだけ）
   moveRoute?: MoveRoute;
   commands: EventCommand[];
 }
@@ -235,4 +236,5 @@ export function findDanglingRefs(...): RefTarget[];
 
 ## 実装メモ（ランダムエンカウント・メニューでの使用）
 - **`MapData.encounterStep`（ランダムエンカウントの平均歩数）を足した**：1〜999 の整数（省略可。既定 30）。`encounters`（`MapData` に型だけあった敵グループの表）が 1 つ以上あるマップで、歩くたびにこの歩数に 1 回ほど、重み（`weight`）の比でトループを選んで戦闘になる（02・04）。`encounters` が無い・空のマップ（村・ダンジョンの安全な部屋）では出会わない。値を足しただけ（省略可）で既存のデータはそのまま読めるので `formatVersion` は上げていない。エディタの `setMapProperties` は `encounterStep`（`null` で既定に戻す）も受け取る。
+- **`Tileset.ice`（氷の床）と `EventPage.pushable`（押せるイベント）を足した**：`ice` はタイル ID の配列（`1` 以上の整数、省略可）。そのタイルがどのレイヤにあっても、歩いて着くと同じ向きに止まるまで滑る床になる。`pushable` は `boolean`（省略可）で、有効なページが真のとき、通常プライオリティで `through` でないイベントを、プレイヤーが突き当たって 1 タイル押せる（02）。どちらも省略可なので `formatVersion` は上げない。
 - **`system.menuSkill`（メニューに「スキル」を出すか）を足した**：`boolean`（省略可）。`true` のときだけメインメニューの「アイテム」の次に「スキル」が並び、味方に向けたスキル（回復など）をマップで使える（02・06）。省略または `false` なら並ばない（従来のメニューのまま）。`menuSave` と違って省略時は出さない（既存のゲームのメニューを変えないため）。値を足しただけで `formatVersion` は上げていない。
