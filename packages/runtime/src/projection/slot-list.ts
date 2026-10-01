@@ -1,5 +1,5 @@
 import type { ProjectView } from "@rpg/core";
-import { SAVE_SLOT_COUNT, SAVE_SLOT_FIRST } from "@rpg/core";
+import { AUTOSAVE_SLOT, loadSlotNumbers, saveSlotNumbers } from "@rpg/core";
 import type { UiNode } from "../frame-spec.js";
 import { term } from "./terms.js";
 import type { TermKey } from "./terms.js";
@@ -12,6 +12,7 @@ const HEADER_HEIGHT = 28;
 /**
  * セーブ/ロード/コンティニューのスロット一覧（画面いっぱいのウィンドウ）。
  * 1 行 = スロット番号・マップ名・先頭のキャラクターのレベルと、右端にプレイ時間。
+ * ロード/コンティニューは、オートセーブが有効なら先頭にスロット 0（番号の代わりに「オート」）が付く。
  */
 export function projectSlotList(view: ProjectView, screen: { width: number; height: number }, titleKey: TermKey, cursor: number, ui: UiContext): UiNode[] {
   const x = UI_MARGIN;
@@ -19,16 +20,16 @@ export function projectSlotList(view: ProjectView, screen: { width: number; heig
   const w = screen.width - UI_MARGIN * 2;
   const h = screen.height - UI_MARGIN * 2;
   const rows = Math.max(1, Math.floor((h - HEADER_HEIGHT - UI_PADDING) / UI_ROW_HEIGHT));
-  const first = firstVisible(cursor, SAVE_SLOT_COUNT, rows);
+  const slotNumbers = titleKey === "save" ? saveSlotNumbers() : loadSlotNumbers(view);
+  const first = firstVisible(cursor, slotNumbers.length, rows);
   const top = y + HEADER_HEIGHT;
 
   const children: UiNode[] = [textNode(x + UI_PADDING, y + UI_PADDING, term(view, titleKey), textColor(6))];
-  for (let i = 0; i < Math.min(rows, SAVE_SLOT_COUNT - first); i++) {
-    const index = first + i;
-    const slot = SAVE_SLOT_FIRST + index;
+  for (let i = 0; i < Math.min(rows, slotNumbers.length - first); i++) {
+    const slot = slotNumbers[first + i] ?? 0;
     const meta = ui.slots.find((m) => m.slot === slot);
     const ty = top + i * UI_ROW_HEIGHT + 2;
-    const label = `${String(slot).padStart(2, " ")}  `;
+    const label = `${slot === AUTOSAVE_SLOT ? term(view, "autosave") : String(slot).padStart(2, " ")}  `;
     if (meta === undefined) {
       children.push(textNode(x + UI_PADDING, ty, `${label}${term(view, "emptySlot")}`, textColor(7)));
     } else {

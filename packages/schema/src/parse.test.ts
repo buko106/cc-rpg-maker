@@ -113,6 +113,19 @@ describe("parseProject: errors", () => {
     expect(parseProject(project).ok).toBe(false);
   });
 
+  it("system.autosave is optional (older projects still parse) and strict", () => {
+    const { project } = rawMinimal();
+    expect(project["system"].autosave).toBeUndefined();
+    expect(parseProject(project).ok).toBe(true);
+    project["system"].autosave = { onTransfer: true };
+    const r = parseProject(project);
+    expect(r.ok && r.value.system.autosave).toEqual({ onTransfer: true });
+    project["system"].autosave = { onTransfer: true, onBattle: true };
+    expect(parseProject(project).ok).toBe(false);
+    project["system"].autosave = {};
+    expect(parseProject(project).ok).toBe(false);
+  });
+
   it("rejects unknown keys (typo detection)", () => {
     const { project } = rawMinimal();
     project["system"].startMapp = "x";
