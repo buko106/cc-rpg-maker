@@ -1,0 +1,135 @@
+{
+  "id": "map_room06",
+  "width": 11,
+  "height": 11,
+  "tileset": "ts_cave",
+  "layers": [
+    {
+      "name": "ground",
+      "tiles": [6, 6, 6, 6, 6, 9, 6, 6, 6, 6, 6, 6, 6, 2, 6, 2, 2, 2, 2, 2, 6, 6, 6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 6, 6, 2, 2, 2, 2, 2, 2, 2, 2, 6, 6, 6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 6, 11, 2, 2, 2, 2, 2, 2, 2, 2, 2, 12, 6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 6, 6, 6, 2, 2, 2, 2, 2, 2, 2, 2, 6, 6, 6, 2, 2, 2, 2, 2, 2, 2, 2, 6, 6, 6, 2, 2, 2, 2, 2, 2, 6, 6, 6, 6, 6, 6, 6, 6, 10, 6, 6, 6, 6, 6]
+    },
+    {
+      "name": "objects",
+      "tiles": [0, 0, 20, 0, 0, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 17, 18, 0, 0, 0, 0, 0, 0, 0, 0, 14, 0, 0, 0, 0, 14, 0, 19, 0, 0, 0, 19, 0, 0, 0, 14, 14, 0, 0, 0, 0, 0, 0, 0, 14, 14, 0, 14, 17, 0, 0, 0, 0, 0, 0, 18, 0, 0, 0, 19, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+  ],
+  "events": {
+    "ev_door_up": {
+      "id": "ev_door_up",
+      "name": "上の出入口",
+      "x": 5,
+      "y": 0,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_room05",
+                "x": 5,
+                "y": 9,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_door_down": {
+      "id": "ev_door_down",
+      "name": "下の出入口",
+      "x": 5,
+      "y": 10,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_room07",
+                "x": 5,
+                "y": 1,
+                "dir": "down",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_door_right": {
+      "id": "ev_door_right",
+      "name": "右の出入口",
+      "x": 10,
+      "y": 5,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_room06",
+                "x": 1,
+                "y": 5,
+                "dir": "right",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_door_left": {
+      "id": "ev_door_left",
+      "name": "左の出入口",
+      "x": 0,
+      "y": 5,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ひゅうっ……！\n冷たい風に 押し戻された！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_room01",
+                "x": 5,
+                "y": 6,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

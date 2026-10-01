@@ -1,0 +1,229 @@
+{
+  "formatVersion": 1,
+  "meta": {
+    "id": "maze",
+    "title": "デモ：地下迷宮",
+    "createdAt": "2026-09-30T00:00:00Z",
+    "updatedAt": "2026-09-30T00:00:00Z"
+  },
+  "system": {
+    "startMap": "map_room01",
+    "startX": 5,
+    "startY": 6,
+    "initialParty": [
+      "actor_hero"
+    ],
+    "tileSize": 32,
+    "screen": {
+      "width": 352,
+      "height": 352
+    },
+    "bgm": {},
+    "terms": {
+      "newGame": "ニューゲーム"
+    }
+  },
+  "maps": {
+    "map_room01": {
+      "id": "map_room01",
+      "name": "第1の間",
+      "order": 0
+    },
+    "map_room02": {
+      "id": "map_room02",
+      "name": "第2の間",
+      "order": 1
+    },
+    "map_room03": {
+      "id": "map_room03",
+      "name": "第3の間",
+      "order": 2
+    },
+    "map_room04": {
+      "id": "map_room04",
+      "name": "第4の間",
+      "order": 3
+    },
+    "map_room05": {
+      "id": "map_room05",
+      "name": "第5の間",
+      "order": 4
+    },
+    "map_room06": {
+      "id": "map_room06",
+      "name": "第6の間",
+      "order": 5
+    },
+    "map_room07": {
+      "id": "map_room07",
+      "name": "第7の間",
+      "order": 6
+    },
+    "map_room08": {
+      "id": "map_room08",
+      "name": "第8の間",
+      "order": 7
+    },
+    "map_room09": {
+      "id": "map_room09",
+      "name": "第9の間",
+      "order": 8
+    },
+    "map_room10": {
+      "id": "map_room10",
+      "name": "第10の間",
+      "order": 9
+    },
+    "map_room11": {
+      "id": "map_room11",
+      "name": "第11の間",
+      "order": 10
+    },
+    "map_room12": {
+      "id": "map_room12",
+      "name": "第12の間",
+      "order": 11
+    },
+    "map_room13": {
+      "id": "map_room13",
+      "name": "第13の間",
+      "order": 12
+    },
+    "map_room14": {
+      "id": "map_room14",
+      "name": "第14の間",
+      "order": 13
+    },
+    "map_room15": {
+      "id": "map_room15",
+      "name": "第15の間",
+      "order": 14
+    },
+    "map_room16": {
+      "id": "map_room16",
+      "name": "第16の間",
+      "order": 15
+    },
+    "map_room17": {
+      "id": "map_room17",
+      "name": "第17の間",
+      "order": 16
+    },
+    "map_room18": {
+      "id": "map_room18",
+      "name": "第18の間",
+      "order": 17
+    },
+    "map_room19": {
+      "id": "map_room19",
+      "name": "第19の間",
+      "order": 18
+    },
+    "map_room20": {
+      "id": "map_room20",
+      "name": "第20の間（出口）",
+      "order": 19
+    }
+  },
+  "tilesets": {
+    "ts_cave": {
+      "id": "ts_cave",
+      "name": "洞窟",
+      "image": {
+        "asset": "ba308f78c8dd4221"
+      },
+      "passage": [15, 15, 15, 15, 15, 0, 0, 0, 0, 15, 15, 15, 15, 0, 0, 0, 0, 0, 15, 15, 0, 15, 15, 15]
+    }
+  },
+  "database": {
+    "actors": {
+      "actor_hero": {
+        "id": "actor_hero",
+        "name": "勇者",
+        "classId": "class_hero",
+        "initialLevel": 1,
+        "walk": {
+          "asset": "bb2e23b45d1f4d4d"
+        },
+        "equips": {}
+      }
+    },
+    "classes": {
+      "class_hero": {
+        "id": "class_hero",
+        "name": "戦士",
+        "skills": [],
+        "params": {
+          "mhp": {
+            "base": 100,
+            "growth": 2
+          },
+          "mmp": {
+            "base": 20,
+            "growth": 2
+          },
+          "atk": {
+            "base": 10,
+            "growth": 2
+          },
+          "def": {
+            "base": 10,
+            "growth": 2
+          },
+          "mat": {
+            "base": 10,
+            "growth": 2
+          },
+          "mdf": {
+            "base": 10,
+            "growth": 2
+          },
+          "agi": {
+            "base": 10,
+            "growth": 2
+          },
+          "luk": {
+            "base": 10,
+            "growth": 2
+          }
+        }
+      }
+    },
+    "skills": {},
+    "items": {},
+    "enemies": {},
+    "troops": {},
+    "states": {},
+    "commonEvents": {}
+  },
+  "assets": {
+    "entries": {
+      "ba308f78c8dd4221": {
+        "name": "cave_tileset.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 9267,
+        "width": 768,
+        "height": 32
+      },
+      "bb2e23b45d1f4d4d": {
+        "name": "hero.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 660,
+        "width": 96,
+        "height": 128
+      },
+      "ec5b6ad1b2757c76": {
+        "name": "signboard.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 492,
+        "width": 96,
+        "height": 128
+      }
+    }
+  },
+  "switches": {},
+  "variables": {}
+}

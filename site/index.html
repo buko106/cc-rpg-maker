@@ -66,6 +66,7 @@
       .shots { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; margin: 0; padding: 0; list-style: none; }
       .shots figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; overflow: hidden; }
       .shots img { display: block; width: 100%; height: auto; image-rendering: pixelated; background: #000; }
+      .shots img.game { aspect-ratio: 4 / 3; object-fit: cover; }
       .shots figcaption { padding: 10px 14px; font-size: 0.9rem; color: var(--muted); }
 
       .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; margin: 0; padding: 0; list-style: none; }
@@ -88,7 +89,7 @@
         <h1>cc-rpg-maker<br /><span>ブラウザで作って、ブラウザで遊ぶ。</span></h1>
         <p>RPGツクール風のゲーム制作ツールです。マップとイベントを作り、そのままテストプレイ。作ったゲームは静的ファイルか単一 HTML で配れます。インストールは要りません。</p>
         <div class="cta">
-          <a class="btn primary" href="demo/">デモを遊ぶ</a>
+          <a class="btn primary" href="demo/">デモを選んで遊ぶ</a>
           <a class="btn secondary" href="editor/">エディタを開く</a>
         </div>
       </div>
@@ -97,12 +98,18 @@
     <main class="wrap">
       <section>
         <h2>デモ</h2>
-        <p class="lead">同梱のサンプルゲームです。村を歩いて、話しかけて、スライムと戦えます。ネコとヒヨコも歩いています。</p>
+        <p class="lead">同梱のサンプルゲームです。<a href="demo/">デモの一覧</a>から選んで遊べます。</p>
         <ul class="shots">
           <li>
             <figure>
-              <a href="demo/"><img src="img/demo.png" alt="サンプルゲームのマップ画面" width="640" height="480" loading="lazy" /></a>
-              <figcaption>プレイヤー：マップを歩き、イベントに話しかけ、戦闘やセーブができる</figcaption>
+              <a href="demo/village/"><img class="game" src="img/demo.png" alt="はじまりの村のマップ画面" width="640" height="480" loading="lazy" /></a>
+              <figcaption><strong>はじまりの村</strong>：村を歩いて、話しかけて、スライムと戦う。ネコとヒヨコも歩いています</figcaption>
+            </figure>
+          </li>
+          <li>
+            <figure>
+              <a href="demo/maze/"><img class="game" src="img/maze.png" alt="地下迷宮の洞窟の部屋" width="704" height="704" loading="lazy" /></a>
+              <figcaption><strong>地下迷宮</strong>：20 の洞窟の間を抜けて出口の光を目指す迷路。道を間違えるとループしたり、入口の方へ押し戻されたり</figcaption>
             </figure>
           </li>
           <li>

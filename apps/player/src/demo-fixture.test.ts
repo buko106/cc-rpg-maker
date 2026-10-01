@@ -4,11 +4,12 @@ import { describe, expect, it } from "vitest";
 import { hashAsset } from "@rpg/assets";
 import { FIXTURES_ROOT, loadFixtureProject } from "@rpg/test-utils";
 
-const ASSETS = join(FIXTURES_ROOT, "projects", "v1", "demo", "assets");
 const EXTENSIONS: Record<string, string> = { "image/png": "png", "audio/wav": "wav" };
 
-describe("fixtures/projects/v1/demo のアセット", () => {
-  const { project } = loadFixtureProject("demo");
+// サイトの「デモを選ぶ」に並ぶデモ（tools/build-demos.mjs の DEMOS）
+describe.each(["demo", "maze"])("fixtures/projects/v1/%s のアセット", (name) => {
+  const ASSETS = join(FIXTURES_ROOT, "projects", "v1", name, "assets");
+  const { project } = loadFixtureProject(name);
   const files = readdirSync(ASSETS).sort();
 
   it("[inv-5] ファイル名（AssetId）は内容の sha256 先頭 16 桁と一致する", async () => {
