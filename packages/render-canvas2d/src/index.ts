@@ -188,14 +188,17 @@ export function createCanvas2dRenderer(canvas: HTMLCanvasElement, options: Canva
     }
 
     // overlay の順序: tint → flash → fade
-    const { tint, flash, fade } = frame.overlay;
+    const { tint, flash, fade, fadeColor } = frame.overlay;
     const cover = (fill: string): void => {
       c.fillStyle = fill;
       c.fillRect(0, 0, frame.size.width, frame.size.height);
     };
     if (tint.a > 0) cover(css(tint));
     if (flash !== undefined && flash.alpha > 0) cover(css({ ...flash.color, a: flash.color.a * flash.alpha }));
-    if (fade > 0) cover(`rgba(0,0,0,${Math.min(1, fade)})`);
+    if (fade > 0) {
+      const fc = fadeColor ?? { r: 0, g: 0, b: 0 };
+      cover(`rgba(${fc.r},${fc.g},${fc.b},${Math.min(1, fade)})`);
+    }
 
     for (const node of frame.ui) drawUi(c, node);
   }

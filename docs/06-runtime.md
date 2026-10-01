@@ -171,7 +171,7 @@ export type UiNode =
 - **テスト**：`projection/battle.test.ts`（スナップショット 2 つ、レイアウト、ログの文言の表、ポップアップ、対象カーソル）、`battle-runtime.test.ts`（Runtime を通した BGM・描画・勝利・ゲームオーバー → タイトル）。`runtime.test.ts` のリプレイ一致テストは `title: true` のリプレイも通る。
 
 ## 実装メモ（M6 で確定した点）
-- **`VisualFx` に色調と暗転を追加**：`screenTint`（`from` → `color` へ線形に変わり、終わってもそのまま保たれる。`a = 0` に戻ると消える）と `screenFade`（暗転は `to = 0`（明転）を指示するまで保たれる）。どちらも `fxOverlay` が `Overlay.tint` / `Overlay.fade` にする。セーブ・リプレイの対象外（ロードすると消える）。
+- **`VisualFx` に色調と暗転を追加**：`screenTint`（`from` → `color` へ線形に変わり、終わってもそのまま保たれる。`a = 0` に戻ると消える）と `screenFade`（暗転は `to = 0`（明転）を指示するまで保たれる）。どちらも `fxOverlay` が `Overlay.tint` / `Overlay.fade` にする。暗転の色が白なら `Overlay.fadeColor`（白）も出す（黒のときは出さないので、既存のフレームのスナップショットは変わらない）。`TransferPlayer` の `fade` もこの `screenFade` で暗転・明転する。セーブ・リプレイの対象外（ロードすると消える）。
 - **投影**：選択肢（見出し `text` の下に縦に並べ、カーソルを重ねる。多いときはカーソルが見える範囲だけ）、数値入力（桁ごとの数字と、編集中の桁のカーソル。画面中央）、タイマー（右上に `m:ss`）。
 
 ## 実装メモ（M7 で確定した点）

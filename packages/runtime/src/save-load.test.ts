@@ -30,7 +30,7 @@ async function saveTo(h: RuntimeHarness, slot: number): Promise<void> {
 
 /** transfer-demo の扉を抜けて map_b へ。マップの読み込みで止まるたびに完了を待つ。 */
 async function throughDoor(h: RuntimeHarness): Promise<void> {
-  for (const f of expandInputs([{ hold: "right", frames: 128 }, { wait: 2 }, { press: "ok" }, { wait: 40 }, { press: "ok" }, { wait: 20 }])) {
+  for (const f of expandInputs([{ hold: "right", frames: 128 }, { wait: 2 }, { press: "ok" }, { wait: 40 }, { press: "ok" }, { wait: 50 }])) {
     h.play(f);
     if (h.runtime.status === "loading") await h.runtime.settled();
   }

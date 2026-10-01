@@ -108,7 +108,7 @@ export function runInterpreters(state: GameState, input: InputFrame, ctx: Ctx): 
 | `CallCommonEvent` | `{ id }` | `control: call` |
 | `Label` / `JumpToLabel` | `{ name }` | |
 | `Wait` | `{ frames }` | |
-| `TransferPlayer` | `{ mapId, x, y, dir, fade }` | `wait: transfer`。MapData 未ロードなら `requestMapData` |
+| `TransferPlayer` | `{ mapId, x, y, dir, fade }` | `fade` が `black` / `white` なら `screenFade`（その色）で 15 フレーム暗転 → 場所移動 → 15 フレーム明転（`TRANSFER_FADE_TICKS`。段階は `interp.locals` に持つ）。`none` はすぐ移動。`wait: transfer`。MapData 未ロードなら `requestMapData`（暗転したまま待つ） |
 | `SetMoveRoute` | `{ target, route, wait }` | |
 | `ChangeGold` / `ChangeItems` / `ChangeParty` / `ChangeHp` / `ChangeLevel` … | | |
 | `ChangeBgm` / `PlaySe` / `FadeoutBgm` | | Effect のみ |

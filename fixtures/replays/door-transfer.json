@@ -7,19 +7,21 @@
     { "press": "ok" },
     { "wait": 40 },
     { "press": "ok" },
-    { "wait": 5 }
+    { "wait": 35 }
   ],
-  "expect": { "finalStateHash": "e86fe168db533a494c7e97c10ca76641636b21162beef619ecb2242266830f54", "effects": { "log": 0, "requestMapData": 0 } },
+  "expect": { "finalStateHash": "7d1c9c9ba28f26cf601956ed04c819f82b7d25f9027a3e98635849ca4a31bfa7", "effects": { "log": 0, "requestMapData": 0, "screenFade": 2 } },
   "assertions": [
     { "atTick": 100, "path": "message.text", "equals": "扉を開ける…" },
     { "atTick": 128, "path": "map.player.x", "equals": 7 },
     { "atTick": 128, "path": "map.mapId", "equals": "map_a" },
     { "atTick": 171, "path": "message.text", "equals": "初めて入る。" },
     { "atTick": 171, "path": "variables.var_visits", "equals": 1 },
-    { "atTick": 177, "path": "map.mapId", "equals": "map_b" },
-    { "atTick": 177, "path": "map.player.x", "equals": 2 },
-    { "atTick": 177, "path": "map.player.y", "equals": 3 },
-    { "atTick": 177, "path": "switches.sw_entered", "equals": true },
-    { "atTick": 177, "path": "interpreters", "equals": [] }
+    { "atTick": 180, "path": "map.mapId", "equals": "map_a" },
+    { "atTick": 180, "path": "switches.sw_entered", "equals": true },
+    { "atTick": 192, "path": "map.mapId", "equals": "map_b" },
+    { "atTick": 192, "path": "map.player.x", "equals": 2 },
+    { "atTick": 192, "path": "map.player.y", "equals": 3 },
+    { "atTick": 192, "path": "interpreters.0.wait.kind", "equals": "frames" },
+    { "atTick": 207, "path": "interpreters", "equals": [] }
   ]
 }

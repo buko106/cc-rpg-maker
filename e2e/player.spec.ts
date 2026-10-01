@@ -152,7 +152,8 @@ test("家の扉に触れるとマップが遅延ロードされ、家の中へ�
   expect(mapRequests).toEqual(["/project/maps/map_town.json", "/project/maps/map_house.json"]);
   expect((await state(page)).map).toMatchObject({ name: "村人の家", player: { x: 5, y: 6 } });
 
-  // 家の床（茶色の木）が描かれている
+  // 扉は fade: black なので、移動先で明転し終わる（扉のイベントが終わる）のを待ってから、家の床（茶色の木）が描かれていることを見る
+  await page.waitForFunction(() => window.__rpg.getState().interpreters.length === 0);
   await page.waitForTimeout(100);
   const [r, g, b] = await pixel(page, 8 * 32 - 5, 100);
   expect(r).toBeGreaterThan(g! + 20);

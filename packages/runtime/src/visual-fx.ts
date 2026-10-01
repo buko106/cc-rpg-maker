@@ -11,11 +11,13 @@ export interface VisualFx {
   readonly flash?: { readonly color: RGBA; readonly total: number; readonly left: number };
   /** 色調：`from` から `color` へ `total` フレームかけて変わり、`left` が 0 になったらそのまま保たれる（`a` = 0 なら消える）。 */
   readonly tint?: { readonly from: RGBA; readonly color: RGBA; readonly total: number; readonly left: number };
-  /** 暗転：`from` から `to`（0 = 明るい、1 = 真っ暗）へ変わり、暗転は明転を指示するまで保たれる。 */
-  readonly fade?: { readonly from: number; readonly to: 0 | 1; readonly total: number; readonly left: number };
+  /** 暗転：`from` から `to`（0 = 明るい、1 = 真っ暗）へ変わり、暗転は明転を指示するまで保たれる。`color` は暗転の色。 */
+  readonly fade?: { readonly from: number; readonly to: 0 | 1; readonly total: number; readonly left: number; readonly color: "black" | "white" };
 }
 
 export const NO_FX: VisualFx = {};
+
+const WHITE: RGBA = { r: 255, g: 255, b: 255, a: 1 };
 
 export function applyFxEffect(fx: VisualFx, effect: Effect): VisualFx {
   if (effect.kind === "screenShake") {
@@ -25,7 +27,11 @@ export function applyFxEffect(fx: VisualFx, effect: Effect): VisualFx {
     return effect.durationTicks > 0 ? { ...fx, flash: { color: effect.color, total: effect.durationTicks, left: effect.durationTicks } } : fx;
   }
   if (effect.kind === "screenTint") return { ...fx, tint: { from: tintNow(fx), color: effect.color, total: effect.durationTicks, left: effect.durationTicks } };
-  if (effect.kind === "screenFade") return { ...fx, fade: { from: fadeNow(fx), to: effect.to, total: effect.durationTicks, left: effect.durationTicks } };
+  if (effect.kind === "screenFade") {
+    // 色の指定が無い明転は、今の暗転の色のまま戻す（白く暗転した画面を黒から明転させない）。指定の無い暗転は黒
+    const color = effect.color ?? (effect.to === 0 ? (fx.fade?.color ?? "black") : "black");
+    return { ...fx, fade: { from: fadeNow(fx), to: effect.to, total: effect.durationTicks, left: effect.durationTicks, color } };
+  }
   return fx;
 }
 
@@ -72,6 +78,7 @@ export function fxOverlay(fx: VisualFx): Overlay {
     : { dx: 0, dy: 0 };
   return {
     fade: fadeNow(fx),
+    ...(fx.fade?.color === "white" ? { fadeColor: WHITE } : {}),
     tint: tintNow(fx),
     ...(fx.flash ? { flash: { color: fx.flash.color, alpha: fx.flash.left / fx.flash.total } } : {}),
     shake,

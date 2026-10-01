@@ -419,23 +419,13 @@ function buildRoom(k, plan) {
 // ── イベント ──────────────────────────────────────────────────────────
 const cmd = (code, params, indent = 0) => ({ code, params, indent });
 const text = (t) => cmd("ShowText", { text: t, position: "bottom", background: "window" });
-/** 部屋を移るときの暗転の長さ（フレーム）。 */
-const FADE_FRAMES = 15;
-/**
- * 暗転しながら場所移動する：フェードアウト → 場所移動 → フェードイン。
- * `TransferPlayer` の `fade` は今のところ見た目に反映されないので、画面のフェードのコマンドで暗転させる。
- * 場所移動を待っていたインタプリタは移動先でも続くので、フェードインは移動先の部屋で実行される（終わるまで歩けない）。
- */
-const transfer = (to, x, y, dir) => [
-  cmd("Fadeout", { duration: FADE_FRAMES, wait: true }),
-  cmd("TransferPlayer", { mapId: mapId(to), x, y, dir, fade: "none" }),
-  cmd("Fadein", { duration: FADE_FRAMES, wait: true }),
-];
+/** 部屋を移るときは暗転する（`TransferPlayer` の `fade: "black"`。暗転 → 場所移動 → 明転、終わるまで歩けない）。 */
+const transfer = (to, x, y, dir) => cmd("TransferPlayer", { mapId: mapId(to), x, y, dir, fade: "black" });
 
 function doorEvent(k, dir, door) {
   const commands = [];
   if (door.kind === "trap") commands.push(text("ひゅうっ……！\n冷たい風に 押し戻された！"));
-  commands.push(...transfer(door.to, door.x, door.y, door.dir));
+  commands.push(transfer(door.to, door.x, door.y, door.dir));
   const [x, y] = DOOR[dir];
   return {
     id: `ev_door_${dir}`,

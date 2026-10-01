@@ -165,6 +165,15 @@ describe("createCanvas2dRenderer", () => {
     expect(calls.filter((c) => c.startsWith("fillStyle="))).toEqual(["fillStyle=#000", "fillStyle=rgba(1,2,3,0.4)", "fillStyle=rgba(255,255,255,0.5)", "fillStyle=rgba(0,0,0,0.5)"]);
   });
 
+  it("暗転の色（fadeColor）が白なら、白で覆う", async () => {
+    const { ctx, calls } = mockContext();
+    const r = createCanvas2dRenderer(mockCanvas(ctx));
+    await r.init({ width: 64, height: 48, assets: assetsOf({}).source });
+    calls.length = 0;
+    r.render(frame({ overlay: { fade: 0.5, fadeColor: { r: 255, g: 255, b: 255, a: 1 }, tint: { r: 0, g: 0, b: 0, a: 0 }, shake: { dx: 0, dy: 0 } } }));
+    expect(calls.filter((c) => c.startsWith("fillStyle="))).toEqual(["fillStyle=#000", "fillStyle=rgba(255,255,255,0.5)"]);
+  });
+
   it("テキストは maxWidth で折り返し、runs は色ごとに続けて描く", async () => {
     const { ctx, calls } = mockContext();
     const r = createCanvas2dRenderer(mockCanvas(ctx));

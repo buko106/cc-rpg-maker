@@ -82,6 +82,16 @@ describe("VisualFx: 色調と暗転", () => {
     expect(fx.fade).toBeUndefined();
   });
 
+  it("白い暗転は overlay に fadeColor（白）を出す。黒は出さない。色の指定が無い明転は今の色のまま戻る", () => {
+    let fx = applyFxEffect(NO_FX, { kind: "screenFade", to: 1, durationTicks: 0, color: "white" });
+    expect(fxOverlay(fx)).toMatchObject({ fade: 1, fadeColor: { r: 255, g: 255, b: 255 } });
+    fx = applyFxEffect(fx, { kind: "screenFade", to: 0, durationTicks: 2 });
+    expect(fxOverlay(tickFx(fx))).toMatchObject({ fade: 0.5, fadeColor: { r: 255, g: 255, b: 255 } });
+    expect(fxOverlay(applyFxEffect(NO_FX, { kind: "screenFade", to: 1, durationTicks: 0 }))).not.toHaveProperty("fadeColor");
+    // 指定の無い暗転は黒
+    expect(fxOverlay(applyFxEffect(fx, { kind: "screenFade", to: 1, durationTicks: 0 }))).not.toHaveProperty("fadeColor");
+  });
+
   it("長さ 0 なら即座に切り替わる", () => {
     expect(fxOverlay(applyFxEffect(NO_FX, { kind: "screenFade", to: 1, durationTicks: 0 })).fade).toBe(1);
     expect(fxOverlay(applyFxEffect(NO_FX, { kind: "screenTint", color: blue, durationTicks: 0 })).tint).toEqual(blue);
