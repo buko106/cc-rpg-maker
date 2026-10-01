@@ -27,13 +27,29 @@
           "priority": "below",
           "commands": [
             {
+              "code": "Fadeout",
+              "params": {
+                "duration": 15,
+                "wait": true
+              },
+              "indent": 0
+            },
+            {
               "code": "TransferPlayer",
               "params": {
                 "mapId": "map_room18",
                 "x": 1,
                 "y": 5,
                 "dir": "right",
-                "fade": "black"
+                "fade": "none"
+              },
+              "indent": 0
+            },
+            {
+              "code": "Fadein",
+              "params": {
+                "duration": 15,
+                "wait": true
               },
               "indent": 0
             }
@@ -54,13 +70,29 @@
           "priority": "below",
           "commands": [
             {
+              "code": "Fadeout",
+              "params": {
+                "duration": 15,
+                "wait": true
+              },
+              "indent": 0
+            },
+            {
               "code": "TransferPlayer",
               "params": {
                 "mapId": "map_room20",
                 "x": 5,
                 "y": 9,
                 "dir": "up",
-                "fade": "black"
+                "fade": "none"
+              },
+              "indent": 0
+            },
+            {
+              "code": "Fadein",
+              "params": {
+                "duration": 15,
+                "wait": true
               },
               "indent": 0
             }
@@ -81,13 +113,29 @@
           "priority": "below",
           "commands": [
             {
+              "code": "Fadeout",
+              "params": {
+                "duration": 15,
+                "wait": true
+              },
+              "indent": 0
+            },
+            {
               "code": "TransferPlayer",
               "params": {
                 "mapId": "map_room19",
                 "x": 5,
                 "y": 1,
                 "dir": "down",
-                "fade": "black"
+                "fade": "none"
+              },
+              "indent": 0
+            },
+            {
+              "code": "Fadein",
+              "params": {
+                "duration": 15,
+                "wait": true
               },
               "indent": 0
             }
@@ -117,13 +165,29 @@
               "indent": 0
             },
             {
+              "code": "Fadeout",
+              "params": {
+                "duration": 15,
+                "wait": true
+              },
+              "indent": 0
+            },
+            {
               "code": "TransferPlayer",
               "params": {
                 "mapId": "map_room13",
                 "x": 5,
                 "y": 1,
                 "dir": "down",
-                "fade": "black"
+                "fade": "none"
+              },
+              "indent": 0
+            },
+            {
+              "code": "Fadein",
+              "params": {
+                "duration": 15,
+                "wait": true
               },
               "indent": 0
             }
