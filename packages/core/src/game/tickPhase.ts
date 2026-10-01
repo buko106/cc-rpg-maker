@@ -9,6 +9,7 @@ import { battleTick } from "../battle/index.js";
 import type { GameState, MapState } from "../state.js";
 import type { StepResult } from "./actions.js";
 import { enterMap } from "./initial.js";
+import { AUTOSAVE_SLOT, autosaveOnTransfer } from "./scenes.js";
 import { hasNormalInterpreter, startMapEvent } from "./inputPhase.js";
 
 /** 自動実行・並列処理イベントのインタプリタを、現在の有効ページに合わせて起動・停止する。 */
@@ -73,6 +74,8 @@ function applyTransfer(state: GameState, ctx: Ctx): StepResult {
   // 元のマップの並列イベントは終了する（移動先で必要なら再び起動される）。移動を待っているインタプリタ自身は残す。
   const interpreters = state.interpreters.filter((i) => !(i.mode === "parallel" && (i.origin.kind === "mapEvent" || isPageRouteOrigin(i.origin))));
   const s = refreshEventPages({ ...state, map: entered, interpreters }, target);
+  // オートセーブ：移動先に着いた状態を保存する（`system.autosave.onTransfer`）。runtime は確認せず、お知らせだけ出す。
+  if (autosaveOnTransfer(ctx.project)) effects.push({ kind: "requestSave", slot: AUTOSAVE_SLOT });
   return { state: { ...s, map: { ...s.map, camera: computeCamera(player, target, ctx.project.project.system) } }, effects };
 }
 

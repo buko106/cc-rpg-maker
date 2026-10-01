@@ -184,3 +184,4 @@ export function runInterpreters(state: GameState, input: InputFrame, ctx: Ctx): 
 - **`meta.internal`**：内部用（他のコマンドが展開して作る）。`MoveStep` だけ。エディタの追加の一覧に出さず、単独では扱えない。
 - **組み込みの対応**：開始 = `ConditionalBranch`（`bodyFirst`・`Else`）/ `ShowChoices` / `BattleProcessing` / `Loop`（`bodyFirst`）、区切り = `Else` / `ChoiceBranch`、終端 = `EndBranch` / `EndLoop`。プラグインのコマンドも同じ `meta.block` を書けばエディタで同じように扱える（14）。
 - **テスト**：`meta.test.ts`（組み込みの役割、`close` と `dividers` が登録済みの終端・区切りを指すこと、区切りの並び）。
+- **`SaveGame` / `LoadGame` はセーブポータル**：メニューと同じセーブ/ロード画面を、イベントから直接開く（`scene` を `{ kind: "menu", screen, cursor: 0, portal: true }` にする）。`portal` の画面は、キャンセルするとメインメニューを経由せずマップに戻り、イベントが続きから動く（メニューから開いた画面は従来どおりメインメニューに戻る）。`system.menuSave: false`（02）のゲームでも、これで開けばセーブできる。保存は画面での選択で行うので、コマンドに引数は無い。

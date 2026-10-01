@@ -1,4 +1,4 @@
-import { createCtx, createProjectView, dispatch as coreDispatch, initialState, progressFingerprint, SAVE_SLOT_FIRST, step, titleState, toSnapshot } from "@rpg/core";
+import { AUTOSAVE_SLOT, createCtx, createProjectView, dispatch as coreDispatch, initialState, progressFingerprint, SAVE_SLOT_FIRST, step, titleState, toSnapshot } from "@rpg/core";
 import type { Action, Ctx, Effect, GameState } from "@rpg/core";
 import type { MapData, MapId } from "@rpg/schema";
 import { distributeEffect } from "./effects.js";
@@ -154,8 +154,12 @@ export function createRuntime(deps: RuntimeDeps): Runtime {
     }
   };
 
-  /** 現在の状態のスナップショットを取り（同期）、書き込みは非同期で行う。 */
+  /**
+   * 現在の状態のスナップショットを取り（同期）、書き込みは非同期で行う。
+   * オートセーブ（スロット 0）は「プレイの元のセーブ」にしない（確認ダイアログの判断を変えない）ので、お知らせだけ別にして `origin` は触らない。
+   */
   function saveSlot(slot: number): void {
+    const auto = slot === AUTOSAVE_SLOT;
     const { state: s } = current();
     const now = clock();
     const snap = toSnapshot(s, { projectId, projectHash, savedAt: new Date(Number.isFinite(now) ? now : 0).toISOString() });
@@ -165,8 +169,8 @@ export function createRuntime(deps: RuntimeDeps): Runtime {
         .write(slot, snap)
         .then(async (r) => {
           if (r.ok) {
-            origin = { slot, fingerprint };
-            setNotice("saved");
+            if (!auto) origin = { slot, fingerprint };
+            setNotice(auto ? "autosaved" : "saved");
             await refreshSlots();
           } else {
             logger.warn(`slot ${slot} に保存できない: ${r.error.kind}`);

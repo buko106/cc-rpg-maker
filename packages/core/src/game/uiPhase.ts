@@ -4,7 +4,7 @@ import type { InputFrame } from "../input.js";
 import type { GameState, MenuConfirm, MenuScreen, SceneState } from "../state.js";
 import type { StepResult } from "./actions.js";
 import { initialState, titleState } from "./initial.js";
-import { MENU_ITEMS, menuItemIds, SAVE_SLOT_COUNT, SAVE_SLOT_FIRST, TITLE_ITEMS } from "./scenes.js";
+import { loadSlotNumbers, menuItemIds, menuItems, saveSlotNumbers, TITLE_ITEMS } from "./scenes.js";
 
 /** 0..count-1 を循環するカーソル移動。 */
 const move = (cursor: number, delta: number, count: number): number => (count <= 0 ? 0 : (((cursor + delta) % count) + count) % count);
@@ -18,7 +18,7 @@ const withScene = (state: GameState, scene: SceneState, effects: Effect[] = []):
 
 /**
  * タイトル画面の入力。ニューゲームは `initialState` から作り直す（`tick` は数え続ける）。
- * コンティニューはスロット一覧に進み、決定で `requestLoad`（読み込みと反映は runtime）。
+ * コンティニューはスロット一覧（オートセーブが有効なら先頭に付く）に進み、決定で `requestLoad`（読み込みと反映は runtime）。
  */
 export function handleTitleInput(state: GameState, input: InputFrame, ctx: Ctx): StepResult {
   const scene = state.scene;
@@ -35,23 +35,26 @@ export function handleTitleInput(state: GameState, input: InputFrame, ctx: Ctx):
   }
 
   if (input.triggered.has("cancel")) return withScene(state, { kind: "title", screen: "main", cursor: TITLE_ITEMS.indexOf("continue") });
-  if (dy !== 0) return withScene(state, { ...scene, cursor: move(scene.cursor, dy, SAVE_SLOT_COUNT) });
-  if (input.triggered.has("ok")) return { state, effects: [{ kind: "requestLoad", slot: SAVE_SLOT_FIRST + scene.cursor }] };
+  const slots = loadSlotNumbers(ctx.project);
+  if (dy !== 0) return withScene(state, { ...scene, cursor: move(scene.cursor, dy, slots.length) });
+  const slot = slots[scene.cursor];
+  if (input.triggered.has("ok") && slot !== undefined) return { state, effects: [{ kind: "requestLoad", slot }] };
   return { state, effects: [] };
 }
 
 /** 各画面のカーソルの取りうる個数。 */
-function screenSize(state: GameState, screen: MenuScreen): number {
+function screenSize(state: GameState, screen: MenuScreen, ctx: Ctx): number {
   switch (screen) {
     case "main":
-      return MENU_ITEMS.length;
+      return menuItems(ctx.project).length;
     case "item":
       return menuItemIds(state).length;
     case "status":
       return state.party.members.length;
     case "save":
+      return saveSlotNumbers().length;
     case "load":
-      return SAVE_SLOT_COUNT;
+      return loadSlotNumbers(ctx.project).length;
   }
 }
 
@@ -74,31 +77,36 @@ function handleConfirmInput(state: GameState, scene: Extract<SceneState, { kind:
  * メニューの入力。キャンセルで一つ前の画面（メインならマップ）へ、メニューボタンで一度に閉じる。
  * セーブ/ロード画面の決定は `requestSave` / `requestLoad`（書き込み・読み込みは runtime）。
  */
-export function handleMenuInput(state: GameState, input: InputFrame): StepResult {
+export function handleMenuInput(state: GameState, input: InputFrame, ctx: Ctx): StepResult {
   const scene = state.scene;
   if (scene.kind !== "menu") return { state, effects: [] };
 
   if (input.triggered.has("menu")) return withScene(state, { kind: "map" });
   if (scene.confirm !== undefined) return handleConfirmInput(state, scene, scene.confirm, input);
   if (input.triggered.has("cancel")) {
-    if (scene.screen === "main") return withScene(state, { kind: "map" });
-    return withScene(state, { kind: "menu", screen: "main", cursor: MENU_ITEMS.indexOf(scene.screen) });
+    // イベントが直接開いたセーブ/ロード画面（ポータル）は、メインメニューを経由せずマップに戻る
+    if (scene.screen === "main" || scene.portal === true) return withScene(state, { kind: "map" });
+    return withScene(state, { kind: "menu", screen: "main", cursor: Math.max(0, menuItems(ctx.project).indexOf(scene.screen)) });
   }
 
-  const count = screenSize(state, scene.screen);
+  const count = screenSize(state, scene.screen, ctx);
   const delta = scene.screen === "status" ? (input.triggered.has("pagedown") ? 1 : 0) - (input.triggered.has("pageup") ? 1 : 0) || vertical(input) : vertical(input);
   if (delta !== 0) return withScene(state, { ...scene, cursor: move(scene.cursor, delta, count) });
 
   if (!input.triggered.has("ok")) return { state, effects: [] };
   switch (scene.screen) {
     case "main": {
-      const next = MENU_ITEMS[scene.cursor];
+      const next = menuItems(ctx.project)[scene.cursor];
       return next === undefined ? { state, effects: [] } : withScene(state, { kind: "menu", screen: next, cursor: 0 });
     }
-    case "save":
-      return { state, effects: [{ kind: "requestSave", slot: SAVE_SLOT_FIRST + scene.cursor }] };
-    case "load":
-      return { state, effects: [{ kind: "requestLoad", slot: SAVE_SLOT_FIRST + scene.cursor }] };
+    case "save": {
+      const slot = saveSlotNumbers()[scene.cursor];
+      return slot === undefined ? { state, effects: [] } : { state, effects: [{ kind: "requestSave", slot }] };
+    }
+    case "load": {
+      const slot = loadSlotNumbers(ctx.project)[scene.cursor];
+      return slot === undefined ? { state, effects: [] } : { state, effects: [{ kind: "requestLoad", slot }] };
+    }
     default:
       return { state, effects: [] };
   }

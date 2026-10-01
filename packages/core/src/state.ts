@@ -39,7 +39,8 @@ export interface ShopScene {
 export type SceneState =
   | { readonly kind: "map" }
   | { readonly kind: "title"; readonly screen: TitleScreen; readonly cursor: number }
-  | { readonly kind: "menu"; readonly screen: MenuScreen; readonly cursor: number; readonly confirm?: MenuConfirm }
+  /** `portal` は、イベント（`SaveGame` / `LoadGame`）がセーブ/ロード画面を直接開いたとき。キャンセルでメインメニューではなくマップに戻る。 */
+  | { readonly kind: "menu"; readonly screen: MenuScreen; readonly cursor: number; readonly confirm?: MenuConfirm; readonly portal?: boolean }
   | ShopScene
   | { readonly kind: "battle" | "gameover" };
 

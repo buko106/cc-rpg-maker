@@ -168,6 +168,18 @@ describe("バトルタワーのデモ（fixtures/projects/v1/tower）", () => {
     expect(project.system.initialParty).toEqual(["actor_hero", "actor_mage"]);
   });
 
+  it("メニューからはセーブできず（menuSave: false）、記録は 1F の回復の泉（SaveGame のセーブポータル）でだけできる", () => {
+    expect(project.system.menuSave).toBe(false);
+    const fountain = mapOf(floorId(1)).events["ev_fountain" as keyof MapData["events"]]!;
+    expect(fountain.pages[0]!.commands.some((c) => c.code === "SaveGame")).toBe(true);
+    // メインメニューは アイテム / ステータス / ロード の 3 つ（「セーブ」が無い）
+    const tap = (st: State, ...b: (Dir | "menu" | "ok")[]): State => b.reduce((cur, k) => drive(cur, ctx, [press(k), ...idleFrames(1)]).state, st);
+    const menu = tap(newGame("tower-menu"), "menu");
+    expect(menu.scene).toEqual({ kind: "menu", screen: "main", cursor: 0 });
+    expect(tap(menu, "up").scene).toEqual({ kind: "menu", screen: "main", cursor: 2 });
+    expect(tap(menu, "down", "down", "ok").scene).toMatchObject({ screen: "load" });
+  });
+
   it("階段は隣の階どうしをつなぎ、着く場所は通れるタイル。場所移動は暗転する", () => {
     for (let n = 1; n <= FLOORS; n++) {
       const map = mapOf(floorId(n));

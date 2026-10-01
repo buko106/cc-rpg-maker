@@ -7,7 +7,7 @@
  *   node tools/make-tower-demo.mjs
  *
  * 塔のしくみ：
- * - 1F はエントランス。受付（説明と支度金）、よろず屋、回復の泉（記録もできる）、訓練用のかかし（何度でも戦える）がある。
+ * - 1F はエントランス。受付（説明と支度金）、よろず屋、回復の泉（ここでだけ記録できる。メニューからのセーブは無効）、訓練用のかかし（何度でも戦える）がある。
  * - 2F〜5F と屋上には番人がいて、上り階段の前をふさいでいる。話しかけて「挑む」と戦闘。勝つと番人が消えて上へ進める。
  *   2F ゴブリン兄弟、3F 大グモ（毒）、4F ストーンゴーレム（守りが固い）、5F 闇の魔術師と骸骨兵（眠り・全体魔法）、屋上 炎の竜。
  * - 3F の大グモを倒すと、捕らわれていた僧侶が仲間になる（回復・蘇生の魔法）。
@@ -870,7 +870,7 @@ function lobbyEvents(assets) {
         commands: [
           text("ようこそ、\\C[6]バトルタワー\\C[0]へ！\n各階の 番人を 倒して、\n屋上を 目指してください。"),
           text("負けても 入口に 戻されるだけ。\n何度でも 挑戦できます。\n各階の \\C[3]魔法陣\\C[0]で 回復も できますよ。"),
-          text("泉で 回復と 記録、よろず屋で 買い物、\nかかしで 腕だめしが できます。"),
+          text("記録できるのは 1F の 泉だけ。\nよろず屋で 買い物、\nかかしで 腕だめしも できます。"),
           text("こちらは 挑戦者への 支度金と\nポーションです。 がんばって！"),
           cmd("ChangeGold", { op: "gain", amount: { kind: "constant", value: 100 } }),
           cmd("ChangeItems", { item: "item_potion", op: "gain", amount: { kind: "constant", value: 3 } }),
@@ -1153,6 +1153,8 @@ const project = {
     tileSize: TILE,
     screen: { width: W * TILE, height: H * TILE },
     bgm: { battle: { asset: assets["battle.wav"].id, volume: 0.6, pitch: 1, loop: true } },
+    // メニューからはセーブできない。記録は 1F の回復の泉（セーブポータル）でだけ。
+    menuSave: false,
     terms: { newGame: "ニューゲーム", attack: "攻撃", skill: "スキル", guard: "防御", escape: "逃げる" },
   },
   maps: mapsMeta,

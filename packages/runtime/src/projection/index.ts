@@ -14,13 +14,15 @@ import { projectTimer } from "./timer.js";
 import type { UiContext } from "./ui.js";
 import type { UiNode } from "../frame-spec.js";
 
-/** タイトル・メニューの下端に出すお知らせ（セーブ完了など）。 */
-function projectNotice(view: ProjectView, ui: UiContext, screen: { width: number; height: number }): UiNode[] {
+/**
+ * お知らせ（セーブ完了など）。タイトル・メニューでは下端、マップ上では上端（イベントのセーブ・オートセーブの後に出る。下端はメッセージウィンドウと重なる）。
+ */
+function projectNotice(view: ProjectView, ui: UiContext, screen: { width: number; height: number }, at: "top" | "bottom" = "bottom"): UiNode[] {
   if (ui.notice === undefined) return [];
   const w = 220;
   const h = 32;
   const x = Math.round((screen.width - w) / 2);
-  const y = screen.height - 8 - h - 4;
+  const y = at === "top" ? 8 : screen.height - 8 - h - 4;
   return [windowNode(x, y, w, h, [textNode(screen.width / 2, y + 7, term(view, ui.notice), { r: 255, g: 255, b: 255, a: 1 }, { align: "center" })])];
 }
 
@@ -60,6 +62,7 @@ export function projectFrame(state: GameState, view: ProjectView, fx: VisualFx =
     ui: [
       ...projectTimer(state, screen),
       ...projectMessage(state, (id) => (Object.hasOwn(state.actors, id) ? state.actors[id as keyof typeof state.actors]?.name : undefined), screen),
+      ...projectNotice(view, ui, screen, "top"),
     ],
   };
 }

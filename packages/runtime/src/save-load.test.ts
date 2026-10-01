@@ -452,3 +452,118 @@ describe("ロードの確認", () => {
     expect(confirmOf(h)).toMatchObject({ kind: "save", slot: 1 });
   });
 });
+
+const withAutosave = (p: Parameters<NonNullable<RuntimeHarnessOptions["patchProject"]>>[0]) => ({ ...p, system: { ...p.system, autosave: { onTransfer: true } } });
+
+describe("セーブポータル（イベントからセーブ画面を開く）", () => {
+  const portal = (code: "SaveGame" | "LoadGame" = "SaveGame"): Parameters<RuntimeHarness["runtime"]["dispatch"]>[0] => ({
+    type: "interpreter",
+    op: "start",
+    origin: { kind: "plugin", name: "save-point" },
+    commands: [{ code, params: {}, indent: 0 }],
+    mode: "normal",
+  });
+
+  it("SaveGame でセーブ画面が開き、選んだスロットに保存できる。キャンセルでマップに戻る", async () => {
+    const h = await boot({ title: false });
+    h.runtime.dispatch(portal());
+    h.advanceFrames(2);
+    expect(h.runtime.getState().scene).toMatchObject({ kind: "menu", screen: "save", portal: true });
+    press(h, "down", "ok"); // スロット 2
+    await h.runtime.settled();
+    expect((await h.saves.listSlots()).map((m) => m.slot)).toEqual([2]);
+    h.advanceFrames(1);
+    expect(screenTexts(h)).toContain("セーブしました");
+
+    press(h, "cancel");
+    expect(h.runtime.getState().scene).toEqual({ kind: "map" });
+    expect(h.runtime.getState().interpreters).toHaveLength(0);
+  });
+
+  it("system.menuSave が false のゲームでも、ポータルからはセーブできる（メインメニューには「セーブ」が出ない）", async () => {
+    const h = await boot({ title: false, patchProject: (p) => ({ ...p, system: { ...p.system, menuSave: false } }) });
+    press(h, "menu");
+    h.advanceFrames(1);
+    expect(screenTexts(h)).toEqual(expect.arrayContaining(["アイテム", "ステータス", "ロード"]));
+    expect(screenTexts(h)).not.toContain("セーブ");
+    press(h, "menu");
+
+    h.runtime.dispatch(portal());
+    h.advanceFrames(2);
+    press(h, "ok");
+    await h.runtime.settled();
+    expect((await h.saves.listSlots()).map((m) => m.slot)).toEqual([1]);
+  });
+});
+
+describe("オートセーブ", () => {
+  it("system.autosave.onTransfer が有効なら、場所移動のたびにスロット 0 へ保存してお知らせを出す", async () => {
+    const h = await boot({ project: "transfer-demo", title: false, patchProject: withAutosave });
+    expect(await h.saves.listSlots()).toEqual([]);
+    // 移動先に着いた（保存の要求が出た）ところで止める
+    for (const f of expandInputs([{ hold: "right", frames: 128 }, { wait: 2 }, { press: "ok" }, { wait: 40 }, { press: "ok" }, { wait: 50 }])) {
+      if (h.effects.some((e) => e.kind === "requestSave")) break;
+      h.play(f);
+      if (h.runtime.status === "loading") await h.runtime.settled();
+    }
+    await h.runtime.settled();
+
+    expect(h.effects.filter((e) => e.kind === "requestSave")).toEqual([{ kind: "requestSave", slot: 0 }]);
+    const slots = await h.saves.listSlots();
+    expect(slots.map((m) => m.slot)).toEqual([0]);
+    expect(slots[0]?.preview.mapName).toBe(h.runtime.getState().map.name);
+    h.advanceFrames(1);
+    expect(screenTexts(h)).toContain("オートセーブしました");
+  });
+
+  it("設定が無ければ（既定）オートセーブしない", async () => {
+    const h = await boot({ project: "transfer-demo", title: false });
+    await throughDoor(h);
+    await h.runtime.settled();
+    expect(await h.saves.listSlots()).toEqual([]);
+  });
+
+  it("オートセーブしても「プレイの元のセーブ」にはならない（ロードの確認は変わらない）", async () => {
+    const h = await boot({ project: "transfer-demo", title: false, patchProject: withAutosave });
+    await throughDoor(h);
+    await h.runtime.settled();
+    press(h, "menu", "down", "down", "down", "ok", "down", "ok"); // ロード画面（先頭はオート）→ スロット 1 は空き
+    await h.runtime.settled();
+    expect(confirmOf(h)).toBeUndefined(); // 空きは確認しない
+    press(h, "up", "ok"); // オート（スロット 0）：進行は未セーブ扱いなので確認が出る
+    expect(confirmOf(h)).toEqual({ kind: "load", slot: 0, cursor: 1 });
+  });
+
+  it("コンティニュー/ロード画面の先頭にオートセーブが並び、読み込める。セーブ画面には並ばない", async () => {
+    const first = await boot({ project: "transfer-demo", title: false, patchProject: withAutosave });
+    await throughDoor(first);
+    await first.runtime.settled();
+    const saved = first.runtime.getState();
+
+    const second = await boot({ project: "transfer-demo", saves: first.saves, patchProject: withAutosave, deferMaps: ["map_b"] });
+    press(second, "down", "ok"); // コンティニュー
+    second.advanceFrames(1);
+    const texts = screenTexts(second);
+    expect(texts[1]).toMatch(/^オート {2}map_b/); // 先頭の行がオートセーブ
+    expect(texts[3]).toBe(" 1  （空き）"); // 手動スロットはその次から
+
+    second.play(...tap("ok")); // 先頭 = スロット 0
+    await vi.waitFor(() => expect(second.projectSource.requested).toEqual(["map_b"]));
+    second.projectSource.release("map_b");
+    await second.runtime.settled();
+    expect(second.runtime.getState().map.mapId).toBe("map_b");
+    expect(second.runtime.getState().map.player).toMatchObject({ x: saved.map.player.x, y: saved.map.player.y });
+
+    press(second, "menu", "down", "down", "ok");
+    second.advanceFrames(1);
+    expect(screenTexts(second).some((t) => t.startsWith("オート"))).toBe(false);
+  });
+
+  it("オートセーブが無効なら、ロード画面の先頭はスロット 1 のまま", async () => {
+    const h = await boot();
+    press(h, "down", "ok");
+    h.advanceFrames(1);
+    expect(screenTexts(h).some((t) => t.startsWith("オート"))).toBe(false);
+    expect(screenTexts(h)[1]).toBe(" 1  （空き）");
+  });
+});

@@ -26,7 +26,9 @@ const DEFAULT_TERMS = {
   total: "合計",
   yes: "はい",
   no: "いいえ",
+  autosave: "オート",
   saved: "セーブしました",
+  autosaved: "オートセーブしました",
   saveFailed: "セーブに失敗しました",
   loadFailed: "ロードに失敗しました",
   mhp: "最大HP",
@@ -87,4 +89,4 @@ export const term = (view: ProjectView, key: TermKey): string => {
 };
 
 /** 一時的なお知らせ（セーブ完了・失敗など）。runtime が持つ見た目だけの状態。 */
-export type NoticeKey = "saved" | "saveFailed" | "loadFailed";
+export type NoticeKey = "saved" | "autosaved" | "saveFailed" | "loadFailed";

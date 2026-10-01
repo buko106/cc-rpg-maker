@@ -117,6 +117,9 @@ const FIELD_LABELS: Readonly<Record<string, string>> = {
   title: "タイトル",
   battle: "戦闘",
   terms: "用語",
+  menuSave: "メニューからセーブできる",
+  autosave: "オートセーブ",
+  onTransfer: "場所移動のとき",
   // 能力値
   mhp: "最大HP",
   mmp: "最大MP",

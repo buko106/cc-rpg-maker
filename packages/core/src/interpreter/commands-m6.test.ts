@@ -394,9 +394,9 @@ describe("システム", () => {
     for (let i = 0; i < n; i++) s = step(s, emptyInput(), ctx).state;
     return s;
   };
-  it("SaveGame / LoadGame open the menu on the save / load screen", () => {
-    expect(frames([cmd("SaveGame")]).scene).toEqual({ kind: "menu", screen: "save", cursor: 0 });
-    expect(frames([cmd("LoadGame")]).scene).toEqual({ kind: "menu", screen: "load", cursor: 0 });
+  it("SaveGame / LoadGame open the menu on the save / load screen as a portal", () => {
+    expect(frames([cmd("SaveGame")]).scene).toEqual({ kind: "menu", screen: "save", cursor: 0, portal: true });
+    expect(frames([cmd("LoadGame")]).scene).toEqual({ kind: "menu", screen: "load", cursor: 0, portal: true });
   });
   it("GameOver goes to the game over scene and drops the event", () => {
     const s = frames([cmd("GameOver"), cmd("ControlSwitches", { ids: ["never"], value: true })]);

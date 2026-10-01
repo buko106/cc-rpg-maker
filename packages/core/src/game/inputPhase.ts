@@ -59,7 +59,7 @@ function directionOf(input: InputFrame): Direction | undefined {
 export function handleInput(state: GameState, input: InputFrame, ctx: Ctx): StepResult {
   const idle: StepResult = { state, effects: [] };
   if (state.scene.kind === "title") return handleTitleInput(state, input, ctx);
-  if (state.scene.kind === "menu") return handleMenuInput(state, input);
+  if (state.scene.kind === "menu") return handleMenuInput(state, input, ctx);
   if (state.scene.kind === "battle") return battleInput(state, input, ctx);
   if (state.scene.kind === "gameover") return handleGameoverInput(state, input, ctx);
   if (state.scene.kind === "shop") return handleShopInput(state, input, ctx);
