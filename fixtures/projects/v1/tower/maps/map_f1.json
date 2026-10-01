@@ -1,0 +1,443 @@
+{
+  "id": "map_f1",
+  "width": 13,
+  "height": 12,
+  "tileset": "ts_tower",
+  "layers": [
+    {
+      "name": "ground",
+      "tiles": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 5, 4, 6, 4, 5, 4, 4, 4, 3, 3, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 2, 2, 2, 1, 1, 1, 1, 3, 3, 3, 3, 3, 3, 3, 32, 3, 3, 3, 3, 3, 3]
+    },
+    {
+      "name": "objects",
+      "tiles": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 44, 0, 0, 45, 0, 45, 0, 0, 44, 0, 0, 0, 39, 39, 41, 0, 0, 0, 0, 0, 41, 38, 38, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 36, 0, 0, 0, 0, 0, 0, 0, 36, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 37, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 0, 0, 0, 41, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+  ],
+  "events": {
+    "ev_up": {
+      "id": "ev_up",
+      "name": "上り階段",
+      "x": 6,
+      "y": 1,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_f2",
+                "x": 6,
+                "y": 9,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_reception": {
+      "id": "ev_reception",
+      "name": "受付",
+      "x": 10,
+      "y": 3,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "4bbc359dfc9a56d6",
+            "index": 0,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ようこそ、\\C[6]バトルタワー\\C[0]へ！\n各階の 番人を 倒して、\n屋上を 目指してください。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "負けても 入口に 戻されるだけ。\n何度でも 挑戦できます。\n各階の \\C[3]魔法陣\\C[0]で 回復も できますよ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "泉で 回復と 記録、よろず屋で 買い物、\nかかしで 腕だめしが できます。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "こちらは 挑戦者への 支度金と\nポーションです。 がんばって！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChangeGold",
+              "params": {
+                "op": "gain",
+                "amount": {
+                  "kind": "constant",
+                  "value": 100
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChangeItems",
+              "params": {
+                "item": "item_potion",
+                "op": "gain",
+                "amount": {
+                  "kind": "constant",
+                  "value": 3
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]100G\\C[0] と ポーション 3個を 受け取った！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSelfSwitch",
+              "params": {
+                "key": "A",
+                "value": true
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "selfSwitch",
+              "key": "A",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "4bbc359dfc9a56d6",
+            "index": 0,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "いままでに 倒した 番人は \\C[2]\\V[var_cleared]\\C[0] 体。\n屋上の 竜を 倒せば 制覇です！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ゴーレムは 守りが 固いので 魔法が おすすめ。\n魔術師の 眠りの 魔法は、\n僧侶の キュアで 目を 覚ませます。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_merchant": {
+      "id": "ev_merchant",
+      "name": "よろず屋",
+      "x": 2,
+      "y": 3,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "4bbc359dfc9a56d6",
+            "index": 1,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "いらっしゃい！ 塔に 挑むなら\n薬は 多めに 持っていきな。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShopProcessing",
+              "params": {
+                "goods": [
+                  "item_potion",
+                  "item_hipotion",
+                  "item_ether",
+                  "item_antidote",
+                  "item_waker"
+                ],
+                "canSell": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "気をつけてな！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_fountain": {
+      "id": "ev_fountain",
+      "name": "回復の泉",
+      "x": 2,
+      "y": 8,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 150,
+                  "g": 210,
+                  "b": 255,
+                  "a": 0.6
+                },
+                "duration": 20
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChangeHp",
+              "params": {
+                "target": "party",
+                "op": "gain",
+                "amount": {
+                  "kind": "constant",
+                  "value": 9999
+                },
+                "allowDeath": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChangeMp",
+              "params": {
+                "target": "party",
+                "op": "gain",
+                "amount": {
+                  "kind": "constant",
+                  "value": 9999
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "泉の 水を 飲んだ。\nHP と MP が 回復した！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ここまでの 冒険を 記録しますか？",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "記録する",
+                  "しない"
+                ],
+                "cancel": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "SaveGame",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_dummy": {
+      "id": "ev_dummy",
+      "name": "訓練用のかかし",
+      "x": 10,
+      "y": 8,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "d742c0cded60be10",
+            "index": 0,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "訓練用の かかしだ。\n「何度でも 打ちこんで よし！」と 書いてある。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "打ちこむ",
+                  "やめておく"
+                ],
+                "cancel": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "BattleProcessing",
+              "params": {
+                "troop": "tr_dummy",
+                "canEscape": true,
+                "canLose": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "いい 手ごたえだ！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 2
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

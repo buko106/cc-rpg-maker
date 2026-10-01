@@ -62,7 +62,9 @@ export function image(width, height) {
       chunk("IEND", Buffer.alloc(0)),
     ]);
   };
-  return { set, rect, disc, png, width, height };
+  /** (x, y) の色（範囲外は透明）。 */
+  const get = (x, y) => (x < 0 || y < 0 || x >= width || y >= height ? [0, 0, 0, 0] : [...px.subarray((y * width + x) * 4, (y * width + x) * 4 + 4)]);
+  return { set, rect, disc, png, get, width, height };
 }
 
 /** 決定論的な擬似乱数（LCG）。 */
