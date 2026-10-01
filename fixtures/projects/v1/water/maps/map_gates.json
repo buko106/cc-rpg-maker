@@ -1,0 +1,1146 @@
+{
+  "id": "map_gates",
+  "width": 15,
+  "height": 11,
+  "tileset": "ts_water",
+  "layers": [
+    {
+      "name": "ground",
+      "tiles": [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 7, 6, 7, 7, 6, 7, 7, 7, 7, 6, 6, 1, 1, 1, 1, 1, 7, 15, 1, 7, 1, 1, 1, 1, 6, 6, 1, 1, 1, 1, 1, 1, 15, 1, 1, 1, 1, 7, 1, 6, 6, 1, 1, 1, 1, 1, 1, 15, 7, 1, 1, 1, 1, 1, 6, 6, 4, 17, 17, 17, 17, 17, 17, 17, 2, 2, 2, 2, 11, 6, 6, 1, 1, 1, 7, 1, 1, 1, 1, 1, 1, 7, 1, 1, 6, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 6, 6, 6, 6, 6, 6, 6, 1, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]
+    },
+    {
+      "name": "objects",
+      "tiles": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+  ],
+  "events": {
+    "ev_down": {
+      "id": "ev_down",
+      "name": "戻る階段",
+      "x": 7,
+      "y": 9,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "e445fda9383a98e3",
+            "index": 6,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_hall",
+                "x": 11,
+                "y": 8,
+                "dir": "left",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_lever_3": {
+      "id": "ev_lever_3",
+      "name": "連動水門のレバー3",
+      "x": 5,
+      "y": 2,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "e445fda9383a98e3",
+            "index": 4,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "連動水門の レバーだ。台座の ランプは \\C[6]青\\C[0]。\n引くと、青の 水路の 水位が 入れかわる。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "引く",
+                  "やめる"
+                ],
+                "cancel": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "s(\"sw_low_map_gates_a\")"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_low_map_gates_a"
+                ],
+                "value": false
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 9,
+                "y": 5,
+                "width": 4,
+                "height": 1,
+                "tile": 2
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 1,
+                "y": 5,
+                "width": 1,
+                "height": 1,
+                "tile": 4
+              },
+              "indent": 2
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_low_map_gates_a"
+                ],
+                "value": true
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 9,
+                "y": 5,
+                "width": 4,
+                "height": 1,
+                "tile": 3
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 1,
+                "y": 5,
+                "width": 1,
+                "height": 1,
+                "tile": 5
+              },
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 120,
+                  "g": 190,
+                  "b": 255,
+                  "a": 0.5
+                },
+                "duration": 14
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 3,
+                "duration": 24,
+                "wait": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]ゴゴゴ……\\C[0] 青の 水路の 水位が 入れかわった！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_lever_1": {
+      "id": "ev_lever_1",
+      "name": "連動水門のレバー1",
+      "x": 11,
+      "y": 2,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "e445fda9383a98e3",
+            "index": 2,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "連動水門の レバーだ。台座の ランプは \\C[6]青と緑\\C[0]。\n引くと、青と緑の 水路の 水位が 入れかわる。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "引く",
+                  "やめる"
+                ],
+                "cancel": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "s(\"sw_low_map_gates_a\")"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_low_map_gates_a"
+                ],
+                "value": false
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 9,
+                "y": 5,
+                "width": 4,
+                "height": 1,
+                "tile": 2
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 1,
+                "y": 5,
+                "width": 1,
+                "height": 1,
+                "tile": 4
+              },
+              "indent": 2
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_low_map_gates_a"
+                ],
+                "value": true
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 9,
+                "y": 5,
+                "width": 4,
+                "height": 1,
+                "tile": 3
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 1,
+                "y": 5,
+                "width": 1,
+                "height": 1,
+                "tile": 5
+              },
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "s(\"sw_low_map_gates_b\")"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_low_map_gates_b"
+                ],
+                "value": false
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 13,
+                "y": 5,
+                "width": 1,
+                "height": 1,
+                "tile": 11
+              },
+              "indent": 2
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_low_map_gates_b"
+                ],
+                "value": true
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 13,
+                "y": 5,
+                "width": 1,
+                "height": 1,
+                "tile": 12
+              },
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 120,
+                  "g": 190,
+                  "b": 255,
+                  "a": 0.5
+                },
+                "duration": 14
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 3,
+                "duration": 24,
+                "wait": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]ゴゴゴ……\\C[0] 青と緑の 水路の 水位が 入れかわった！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_lever_2": {
+      "id": "ev_lever_2",
+      "name": "連動水門のレバー2",
+      "x": 9,
+      "y": 3,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "e445fda9383a98e3",
+            "index": 3,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "連動水門の レバーだ。台座の ランプは \\C[6]緑と紫\\C[0]。\n引くと、緑と紫の 水路の 水位が 入れかわる。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "引く",
+                  "やめる"
+                ],
+                "cancel": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "s(\"sw_low_map_gates_b\")"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_low_map_gates_b"
+                ],
+                "value": false
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 13,
+                "y": 5,
+                "width": 1,
+                "height": 1,
+                "tile": 11
+              },
+              "indent": 2
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_low_map_gates_b"
+                ],
+                "value": true
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 13,
+                "y": 5,
+                "width": 1,
+                "height": 1,
+                "tile": 12
+              },
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "s(\"sw_low_map_gates_c\")"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_low_map_gates_c"
+                ],
+                "value": false
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 7,
+                "y": 2,
+                "width": 1,
+                "height": 1,
+                "tile": 15
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 7,
+                "y": 3,
+                "width": 1,
+                "height": 1,
+                "tile": 15
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 7,
+                "y": 4,
+                "width": 1,
+                "height": 1,
+                "tile": 15
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 2,
+                "y": 5,
+                "width": 7,
+                "height": 1,
+                "tile": 17
+              },
+              "indent": 2
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_low_map_gates_c"
+                ],
+                "value": true
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 7,
+                "y": 2,
+                "width": 1,
+                "height": 1,
+                "tile": 16
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 7,
+                "y": 3,
+                "width": 1,
+                "height": 1,
+                "tile": 16
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 7,
+                "y": 4,
+                "width": 1,
+                "height": 1,
+                "tile": 16
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 2,
+                "y": 5,
+                "width": 7,
+                "height": 1,
+                "tile": 18
+              },
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 120,
+                  "g": 190,
+                  "b": 255,
+                  "a": 0.5
+                },
+                "duration": 14
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 3,
+                "duration": 24,
+                "wait": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]ゴゴゴ……\\C[0] 緑と紫の 水路の 水位が 入れかわった！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_crystal": {
+      "id": "ev_crystal",
+      "name": "水晶の祭壇",
+      "x": 8,
+      "y": 2,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_crystal_b",
+              "value": false
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "e445fda9383a98e3",
+            "index": 8,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "祭壇に、澄んだ 水晶が 浮かんでいる。\n手に取ると、ひんやりと 冷たい。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_crystal_b"
+                ],
+                "value": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 255,
+                  "g": 230,
+                  "b": 150,
+                  "a": 0.7
+                },
+                "duration": 24
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]水晶を 手に入れた！\\C[0]\n入口の間の 台座に 戻そう。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "s(\"sw_crystal_a\")"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_hall_drained"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "map_hall",
+                "layer": 0,
+                "x": 1,
+                "y": 3,
+                "width": 13,
+                "height": 1,
+                "tile": 3
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 3,
+                "duration": 40,
+                "wait": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "二つの 水晶が そろった。\\C[6]ゴゴゴ……\\C[0]\n遠くで 水の 流れる 音が する。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "入口の間の 北の 水路が 干上がった はずだ。\n入口の間へ もどって、北の 階段を めざそう。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_crystal_b",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "e445fda9383a98e3",
+            "index": 9,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "祭壇は からっぽだ。水晶は もう 持ちだした。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_rune": {
+      "id": "ev_rune",
+      "name": "魔法陣",
+      "x": 7,
+      "y": 8,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "graphic": {
+            "asset": "e445fda9383a98e3",
+            "index": 12,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "足元の 魔法陣が かすかに 光っている。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "水位を もとに もどす",
+                  "ヒントを 読む",
+                  "やめる"
+                ],
+                "cancel": 2
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_low_map_gates_a",
+                  "sw_low_map_gates_b",
+                  "sw_low_map_gates_c"
+                ],
+                "value": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 9,
+                "y": 5,
+                "width": 4,
+                "height": 1,
+                "tile": 2
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 1,
+                "y": 5,
+                "width": 1,
+                "height": 1,
+                "tile": 4
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 13,
+                "y": 5,
+                "width": 1,
+                "height": 1,
+                "tile": 11
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 7,
+                "y": 2,
+                "width": 1,
+                "height": 1,
+                "tile": 15
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 7,
+                "y": 3,
+                "width": 1,
+                "height": 1,
+                "tile": 15
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 7,
+                "y": 4,
+                "width": 1,
+                "height": 1,
+                "tile": 15
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 2,
+                "y": 5,
+                "width": 7,
+                "height": 1,
+                "tile": 17
+              },
+              "indent": 1
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 120,
+                  "g": 190,
+                  "b": 255,
+                  "a": 0.5
+                },
+                "duration": 14
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "三つの 水路の 水位が、はじめの 状態に もどった。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "レバーの ランプの 色が、動かす 水路の 色だ。\n一つの レバーが、二つの 水路を 動かす ことも ある。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "水路が 干上がると、堰は 石の壁に なる。\n通りたい 場所の 水位は、いま どう なっているか？",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "レバーを 引く 順番しだい で、別の 場所の レバーへ\n届く ように なる。まず 動ける 場所を 数えよう。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 2
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
