@@ -4,7 +4,7 @@ import type { InputFrame } from "../input.js";
 import type { GameState, MenuConfirm, MenuScreen, SceneState } from "../state.js";
 import type { StepResult } from "./actions.js";
 import { initialState, titleState } from "./initial.js";
-import { loadSlotNumbers, MENU_ITEMS, menuItemIds, saveSlotNumbers, TITLE_ITEMS } from "./scenes.js";
+import { loadSlotNumbers, menuItemIds, menuItems, saveSlotNumbers, TITLE_ITEMS } from "./scenes.js";
 
 /** 0..count-1 を循環するカーソル移動。 */
 const move = (cursor: number, delta: number, count: number): number => (count <= 0 ? 0 : (((cursor + delta) % count) + count) % count);
@@ -46,7 +46,7 @@ export function handleTitleInput(state: GameState, input: InputFrame, ctx: Ctx):
 function screenSize(state: GameState, screen: MenuScreen, ctx: Ctx): number {
   switch (screen) {
     case "main":
-      return MENU_ITEMS.length;
+      return menuItems(ctx.project).length;
     case "item":
       return menuItemIds(state).length;
     case "status":
@@ -84,8 +84,9 @@ export function handleMenuInput(state: GameState, input: InputFrame, ctx: Ctx): 
   if (input.triggered.has("menu")) return withScene(state, { kind: "map" });
   if (scene.confirm !== undefined) return handleConfirmInput(state, scene, scene.confirm, input);
   if (input.triggered.has("cancel")) {
-    if (scene.screen === "main") return withScene(state, { kind: "map" });
-    return withScene(state, { kind: "menu", screen: "main", cursor: MENU_ITEMS.indexOf(scene.screen) });
+    // イベントが直接開いたセーブ/ロード画面（ポータル）は、メインメニューを経由せずマップに戻る
+    if (scene.screen === "main" || scene.portal === true) return withScene(state, { kind: "map" });
+    return withScene(state, { kind: "menu", screen: "main", cursor: Math.max(0, menuItems(ctx.project).indexOf(scene.screen)) });
   }
 
   const count = screenSize(state, scene.screen, ctx);
@@ -95,7 +96,7 @@ export function handleMenuInput(state: GameState, input: InputFrame, ctx: Ctx): 
   if (!input.triggered.has("ok")) return { state, effects: [] };
   switch (scene.screen) {
     case "main": {
-      const next = MENU_ITEMS[scene.cursor];
+      const next = menuItems(ctx.project)[scene.cursor];
       return next === undefined ? { state, effects: [] } : withScene(state, { kind: "menu", screen: next, cursor: 0 });
     }
     case "save": {

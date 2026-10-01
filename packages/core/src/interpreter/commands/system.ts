@@ -1,6 +1,5 @@
 import { z } from "zod";
 import { titleState } from "../../game/initial.js";
-import { SAVE_SLOT_COUNT, SAVE_SLOT_FIRST } from "../../game/scenes.js";
 import { warn } from "../../effects.js";
 import type { GameState } from "../../state.js";
 import { defineCommand } from "../handler.js";
@@ -8,36 +7,23 @@ import { defineCommand } from "../handler.js";
 const empty = z.strictObject({});
 const noRefs = () => [];
 
-const saveParams = z.strictObject({
-  /** 省略 = セーブ画面を開く。指定 = その番号のスロットへ、画面を出さずに直接セーブする。 */
-  slot: z.number().int().min(SAVE_SLOT_FIRST).max(SAVE_SLOT_FIRST + SAVE_SLOT_COUNT - 1).optional(),
-});
-
 /**
- * `slot` を省略すると、セーブ画面を開く（メニューのセーブ画面。閉じるとマップに戻り、続きから実行される）。
- * `slot` を指定すると、画面を出さずにそのスロットへセーブして続ける（セーブポイント）。保存されるのはこのコマンドの次から再開する状態。
+ * セーブ画面を開く（セーブポータル）。メニューのセーブ画面と同じ画面で、キャンセルするとメインメニューではなくマップに戻り、続きから実行される。
+ * メニューからのセーブを禁止している（`system.menuSave: false`）ゲームでも、これで開けばセーブできる。
  */
 export const saveGame = defineCommand({
   code: "SaveGame",
-  params: saveParams,
-  meta: {
-    label: "セーブ",
-    category: "システム",
-    describe: (p) => (p.slot === undefined ? "セーブ画面を開く" : `スロット${p.slot} にセーブ`),
-    refs: noRefs,
-  },
-  run: (p, c) =>
-    p.slot === undefined
-      ? { state: { ...c.state, scene: { kind: "menu", screen: "save", cursor: 0 } } }
-      : { effects: [{ kind: "requestSave", slot: p.slot, confirmed: true }] },
+  params: empty,
+  meta: { label: "セーブ画面を開く", category: "システム", describe: () => "セーブ画面を開く", refs: noRefs },
+  run: (_p, c) => ({ state: { ...c.state, scene: { kind: "menu", screen: "save", cursor: 0, portal: true } } }),
 });
 
-/** ロード画面を開く。 */
+/** ロード画面を開く（キャンセルするとマップに戻る）。 */
 export const loadGame = defineCommand({
   code: "LoadGame",
   params: empty,
   meta: { label: "ロード画面を開く", category: "システム", describe: () => "ロード画面を開く", refs: noRefs },
-  run: (_p, c) => ({ state: { ...c.state, scene: { kind: "menu", screen: "load", cursor: 0 } } }),
+  run: (_p, c) => ({ state: { ...c.state, scene: { kind: "menu", screen: "load", cursor: 0, portal: true } } }),
 });
 
 /** ゲームオーバー画面へ。このインタプリタは終了する。 */

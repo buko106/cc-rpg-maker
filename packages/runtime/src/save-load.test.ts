@@ -455,48 +455,44 @@ describe("ロードの確認", () => {
 
 const withAutosave = (p: Parameters<NonNullable<RuntimeHarnessOptions["patchProject"]>>[0]) => ({ ...p, system: { ...p.system, autosave: { onTransfer: true } } });
 
-describe("イベントでセーブ", () => {
-  const saveEvent = (slot?: number): Parameters<RuntimeHarness["runtime"]["dispatch"]>[0] => ({
+describe("セーブポータル（イベントからセーブ画面を開く）", () => {
+  const portal = (code: "SaveGame" | "LoadGame" = "SaveGame"): Parameters<RuntimeHarness["runtime"]["dispatch"]>[0] => ({
     type: "interpreter",
     op: "start",
     origin: { kind: "plugin", name: "save-point" },
-    commands: [{ code: "SaveGame", params: slot === undefined ? {} : { slot }, indent: 0 }],
+    commands: [{ code, params: {}, indent: 0 }],
     mode: "normal",
   });
 
-  it("slot を指定した SaveGame は、画面を出さずにそのスロットへ保存してイベントを続ける", async () => {
+  it("SaveGame でセーブ画面が開き、選んだスロットに保存できる。キャンセルでマップに戻る", async () => {
     const h = await boot({ title: false });
-    h.runtime.dispatch(saveEvent(4));
+    h.runtime.dispatch(portal());
     h.advanceFrames(2);
+    expect(h.runtime.getState().scene).toMatchObject({ kind: "menu", screen: "save", portal: true });
+    press(h, "down", "ok"); // スロット 2
     await h.runtime.settled();
-
-    expect(h.effects.filter((e) => e.kind === "requestSave")).toEqual([{ kind: "requestSave", slot: 4, confirmed: true }]);
-    expect((await h.saves.listSlots()).map((m) => m.slot)).toEqual([4]);
-    expect(h.runtime.getState().scene).toEqual({ kind: "map" }); // メニューは開かない
-    expect(h.runtime.getState().interpreters).toHaveLength(0); // 保存して終わった
+    expect((await h.saves.listSlots()).map((m) => m.slot)).toEqual([2]);
     h.advanceFrames(1);
     expect(screenTexts(h)).toContain("セーブしました");
+
+    press(h, "cancel");
+    expect(h.runtime.getState().scene).toEqual({ kind: "map" });
+    expect(h.runtime.getState().interpreters).toHaveLength(0);
   });
 
-  it("イベントでセーブしたスロットから、保存した直後の状態で再開できる", async () => {
-    const h = await boot({ title: false });
-    h.play(...expandInputs([{ hold: "right", frames: 16 }]));
-    h.runtime.dispatch(saveEvent(2));
+  it("system.menuSave が false のゲームでも、ポータルからはセーブできる（メインメニューには「セーブ」が出ない）", async () => {
+    const h = await boot({ title: false, patchProject: (p) => ({ ...p, system: { ...p.system, menuSave: false } }) });
+    press(h, "menu");
+    h.advanceFrames(1);
+    expect(screenTexts(h)).toEqual(expect.arrayContaining(["アイテム", "ステータス", "ロード"]));
+    expect(screenTexts(h)).not.toContain("セーブ");
+    press(h, "menu");
+
+    h.runtime.dispatch(portal());
     h.advanceFrames(2);
+    press(h, "ok");
     await h.runtime.settled();
-
-    const second = await boot({ saves: h.saves });
-    press(second, "down", "ok", "down", "ok");
-    await second.runtime.settled();
-    expect(second.runtime.getState().map.player).toMatchObject({ x: 3, y: 2 });
-  });
-
-  it("slot を省略すると従来どおりセーブ画面を開く", async () => {
-    const h = await boot({ title: false });
-    h.runtime.dispatch(saveEvent());
-    h.advanceFrames(2);
-    expect(h.runtime.getState().scene).toMatchObject({ kind: "menu", screen: "save" });
-    expect(await h.saves.listSlots()).toEqual([]);
+    expect((await h.saves.listSlots()).map((m) => m.slot)).toEqual([1]);
   });
 });
 

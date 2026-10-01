@@ -10,7 +10,7 @@ export * from "./interpreter/index.js";
 export { computeCamera, activePage, activePageIndex, canPass, eventsToTrigger, moveCharacter, newCharacter, refreshEventPages } from "./map/index.js";
 export type { PassabilityCtx } from "./map/index.js";
 export {
-  AUTOSAVE_SLOT, autosaveOnTransfer, dispatch, initialState, isSellable, loadSlotNumbers, MENU_ITEMS, maxBuyQuantity, menuItemIds, openShop, paramAt, SAVE_SLOT_COUNT, SAVE_SLOT_FIRST, saveSlotNumbers, sellableItemIds, sellPrice, SHOP_ITEM_LIMIT, shopCommands,
+  AUTOSAVE_SLOT, autosaveOnTransfer, dispatch, initialState, isSellable, loadSlotNumbers, MENU_ITEMS, maxBuyQuantity, menuItemIds, menuItems, openShop, paramAt, SAVE_SLOT_COUNT, SAVE_SLOT_FIRST, saveSlotNumbers, sellableItemIds, sellPrice, SHOP_ITEM_LIMIT, shopCommands,
   shopListIds, step, TITLE_ITEMS, titleState,
 } from "./game/index.js";
 export type { Action, InterpreterAction, StepResult } from "./game/index.js";

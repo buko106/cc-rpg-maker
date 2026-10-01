@@ -225,4 +225,5 @@ export function findDanglingRefs(...): RefTarget[];
 ## 実装メモ（イベントから接触）
 - **`EventPage.trigger` に `eventTouch`（イベントから接触）を足した**。`touch`（プレイヤーから接触）と同じようにプレイヤーから触れても始まり、加えて、このイベント（通常プライオリティ）が移動ルートでプレイヤーの居るタイルへ進もうとしたときにも始まる（03）。値を足しただけで既存のデータはそのまま読めるので、ページの `moveRoute` を足したときと同じく `formatVersion` は上げていない。`SaveSnapshot` のイベントの `trigger` も同じ値を受け付ける。
 
+- **`system.menuSave`（メニューからセーブできるか）を足した**：`boolean`（省略可）。省略または `true` ならメインメニューに「セーブ」が並ぶ。`false` なら並ばない（イベントの `SaveGame`＝セーブポータルからはセーブできる。03）。値を足しただけ（省略可）で既存のデータはそのまま読めるので `formatVersion` は上げていない。
 - **`system.autosave`（オートセーブの設定）を足した**：`{ onTransfer: boolean }`（省略可）。省略または `onTransfer: false` ならオートセーブしない。`true` なら場所移動で移動先に着くたびにスロット 0 へ保存する（02・06）。値を足しただけ（省略可）で既存のデータはそのまま読めるので `formatVersion` は上げていない。

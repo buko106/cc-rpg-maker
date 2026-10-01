@@ -6,7 +6,7 @@ import type { Button } from "../input.js";
 import { startInterpreter } from "../interpreter/index.js";
 import { createProjectView } from "../project-view.js";
 import type { GameState } from "../state.js";
-import { AUTOSAVE_SLOT, initialState, loadSlotNumbers, MENU_ITEMS, SAVE_SLOT_COUNT, saveSlotNumbers, step, titleState } from "./index.js";
+import { AUTOSAVE_SLOT, dispatch, initialState, loadSlotNumbers, MENU_ITEMS, SAVE_SLOT_COUNT, saveSlotNumbers, step, titleState } from "./index.js";
 import type { StepResult } from "./index.js";
 
 /** プロジェクトに `system.autosave` を足した ctx。 */
@@ -79,38 +79,76 @@ describe("オートセーブの発火（場所移動）", () => {
   });
 });
 
-describe("SaveGame コマンド", () => {
-  const exec = (params: Record<string, unknown>, state = initialState(plain.ctx, "seed")): StepResult => {
-    const s = startInterpreter(state, { kind: "plugin", name: "t" }, [{ code: "SaveGame", params, indent: 0 }, { code: "ControlSwitches", params: { ids: ["after"], value: true }, indent: 0 }], "normal");
-    let cur = s;
-    const effects: StepResult["effects"][number][] = [];
-    for (let i = 0; i < 3; i++) {
-      const r = step(cur, emptyInput(), plain.ctx);
-      cur = r.state;
-      effects.push(...r.effects);
-    }
-    return { state: cur, effects };
+/** プロジェクトの `system.menuSave` を差し替えた ctx。 */
+function withMenuSave(menuSave: boolean | undefined) {
+  const project = { ...plain.project, system: { ...plain.project.system, ...(menuSave === undefined ? {} : { menuSave }) } };
+  return createCtx(createProjectView(project, plain.maps));
+}
+
+describe("セーブポータル（イベントから開くセーブ画面）", () => {
+  const open = (code: "SaveGame" | "LoadGame", ctx = plain.ctx): GameState => {
+    let s = startInterpreter(initialState(ctx, "seed"), { kind: "plugin", name: "t" }, [{ code, params: {}, indent: 0 }], "normal");
+    for (let i = 0; i < 3; i++) s = step(s, emptyInput(), ctx).state;
+    return s;
   };
 
-  it("slot ありは、画面を開かずに確認なしの保存を要求して次のコマンドへ進む", () => {
-    const r = exec({ slot: 3 });
-    expect(r.effects.filter((e) => e.kind === "requestSave")).toEqual([{ kind: "requestSave", slot: 3, confirmed: true }]);
-    expect(r.state.scene).toEqual({ kind: "map" });
-    expect(r.state.switches["after" as never]).toBe(true);
+  it("SaveGame は画面を開くだけで、保存は要求しない。決定でそのスロットを要求する", () => {
+    const portal = open("SaveGame");
+    expect(portal.scene).toEqual({ kind: "menu", screen: "save", cursor: 0, portal: true });
+    expect(press(plain.ctx, pressAll(plain.ctx, portal, "down"), "ok").effects).toEqual([{ kind: "requestSave", slot: 2 }]);
   });
 
-  it("slot なしは従来どおりセーブ画面を開く", () => {
-    const r = exec({});
-    expect(r.state.scene).toEqual({ kind: "menu", screen: "save", cursor: 0 });
-    expect(r.effects.filter((e) => e.kind === "requestSave")).toEqual([]);
+  it("キャンセルでメインメニューを経由せずマップに戻り、イベントが続きから動く", () => {
+    const back = press(plain.ctx, open("SaveGame"), "cancel").state;
+    expect(back.scene).toEqual({ kind: "map" });
+    expect(back.interpreters).toHaveLength(0);
+    expect(press(plain.ctx, open("LoadGame"), "cancel").state.scene).toEqual({ kind: "map" });
   });
 
-  it("slot は 1〜10 だけ（0 はオートセーブ専用）", () => {
-    const handler = plain.ctx.commands.get("SaveGame")!;
-    expect(handler.params.safeParse({ slot: 1 }).success).toBe(true);
-    expect(handler.params.safeParse({ slot: SAVE_SLOT_COUNT }).success).toBe(true);
-    expect(handler.params.safeParse({ slot: 0 }).success).toBe(false);
-    expect(handler.params.safeParse({ slot: SAVE_SLOT_COUNT + 1 }).success).toBe(false);
-    expect(handler.params.safeParse({ slot: 1.5 }).success).toBe(false);
+  it("確認ダイアログの間のキャンセルは、まずダイアログだけを閉じる", () => {
+    const asked = dispatch(open("SaveGame"), { type: "askConfirm", kind: "save", slot: 1 }, plain.ctx).state;
+    const closed = press(plain.ctx, asked, "cancel").state;
+    expect(closed.scene).toEqual({ kind: "menu", screen: "save", cursor: 0, portal: true });
+    expect(press(plain.ctx, closed, "cancel").state.scene).toEqual({ kind: "map" });
+  });
+
+  it("メニューから開いたセーブ画面は従来どおり、キャンセルでメインメニューに戻る", () => {
+    const fromMenu = pressAll(plain.ctx, initialState(plain.ctx, "seed"), "menu", "down", "down", "ok");
+    expect(press(plain.ctx, fromMenu, "cancel").state.scene).toEqual({ kind: "menu", screen: "main", cursor: 2 });
+  });
+});
+
+describe("system.menuSave（メニューからのセーブ可否）", () => {
+  const mainItems = (ctx: typeof plain.ctx): string[] => {
+    const items: string[] = [];
+    let s = pressAll(ctx, initialState(ctx, "seed"), "menu");
+    for (let i = 0; i < 6; i++) {
+      const next = press(ctx, s, "ok").state;
+      items.push(next.scene.kind === "menu" ? next.scene.screen : "?");
+      s = press(ctx, press(ctx, next, "cancel").state, "down").state;
+    }
+    return items;
+  };
+
+  it("省略・true ならメインメニューに「セーブ」が並ぶ。false なら並ばない（アイテム/ステータス/ロード）", () => {
+    expect(mainItems(withMenuSave(undefined)).slice(0, 4)).toEqual(["item", "status", "save", "load"]);
+    expect(mainItems(withMenuSave(true)).slice(0, 4)).toEqual(["item", "status", "save", "load"]);
+    expect(mainItems(withMenuSave(false)).slice(0, 3)).toEqual(["item", "status", "load"]);
+  });
+
+  it("false のとき、ロードから戻るカーソル位置は詰めた並びに合う。メインメニューのカーソルは 3 つで循環する", () => {
+    const ctx = withMenuSave(false);
+    const main = pressAll(ctx, initialState(ctx, "seed"), "menu");
+    expect(press(ctx, main, "up").state.scene).toEqual({ kind: "menu", screen: "main", cursor: 2 });
+    const load = pressAll(ctx, main, "down", "down", "ok");
+    expect(load.scene).toMatchObject({ screen: "load" });
+    expect(press(ctx, load, "cancel").state.scene).toEqual({ kind: "menu", screen: "main", cursor: 2 });
+  });
+
+  it("false でもイベントのセーブポータルからはセーブできる", () => {
+    const ctx = withMenuSave(false);
+    let s = startInterpreter(initialState(ctx, "seed"), { kind: "plugin", name: "t" }, [{ code: "SaveGame", params: {}, indent: 0 }], "normal");
+    for (let i = 0; i < 3; i++) s = step(s, emptyInput(), ctx).state;
+    expect(press(ctx, s, "ok").effects).toEqual([{ kind: "requestSave", slot: 1 }]);
   });
 });

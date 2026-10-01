@@ -3,8 +3,12 @@ import type { GameState } from "../state.js";
 
 /** タイトルのコマンド（順序が `scene.cursor` の意味）。表示文言は runtime が `system.terms[key]` から引く。 */
 export const TITLE_ITEMS = ["newGame", "continue"] as const;
-/** メニューのコマンド。 */
+/** メニューのコマンド（すべて）。 */
 export const MENU_ITEMS = ["item", "status", "save", "load"] as const;
+export type MenuItem = (typeof MENU_ITEMS)[number];
+
+/** このプロジェクトのメインメニューに並ぶコマンド（順序が `scene.cursor` の意味）。`system.menuSave: false` なら「セーブ」が無い。 */
+export const menuItems = (project: ProjectView): readonly MenuItem[] => (project.project.system.menuSave === false ? MENU_ITEMS.filter((i) => i !== "save") : MENU_ITEMS);
 
 /** セーブ/ロード画面に並べるスロット番号は `SAVE_SLOT_FIRST` から `SAVE_SLOT_COUNT` 個（スロット 0 はオートセーブ用で別扱い）。 */
 export const SAVE_SLOT_FIRST = 1;

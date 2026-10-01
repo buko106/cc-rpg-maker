@@ -1,5 +1,5 @@
 import type { GameState, ProjectView } from "@rpg/core";
-import { MENU_ITEMS, menuItemIds, paramAt } from "@rpg/core";
+import { menuItemIds, menuItems, paramAt } from "@rpg/core";
 import type { Param } from "@rpg/schema";
 import type { UiNode } from "../frame-spec.js";
 import { projectConfirm } from "./confirm.js";
@@ -34,7 +34,7 @@ function memberSummary(state: GameState, view: ProjectView, id: string, x: numbe
 }
 
 function projectMain(state: GameState, view: ProjectView, screen: Screen, cursor: number): UiNode[] {
-  const labels = MENU_ITEMS.map((key) => term(view, key));
+  const labels = menuItems(view).map((key) => term(view, key));
   const commandH = labels.length * UI_ROW_HEIGHT + UI_PADDING * 2;
   const infoH = 2 * UI_ROW_HEIGHT + UI_PADDING * 2;
   const partyX = UI_MARGIN * 2 + COMMAND_WIDTH;

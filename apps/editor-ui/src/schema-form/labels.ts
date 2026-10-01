@@ -21,7 +21,6 @@ const FIELD_LABELS: Readonly<Record<string, string>> = {
   op: "演算",
   frames: "フレーム数",
   mapId: "移動先マップ",
-  slot: "スロット（空欄 = セーブ画面を開く）",
   x: "X",
   y: "Y",
   dir: "向き",
@@ -118,6 +117,7 @@ const FIELD_LABELS: Readonly<Record<string, string>> = {
   title: "タイトル",
   battle: "戦闘",
   terms: "用語",
+  menuSave: "メニューからセーブできる",
   autosave: "オートセーブ",
   onTransfer: "場所移動のとき",
   // 能力値

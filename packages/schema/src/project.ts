@@ -37,6 +37,8 @@ export const systemSettingsSchema = z
     tileSize: z.union([z.literal(16), z.literal(32), z.literal(48)]),
     screen: z.strictObject({ width: z.number().int().min(1), height: z.number().int().min(1) }),
     bgm: z.strictObject({ title: audioRefSchema.optional(), battle: audioRefSchema.optional() }),
+    /** メインメニューに「セーブ」を出すか。省略 = 出す。`false` でも、イベントの `SaveGame`（セーブポータル）からはセーブできる。 */
+    menuSave: z.boolean().optional(),
     /** オートセーブ（スロット 0）。省略 = しない。`onTransfer` は場所移動のたびに保存する（docs/06-runtime.md）。 */
     autosave: z.strictObject({ onTransfer: z.boolean() }).optional(),
     /** UI 文言 */

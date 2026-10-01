@@ -69,7 +69,6 @@ const cases: [EventCommand, string, unknown[]][] = [
   [cmd("Fadeout"), "フェードアウト：30フレーム", []],
   [cmd("Fadein", { duration: 10 }), "フェードイン：10フレーム", []],
   [cmd("SaveGame"), "セーブ画面を開く", []],
-  [cmd("SaveGame", { slot: 3 }), "スロット3 にセーブ", []],
   [cmd("LoadGame"), "ロード画面を開く", []],
   [cmd("GameOver"), "ゲームオーバー", []],
   [cmd("ReturnToTitle"), "タイトルへ戻る", []],

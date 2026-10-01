@@ -14,7 +14,8 @@ export type { Action, InterpreterAction, StepResult } from "./actions.js";
 export { paramAt } from "../params.js";
 export { initialState, titleState } from "./initial.js";
 export { isSellable, maxBuyQuantity, openShop, sellableItemIds, sellPrice, SHOP_ITEM_LIMIT, shopCommands, shopListIds } from "./shop.js";
-export { AUTOSAVE_SLOT, autosaveOnTransfer, loadSlotNumbers, MENU_ITEMS, menuItemIds, SAVE_SLOT_COUNT, SAVE_SLOT_FIRST, saveSlotNumbers, TITLE_ITEMS } from "./scenes.js";
+export type { MenuItem } from "./scenes.js";
+export { AUTOSAVE_SLOT, autosaveOnTransfer, loadSlotNumbers, MENU_ITEMS, menuItemIds, menuItems, SAVE_SLOT_COUNT, SAVE_SLOT_FIRST, saveSlotNumbers, TITLE_ITEMS } from "./scenes.js";
 
 /**
  * 1 フレーム進める：`input` を処理してから時間を 1 進める。`runtime` はこれだけを呼ぶ。
