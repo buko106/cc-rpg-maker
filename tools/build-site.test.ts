@@ -39,6 +39,18 @@ describe("build-site", () => {
     }
   });
 
+  it("エディタに、すべてのデモの編集データがサンプルとして入っている（samples/index.json と、そこに載ったファイル）", () => {
+    const index = JSON.parse(readFileSync(join(out, "editor/samples/index.json"), "utf8")) as { id: string; image: string; files: string[] }[];
+    expect(index.map((s) => s.id)).toEqual((DEMOS as { slug: string }[]).map((d) => d.slug));
+    for (const s of index) {
+      expect(existsSync(join(out, "editor/samples", s.image)), s.image).toBe(true);
+      expect(s.files).toContain("project.json");
+      expect(s.files.some((f) => f.startsWith("maps/"))).toBe(true);
+      expect(s.files.some((f) => f.startsWith("assets/"))).toBe(true);
+      for (const f of s.files) expect(existsSync(join(out, "editor/samples", s.id, f)), `${s.id}/${f}`).toBe(true);
+    }
+  });
+
   it("デモを選ぶページに、すべてのデモへのリンクがある", () => {
     const html = readFileSync(join(out, "demo/index.html"), "utf8");
     for (const { slug } of DEMOS as { slug: string }[]) expect(html).toContain(`href="${slug}/"`);

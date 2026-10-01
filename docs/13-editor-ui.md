@@ -69,7 +69,7 @@
 - **配布物の書き出し**（`ExportDialog`）：メニューバーの「配布物を書き出す…」。形式（フォルダ形式の ZIP / 単一 HTML）と「JSON を圧縮する」を選び、書き出す前に `session.save()` で未保存の変更を保存する（保存できなければ書き出さない）。`@rpg/exporter` の `exportGame` を、ストアの内容（`RepoContext` の `repo`）から呼ぶ。`EditorEnv` に `loadPlayerBundle()`（ブラウザでは同じオリジンの `player/player.js` を fetch）と `saveFile(name, bytes, mime)`（ダウンロード）を足した。エディタのビルド（`build-web.mjs`）は `apps/player` の `main.ts` を `dist-web/player/player.js` にもバンドルする。
 - **コマンドリスト**：props を `onEdit(ops: CommandOp[])` に一本化した（挿入・削除・差し替えの列。複数なら `cmd.batch` で 1 回の Undo にまとめる）。`Loop` は `EndLoop` と、`ShowChoices` は選択肢の数だけの `ChoiceBranch` と `EndBranch` と一緒に入る。選択肢の数を増減すると、対になる `ChoiceBranch` も増減する（減らすときは余った分岐を本体ごと消す）。`Loop` の直後はループの中に入り、`Loop` / `ShowChoices` は丸ごと消える。`EndLoop` / `MoveStep`（内部用）は単独では追加も削除もできない。
 - **移動ルートの編集**は、`SetMoveRoute` コマンドの標準フォーム（手順の配列。種類を選ぶ）で行う。専用のエディタは無い。ページの `moveRoute`（自律移動）は、イベントダイアログの「自律移動（ページが有効な間、勝手に動く）」で、「自律移動する」を入れると初期ルート（ランダムに 1 歩、60 フレーム待つ、を繰り返す）が付き、同じ標準フォームで手順・繰り返し・動けなければ飛ばすを編集する（外すと `moveRoute` を消す）。`e2e/editor.spec.ts` が、入れたイベントがテストプレイで動き出すことを確かめる。
-- **未対応**：テストプレイの音、タイルセットの追加・画像差し替え、アセットの一括インポート（ZIP の import は project-store にあるが、UI からはまだ呼べない）、矩形選択、キャンバスのスクロール位置を保った拡大。
+- **未対応**：テストプレイの音、タイルセットの追加・画像差し替え、アセットの一括インポート（プロジェクト丸ごとの ZIP の読み込みは、後の「実装メモ（サンプルと、編集データの ZIP）」で一覧から呼べるようにした）、矩形選択、キャンバスのスクロール位置を保った拡大。
 
 ## 実装メモ（M7 で確定した点）
 - **プラグイン**：システム設定に「プラグイン」タブ（ビルドに入っているプラグインの有効/無効、設定の JSON、入っていないプラグインの一覧と外す操作、読み込めなかったプラグインの表示）。`EditorEnv` は `PluginEnv`（`pluginCatalog` / `pluginDiagnostics` / `pluginForms` / `pluginFailures` / `createExtensions`）を持つ。`createBrowserEnv()` は非同期になった（プラグインの `register` が非同期でもよいため）。詳しくは 14。
@@ -111,3 +111,10 @@
 - **分岐の見出しと区切りの数**：`branchHeading` は `divider` 役のコマンドの行すべてに効く（`params.index` があれば開始の行の `branchLabel` を使う）。設定フォームの確定で、開始の行の区切りの数が変わったら（選択肢の数など）`syncDividers` で合わせる（以前は `ShowChoices` だけ）。
 - **テスト**：`CommandList.test.tsx`（並べ替え・端・Alt+矢印・範囲選択・分岐への広がり・コピー / 切り取り / 貼り付け・ページをまたぐ・区切りの行・入力欄のキー）、`plugins.test.tsx`（プラグインの分岐コマンド）、`dialogs.test.tsx`（コモンイベントの並べ替え・コピー）、E2E `e2e/editor.spec.ts`（並べ替え → Shift+↓ で範囲 → コピー → 貼り付け → Alt+↑ → Undo → テストプレイで並べ替えた順）。
 - **未対応**：ドラッグ＆ドロップでの並べ替え、離れた行の複数選択（Ctrl+クリック）、すべて選択（Ctrl+A）、ブロックをまたぐ移動（別の分岐の中へ動かす）、別のブラウザ・プロジェクトへのコピー（OS のクリップボード）、貼り付けたブロックの構造の検証（クリップボードに入るのはブロックを切らない範囲だけなので、いつも閉じている）。
+
+## 実装メモ（サンプルと、編集データの ZIP）
+デモのゲームを、エディタで中身を見て作り変えられるサンプルにした。編集データの ZIP は project-store の `exportZip` / `importZip`（10）をそのまま使う。
+- **サンプルの同梱**：エディタのビルド（`scripts/build-web.mjs`）が、`tools/build-demos.mjs` の `DEMOS`（はじまりの村・地下迷宮。デモを選ぶページと同じ一覧・タイトル・説明・タグ・画面写真）の編集データを `samples/<id>/`（`fixtures/projects/v1/<name>` の project.json + maps/ + assets/ をそのまま）に、画面写真を `samples/<id>.png` に置き、一覧 `samples/index.json`（id・タイトル・説明・タグ・画面写真・ファイルの一覧）を書く。サイト（`tools/build-site.mjs`）では `editor/samples/` になる。
+- **`EditorEnv`**：`listSamples(): Promise<ProjectSample[]>`（一覧。無ければ空）と `loadSample(id)`（編集データを `importZip` で読める ZIP のバイト列にして返す）を足した。ブラウザでは `createSampleSource("samples/")`（`browser-env.ts`）が、`index.json` を取り（404 ならサンプルは無い。失敗したら次に呼んだときに取り直す）、サンプルのファイルを取って `writeZip` でまとめる。取り込みは UI が `repo.importZip` で行うので、保存先（IndexedDB / OPFS / 選んだフォルダ）を選ばない。
+- **プロジェクト一覧**（`ProjectList`）：「サンプルから作る」（画面写真・タイトル・説明・タグのカード。「このサンプルから作る」で取り込んで、そのまま開く。サンプルが無ければ節ごと出さない）、「ZIP から読み込む…」（ファイルを選ぶと `importZip` で新しいプロジェクトにして開く）、プロジェクトごとの「ZIP」（`exportZip` の結果を `<タイトル>.zip` で `saveFile`）。取り込みは新しい ID になるので、同じサンプルを何度取り込んでもよい。取り込み中はほかの取り込みを押せない。失敗は理由（ZIP の中身の問題なら最初の 1 つ）を出し、一覧に留まる。
+- **テスト**：`samples.test.tsx`（両方のデモの fixture を ZIP にして取り込むと、マップ・アセットごと同じ内容の新しいプロジェクトとして開く。サンプルが無いとき・読めないとき。ZIP の書き出し → 読み込み、壊れた ZIP、書き出しの失敗。`createSampleSource` の一覧・ZIP・404・欠けたファイル・取り直し）、`tools/build-site.test.ts`（`editor/samples/` に全デモの編集データがある）、E2E `e2e/samples.spec.ts`（画面写真つきで並ぶ → 地下迷宮から作ってテストプレイで第 1 の間に立つ。はじまりの村から作って ZIP に書き出し、別実装の unzip で中身を確かめて、読み込み直す）。ヘッドレスの Chromium は ASCII 以外のダウンロードのファイル名を "download" にするので、E2E ではファイル名を確かめない。
