@@ -6,6 +6,7 @@ import { emptyInput, inputFrame } from "./input.js";
 import { startInterpreter } from "./interpreter/index.js";
 import { fromSnapshot, migrateSnapshot, progressFingerprint, SNAPSHOT_VERSION, snapshotMigrations, stripTransient, toSnapshot } from "./snapshot.js";
 import type { SaveSnapshot } from "./snapshot.js";
+import { pluginStateOf, withPluginState } from "./state.js";
 import type { GameState } from "./state.js";
 
 const { ctx } = loadFixtureProject("minimal");
@@ -47,6 +48,37 @@ describe("toSnapshot", () => {
     const stripped = stripTransient(s);
     expect(stripped.map.player).toMatchObject({ x: s.map.player.x, realX: s.map.player.x, moving: false });
     expect(stripTransient(stripped)).toEqual(stripped);
+  });
+});
+
+describe("pluginState（プラグインの保存領域）", () => {
+  const withState = (): GameState => withPluginState(withPluginState(walked(), "dungeon", { floor: 3, log: ["a", "b"], seen: null, ok: true }), "other", 7);
+
+  it("書き込むまで無く、プラグインごとのキーに読み書きできる（ほかのプラグインの値は変わらない）", () => {
+    const s = walked();
+    expect(s.pluginState).toBeUndefined();
+    expect(pluginStateOf(s, "dungeon")).toBeUndefined();
+    const a = withPluginState(s, "dungeon", { floor: 1 });
+    const b = withPluginState(a, "other", 2);
+    expect(pluginStateOf(b, "dungeon")).toEqual({ floor: 1 });
+    expect(pluginStateOf(b, "other")).toBe(2);
+    expect(pluginStateOf(b, "toString")).toBeUndefined();
+    expect(s.pluginState).toBeUndefined(); // 元の状態は変わらない
+  });
+
+  it("セーブして読み込むと戻る（JSON を経由しても同じ）。使っていない状態のセーブには、キー自体が増えない", () => {
+    const s = withState();
+    const r = load(clone(toSnapshot(s, meta)));
+    expect(r).toEqual({ ok: true, value: stripTransient(s) });
+    expect(Object.hasOwn(toSnapshot(walked(), meta).state, "pluginState")).toBe(false);
+  });
+
+  it("JSON でない値の入ったセーブは弾く", () => {
+    const snap = clone(toSnapshot(withState(), meta));
+    (snap.state as unknown as Record<string, unknown>)["pluginState"] = { dungeon: { f: () => 1, n: undefined, d: new Date(0) } };
+    expect(load(snap).ok).toBe(false);
+    (snap.state as unknown as Record<string, unknown>)["pluginState"] = [1];
+    expect(load(snap).ok).toBe(false);
   });
 });
 

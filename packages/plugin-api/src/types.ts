@@ -1,9 +1,9 @@
-import type { Action, BattleRules, CommandBlock, CommandCtx, CommandHandler, CommandResult, Effect, FormulaFn, GameState, ProjectView } from "@rpg/core";
+import type { Action, BattleRules, CommandBlock, CommandCtx, CommandHandler, CommandResult, Effect, FormulaFn, GameState, JsonValue, ProjectView } from "@rpg/core";
 import type { Diagnostic, EventDraft, EventTemplate } from "@rpg/editor-core";
 import type { EffectApi, FrameSpec, Logger, MapData, MapId, Project, SceneKind } from "@rpg/runtime";
 import type { z } from "zod";
 
-export type { Action, BattleRules, CommandBlock, CommandCtx, CommandHandler, CommandResult, Diagnostic, Effect, EffectApi, EventDraft, EventTemplate, FormulaFn, FrameSpec, GameState, Logger, ProjectView, SceneKind };
+export type { Action, BattleRules, CommandBlock, CommandCtx, CommandHandler, CommandResult, Diagnostic, Effect, EffectApi, EventDraft, EventTemplate, FormulaFn, FrameSpec, GameState, JsonValue, Logger, ProjectView, SceneKind };
 
 /** エディタの診断フックが受け取る文書（読み取り専用）。 */
 export interface PluginDocument {

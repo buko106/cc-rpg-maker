@@ -87,6 +87,7 @@ export function toSnapshot(s: GameState, meta: { projectId: string; projectHash:
 // ---- 検証スキーマ（破損したセーブデータを弾く） ----
 
 const int = z.number().int();
+const jsonValue: z.ZodType = z.lazy(() => z.union([z.null(), z.boolean(), z.number(), z.string(), z.array(jsonValue), z.record(z.string(), jsonValue)]));
 const characterShape = {
   x: int,
   y: int,
@@ -164,6 +165,7 @@ const serializedStateSchema = z.strictObject({
   variables: z.record(z.string(), z.number()),
   selfSwitches: z.record(z.string(), z.boolean()),
   mapTiles: z.record(z.string(), z.record(z.string(), z.number().int().min(0).max(0xffff))).optional(),
+  pluginState: z.record(z.string(), jsonValue).optional(),
   interpreters: z.array(interpreterSchema),
   nextInterpreterId: nonNegativeInt,
   message: z.strictObject({

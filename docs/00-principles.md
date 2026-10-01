@@ -42,12 +42,13 @@ save-store    → core（Snapshot 型・マイグレーション）, runtime（�
 editor-core   → schema, core（CommandRegistry のメタデータ参照のみ）, project-store（ポート型のみ）
 plugin-api    → core, runtime, editor-core（公開型のみ）
 plugin-samples → plugin-api（サンプルプラグイン。第三者のプラグインと同じ立場）
-editor-ui     → editor-core, runtime, plugin-api, plugin-samples, schema, core（CommandRegistry のメタデータ参照のみ）, exporter, 任意のアダプタ
-player        → runtime, plugin-api, plugin-samples, schema（project.json の検証用）, 任意のアダプタ
+plugin-dungeon → plugin-api（不思議のダンジョン。同じく第三者のプラグインと同じ立場。docs/18）
+editor-ui     → editor-core, runtime, plugin-api, plugin-samples, plugin-dungeon, schema, core（CommandRegistry のメタデータ参照のみ）, exporter, 任意のアダプタ
+player        → runtime, plugin-api, plugin-samples, plugin-dungeon, schema（project.json の検証用）, 任意のアダプタ
 test-utils    → 任意（テスト専用）
 ```
 
-- 各パッケージの**テストファイル（`*.test.ts`）だけは、上記に加えて `test-utils` を import できる**（契約テスト・ハーネスを使うため）。`package.json` では `devDependencies` にのみ宣言する。プロダクションコードは `test-utils` を import してはならない。
+- 各パッケージの**テストファイル（`*.test.ts`）と、テスト専用のヘルパ（`*.testkit.ts`。パッケージのビルドからは除く）だけは、上記に加えて `test-utils` を import できる**（契約テスト・ハーネスを使うため）。`package.json` では `devDependencies` にのみ宣言する。プロダクションコードは `test-utils` を import してはならない。
 
 - 逆方向・横方向の import は `eslint-plugin-boundaries`（または `dependency-cruiser`）で禁止する。
 - `schema`, `core` の `tsconfig` は `lib: ["ES2022"]` のみ（`DOM` を含めない）。これにより DOM API への依存が型レベルで不可能になる。

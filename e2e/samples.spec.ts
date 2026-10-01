@@ -8,7 +8,7 @@ const EDITOR = "http://127.0.0.1:4174/";
 
 // window.__editor / __rpgPlaytest の型は editor.spec.ts の declare global と衝突しないよう、ここでは局所的に読む
 interface Handles {
-  __editor: { doc: { project: { meta: { title: string } }; maps: Record<string, unknown> } };
+  __editor: { doc: { project: { meta: { title: string }; system: { plugins: { name: string }[] } }; maps: Record<string, unknown> } };
   __rpgPlaytest?: { getState(): { scene: { kind: string }; map: { mapId: string } } };
 }
 
@@ -18,9 +18,9 @@ test.beforeEach(async ({ page }) => {
   await page.reload();
 });
 
-test("サンプル（はじまりの村・地下迷宮・バトルタワー・謎解きの館・おばけ屋敷の追いかけっこ・忍び込み・ほこらの冒険・氷の神殿・水門の遺跡）が画面写真つきで並び、地下迷宮から作るとテストプレイで遊べる", async ({ page }) => {
+test("サンプル（はじまりの村・地下迷宮・バトルタワー・謎解きの館・おばけ屋敷の追いかけっこ・忍び込み・ほこらの冒険・氷の神殿・水門の遺跡・風鳴りの洞窟）が画面写真つきで並び、地下迷宮から作るとテストプレイで遊べる", async ({ page }) => {
   const samples = page.getByRole("list", { name: "サンプル" });
-  await expect(samples.getByRole("listitem")).toHaveCount(9);
+  await expect(samples.getByRole("listitem")).toHaveCount(10);
   await expect(samples.getByText("はじまりの村", { exact: true })).toBeVisible();
   await expect(samples.getByText("地下迷宮", { exact: true })).toBeVisible();
   await expect(samples.getByText("バトルタワー", { exact: true })).toBeVisible();
@@ -30,8 +30,9 @@ test("サンプル（はじまりの村・地下迷宮・バトルタワー・�
   await expect(samples.getByText("ほこらの冒険", { exact: true })).toBeVisible();
   await expect(samples.getByText("氷の神殿", { exact: true })).toBeVisible();
   await expect(samples.getByText("水門の遺跡", { exact: true })).toBeVisible();
+  await expect(samples.getByText("風鳴りの洞窟（不思議のダンジョン）", { exact: true })).toBeVisible();
   // 画面写真が読み込めている
-  await expect.poll(() => samples.locator("img").evaluateAll((imgs) => imgs.map((i) => (i as HTMLImageElement).naturalWidth > 0))).toEqual([true, true, true, true, true, true, true, true, true]);
+  await expect.poll(() => samples.locator("img").evaluateAll((imgs) => imgs.map((i) => (i as HTMLImageElement).naturalWidth > 0))).toEqual(Array.from({ length: 10 }, () => true));
 
   await page.getByRole("button", { name: "地下迷宮 のサンプルから作る" }).click();
   await expect(page.getByRole("application")).toBeVisible();
@@ -43,6 +44,34 @@ test("サンプル（はじまりの村・地下迷宮・バトルタワー・�
   await page.keyboard.press("Enter");
   await page.waitForFunction(() => (window as unknown as Handles).__rpgPlaytest!.getState().scene.kind === "map");
   expect(await page.evaluate(() => (window as unknown as Handles).__rpgPlaytest!.getState().map.mapId)).toBe("map_room01");
+});
+
+test("風鳴りの洞窟（プラグイン dungeon を使う v2 のサンプル）から作ると、テストプレイ（プロジェクトの設定でプラグインを読み込む）で洞窟に入って 1 階を歩ける", async ({ page }) => {
+  await page.getByRole("button", { name: "風鳴りの洞窟（不思議のダンジョン） のサンプルから作る" }).click();
+  await expect(page.getByRole("application")).toBeVisible();
+  const plugins = await page.evaluate(() => (window as unknown as Handles).__editor.doc.project.system.plugins.map((p) => p.name));
+  expect(plugins).toEqual(["dungeon"]);
+
+  await page.getByRole("button", { name: "テストプレイ", exact: true }).click();
+  type Play = { getState(): { scene: { kind: string }; map: { mapId: string; player: { moving: boolean } }; message: { open: boolean; choices: string[] | null }; pluginState?: { dungeon?: { floor: number; turn: number } | null } } };
+  await page.waitForFunction(() => (window as unknown as { __rpgPlaytest?: Play }).__rpgPlaytest?.getState().scene.kind === "title");
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(() => (window as unknown as { __rpgPlaytest: Play }).__rpgPlaytest.getState().map.mapId === "map_town");
+  const settle = (): Promise<unknown> => page.waitForFunction(() => !(window as unknown as { __rpgPlaytest: Play }).__rpgPlaytest.getState().map.player.moving);
+  for (let i = 0; i < 5; i++) {
+    await page.keyboard.down("ArrowUp");
+    await page.waitForTimeout(40);
+    await page.keyboard.up("ArrowUp");
+    await settle();
+  }
+  await page.waitForFunction(() => (window as unknown as { __rpgPlaytest: Play }).__rpgPlaytest.getState().message.open);
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(() => (window as unknown as { __rpgPlaytest: Play }).__rpgPlaytest.getState().message.choices !== null);
+  await page.keyboard.press("Enter"); // 「入る」
+  await page.waitForFunction(() => (window as unknown as { __rpgPlaytest: Play }).__rpgPlaytest.getState().pluginState?.dungeon?.floor === 1, undefined, { timeout: 15_000 });
+  await page.waitForTimeout(500);
+  await page.keyboard.press("Enter"); // その場で 1 ターン休む
+  await page.waitForFunction(() => (window as unknown as { __rpgPlaytest: Play }).__rpgPlaytest.getState().pluginState?.dungeon?.turn === 1);
 });
 
 test("はじまりの村から作ったプロジェクトを ZIP に書き出し、ZIP から読み込み直せる", async ({ page }) => {

@@ -6,11 +6,12 @@ const { LOCATIONS, NAMES, TEST_SUPPORT, allowedOf } = require("./tools/dependenc
 
 const dir = (name) => `${LOCATIONS[name]}/${name}`;
 
-const TEST_FILE = "\\.test\\.tsx?$";
+/** テストファイル：`*.test.ts` と、テスト専用のヘルパ `*.testkit.ts`（tsconfig のビルドからは除く）。 */
+const TEST_FILE = "\\.(test|testkit)\\.tsx?$";
 
 /**
  * パッケージごとに「許可されていない他パッケージへの依存」を禁止するルール。
- * テストファイル（*.test.ts）だけは、許可関係に加えて test-utils を import できる。
+ * テストファイル（*.test.ts / *.testkit.ts）だけは、許可関係に加えて test-utils を import できる。
  */
 const packageRules = NAMES.filter((name) => allowedOf(name).length < NAMES.length - 1).flatMap((name) => {
   const permitted = (extra) => [name, ...allowedOf(name), ...extra].map((n) => `${dir(n)}/`).join("|");

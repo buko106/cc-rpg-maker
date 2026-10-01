@@ -25,6 +25,7 @@ const LOCATIONS = {
   "editor-core": "packages",
   "plugin-api": "packages",
   "plugin-samples": "packages",
+  "plugin-dungeon": "packages",
   "test-utils": "packages",
   "editor-ui": "apps",
   player: "apps",
@@ -66,8 +67,9 @@ const ALLOWED = {
   "editor-core": ["schema", "core", "project-store"],
   "plugin-api": ["core", "runtime", "editor-core"],
   "plugin-samples": ["plugin-api"],
-  "editor-ui": ["editor-core", "runtime", "plugin-api", "plugin-samples", "schema", "core", "exporter", ...ADAPTERS],
-  player: ["runtime", "plugin-api", "plugin-samples", "schema", ...ADAPTERS],
+  "plugin-dungeon": ["plugin-api"],
+  "editor-ui": ["editor-core", "runtime", "plugin-api", "plugin-samples", "plugin-dungeon", "schema", "core", "exporter", ...ADAPTERS],
+  player: ["runtime", "plugin-api", "plugin-samples", "plugin-dungeon", "schema", ...ADAPTERS],
   "test-utils": "*",
 };
 

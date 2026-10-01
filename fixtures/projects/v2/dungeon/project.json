@@ -1,0 +1,469 @@
+{
+  "formatVersion": 2,
+  "meta": {
+    "id": "dungeon",
+    "title": "デモ：風鳴りの洞窟（不思議のダンジョン）",
+    "createdAt": "2026-10-01T00:00:00Z",
+    "updatedAt": "2026-10-01T00:00:00Z"
+  },
+  "system": {
+    "startMap": "map_town",
+    "startX": 10,
+    "startY": 7,
+    "initialParty": [
+      "actor_hero"
+    ],
+    "tileSize": 32,
+    "screen": {
+      "width": 480,
+      "height": 352
+    },
+    "bgm": {},
+    "terms": {
+      "newGame": "ニューゲーム"
+    },
+    "plugins": [
+      {
+        "name": "dungeon",
+        "version": "1.0.0",
+        "params": {
+          "floorMap": "map_floor",
+          "width": 39,
+          "height": 27,
+          "goalFloor": 7,
+          "home": {
+            "map": "map_town",
+            "x": 10,
+            "y": 3,
+            "dir": "down"
+          },
+          "tiles": {
+            "rock": 1,
+            "wallFace": 2,
+            "floor": [3, 4],
+            "stairs": 5,
+            "treasure": 6
+          },
+          "sprites": {
+            "asset": "958ba3ca16e715d6",
+            "size": 32,
+            "drop": {
+              "sx": 0,
+              "sy": 32
+            }
+          },
+          "resetOnEnter": true,
+          "startItems": {
+            "item_herb": 2
+          },
+          "belly": {
+            "max": 100,
+            "interval": 4,
+            "hungry": 30,
+            "weak": 10,
+            "starveDamage": 1
+          },
+          "regenInterval": 6,
+          "monsters": {
+            "base": 3,
+            "perFloor": 0.5,
+            "spread": 2
+          },
+          "loot": {
+            "base": 5,
+            "spread": 2
+          },
+          "sight": 9,
+          "clearGold": 500,
+          "vars": {
+            "event": "var_dungeon_event",
+            "best": "var_dungeon_best",
+            "result": "var_dungeon_result",
+            "clears": "var_dungeon_clears"
+          },
+          "enemies": [
+            {
+              "enemy": "enemy_slime",
+              "floors": [1, 3],
+              "weight": 4,
+              "sprite": {
+                "sx": 0,
+                "sy": 0
+              }
+            },
+            {
+              "enemy": "enemy_bat",
+              "floors": [2, 5],
+              "weight": 3,
+              "sprite": {
+                "sx": 32,
+                "sy": 0
+              },
+              "act": "fast"
+            },
+            {
+              "enemy": "enemy_goblin",
+              "floors": [3, 7],
+              "weight": 4,
+              "sprite": {
+                "sx": 64,
+                "sy": 0
+              }
+            },
+            {
+              "enemy": "enemy_golem",
+              "floors": [5, 7],
+              "weight": 3,
+              "sprite": {
+                "sx": 96,
+                "sy": 0
+              },
+              "act": "slow"
+            },
+            {
+              "enemy": "enemy_dragon",
+              "boss": true,
+              "sprite": {
+                "sx": 128,
+                "sy": 0
+              }
+            }
+          ],
+          "items": [
+            {
+              "kind": "item",
+              "key": "herb",
+              "item": "item_herb",
+              "floors": [1, 7],
+              "weight": 5,
+              "sprite": {
+                "sx": 0,
+                "sy": 32
+              }
+            },
+            {
+              "kind": "item",
+              "key": "bigherb",
+              "item": "item_bigherb",
+              "floors": [4, 7],
+              "weight": 2,
+              "sprite": {
+                "sx": 128,
+                "sy": 32
+              }
+            },
+            {
+              "kind": "food",
+              "key": "onigiri",
+              "name": "おにぎり",
+              "amount": 40,
+              "floors": [1, 7],
+              "weight": 5,
+              "sprite": {
+                "sx": 32,
+                "sy": 32
+              }
+            },
+            {
+              "kind": "gold",
+              "key": "gold",
+              "min": 15,
+              "max": 60,
+              "floors": [1, 7],
+              "weight": 3,
+              "sprite": {
+                "sx": 64,
+                "sy": 32
+              }
+            },
+            {
+              "kind": "seed",
+              "key": "seed",
+              "name": "ちからの種",
+              "atk": 1,
+              "floors": [2, 7],
+              "weight": 1,
+              "sprite": {
+                "sx": 96,
+                "sy": 32
+              }
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "maps": {
+    "map_town": {
+      "id": "map_town",
+      "name": "洞窟の前の広場",
+      "order": 0
+    },
+    "map_floor": {
+      "id": "map_floor",
+      "name": "風鳴りの洞窟（フロアのひな形）",
+      "order": 1
+    }
+  },
+  "tilesets": {
+    "ts_dungeon": {
+      "id": "ts_dungeon",
+      "name": "ダンジョンと町",
+      "image": {
+        "asset": "e495343e735483d5"
+      },
+      "passage": [15, 0, 0, 15, 15, 15, 15, 15, 15, 15, 0, 0, 0]
+    }
+  },
+  "database": {
+    "actors": {
+      "actor_hero": {
+        "id": "actor_hero",
+        "name": "旅人",
+        "classId": "class_hero",
+        "initialLevel": 1,
+        "walk": {
+          "asset": "bb2e23b45d1f4d4d"
+        },
+        "equips": {}
+      }
+    },
+    "classes": {
+      "class_hero": {
+        "id": "class_hero",
+        "name": "旅人",
+        "skills": [],
+        "params": {
+          "mhp": {
+            "base": 30,
+            "growth": 8
+          },
+          "mmp": {
+            "base": 0,
+            "growth": 0
+          },
+          "atk": {
+            "base": 7,
+            "growth": 2.5
+          },
+          "def": {
+            "base": 3,
+            "growth": 1.2
+          },
+          "mat": {
+            "base": 0,
+            "growth": 0
+          },
+          "mdf": {
+            "base": 0,
+            "growth": 0
+          },
+          "agi": {
+            "base": 8,
+            "growth": 0
+          },
+          "luk": {
+            "base": 0,
+            "growth": 0
+          }
+        }
+      }
+    },
+    "skills": {},
+    "items": {
+      "item_herb": {
+        "id": "item_herb",
+        "name": "くすり草",
+        "kind": "consumable",
+        "price": 30,
+        "effects": [
+          {
+            "kind": "recoverHp",
+            "value": 30
+          }
+        ]
+      },
+      "item_bigherb": {
+        "id": "item_bigherb",
+        "name": "大きなくすり草",
+        "kind": "consumable",
+        "price": 120,
+        "effects": [
+          {
+            "kind": "recoverHp",
+            "value": 100
+          }
+        ]
+      }
+    },
+    "enemies": {
+      "enemy_slime": {
+        "id": "enemy_slime",
+        "name": "スライム",
+        "params": {
+          "mhp": 8,
+          "mmp": 0,
+          "atk": 5,
+          "def": 1,
+          "mat": 0,
+          "mdf": 0,
+          "agi": 8,
+          "luk": 0
+        },
+        "actions": [],
+        "drops": [
+          {
+            "item": "item_herb",
+            "rate": 0.12
+          }
+        ],
+        "exp": 4,
+        "gold": 3
+      },
+      "enemy_bat": {
+        "id": "enemy_bat",
+        "name": "コウモリ",
+        "params": {
+          "mhp": 7,
+          "mmp": 0,
+          "atk": 6,
+          "def": 0,
+          "mat": 0,
+          "mdf": 0,
+          "agi": 14,
+          "luk": 0
+        },
+        "actions": [],
+        "drops": [],
+        "exp": 6,
+        "gold": 4
+      },
+      "enemy_goblin": {
+        "id": "enemy_goblin",
+        "name": "ゴブリン",
+        "params": {
+          "mhp": 18,
+          "mmp": 0,
+          "atk": 10,
+          "def": 3,
+          "mat": 0,
+          "mdf": 0,
+          "agi": 8,
+          "luk": 0
+        },
+        "actions": [],
+        "drops": [
+          {
+            "item": "item_herb",
+            "rate": 0.2
+          }
+        ],
+        "exp": 10,
+        "gold": 8
+      },
+      "enemy_golem": {
+        "id": "enemy_golem",
+        "name": "ゴーレム",
+        "params": {
+          "mhp": 34,
+          "mmp": 0,
+          "atk": 15,
+          "def": 8,
+          "mat": 0,
+          "mdf": 0,
+          "agi": 4,
+          "luk": 0
+        },
+        "actions": [],
+        "drops": [
+          {
+            "item": "item_bigherb",
+            "rate": 0.25
+          }
+        ],
+        "exp": 20,
+        "gold": 15
+      },
+      "enemy_dragon": {
+        "id": "enemy_dragon",
+        "name": "洞窟の竜",
+        "params": {
+          "mhp": 90,
+          "mmp": 0,
+          "atk": 20,
+          "def": 8,
+          "mat": 0,
+          "mdf": 0,
+          "agi": 8,
+          "luk": 0
+        },
+        "actions": [],
+        "drops": [],
+        "exp": 80,
+        "gold": 100
+      }
+    },
+    "troops": {},
+    "states": {},
+    "commonEvents": {}
+  },
+  "assets": {
+    "entries": {
+      "e495343e735483d5": {
+        "name": "dungeon_tiles.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 2798,
+        "width": 416,
+        "height": 32
+      },
+      "bb2e23b45d1f4d4d": {
+        "name": "hero.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 660,
+        "width": 96,
+        "height": 128
+      },
+      "91fa9a1d5187f397": {
+        "name": "elder.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 660,
+        "width": 96,
+        "height": 128
+      },
+      "61b7b2e9a0ba3848": {
+        "name": "sign.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 487,
+        "width": 96,
+        "height": 128
+      },
+      "958ba3ca16e715d6": {
+        "name": "sprites.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 1733,
+        "width": 160,
+        "height": 64
+      }
+    }
+  },
+  "switches": {},
+  "variables": {
+    "var_dungeon_event": {
+      "name": "ダンジョン：イベント"
+    },
+    "var_dungeon_best": {
+      "name": "ダンジョン：最深階"
+    },
+    "var_dungeon_result": {
+      "name": "ダンジョン：最後の結果"
+    },
+    "var_dungeon_clears": {
+      "name": "ダンジョン：クリア回数"
+    }
+  }
+}
