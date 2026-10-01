@@ -27,5 +27,5 @@ export type { FakeDirectory } from "./harness/fakeDirectory.js";
 export { summarizeFrame } from "./harness/frame.js";
 export { createRuntimeHarness } from "./harness/runtimeHarness.js";
 export type { RuntimeHarness, RuntimeHarnessOptions, TestProjectSource } from "./harness/runtimeHarness.js";
-export { battleKit, battleProject, beginBattle, drive, driveUntil, idleFrames, press } from "./harness/battle.js";
-export type { BattleKit, DriveResult } from "./harness/battle.js";
+export { autoBattle, battleKit, battleProject, beginBattle, drive, driveUntil, idleFrames, press } from "./harness/battle.js";
+export type { AutoBattleChoice, AutoBattlePolicy, AutoBattleTurn, BattleKit, DriveResult } from "./harness/battle.js";

@@ -1,0 +1,470 @@
+{
+  "id": "map_f3",
+  "width": 13,
+  "height": 12,
+  "tileset": "ts_tower",
+  "layers": [
+    {
+      "name": "ground",
+      "tiles": [15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 16, 16, 16, 17, 16, 18, 16, 17, 16, 16, 16, 15, 15, 13, 13, 13, 13, 14, 14, 14, 13, 13, 13, 13, 15, 15, 13, 13, 13, 13, 14, 14, 14, 13, 13, 13, 13, 15, 15, 13, 13, 13, 13, 14, 14, 14, 13, 13, 13, 13, 15, 15, 13, 13, 13, 13, 14, 14, 14, 13, 13, 13, 13, 15, 15, 13, 13, 13, 13, 14, 14, 14, 13, 13, 13, 13, 15, 15, 13, 13, 13, 13, 14, 14, 14, 13, 13, 13, 13, 15, 15, 13, 13, 13, 13, 14, 14, 14, 13, 13, 13, 13, 15, 15, 13, 13, 13, 13, 14, 14, 14, 13, 13, 13, 13, 15, 15, 13, 13, 13, 13, 14, 31, 14, 13, 13, 13, 13, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15, 15]
+    },
+    {
+      "name": "objects",
+      "tiles": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 44, 0, 0, 45, 0, 45, 0, 0, 44, 0, 0, 0, 42, 0, 0, 0, 0, 0, 0, 0, 0, 42, 42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 42, 0, 0, 0, 0, 43, 0, 0, 0, 0, 0, 0, 42, 42, 0, 0, 0, 36, 0, 0, 0, 0, 0, 0, 0, 36, 0, 0, 0, 42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43, 0, 0, 0, 0, 36, 0, 0, 0, 0, 0, 0, 0, 36, 0, 0, 0, 42, 0, 47, 0, 0, 0, 0, 0, 0, 0, 42, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+  ],
+  "events": {
+    "ev_up": {
+      "id": "ev_up",
+      "name": "上り階段",
+      "x": 6,
+      "y": 1,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_f4",
+                "x": 6,
+                "y": 9,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_down": {
+      "id": "ev_down",
+      "name": "下り階段",
+      "x": 6,
+      "y": 10,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_f2",
+                "x": 6,
+                "y": 2,
+                "dir": "down",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_circle": {
+      "id": "ev_circle",
+      "name": "回復の魔法陣",
+      "x": 3,
+      "y": 9,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 120,
+                  "g": 255,
+                  "b": 230,
+                  "a": 0.6
+                },
+                "duration": 20
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChangeHp",
+              "params": {
+                "target": "party",
+                "op": "gain",
+                "amount": {
+                  "kind": "constant",
+                  "value": 9999
+                },
+                "allowDeath": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChangeMp",
+              "params": {
+                "target": "party",
+                "op": "gain",
+                "amount": {
+                  "kind": "constant",
+                  "value": 9999
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "魔法陣が 光った。\nHP と MP が 回復した！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_guardian": {
+      "id": "ev_guardian",
+      "name": "大グモ",
+      "x": 6,
+      "y": 2,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "d742c0cded60be10",
+            "index": 2,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "シュルルル……",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "（大グモが 糸を 張って 待ちかまえている。\n\\C[2]毒の牙\\C[0]に 気をつけよう）",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "挑む",
+                  "やめておく"
+                ],
+                "cancel": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "BattleProcessing",
+              "params": {
+                "troop": "tr_spider",
+                "canEscape": true,
+                "canLose": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]大グモを たおした！\\C[0]",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 2
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_cleared"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 2
+            },
+            {
+              "code": "ControlSelfSwitch",
+              "params": {
+                "key": "A",
+                "value": true
+              },
+              "indent": 2
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_spider"
+                ],
+                "value": true
+              },
+              "indent": 2
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "糸に 捕らわれていた 人が いる……！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "いったん 退いて、体勢を 立て直そう。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 2
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\N[actor_hero]たちは 力尽きた……",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChangeHp",
+              "params": {
+                "target": "party",
+                "op": "gain",
+                "amount": {
+                  "kind": "constant",
+                  "value": 9999
+                },
+                "allowDeath": false
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChangeMp",
+              "params": {
+                "target": "party",
+                "op": "gain",
+                "amount": {
+                  "kind": "constant",
+                  "value": 9999
+                }
+              },
+              "indent": 2
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_f1",
+                "x": 6,
+                "y": 9,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 2
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "……気がつくと、塔の 入口に 運ばれていた。\n（番人は 何度でも 挑戦を 受けてくれる）",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "準備を してから 出直そう。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "selfSwitch",
+              "key": "A",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "commands": []
+        }
+      ]
+    },
+    "ev_cleric": {
+      "id": "ev_cleric",
+      "name": "僧侶",
+      "x": 10,
+      "y": 3,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "4bbc359dfc9a56d6",
+            "index": 2,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "たすけて……！\n糸に からまって 動けないの。\n番人の 大グモを 倒して ください……！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_spider",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "4bbc359dfc9a56d6",
+            "index": 2,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "助けてくれて ありがとう！\nわたしも 屋上を 目指していたの。\nいっしょに 行かせて ください！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChangeParty",
+              "params": {
+                "actor": "actor_cleric",
+                "op": "add"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]\\N[actor_cleric]\\C[0]が 仲間に なった！\n（回復の魔法 \\C[3]ヒール\\C[0]、目覚めの魔法 \\C[3]キュア\\C[0]が 使える）",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSelfSwitch",
+              "params": {
+                "key": "A",
+                "value": true
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "selfSwitch",
+              "key": "A",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "commands": []
+        }
+      ]
+    }
+  }
+}

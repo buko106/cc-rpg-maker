@@ -15,6 +15,7 @@ import type { TestEnv } from "./test-env.js";
 const SAMPLES = [
   { id: "village", fixture: "demo", title: "はじまりの村" },
   { id: "maze", fixture: "maze", title: "地下迷宮" },
+  { id: "tower", fixture: "tower", title: "バトルタワー" },
 ] as const;
 const dirOf = (fixture: string): string => join(FIXTURES_ROOT, "projects", "v1", fixture);
 const filesOf = (dir: string): string[] =>

@@ -87,7 +87,7 @@ saveRepositoryContract("idb", () => createIdbSaveRepository({ ... }), { supports
 
 ## 実装メモ（M4 で確定した点）
 - **リプレイ**：`fixtures/replays/*.json` に任意の `"title": true` を追加した（`titleState` から始め、先頭の入力でニューゲームを選ぶ）。`battle-win.json`（歩いてスライムに話しかけ、攻撃とファイアで勝利、マップに戻って続きのイベント）と `battle-escape.json`。demo プロジェクトを使うので、demo の敵・トループの座標を変えたら `UPDATE_REPLAYS=1` で更新する。`runtime.test.ts` はリプレイを Runtime 経由でも実行して同じハッシュになることを確かめる。
-- **戦闘のテストデータ**：`test-utils` の `battleProject()`（`minimal` に、勇者と魔法使い・スキル・アイテム・状態・敵・トループを足した、手計算しやすい固定値のプロジェクト。`mutate` で書き換えられる）と `battleKit()`（Ctx と初期状態）、`beginBattle` / `drive` / `driveUntil` / `press` / `idleFrames`。
+- **戦闘のテストデータ**：`test-utils` の `battleProject()`（`minimal` に、勇者と魔法使い・スキル・アイテム・状態・敵・トループを足した、手計算しやすい固定値のプロジェクト。`mutate` で書き換えられる）と `battleKit()`（Ctx と初期状態）、`beginBattle` / `drive` / `driveUntil` / `press` / `idleFrames`。`autoBattle(state, ctx, policy)` は、作戦（味方ごとに行動と対象を選ぶ関数）の選んだ行動をメニューの十字キーと決定で入力して、戦闘が終わるまで進める（デモの通しプレイ・敵の強さの見積もりに使う）。
 - **プロパティテスト**：任意の入力列で HP/MP が範囲内・状態を変更しない（`deepFreeze`）・毎フレーム何かが進む・同じ入力で同じ結果。
 - **カバレッジ閾値**：実装済みのパッケージに `audio-webaudio` を追加（70%）。
 - **依存ルール（テスト）**：パッケージ自身を `@rpg/<自分>` の名前で import できない（解決できない依存として検出される）ので、同じパッケージのテストは相対パスで import する。

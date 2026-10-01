@@ -1,0 +1,371 @@
+{
+  "id": "map_f6",
+  "width": 13,
+  "height": 12,
+  "tileset": "ts_tower",
+  "layers": [
+    {
+      "name": "ground",
+      "tiles": [35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 35, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 34, 34, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 34, 34, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 34, 34, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 34, 34, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 34, 34, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 34, 34, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 34, 34, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 33, 34, 34, 33, 33, 33, 33, 33, 31, 33, 33, 33, 33, 33, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34, 34]
+    },
+    {
+      "name": "objects",
+      "tiles": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 49, 0, 0, 0, 0, 0, 0, 0, 0, 0, 49, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 50, 0, 0, 0, 50, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43, 0, 0, 0, 0, 0, 0, 0, 0, 0, 43, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 47, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+  ],
+  "events": {
+    "ev_down": {
+      "id": "ev_down",
+      "name": "下り階段",
+      "x": 6,
+      "y": 10,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_f5",
+                "x": 6,
+                "y": 2,
+                "dir": "down",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_circle": {
+      "id": "ev_circle",
+      "name": "回復の魔法陣",
+      "x": 3,
+      "y": 9,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 120,
+                  "g": 255,
+                  "b": 230,
+                  "a": 0.6
+                },
+                "duration": 20
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChangeHp",
+              "params": {
+                "target": "party",
+                "op": "gain",
+                "amount": {
+                  "kind": "constant",
+                  "value": 9999
+                },
+                "allowDeath": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChangeMp",
+              "params": {
+                "target": "party",
+                "op": "gain",
+                "amount": {
+                  "kind": "constant",
+                  "value": 9999
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "魔法陣が 光った。\nHP と MP が 回復した！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_guardian": {
+      "id": "ev_guardian",
+      "name": "炎の竜",
+      "x": 6,
+      "y": 4,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "d742c0cded60be10",
+            "index": 6,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "グオオオオオ……！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "（塔の 頂上に すむ 炎の竜が 翼を 広げた！\nこれが 最後の 戦いだ）",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "挑む",
+                  "やめておく"
+                ],
+                "cancel": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "BattleProcessing",
+              "params": {
+                "troop": "tr_dragon",
+                "canEscape": false,
+                "canLose": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]炎の竜を たおした！\\C[0]",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 2
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_cleared"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 2
+            },
+            {
+              "code": "ControlSelfSwitch",
+              "params": {
+                "key": "A",
+                "value": true
+              },
+              "indent": 2
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 255,
+                  "g": 240,
+                  "b": 200,
+                  "a": 1
+                },
+                "duration": 40
+              },
+              "indent": 2
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "炎の竜は 空の かなたへ 飛び去っていった……",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 2
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]バトルタワー 制覇！\\C[0]\nおめでとう！ \\N[actor_hero]たちは\n塔の 頂上に たどり着いた！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 2
+            },
+            {
+              "code": "Fadeout",
+              "params": {
+                "duration": 40
+              },
+              "indent": 2
+            },
+            {
+              "code": "ReturnToTitle",
+              "params": {},
+              "indent": 2
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "いったん 退いて、体勢を 立て直そう。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 2
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\N[actor_hero]たちは 力尽きた……",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChangeHp",
+              "params": {
+                "target": "party",
+                "op": "gain",
+                "amount": {
+                  "kind": "constant",
+                  "value": 9999
+                },
+                "allowDeath": false
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChangeMp",
+              "params": {
+                "target": "party",
+                "op": "gain",
+                "amount": {
+                  "kind": "constant",
+                  "value": 9999
+                }
+              },
+              "indent": 2
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_f1",
+                "x": 6,
+                "y": 9,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 2
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "……気がつくと、塔の 入口に 運ばれていた。\n（番人は 何度でも 挑戦を 受けてくれる）",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "準備を してから 出直そう。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "selfSwitch",
+              "key": "A",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "commands": []
+        }
+      ]
+    }
+  }
+}

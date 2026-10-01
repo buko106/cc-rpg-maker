@@ -1,7 +1,7 @@
-import { createCtx, createProjectView, emptyInput, initialState, inputFrame, startBattle, step } from "@rpg/core";
-import type { Button, Ctx, Effect, GameState, InputFrame } from "@rpg/core";
+import { battleCommands, createCtx, createProjectView, emptyInput, initialState, inputFrame, learnedSkills, startBattle, step, targetCandidates, usableItems } from "@rpg/core";
+import type { BattleState, Battler, BattlerId, Button, Ctx, Effect, GameState, InputFrame } from "@rpg/core";
 import { ProjectSchema } from "@rpg/schema";
-import type { Project } from "@rpg/schema";
+import type { ActorId, Item, Project, Skill } from "@rpg/schema";
 import { loadFixtureProject } from "./project.js";
 
 const params = (mhp: number, mmp: number, atk: number, def: number, mat: number, mdf: number, agi: number, luk: number) => ({
@@ -143,4 +143,68 @@ export function driveUntil(state: GameState, ctx: Ctx, done: (s: GameState) => b
   let s = state;
   for (let i = 0; i < max && !done(s); i++) s = step(s, emptyInput(), ctx).state;
   return s;
+}
+
+/** `autoBattle` の作戦が選ぶ行動。`target` は一人を選ぶ範囲のときの対象（省略・選べないときは先頭）。 */
+export interface AutoBattleChoice {
+  kind: "attack" | "skill" | "item" | "guard";
+  skill?: string;
+  item?: string;
+  target?: BattlerId;
+}
+
+/** 作戦に渡す、いまコマンドを選ぶ味方の情報。`skills` は習得済みのスキル（MP が足りないものも含む）。 */
+export interface AutoBattleTurn {
+  state: GameState;
+  battle: BattleState;
+  actor: Battler;
+  skills: readonly Skill[];
+  items: readonly Item[];
+}
+
+export type AutoBattlePolicy = (turn: AutoBattleTurn) => AutoBattleChoice;
+
+/**
+ * 戦闘が終わって戦闘シーンを出るまで、`policy` が選ぶ行動をメニューの操作（十字キーと決定）で入力して進める。
+ * 解決中と結果表示は決定で送る。選べない行動（MP 不足のスキルなど）は通常攻撃に読み替える。
+ */
+export function autoBattle(state: GameState, ctx: Ctx, policy: AutoBattlePolicy, maxFrames = 30000): GameState {
+  let s = state;
+  for (let frame = 0; frame < maxFrames && s.scene.kind === "battle"; frame++) {
+    s = step(s, autoBattleInput(s, ctx, policy), ctx).state;
+  }
+  if (s.scene.kind === "battle") throw new Error(`autoBattle: ${maxFrames} フレームで戦闘が終わらない`);
+  return s;
+}
+
+function autoBattleInput(state: GameState, ctx: Ctx, policy: AutoBattlePolicy): InputFrame {
+  const b = state.battle;
+  if (b === undefined) return emptyInput();
+  if (b.phase !== "input") return b.phase === "start" ? emptyInput() : press("ok");
+  const cur = b.inputCursor;
+  const actorId = b.party[cur.actorIndex];
+  const actor = actorId === undefined ? undefined : b.allies[actorId];
+  if (actorId === undefined || actor === undefined) return emptyInput();
+  const skills = learnedSkills(ctx, actorId as ActorId, actor.level);
+  const items = usableItems(state, ctx);
+  let choice = policy({ state, battle: b, actor, skills, items });
+  const usable =
+    choice.kind === "skill" ? skills.some((x) => x.id === choice.skill && x.mpCost <= actor.mp) : choice.kind === "item" ? items.some((x) => x.id === choice.item) : true;
+  if (!usable) choice = { kind: "attack", ...(choice.target === undefined ? {} : { target: choice.target }) };
+  /** カーソルを `want` に合わせる（合っていれば決定）。 */
+  const toward = (want: number, next: Button = "down"): InputFrame => (want < 0 || cur.index === want ? press("ok") : press(next));
+  switch (cur.menu) {
+    case "command":
+      return toward(battleCommands(b.canEscape).indexOf(choice.kind));
+    case "skill":
+      return choice.kind === "skill" ? toward(skills.findIndex((x) => x.id === choice.skill)) : press("cancel");
+    case "item":
+      return choice.kind === "item" ? toward(items.findIndex((x) => x.id === choice.item)) : press("cancel");
+    case "target": {
+      const pick = cur.pick;
+      const scope = pick === null ? "none" : pick.kind === "attack" ? "one-enemy" : pick.kind === "item" ? "one-ally" : (ctx.project.skill(pick.skillId as never)?.scope ?? "none");
+      const candidates = targetCandidates(b, scope);
+      return toward(choice.target === undefined ? 0 : Math.max(0, candidates.indexOf(choice.target)), "right");
+    }
+  }
 }

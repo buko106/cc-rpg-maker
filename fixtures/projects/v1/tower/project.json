@@ -1,0 +1,1111 @@
+{
+  "formatVersion": 1,
+  "meta": {
+    "id": "tower",
+    "title": "デモ：バトルタワー",
+    "createdAt": "2026-10-01T00:00:00Z",
+    "updatedAt": "2026-10-01T00:00:00Z"
+  },
+  "system": {
+    "startMap": "map_f1",
+    "startX": 6,
+    "startY": 9,
+    "initialParty": [
+      "actor_hero",
+      "actor_mage"
+    ],
+    "tileSize": 32,
+    "screen": {
+      "width": 416,
+      "height": 384
+    },
+    "bgm": {
+      "battle": {
+        "asset": "87073bd84cdaced6",
+        "volume": 0.6,
+        "pitch": 1,
+        "loop": true
+      }
+    },
+    "terms": {
+      "newGame": "ニューゲーム",
+      "attack": "攻撃",
+      "skill": "スキル",
+      "guard": "防御",
+      "escape": "逃げる"
+    }
+  },
+  "maps": {
+    "map_f1": {
+      "id": "map_f1",
+      "name": "1F エントランス",
+      "order": 0
+    },
+    "map_f2": {
+      "id": "map_f2",
+      "name": "2F ゴブリンのねぐら",
+      "order": 1
+    },
+    "map_f3": {
+      "id": "map_f3",
+      "name": "3F クモの巣の間",
+      "order": 2
+    },
+    "map_f4": {
+      "id": "map_f4",
+      "name": "4F 石像の回廊",
+      "order": 3
+    },
+    "map_f5": {
+      "id": "map_f5",
+      "name": "5F 魔術師の書斎",
+      "order": 4
+    },
+    "map_f6": {
+      "id": "map_f6",
+      "name": "屋上",
+      "order": 5
+    }
+  },
+  "tilesets": {
+    "ts_tower": {
+      "id": "ts_tower",
+      "name": "塔",
+      "image": {
+        "asset": "6053f42c20044a34"
+      },
+      "passage": [15, 15, 15, 0, 0, 0, 15, 15, 15, 0, 0, 0, 15, 15, 15, 0, 0, 0, 15, 15, 15, 0, 0, 0, 15, 15, 15, 0, 0, 0, 15, 15, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 15, 15, 0, 0, 0, 15, 0, 0, 0]
+    }
+  },
+  "database": {
+    "actors": {
+      "actor_hero": {
+        "id": "actor_hero",
+        "name": "勇者",
+        "classId": "class_warrior",
+        "initialLevel": 1,
+        "walk": {
+          "asset": "bb2e23b45d1f4d4d"
+        },
+        "equips": {
+          "weapon": "wp_sword",
+          "armor": "ar_leather"
+        }
+      },
+      "actor_mage": {
+        "id": "actor_mage",
+        "name": "魔法使い",
+        "classId": "class_mage",
+        "initialLevel": 1,
+        "equips": {
+          "weapon": "wp_rod",
+          "armor": "ar_robe"
+        }
+      },
+      "actor_cleric": {
+        "id": "actor_cleric",
+        "name": "僧侶",
+        "classId": "class_cleric",
+        "initialLevel": 4,
+        "equips": {
+          "weapon": "wp_staff",
+          "armor": "ar_robe"
+        }
+      }
+    },
+    "classes": {
+      "class_warrior": {
+        "id": "class_warrior",
+        "name": "戦士",
+        "params": {
+          "mhp": {
+            "base": 64,
+            "growth": 14
+          },
+          "mmp": {
+            "base": 8,
+            "growth": 2
+          },
+          "atk": {
+            "base": 14,
+            "growth": 3
+          },
+          "def": {
+            "base": 10,
+            "growth": 2
+          },
+          "mat": {
+            "base": 4,
+            "growth": 1
+          },
+          "mdf": {
+            "base": 6,
+            "growth": 1
+          },
+          "agi": {
+            "base": 9,
+            "growth": 2
+          },
+          "luk": {
+            "base": 8,
+            "growth": 1
+          }
+        },
+        "skills": [
+          {
+            "level": 1,
+            "skill": "sk_smash"
+          },
+          {
+            "level": 4,
+            "skill": "sk_break"
+          }
+        ]
+      },
+      "class_mage": {
+        "id": "class_mage",
+        "name": "魔法使い",
+        "params": {
+          "mhp": {
+            "base": 42,
+            "growth": 8
+          },
+          "mmp": {
+            "base": 24,
+            "growth": 5
+          },
+          "atk": {
+            "base": 6,
+            "growth": 1
+          },
+          "def": {
+            "base": 6,
+            "growth": 1
+          },
+          "mat": {
+            "base": 15,
+            "growth": 3
+          },
+          "mdf": {
+            "base": 10,
+            "growth": 2
+          },
+          "agi": {
+            "base": 11,
+            "growth": 2
+          },
+          "luk": {
+            "base": 8,
+            "growth": 1
+          }
+        },
+        "skills": [
+          {
+            "level": 1,
+            "skill": "sk_fire"
+          },
+          {
+            "level": 2,
+            "skill": "sk_flame"
+          },
+          {
+            "level": 4,
+            "skill": "sk_thunder"
+          }
+        ]
+      },
+      "class_cleric": {
+        "id": "class_cleric",
+        "name": "僧侶",
+        "params": {
+          "mhp": {
+            "base": 48,
+            "growth": 10
+          },
+          "mmp": {
+            "base": 26,
+            "growth": 5
+          },
+          "atk": {
+            "base": 8,
+            "growth": 2
+          },
+          "def": {
+            "base": 9,
+            "growth": 2
+          },
+          "mat": {
+            "base": 12,
+            "growth": 3
+          },
+          "mdf": {
+            "base": 14,
+            "growth": 2
+          },
+          "agi": {
+            "base": 8,
+            "growth": 1
+          },
+          "luk": {
+            "base": 10,
+            "growth": 1
+          }
+        },
+        "skills": [
+          {
+            "level": 1,
+            "skill": "sk_heal"
+          },
+          {
+            "level": 1,
+            "skill": "sk_cure"
+          },
+          {
+            "level": 3,
+            "skill": "sk_protect"
+          },
+          {
+            "level": 4,
+            "skill": "sk_raise"
+          },
+          {
+            "level": 5,
+            "skill": "sk_healall"
+          }
+        ]
+      }
+    },
+    "skills": {
+      "sk_smash": {
+        "id": "sk_smash",
+        "name": "強打",
+        "mpCost": 4,
+        "scope": "one-enemy",
+        "formula": "a.atk * 6 - b.def * 2",
+        "effects": []
+      },
+      "sk_break": {
+        "id": "sk_break",
+        "name": "かぶと割り",
+        "mpCost": 6,
+        "scope": "one-enemy",
+        "formula": "a.atk * 4 - b.def",
+        "effects": [
+          {
+            "kind": "buff",
+            "param": "def",
+            "level": -1
+          }
+        ]
+      },
+      "sk_fire": {
+        "id": "sk_fire",
+        "name": "ファイア",
+        "mpCost": 4,
+        "scope": "one-enemy",
+        "formula": "a.mat * 4 - b.mdf * 2",
+        "effects": []
+      },
+      "sk_flame": {
+        "id": "sk_flame",
+        "name": "フレイム",
+        "mpCost": 8,
+        "scope": "all-enemies",
+        "formula": "a.mat * 3 - b.mdf * 2",
+        "effects": []
+      },
+      "sk_thunder": {
+        "id": "sk_thunder",
+        "name": "サンダー",
+        "mpCost": 10,
+        "scope": "one-enemy",
+        "formula": "a.mat * 6 - b.mdf * 2",
+        "effects": []
+      },
+      "sk_heal": {
+        "id": "sk_heal",
+        "name": "ヒール",
+        "mpCost": 3,
+        "scope": "one-ally",
+        "formula": "-(a.mat * 3 + 30)",
+        "effects": []
+      },
+      "sk_cure": {
+        "id": "sk_cure",
+        "name": "キュア",
+        "mpCost": 2,
+        "scope": "one-ally",
+        "formula": "",
+        "effects": [
+          {
+            "kind": "removeState",
+            "state": "st_poison"
+          },
+          {
+            "kind": "removeState",
+            "state": "st_sleep"
+          }
+        ]
+      },
+      "sk_protect": {
+        "id": "sk_protect",
+        "name": "プロテクト",
+        "mpCost": 5,
+        "scope": "all-allies",
+        "formula": "",
+        "effects": [
+          {
+            "kind": "buff",
+            "param": "def",
+            "level": 1
+          }
+        ]
+      },
+      "sk_raise": {
+        "id": "sk_raise",
+        "name": "リザレク",
+        "mpCost": 10,
+        "scope": "one-dead-ally",
+        "formula": "",
+        "effects": [
+          {
+            "kind": "recoverHp",
+            "value": 60
+          }
+        ]
+      },
+      "sk_healall": {
+        "id": "sk_healall",
+        "name": "ヒールオール",
+        "mpCost": 9,
+        "scope": "all-allies",
+        "formula": "-(a.mat * 2 + 30)",
+        "effects": []
+      },
+      "sk_sway": {
+        "id": "sk_sway",
+        "name": "ゆらゆら揺れる",
+        "mpCost": 0,
+        "scope": "none",
+        "formula": "",
+        "effects": []
+      },
+      "sk_club": {
+        "id": "sk_club",
+        "name": "こん棒",
+        "mpCost": 0,
+        "scope": "one-enemy",
+        "formula": "a.atk * 4 - b.def * 2",
+        "effects": []
+      },
+      "sk_bite": {
+        "id": "sk_bite",
+        "name": "かみつく",
+        "mpCost": 0,
+        "scope": "one-enemy",
+        "formula": "a.atk * 4 - b.def * 2",
+        "effects": []
+      },
+      "sk_fang": {
+        "id": "sk_fang",
+        "name": "毒の牙",
+        "mpCost": 0,
+        "scope": "one-enemy",
+        "formula": "a.atk * 3 - b.def * 2",
+        "effects": [
+          {
+            "kind": "addState",
+            "state": "st_poison",
+            "chance": 0.6
+          }
+        ]
+      },
+      "sk_web": {
+        "id": "sk_web",
+        "name": "糸を吐く",
+        "mpCost": 0,
+        "scope": "all-enemies",
+        "formula": "a.atk * 2 - b.def * 2",
+        "effects": [
+          {
+            "kind": "buff",
+            "param": "agi",
+            "level": -1
+          }
+        ]
+      },
+      "sk_punch": {
+        "id": "sk_punch",
+        "name": "岩の拳",
+        "mpCost": 0,
+        "scope": "one-enemy",
+        "formula": "a.atk * 4 - b.def * 2",
+        "effects": []
+      },
+      "sk_rocks": {
+        "id": "sk_rocks",
+        "name": "岩投げ",
+        "mpCost": 0,
+        "scope": "all-enemies",
+        "formula": "a.atk * 3 - b.def * 2",
+        "effects": []
+      },
+      "sk_harden": {
+        "id": "sk_harden",
+        "name": "かたくなる",
+        "mpCost": 0,
+        "scope": "self",
+        "formula": "",
+        "effects": [
+          {
+            "kind": "buff",
+            "param": "def",
+            "level": 1
+          }
+        ]
+      },
+      "sk_darkfire": {
+        "id": "sk_darkfire",
+        "name": "ダークファイア",
+        "mpCost": 4,
+        "scope": "one-enemy",
+        "formula": "a.mat * 4 - b.mdf * 2",
+        "effects": []
+      },
+      "sk_sleep": {
+        "id": "sk_sleep",
+        "name": "スリープ",
+        "mpCost": 6,
+        "scope": "all-enemies",
+        "formula": "",
+        "effects": [
+          {
+            "kind": "addState",
+            "state": "st_sleep",
+            "chance": 0.4
+          }
+        ]
+      },
+      "sk_darkflame": {
+        "id": "sk_darkflame",
+        "name": "ダークフレイム",
+        "mpCost": 10,
+        "scope": "all-enemies",
+        "formula": "a.mat * 3 - b.mdf * 2",
+        "effects": []
+      },
+      "sk_slash": {
+        "id": "sk_slash",
+        "name": "斬りつける",
+        "mpCost": 0,
+        "scope": "one-enemy",
+        "formula": "a.atk * 4 - b.def * 2",
+        "effects": []
+      },
+      "sk_breath": {
+        "id": "sk_breath",
+        "name": "火の息",
+        "mpCost": 0,
+        "scope": "all-enemies",
+        "formula": "a.mat * 3 - b.mdf * 2",
+        "effects": []
+      },
+      "sk_roar": {
+        "id": "sk_roar",
+        "name": "咆哮",
+        "mpCost": 0,
+        "scope": "self",
+        "formula": "",
+        "effects": [
+          {
+            "kind": "buff",
+            "param": "atk",
+            "level": 1
+          }
+        ]
+      },
+      "sk_inferno": {
+        "id": "sk_inferno",
+        "name": "業火",
+        "mpCost": 0,
+        "scope": "all-enemies",
+        "formula": "a.mat * 4 - b.mdf * 2",
+        "effects": []
+      }
+    },
+    "items": {
+      "item_potion": {
+        "id": "item_potion",
+        "name": "ポーション",
+        "kind": "consumable",
+        "price": 20,
+        "effects": [
+          {
+            "kind": "recoverHp",
+            "value": 60
+          }
+        ]
+      },
+      "item_hipotion": {
+        "id": "item_hipotion",
+        "name": "ハイポーション",
+        "kind": "consumable",
+        "price": 80,
+        "effects": [
+          {
+            "kind": "recoverHp",
+            "value": 200
+          }
+        ]
+      },
+      "item_ether": {
+        "id": "item_ether",
+        "name": "エーテル",
+        "kind": "consumable",
+        "price": 100,
+        "effects": [
+          {
+            "kind": "recoverMp",
+            "value": 30
+          }
+        ]
+      },
+      "item_antidote": {
+        "id": "item_antidote",
+        "name": "毒消し草",
+        "kind": "consumable",
+        "price": 10,
+        "effects": [
+          {
+            "kind": "removeState",
+            "state": "st_poison"
+          }
+        ]
+      },
+      "item_waker": {
+        "id": "item_waker",
+        "name": "目覚まし鈴",
+        "kind": "consumable",
+        "price": 10,
+        "effects": [
+          {
+            "kind": "removeState",
+            "state": "st_sleep"
+          }
+        ]
+      },
+      "wp_sword": {
+        "id": "wp_sword",
+        "name": "銅の剣",
+        "kind": "weapon",
+        "price": 100,
+        "effects": [],
+        "params": {
+          "atk": 5
+        }
+      },
+      "wp_rod": {
+        "id": "wp_rod",
+        "name": "樫の杖",
+        "kind": "weapon",
+        "price": 80,
+        "effects": [],
+        "params": {
+          "mat": 4
+        }
+      },
+      "wp_staff": {
+        "id": "wp_staff",
+        "name": "聖なる杖",
+        "kind": "weapon",
+        "price": 120,
+        "effects": [],
+        "params": {
+          "mat": 3,
+          "mdf": 3
+        }
+      },
+      "ar_leather": {
+        "id": "ar_leather",
+        "name": "革の鎧",
+        "kind": "armor",
+        "price": 60,
+        "effects": [],
+        "params": {
+          "def": 4
+        }
+      },
+      "ar_robe": {
+        "id": "ar_robe",
+        "name": "旅のローブ",
+        "kind": "armor",
+        "price": 50,
+        "effects": [],
+        "params": {
+          "def": 2,
+          "mdf": 2
+        }
+      }
+    },
+    "enemies": {
+      "en_scarecrow": {
+        "id": "en_scarecrow",
+        "name": "かかし",
+        "graphic": {
+          "asset": "239572cda7e7a31f"
+        },
+        "params": {
+          "mhp": 40,
+          "mmp": 0,
+          "atk": 1,
+          "def": 4,
+          "mat": 0,
+          "mdf": 2,
+          "agi": 1,
+          "luk": 0
+        },
+        "actions": [
+          {
+            "skill": "sk_sway",
+            "rating": 5
+          }
+        ],
+        "drops": [],
+        "exp": 8,
+        "gold": 3
+      },
+      "en_goblin": {
+        "id": "en_goblin",
+        "name": "ゴブリン",
+        "graphic": {
+          "asset": "706871e63f0964d5"
+        },
+        "params": {
+          "mhp": 110,
+          "mmp": 0,
+          "atk": 11,
+          "def": 8,
+          "mat": 0,
+          "mdf": 4,
+          "agi": 8,
+          "luk": 5
+        },
+        "actions": [
+          {
+            "skill": "sk_club",
+            "rating": 5
+          }
+        ],
+        "drops": [
+          {
+            "item": "item_potion",
+            "rate": 0.5
+          }
+        ],
+        "exp": 20,
+        "gold": 15
+      },
+      "en_spider": {
+        "id": "en_spider",
+        "name": "大グモ",
+        "graphic": {
+          "asset": "87a15d33480ce3fa"
+        },
+        "params": {
+          "mhp": 450,
+          "mmp": 0,
+          "atk": 13,
+          "def": 12,
+          "mat": 0,
+          "mdf": 8,
+          "agi": 12,
+          "luk": 6
+        },
+        "actions": [
+          {
+            "skill": "sk_bite",
+            "rating": 5
+          },
+          {
+            "skill": "sk_fang",
+            "rating": 5
+          },
+          {
+            "skill": "sk_web",
+            "rating": 3
+          }
+        ],
+        "drops": [
+          {
+            "item": "item_antidote",
+            "rate": 1
+          }
+        ],
+        "exp": 80,
+        "gold": 60
+      },
+      "en_golem": {
+        "id": "en_golem",
+        "name": "ストーンゴーレム",
+        "graphic": {
+          "asset": "b5ae3bacc2c5b435"
+        },
+        "params": {
+          "mhp": 500,
+          "mmp": 0,
+          "atk": 18,
+          "def": 34,
+          "mat": 0,
+          "mdf": 8,
+          "agi": 4,
+          "luk": 4
+        },
+        "actions": [
+          {
+            "skill": "sk_punch",
+            "rating": 5
+          },
+          {
+            "skill": "sk_rocks",
+            "rating": 4,
+            "condition": "turn % 3 == 2"
+          },
+          {
+            "skill": "sk_harden",
+            "rating": 3
+          }
+        ],
+        "drops": [
+          {
+            "item": "item_hipotion",
+            "rate": 1
+          }
+        ],
+        "exp": 150,
+        "gold": 120
+      },
+      "en_sorcerer": {
+        "id": "en_sorcerer",
+        "name": "闇の魔術師",
+        "graphic": {
+          "asset": "1966439fb7193c7b"
+        },
+        "params": {
+          "mhp": 280,
+          "mmp": 120,
+          "atk": 10,
+          "def": 14,
+          "mat": 24,
+          "mdf": 20,
+          "agi": 14,
+          "luk": 10
+        },
+        "actions": [
+          {
+            "skill": "sk_darkfire",
+            "rating": 5
+          },
+          {
+            "skill": "sk_sleep",
+            "rating": 4
+          },
+          {
+            "skill": "sk_darkflame",
+            "rating": 4,
+            "condition": "turn >= 2"
+          }
+        ],
+        "drops": [
+          {
+            "item": "item_ether",
+            "rate": 1
+          }
+        ],
+        "exp": 170,
+        "gold": 150
+      },
+      "en_skeleton": {
+        "id": "en_skeleton",
+        "name": "骸骨兵",
+        "graphic": {
+          "asset": "78489951d9e9763d"
+        },
+        "params": {
+          "mhp": 120,
+          "mmp": 0,
+          "atk": 18,
+          "def": 14,
+          "mat": 0,
+          "mdf": 6,
+          "agi": 10,
+          "luk": 4
+        },
+        "actions": [
+          {
+            "skill": "sk_slash",
+            "rating": 5
+          }
+        ],
+        "drops": [],
+        "exp": 30,
+        "gold": 20
+      },
+      "en_dragon": {
+        "id": "en_dragon",
+        "name": "炎の竜",
+        "graphic": {
+          "asset": "0afff08f1d6cb7b0"
+        },
+        "params": {
+          "mhp": 1100,
+          "mmp": 0,
+          "atk": 26,
+          "def": 24,
+          "mat": 26,
+          "mdf": 18,
+          "agi": 16,
+          "luk": 10
+        },
+        "actions": [
+          {
+            "skill": "sk_bite",
+            "rating": 5
+          },
+          {
+            "skill": "sk_breath",
+            "rating": 4,
+            "condition": "turn >= 2"
+          },
+          {
+            "skill": "sk_roar",
+            "rating": 3
+          },
+          {
+            "skill": "sk_inferno",
+            "rating": 8,
+            "condition": "a.hp * 2 < a.mhp && turn % 3 == 0"
+          }
+        ],
+        "drops": [],
+        "exp": 500,
+        "gold": 500
+      }
+    },
+    "troops": {
+      "tr_dummy": {
+        "id": "tr_dummy",
+        "name": "かかし",
+        "members": [
+          {
+            "enemy": "en_scarecrow",
+            "x": 208,
+            "y": 150
+          }
+        ],
+        "pages": []
+      },
+      "tr_goblins": {
+        "id": "tr_goblins",
+        "name": "ゴブリン兄弟",
+        "members": [
+          {
+            "enemy": "en_goblin",
+            "x": 150,
+            "y": 150
+          },
+          {
+            "enemy": "en_goblin",
+            "x": 266,
+            "y": 150
+          }
+        ],
+        "pages": []
+      },
+      "tr_spider": {
+        "id": "tr_spider",
+        "name": "大グモ",
+        "members": [
+          {
+            "enemy": "en_spider",
+            "x": 208,
+            "y": 150
+          }
+        ],
+        "pages": []
+      },
+      "tr_golem": {
+        "id": "tr_golem",
+        "name": "ストーンゴーレム",
+        "members": [
+          {
+            "enemy": "en_golem",
+            "x": 208,
+            "y": 146
+          }
+        ],
+        "pages": []
+      },
+      "tr_sorcerer": {
+        "id": "tr_sorcerer",
+        "name": "闇の魔術師と骸骨兵",
+        "members": [
+          {
+            "enemy": "en_skeleton",
+            "x": 100,
+            "y": 156
+          },
+          {
+            "enemy": "en_sorcerer",
+            "x": 208,
+            "y": 146
+          },
+          {
+            "enemy": "en_skeleton",
+            "x": 316,
+            "y": 156
+          }
+        ],
+        "pages": []
+      },
+      "tr_dragon": {
+        "id": "tr_dragon",
+        "name": "炎の竜",
+        "members": [
+          {
+            "enemy": "en_dragon",
+            "x": 208,
+            "y": 144
+          }
+        ],
+        "pages": []
+      }
+    },
+    "states": {
+      "st_poison": {
+        "id": "st_poison",
+        "name": "毒",
+        "restriction": "none",
+        "turns": 5,
+        "paramRates": {},
+        "hpRegen": -0.08
+      },
+      "st_sleep": {
+        "id": "st_sleep",
+        "name": "眠り",
+        "restriction": "cannotAct",
+        "turns": 2,
+        "paramRates": {},
+        "hpRegen": 0
+      }
+    },
+    "commonEvents": {}
+  },
+  "assets": {
+    "entries": {
+      "6053f42c20044a34": {
+        "name": "tower_tileset.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 9838,
+        "width": 1632,
+        "height": 32
+      },
+      "bb2e23b45d1f4d4d": {
+        "name": "hero.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 660,
+        "width": 96,
+        "height": 128
+      },
+      "4bbc359dfc9a56d6": {
+        "name": "people.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 2191,
+        "width": 288,
+        "height": 128
+      },
+      "d742c0cded60be10": {
+        "name": "monsters.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 10652,
+        "width": 384,
+        "height": 256
+      },
+      "239572cda7e7a31f": {
+        "name": "scarecrow.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 351,
+        "width": 64,
+        "height": 64
+      },
+      "706871e63f0964d5": {
+        "name": "goblin.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 382,
+        "width": 64,
+        "height": 64
+      },
+      "87a15d33480ce3fa": {
+        "name": "spider.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 456,
+        "width": 64,
+        "height": 64
+      },
+      "b5ae3bacc2c5b435": {
+        "name": "golem.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 353,
+        "width": 64,
+        "height": 64
+      },
+      "1966439fb7193c7b": {
+        "name": "sorcerer.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 418,
+        "width": 64,
+        "height": 64
+      },
+      "78489951d9e9763d": {
+        "name": "skeleton.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 291,
+        "width": 64,
+        "height": 64
+      },
+      "0afff08f1d6cb7b0": {
+        "name": "dragon.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 624,
+        "width": 96,
+        "height": 96
+      },
+      "87073bd84cdaced6": {
+        "name": "battle.wav",
+        "kind": "audio",
+        "mime": "audio/wav",
+        "size": 70604
+      }
+    }
+  },
+  "switches": {
+    "sw_spider": {
+      "name": "大グモを倒した"
+    }
+  },
+  "variables": {
+    "var_cleared": {
+      "name": "倒した番人の数"
+    }
+  }
+}
