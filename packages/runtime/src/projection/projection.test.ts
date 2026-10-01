@@ -52,6 +52,16 @@ describe("projectFrame（マップシーン）", () => {
     expect((tiles[0] as unknown as { tiles: number[] }).tiles).toHaveLength(80);
   });
 
+  it("ChangeMapTile で書き換えたタイルを描く（MapData は変えない）", async () => {
+    const h = await boot();
+    const s0 = h.runtime.getState();
+    const changed = { ...s0, mapTiles: { [s0.map.mapId]: { "1:3,2": 5 } } } as GameState;
+    const tiles = projectFrame(changed, view(h)).layers.filter((l) => l.kind === "tiles") as unknown as { tiles: number[] }[];
+    expect(tiles[1]!.tiles[2 * 10 + 3]).toBe(5);
+    expect(tiles[0]!.tiles[2 * 10 + 3]).toBe(1);
+    expect(view(h).map(s0.map.mapId)!.layers[1]!.tiles[2 * 10 + 3]).not.toBe(5);
+  });
+
   it("イベントのスプライトはシートの規約（3 パターン × 4 方向、コマ = tileSize）で切り出す", async () => {
     const h = await boot();
     const [layer] = spritesOf(projectFrame(h.runtime.getState(), view(h)));

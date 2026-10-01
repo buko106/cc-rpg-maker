@@ -155,6 +155,11 @@ export interface GameState {
   readonly switches: Record<SwitchId, boolean>;
   readonly variables: Record<VariableId, number>;
   readonly selfSwitches: Record<`${MapId}:${EventId}:${string}`, boolean>;
+  /**
+   * `ChangeMapTile` で書き換えたマスの、マップごとの一覧（`tileKey(layer, x, y)` → タイル番号）。書き換えるまで無い。
+   * マップを出入りしても残り、セーブに含まれる。通行・氷・描画は `currentMap` がこれを重ねたマップを見る。
+   */
+  readonly mapTiles?: Record<MapId, Record<string, number>>;
   /** 並列イベント分を含む。 */
   readonly interpreters: readonly InterpreterState[];
   /** 次に発行するインタプリタ id の連番。 */

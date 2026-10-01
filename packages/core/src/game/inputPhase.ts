@@ -2,7 +2,7 @@ import type { Direction, EventId, MapData, Tileset } from "@rpg/schema";
 import type { Ctx } from "../ctx-types.js";
 import type { InputFrame } from "../input.js";
 import { startInterpreter } from "../interpreter/index.js";
-import { DIRECTION_VECTOR, moveCharacter, pushableAt, REVERSE, startsOnPlayerTouch } from "../map/index.js";
+import { currentMap, DIRECTION_VECTOR, moveCharacter, pushableAt, REVERSE, startsOnPlayerTouch } from "../map/index.js";
 import type { EventRuntime, GameState } from "../state.js";
 import type { StepResult } from "./actions.js";
 import { battleInput } from "../battle/index.js";
@@ -68,7 +68,7 @@ export function handleInput(state: GameState, input: InputFrame, ctx: Ctx): Step
   if (state.message.open) return handleMessageInput(state, input);
   if (hasNormalInterpreter(state) || state.map.transfer !== undefined || state.map.player.moving) return idle;
 
-  const map = ctx.project.map(state.map.mapId);
+  const map = currentMap(ctx.project, state);
   if (map === undefined) return idle;
 
   if (input.triggered.has("menu") || input.triggered.has("cancel")) return openMenu(state);

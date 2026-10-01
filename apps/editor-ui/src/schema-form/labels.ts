@@ -116,6 +116,8 @@ const FIELD_LABELS: Readonly<Record<string, string>> = {
   screen: "画面サイズ",
   width: "幅",
   height: "高さ",
+  layer: "レイヤ（0 から）",
+  tile: "タイル番号（0 = 空）",
   bgm: "BGM",
   title: "タイトル",
   battle: "戦闘",

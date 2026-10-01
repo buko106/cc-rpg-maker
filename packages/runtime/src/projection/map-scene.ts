@@ -1,3 +1,4 @@
+import { currentMap } from "@rpg/core";
 import type { Character, EventRuntime, GameState, ProjectView } from "@rpg/core";
 import type { Direction } from "@rpg/schema";
 import type { FrameLayer, Sprite } from "../frame-spec.js";
@@ -44,7 +45,7 @@ function characterSprite(ch: Character, view: ProjectView, tileSize: number): Sp
 /** マップ本体のタイルレイヤとキャラクターのスプライトレイヤ。マップが未ロードなら空。 */
 export function projectMapLayers(state: GameState, view: ProjectView): { tileSize: number; layers: FrameLayer[] } {
   const tileSize = view.project.system.tileSize;
-  const map = view.map(state.map.mapId);
+  const map = currentMap(view, state);
   if (map === undefined) return { tileSize, layers: [] };
 
   const tileset = view.tileset(map.tileset);

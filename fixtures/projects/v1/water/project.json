@@ -1,0 +1,181 @@
+{
+  "formatVersion": 1,
+  "meta": {
+    "id": "water",
+    "title": "デモ：水門の遺跡",
+    "createdAt": "2026-10-01T00:00:00Z",
+    "updatedAt": "2026-10-01T00:00:00Z"
+  },
+  "system": {
+    "startMap": "map_hall",
+    "startX": 7,
+    "startY": 8,
+    "initialParty": [
+      "actor_hero"
+    ],
+    "tileSize": 32,
+    "screen": {
+      "width": 480,
+      "height": 352
+    },
+    "bgm": {},
+    "autosave": {
+      "onTransfer": true
+    },
+    "terms": {
+      "newGame": "ニューゲーム"
+    }
+  },
+  "maps": {
+    "map_hall": {
+      "id": "map_hall",
+      "name": "入口の間",
+      "order": 0
+    },
+    "map_canal": {
+      "id": "map_canal",
+      "name": "水路の間",
+      "order": 1
+    },
+    "map_float": {
+      "id": "map_float",
+      "name": "浮き橋の間",
+      "order": 2
+    },
+    "map_sluice": {
+      "id": "map_sluice",
+      "name": "大水門の間",
+      "order": 3
+    },
+    "map_shrine": {
+      "id": "map_shrine",
+      "name": "水神の間",
+      "order": 4
+    }
+  },
+  "tilesets": {
+    "ts_water": {
+      "id": "ts_water",
+      "name": "水門の遺跡",
+      "image": {
+        "asset": "85d84fe008120380"
+      },
+      "passage": [15, 15, 0, 15, 15, 0, 0, 0, 0, 0]
+    }
+  },
+  "database": {
+    "actors": {
+      "actor_hero": {
+        "id": "actor_hero",
+        "name": "リオ",
+        "classId": "class_hero",
+        "initialLevel": 1,
+        "walk": {
+          "asset": "bb2e23b45d1f4d4d"
+        },
+        "equips": {}
+      }
+    },
+    "classes": {
+      "class_hero": {
+        "id": "class_hero",
+        "name": "旅人",
+        "skills": [],
+        "params": {
+          "mhp": {
+            "base": 100,
+            "growth": 2
+          },
+          "mmp": {
+            "base": 20,
+            "growth": 2
+          },
+          "atk": {
+            "base": 10,
+            "growth": 2
+          },
+          "def": {
+            "base": 10,
+            "growth": 2
+          },
+          "mat": {
+            "base": 10,
+            "growth": 2
+          },
+          "mdf": {
+            "base": 10,
+            "growth": 2
+          },
+          "agi": {
+            "base": 10,
+            "growth": 2
+          },
+          "luk": {
+            "base": 10,
+            "growth": 2
+          }
+        }
+      }
+    },
+    "skills": {},
+    "items": {},
+    "enemies": {},
+    "troops": {},
+    "states": {},
+    "commonEvents": {}
+  },
+  "assets": {
+    "entries": {
+      "85d84fe008120380": {
+        "name": "water_tileset.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 1544,
+        "width": 320,
+        "height": 32
+      },
+      "bb2e23b45d1f4d4d": {
+        "name": "hero.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 660,
+        "width": 96,
+        "height": 128
+      },
+      "c14f7f39ca6efacb": {
+        "name": "people.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 1187,
+        "width": 192,
+        "height": 128
+      },
+      "ee1c057f24f01c1a": {
+        "name": "props.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 5359,
+        "width": 288,
+        "height": 384
+      }
+    }
+  },
+  "switches": {
+    "sw_low_map_canal": {
+      "name": "水路の間の水位が低い（水が引いている）"
+    },
+    "sw_low_map_float": {
+      "name": "浮き橋の間の水位が低い（水が引いている）"
+    },
+    "sw_low_map_sluice": {
+      "name": "大水門の間の水位が低い（水が引いている）"
+    },
+    "sw_hall_drained": {
+      "name": "大水門が開いて、入口の間の水路が干上がった"
+    },
+    "sw_orb": {
+      "name": "水神の宝珠を取った"
+    }
+  },
+  "variables": {}
+}
