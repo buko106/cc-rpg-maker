@@ -1,8 +1,9 @@
 import type { BattleCommand, BattleState, Battler, EnemyBattler, GameState, ProjectView } from "@rpg/core";
 import { battleCommands, isAlive, learnedSkills, targetCandidates, usableItems } from "@rpg/core";
-import type { ActorId, Skill } from "@rpg/schema";
+import type { ActorId, Item, Skill } from "@rpg/schema";
 import type { FontSpec, UiNode } from "../frame-spec.js";
 import { formatLogEntry } from "./battle-log.js";
+import { HELP_HEIGHT, helpWindow } from "./describe.js";
 import { term } from "./terms.js";
 import { EXP_COLOR, HP_COLOR, MP_COLOR, textColor, UI_MARGIN, UI_PADDING, UI_ROW_HEIGHT } from "./theme.js";
 import { commandRows, cursorNode, firstVisible, textNode, windowNode } from "./ui.js";
@@ -109,13 +110,13 @@ function projectList(state: GameState, view: ProjectView, screen: Screen, bottom
   const ally = actorId === undefined ? undefined : b.allies[actorId];
   if (actorId === undefined || ally === undefined) return [];
 
-  type Row = { name: string; right: string; enabled: boolean };
+  type Row = { name: string; right: string; enabled: boolean; def: Item | Skill };
   const ctx = { project: view };
   let rows: Row[];
   if (cur.menu === "skill") {
-    rows = learnedSkills(ctx, actorId as ActorId, ally.level).map((s: Skill) => ({ name: s.name, right: s.mpCost > 0 ? `${term(view, "mp")} ${s.mpCost}` : "", enabled: s.mpCost <= ally.mp }));
+    rows = learnedSkills(ctx, actorId as ActorId, ally.level).map((s: Skill) => ({ name: s.name, right: s.mpCost > 0 ? `${term(view, "mp")} ${s.mpCost}` : "", enabled: s.mpCost <= ally.mp, def: s }));
   } else {
-    rows = usableItems(state, ctx).map((i) => ({ name: i.name, right: `× ${state.party.items[i.id] ?? 0}`, enabled: true }));
+    rows = usableItems(state, ctx).map((i) => ({ name: i.name, right: `× ${state.party.items[i.id] ?? 0}`, enabled: true, def: i }));
   }
   const w = screen.width - UI_MARGIN * 2;
   const shown = Math.min(LIST_ROWS, Math.max(1, rows.length));
@@ -130,7 +131,7 @@ function projectList(state: GameState, view: ProjectView, screen: Screen, bottom
     if (row.right !== "") children.push(textNode(UI_MARGIN + w - UI_PADDING, ty, row.right, color, { align: "right" }));
   });
   if (rows.length > 0) children.push(cursorNode(UI_MARGIN + 4, y + UI_PADDING + (cur.index - first) * UI_ROW_HEIGHT, w - 8));
-  return [windowNode(UI_MARGIN, y, w, h, children)];
+  return [windowNode(UI_MARGIN, y, w, h, children), helpWindow(view, rows[cur.index]?.def, UI_MARGIN, y - UI_MARGIN / 2 - HELP_HEIGHT, w)];
 }
 
 /** ダメージなどの数字。対象の位置から少し浮かび上がる。 */

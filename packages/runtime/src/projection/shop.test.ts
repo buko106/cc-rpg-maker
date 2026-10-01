@@ -41,6 +41,13 @@ describe("projectFrame（ショップ）", () => {
     expect(textsOf(projectShop(shopState({}, {}, false), view, size))).not.toContain("売却する");
   });
 
+  it("一覧では選んでいる品物の説明が出る。コマンド画面と、説明のない品物では出ない", () => {
+    expect(textsOf(projectShop(shopState({ screen: "buy", cursor: 0 }), view, size))).toContain("味方1人：HPを30回復");
+    expect(textsOf(projectShop(shopState({ screen: "buy", cursor: 1 }), view, size))).not.toContain("味方1人：HPを30回復"); // 古い鍵は説明なし
+    expect(textsOf(projectShop(shopState({ screen: "command" }), view, size))).not.toContain("味方1人：HPを30回復");
+    expect(textsOf(projectShop(shopState({ screen: "sell", cursor: 0 }), view, size))).toContain("味方1人：HPを30回復");
+  });
+
   it("購入の一覧：カーソルは品物の行。買えないものは灰色", () => {
     const s = shopState({ screen: "buy", cursor: 0 }, { gold: 5 });
     const nodes = flatten(projectShop(s, view, size));
