@@ -220,7 +220,8 @@ const enemy = defineEventTemplate({
     return {
       name: i.name,
       pages: [
-        page({ graphic: i.graphic, trigger: i.trigger, moveRoute, commands: battle }),
+        // ぶつかったとき：プレイヤーから触れても、近づいてきた敵の方から触れても戦闘になる（イベントから接触）
+        page({ graphic: i.graphic, trigger: i.trigger === "touch" ? "eventTouch" : "action", moveRoute, commands: battle }),
         // 倒したあと：見た目なし・すり抜け・下（いないのと同じ）
         page({ conditions: [AFTER], through: true, priority: "below", commands: [] }),
       ],
