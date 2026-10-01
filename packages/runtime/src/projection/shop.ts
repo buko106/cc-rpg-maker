@@ -1,6 +1,7 @@
 import type { GameState, ProjectView, ShopScene } from "@rpg/core";
 import { maxBuyQuantity, sellPrice, shopCommands, shopListIds } from "@rpg/core";
 import type { UiNode } from "../frame-spec.js";
+import { HELP_HEIGHT, helpWindow } from "./describe.js";
 import { term } from "./terms.js";
 import { textColor, UI_MARGIN, UI_PADDING, UI_ROW_HEIGHT } from "./theme.js";
 import { cursorNode, firstVisible, textNode, windowNode } from "./ui.js";
@@ -9,6 +10,7 @@ type Screen = { width: number; height: number };
 
 const OWNED_COLUMN = 76;
 const DIALOG_WIDTH = 240;
+const GOLD_WIDTH = 96;
 
 const rowY = (top: number, i: number): number => top + UI_PADDING + i * UI_ROW_HEIGHT + 2;
 
@@ -73,14 +75,19 @@ export function projectShop(state: GameState, view: ProjectView, screen: Screen)
   if (scene.kind !== "shop") return [];
   const barH = UI_ROW_HEIGHT + UI_PADDING * 2;
   const w = screen.width - UI_MARGIN * 2;
-  const goldY = screen.height - UI_MARGIN - barH;
-  const list = { x: UI_MARGIN, y: UI_MARGIN * 2 + barH, w, h: goldY - UI_MARGIN - (UI_MARGIN * 2 + barH) };
+  // 下段：左に選んでいる品物の説明、右に所持金（説明の窓と同じ高さ）
+  const bottomY = screen.height - UI_MARGIN - HELP_HEIGHT;
+  const goldW = GOLD_WIDTH;
+  const list = { x: UI_MARGIN, y: UI_MARGIN * 2 + barH, w, h: bottomY - UI_MARGIN - (UI_MARGIN * 2 + barH) };
+  const selected = scene.screen === "command" ? undefined : shopListIds(state, scene, { project: view })[scene.cursor];
+  const goldX = UI_MARGIN + w - goldW;
   return [
     windowNode(UI_MARGIN, UI_MARGIN, w, barH, projectCommands(view, scene, UI_MARGIN, w)),
     windowNode(list.x, list.y, list.w, list.h, projectList(state, view, scene, list)),
-    windowNode(UI_MARGIN, goldY, w, barH, [
-      textNode(UI_MARGIN + UI_PADDING, rowY(goldY, 0), term(view, "gold"), textColor(6)),
-      textNode(UI_MARGIN + w - UI_PADDING, rowY(goldY, 0), `${state.party.gold}G`, textColor(0), { align: "right" }),
+    helpWindow(view, selected === undefined ? undefined : view.item(selected), UI_MARGIN, bottomY, w - goldW - UI_MARGIN),
+    windowNode(goldX, bottomY, goldW, HELP_HEIGHT, [
+      textNode(goldX + UI_PADDING, bottomY + UI_PADDING, term(view, "gold"), textColor(6), { font: { family: "sans-serif", size: 12 } }),
+      textNode(goldX + goldW - UI_PADDING, bottomY + UI_PADDING + 16, `${state.party.gold}G`, textColor(0), { align: "right" }),
     ]),
     ...projectQuantity(state, view, scene, screen),
   ];

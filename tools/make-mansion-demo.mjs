@@ -573,6 +573,12 @@ const doorway = (id, name, at, to) => event(id, name, at, [page({ trigger: "touc
 
 /** 大事なもの。`SelectItem` は ID の昇順での番号（1 始まり）を変数に入れる。 */
 const ITEMS = { key_bedroom: "寝室の鍵", key_front: "玄関の鍵", key_letter: "招待状" };
+/** 一覧に出す説明文（大事なものは効果がないので、自動の説明の代わりに手がかりを書く）。 */
+const ITEM_NOTES = {
+  key_bedroom: "食器棚の奥にあった小さな鍵。二階のどこかの扉に合いそうだ。",
+  key_front: "玄関の錠に合う、重たい鍵。",
+  key_letter: "屋敷への招待状。差出人の名前は、にじんで読めない。",
+};
 const itemNumber = (id) => Object.keys(ITEMS).sort().indexOf(id) + 1;
 
 function hallEvents(props, catAsset) {
@@ -830,7 +836,7 @@ const project = {
     actors: { actor_hero: { id: "actor_hero", name: "旅人", classId: "class_hero", initialLevel: 1, walk: { asset: assets["hero.png"].id }, equips: {} } },
     classes: { class_hero: { id: "class_hero", name: "旅人", skills: [], params } },
     skills: {},
-    items: Object.fromEntries(Object.entries(ITEMS).map(([id, name]) => [id, { id, name, kind: "key", price: 0, effects: [] }])),
+    items: Object.fromEntries(Object.entries(ITEMS).map(([id, name]) => [id, { id, name, kind: "key", price: 0, effects: [], description: ITEM_NOTES[id] }])),
     enemies: {},
     troops: {},
     states: {},

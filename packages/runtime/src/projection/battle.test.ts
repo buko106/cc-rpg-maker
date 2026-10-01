@@ -65,6 +65,16 @@ describe("projectFrame（戦闘）", () => {
     expect(textsOf(frame(s).ui)).toEqual(expect.arrayContaining(["ポーション", "× 2"]));
   });
 
+  it("スキル・アイテムの一覧では、選んでいるものの説明が一覧の上に出る", () => {
+    let s = beginBattle(kit, "tr_slime");
+    s = feed(s, "down", "down", "ok");
+    expect(textsOf(frame(s).ui).some((t) => t.includes("HPを") && t.includes("回復"))).toBe(true);
+    const skills = feed(beginBattle(kit, "tr_slime"), "ok", "ok", "down", "ok");
+    expect(textsOf(frame(skills).ui)).toContain("敵1体：ダメージを与える"); // 先頭はファイア
+    const heal = feed(skills, "down");
+    expect(textsOf(frame(heal).ui).some((t) => t.startsWith("味方1人："))).toBe(true);
+  });
+
   it("対象の選択：敵にはカーソルの枠、味方にはステータスの行にカーソルが出る", () => {
     let s = beginBattle(kit, "tr_slimes");
     s = feed(s, "ok");

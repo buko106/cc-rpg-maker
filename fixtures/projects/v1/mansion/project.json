@@ -116,21 +116,24 @@
         "name": "寝室の鍵",
         "kind": "key",
         "price": 0,
-        "effects": []
+        "effects": [],
+        "description": "食器棚の奥にあった小さな鍵。二階のどこかの扉に合いそうだ。"
       },
       "key_front": {
         "id": "key_front",
         "name": "玄関の鍵",
         "kind": "key",
         "price": 0,
-        "effects": []
+        "effects": [],
+        "description": "玄関の錠に合う、重たい鍵。"
       },
       "key_letter": {
         "id": "key_letter",
         "name": "招待状",
         "kind": "key",
         "price": 0,
-        "effects": []
+        "effects": [],
+        "description": "屋敷への招待状。差出人の名前は、にじんで読めない。"
       }
     },
     "enemies": {},

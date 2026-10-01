@@ -101,6 +101,8 @@ export const skillSchema = z.strictObject({
   formula: z.string(),
   effects: z.array(skillEffectSchema),
   animation: assetRefSchema.optional(),
+  /** 一覧に出す説明文。省略すると式と効果から自動で作る。書いた場合はそのまま出す（`""` なら何も出さない。効果を秘密にしたい・ランダムなときなどに使う）。 */
+  description: z.string().meta({ multiline: true }).optional(),
 });
 export type Skill = z.infer<typeof skillSchema>;
 
@@ -112,6 +114,8 @@ export const itemSchema = z.strictObject({
   formula: z.string().optional(),
   effects: z.array(skillEffectSchema),
   params: z.partialRecord(paramSchema, z.number()).optional(),
+  /** 一覧に出す説明文。省略すると効果と能力値から自動で作る。書いた場合はそのまま出す（`""` なら何も出さない。効果を秘密にしたい・ランダムなとき、コモンイベントで効果を作るときなどに使う）。 */
+  description: z.string().meta({ multiline: true }).optional(),
 });
 export type Item = z.infer<typeof itemSchema>;
 

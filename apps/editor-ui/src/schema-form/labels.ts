@@ -85,6 +85,7 @@ const FIELD_LABELS: Readonly<Record<string, string>> = {
   effects: "効果",
   animation: "アニメーション",
   price: "価格",
+  description: "説明文（未設定なら効果から自動で作る。設定して空にすると何も出さない）",
   graphicAsset: "グラフィック",
   actions: "行動パターン",
   rating: "優先度",

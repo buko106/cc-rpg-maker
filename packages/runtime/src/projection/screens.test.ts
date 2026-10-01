@@ -143,7 +143,7 @@ describe("projectFrame（メニュー）", () => {
       const ui = projectFrame(picking, h.loaded.view).ui;
       expect(textsOf(ui).some((t) => t.startsWith("勇者"))).toBe(true);
       expect(textsOf(ui).some((t) => t.startsWith("HP"))).toBe(true);
-      expect(flatten(ui).filter((n) => n.kind === "window")).toHaveLength(3); // 暗幕・アイテム一覧・パーティ
+      expect(flatten(ui).filter((n) => n.kind === "window")).toHaveLength(4); // 暗幕・アイテム一覧・パーティ・説明
       expect(cursors(ui)).toHaveLength(2); // 一覧のカーソルと、対象のカーソル
     });
 
@@ -162,7 +162,7 @@ describe("projectFrame（メニュー）", () => {
       expect(flatten(projectFrame(noMp, h.loaded.view).ui).find((n) => n.kind === "text" && n.text === "ヒール")).toMatchObject({ color: { r: 128, g: 128, b: 128 } });
 
       const picking = { ...listed, scene: { kind: "menu", screen: "skill", cursor: 0, actor: 0, pick: { kind: "skill", id: "sk_heal", user: "actor_hero", cursor: 0 } } } as GameState;
-      expect(flatten(projectFrame(picking, h.loaded.view).ui).filter((n) => n.kind === "window")).toHaveLength(3);
+      expect(flatten(projectFrame(picking, h.loaded.view).ui).filter((n) => n.kind === "window")).toHaveLength(4); // 暗幕・スキル一覧・パーティ・説明
     });
   });
 

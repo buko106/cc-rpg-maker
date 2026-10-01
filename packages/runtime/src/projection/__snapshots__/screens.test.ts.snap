@@ -385,12 +385,38 @@ exports[`projectFrame（メニュー） > [snapshot] アイテム：所持品を
         "y": 60,
       },
     ],
-    "h": 240,
+    "h": 184,
     "kind": "window",
     "variant": "normal",
     "w": 304,
     "x": 8,
     "y": 8,
+  },
+  {
+    "children": [
+      {
+        "color": {
+          "a": 1,
+          "b": 255,
+          "g": 255,
+          "r": 255,
+        },
+        "font": {
+          "family": "sans-serif",
+          "size": 12,
+        },
+        "kind": "text",
+        "text": "",
+        "x": 16,
+        "y": 208,
+      },
+    ],
+    "h": 48,
+    "kind": "window",
+    "variant": "normal",
+    "w": 304,
+    "x": 8,
+    "y": 200,
   },
 ]
 `;

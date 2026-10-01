@@ -3,6 +3,7 @@ import { fieldItemUsable, fieldSkills, fieldSkillUsable, menuItemIds, menuItems,
 import type { Param } from "@rpg/schema";
 import type { UiNode } from "../frame-spec.js";
 import { projectConfirm } from "./confirm.js";
+import { HELP_HEIGHT, helpWindow } from "./describe.js";
 import { projectSlotList } from "./slot-list.js";
 import { term } from "./terms.js";
 import { EXP_COLOR, HP_COLOR, MP_COLOR, textColor, UI_MARGIN, UI_PADDING, UI_ROW_HEIGHT } from "./theme.js";
@@ -66,6 +67,13 @@ function projectTargets(state: GameState, view: ProjectView, screen: Screen, x: 
   return [windowNode(x, UI_MARGIN, w, screen.height - UI_MARGIN * 2, children)];
 }
 
+/** 説明の窓を下に置くぶん、上の窓に使える画面の高さ。 */
+const aboveHelp = (screen: Screen): Screen => ({ width: screen.width, height: screen.height - HELP_HEIGHT - UI_MARGIN });
+
+/** 画面の下端に置く説明の窓（選んでいるアイテム/スキルの説明）。 */
+const projectHelp = (view: ProjectView, screen: Screen, def: Parameters<typeof helpWindow>[1]): UiNode =>
+  helpWindow(view, def, UI_MARGIN, screen.height - UI_MARGIN - HELP_HEIGHT, screen.width - UI_MARGIN * 2);
+
 /** 一覧の窓の幅（対象を選んでいる間は左に寄せて、右にパーティを出す）。 */
 const listWidth = (screen: Screen, picking: boolean): number => (picking ? Math.floor(screen.width * 0.5) - UI_MARGIN : screen.width - UI_MARGIN * 2);
 
@@ -74,7 +82,8 @@ function projectItems(state: GameState, view: ProjectView, screen: Screen, curso
   const x = UI_MARGIN;
   const y = UI_MARGIN;
   const w = listWidth(screen, pick !== undefined);
-  const h = screen.height - UI_MARGIN * 2;
+  const upper = aboveHelp(screen);
+  const h = upper.height - UI_MARGIN * 2;
   const rows = Math.max(1, Math.floor((h - 28 - UI_PADDING) / UI_ROW_HEIGHT));
   const first = firstVisible(cursor, ids.length, rows);
   const children: UiNode[] = [textNode(x + UI_PADDING, y + UI_PADDING, term(view, "item"), textColor(6))];
@@ -88,7 +97,8 @@ function projectItems(state: GameState, view: ProjectView, screen: Screen, curso
   });
   if (ids.length > 0) children.push(cursorNode(x + 4, y + 28 + (cursor - first) * UI_ROW_HEIGHT, w - 8));
   const list = windowNode(x, y, w, h, children);
-  return pick === undefined ? [list] : [list, ...projectTargets(state, view, screen, x + w + UI_MARGIN, pick)];
+  const help = projectHelp(view, screen, view.item(ids[cursor] as never));
+  return pick === undefined ? [list, help] : [list, ...projectTargets(state, view, upper, x + w + UI_MARGIN, pick), help];
 }
 
 /** スキル画面：使う人を選ぶ（パーティ一覧）→ その人のスキルの一覧 →（一人を選ぶ範囲なら）対象の味方。 */
@@ -113,10 +123,12 @@ function projectSkills(state: GameState, view: ProjectView, screen: Screen, scen
   }
 
   const w = listWidth(screen, scene.pick !== undefined);
+  const upper = aboveHelp(screen);
   const cls = view.class(view.actor(user.id)?.classId ?? ("" as never));
   const mmp = paramAt(cls, "mmp", user.level);
   const skills = fieldSkills(state, { project: view }, user.id);
-  const rows = Math.max(1, Math.floor((h - 28 - UI_PADDING) / UI_ROW_HEIGHT));
+  const listH = upper.height - UI_MARGIN * 2;
+  const rows = Math.max(1, Math.floor((listH - 28 - UI_PADDING) / UI_ROW_HEIGHT));
   const first = firstVisible(scene.cursor, skills.length, rows);
   const children: UiNode[] = [
     textNode(x + UI_PADDING, y + UI_PADDING, `${term(view, "skill")}  ${user.name}`, textColor(6)),
@@ -130,8 +142,9 @@ function projectSkills(state: GameState, view: ProjectView, screen: Screen, scen
     children.push(textNode(x + w - UI_PADDING, ty, `${term(view, "mp")} ${skill.mpCost}`, color, { align: "right" }));
   });
   if (skills.length > 0) children.push(cursorNode(x + 4, y + 28 + (scene.cursor - first) * UI_ROW_HEIGHT, w - 8));
-  const list = windowNode(x, y, w, h, children);
-  return scene.pick === undefined ? [list] : [list, ...projectTargets(state, view, screen, x + w + UI_MARGIN, scene.pick)];
+  const list = windowNode(x, y, w, listH, children);
+  const help = projectHelp(view, screen, skills[scene.cursor]);
+  return scene.pick === undefined ? [list, help] : [list, ...projectTargets(state, view, upper, x + w + UI_MARGIN, scene.pick), help];
 }
 
 function projectStatus(state: GameState, view: ProjectView, screen: Screen, cursor: number): UiNode[] {

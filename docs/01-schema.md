@@ -129,9 +129,11 @@ export interface Actor { id: ActorId; name: string; classId: ClassId; initialLev
 export interface Class { id: ClassId; name: string; params: ParamCurve; skills: { level: number; skill: SkillId }[] }
 export interface Skill { id: SkillId; name: string; mpCost: number; scope: Scope;
   formula: string;                        // 05-expression.md の式言語
-  effects: SkillEffect[]; animation?: AssetRef }
+  effects: SkillEffect[]; animation?: AssetRef;
+  description?: string }                  // 一覧に出す説明文（06 の「アイテム・スキルの説明」）
 export interface Item { id: ItemId; name: string; kind: "consumable" | "weapon" | "armor" | "key";
-  price: number; formula?: string; effects: SkillEffect[]; params?: Partial<Record<Param, number>> }
+  price: number; formula?: string; effects: SkillEffect[]; params?: Partial<Record<Param, number>>;
+  description?: string }
 export interface Enemy { id: EnemyId; name: string; params: Record<Param, number>;
   actions: { skill: SkillId; condition?: string; rating: number }[]; drops: Drop[]; exp: number; gold: number }
 export interface Troop { id: TroopId; name: string; members: { enemy: EnemyId; x: number; y: number }[];
