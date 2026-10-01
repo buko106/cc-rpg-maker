@@ -38,7 +38,7 @@
             {
               "code": "ShowText",
               "params": {
-                "text": "北の 階段は 水路に さえぎられて 近づけない。\nまずは 案内人に 話しかけてみよう。",
+                "text": "北の 階段は 水路に さえぎられて 近づけない。\n西と 東の 部屋に ある \\C[6]水晶\\C[0]を 二つ 集めよう。",
                 "position": "bottom",
                 "background": "window"
               },
@@ -106,9 +106,9 @@
               "params": {
                 "choices": [
                   "水位と水路",
-                  "石の堰",
-                  "水位の しくみ",
-                  "宝珠への道",
+                  "木箱と浮き橋",
+                  "連動水門",
+                  "しくみ・やり直し",
                   "やめる"
                 ],
                 "cancel": 4
@@ -125,7 +125,7 @@
             {
               "code": "ShowText",
               "params": {
-                "text": "遺跡の あちこちに ある \\C[6]レバー\\C[0]を 引くと、その 部屋の\n\\C[6]水位\\C[0]が 上がったり 下がったり する。",
+                "text": "遺跡の \\C[6]レバー\\C[0]を 引くと、\\C[6]水位\\C[0]が 変わる。\n水位が 高いと、\\C[6]水路\\C[0]は 水に 沈んで 渡れない。",
                 "position": "bottom",
                 "background": "window"
               },
@@ -134,7 +134,7 @@
             {
               "code": "ShowText",
               "params": {
-                "text": "水位が \\C[6]高い\\C[0]ときは、\\C[6]水路\\C[0]が 水に 沈んで 渡れない。\n水位が \\C[6]低い\\C[0]ときは、水が 引いて 底を 歩ける。",
+                "text": "水位が 低いと、水が 引いて 底を 歩ける。\n\\C[6]石の 堰\\C[0]は 反対で、低いと 石の壁、高いと 浅瀬じゃ。",
                 "position": "bottom",
                 "background": "window"
               },
@@ -150,7 +150,7 @@
             {
               "code": "ShowText",
               "params": {
-                "text": "\\C[6]石の 堰\\C[0]は 反対じゃ。水位が 低いと 石の壁が\n立ちはだかり、高いと 水の下に かくれて 歩けるように なる。",
+                "text": "西の \\C[6]浮き橋の間\\C[0]には 木箱が ある。水位が 低いうちに\n水路の 底へ 箱を 押しこんで、水位を 上げるんじゃ。",
                 "position": "bottom",
                 "background": "window"
               },
@@ -159,7 +159,7 @@
             {
               "code": "ShowText",
               "params": {
-                "text": "つまり、水位を 変えると 歩ける 場所も 変わる。\nどこで 引くかを 考えるんじゃ。",
+                "text": "水の中の 箱は 沈んで、ずっと 渡れる \\C[6]浮き橋\\C[0]に なる。\nただし 箱は 少ない。どこを 橋に するか 考えなされ。",
                 "position": "bottom",
                 "background": "window"
               },
@@ -175,7 +175,7 @@
             {
               "code": "ShowText",
               "params": {
-                "text": "水位は 部屋ごとに 変わる。そして 部屋を 出ても、\nセーブして 遊びなおしても、そのまま 残る。",
+                "text": "東の \\C[6]連動水門の間\\C[0]は、青・緑・紫の 三つの 水路が\nそれぞれ 別の 水位を もっておる。",
                 "position": "bottom",
                 "background": "window"
               },
@@ -184,7 +184,7 @@
             {
               "code": "ShowText",
               "params": {
-                "text": "レバーの まわりは いつも 乾いた 床じゃ。\n引いた 拍子に 足元が 水に なる ことは ない。",
+                "text": "レバーの \\C[6]ランプの 色\\C[0]が、動かす 水路じゃ。\n一つの レバーが 二つの 水路を 同時に 動かす ことも ある。",
                 "position": "bottom",
                 "background": "window"
               },
@@ -200,7 +200,7 @@
             {
               "code": "ShowText",
               "params": {
-                "text": "この 広間の 北の 水路は、ずっと 水に 沈んどる。\n奥にある \\C[6]大水門\\C[0]を 開ければ 水が 引くはずじゃ。",
+                "text": "足元が 水に なって 動けなく なる ことは ない。\nレバーの まわりは いつも 乾いた 床じゃ。",
                 "position": "bottom",
                 "background": "window"
               },
@@ -209,7 +209,7 @@
             {
               "code": "ShowText",
               "params": {
-                "text": "水路の間・浮き橋の間・大水門の間と 進むんじゃ。\n東の すみの 階段が 水路の間への 入口じゃよ。",
+                "text": "水位は 部屋を 出ても、セーブしても 残る。\n箱を 動かしすぎたら 入口の \\C[6]魔法陣\\C[0]で やり直せ。",
                 "position": "bottom",
                 "background": "window"
               },
@@ -230,7 +230,7 @@
             {
               "code": "ShowText",
               "params": {
-                "text": "では、気をつけてな。",
+                "text": "水晶は 西と 東の 部屋に 一つずつ。\n二つ そろえば、北の 水路が 干上がる はずじゃ。",
                 "position": "bottom",
                 "background": "window"
               },
@@ -258,7 +258,7 @@
             {
               "code": "ShowText",
               "params": {
-                "text": "おお、北の 水路が 干上がっとる！\n大水門が 開いたんじゃな。",
+                "text": "おお、北の 水路が 干上がっとる！\n二つの 水晶を そろえたんじゃな。",
                 "position": "bottom",
                 "background": "window"
               },
@@ -289,8 +289,8 @@
           "through": true,
           "priority": "below",
           "graphic": {
-            "asset": "ee1c057f24f01c1a",
-            "index": 4,
+            "asset": "e445fda9383a98e3",
+            "index": 5,
             "direction": "down"
           },
           "commands": [
@@ -309,9 +309,41 @@
         }
       ]
     },
-    "ev_side": {
-      "id": "ev_side",
-      "name": "水路の間への階段",
+    "ev_west": {
+      "id": "ev_west",
+      "name": "浮き橋の間への階段",
+      "x": 2,
+      "y": 8,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": true,
+          "priority": "below",
+          "graphic": {
+            "asset": "e445fda9383a98e3",
+            "index": 6,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_crates",
+                "x": 7,
+                "y": 8,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_east": {
+      "id": "ev_east",
+      "name": "連動水門の間への階段",
       "x": 12,
       "y": 8,
       "pages": [
@@ -321,15 +353,15 @@
           "through": true,
           "priority": "below",
           "graphic": {
-            "asset": "ee1c057f24f01c1a",
-            "index": 5,
+            "asset": "e445fda9383a98e3",
+            "index": 6,
             "direction": "down"
           },
           "commands": [
             {
               "code": "TransferPlayer",
               "params": {
-                "mapId": "map_canal",
+                "mapId": "map_gates",
                 "x": 7,
                 "y": 8,
                 "dir": "up",
@@ -349,12 +381,12 @@
       "pages": [
         {
           "conditions": [],
-          "trigger": "touch",
+          "trigger": "action",
           "through": false,
           "priority": "same",
           "graphic": {
-            "asset": "ee1c057f24f01c1a",
-            "index": 5,
+            "asset": "e445fda9383a98e3",
+            "index": 6,
             "direction": "down"
           },
           "commands": [
@@ -362,6 +394,134 @@
               "code": "ShowText",
               "params": {
                 "text": "入口は 崩れて ふさがっている。\n宝珠を 持ち帰るまで 帰れない。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_ped_a": {
+      "id": "ev_ped_a",
+      "name": "水晶の台座",
+      "x": 4,
+      "y": 4,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_crystal_a",
+              "value": false
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "e445fda9383a98e3",
+            "index": 9,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "水晶を 置く 台座のようだ。\n水晶は 取ったときに ここへ 戻ってくる。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_crystal_a",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "e445fda9383a98e3",
+            "index": 7,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "水晶が 台座で 静かに 光っている。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_ped_b": {
+      "id": "ev_ped_b",
+      "name": "水晶の台座",
+      "x": 10,
+      "y": 4,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_crystal_b",
+              "value": false
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "e445fda9383a98e3",
+            "index": 9,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "水晶を 置く 台座のようだ。\n水晶は 取ったときに ここへ 戻ってくる。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_crystal_b",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "e445fda9383a98e3",
+            "index": 8,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "水晶が 台座で 静かに 光っている。",
                 "position": "bottom",
                 "background": "window"
               },

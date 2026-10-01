@@ -26,8 +26,8 @@
           "through": false,
           "priority": "same",
           "graphic": {
-            "asset": "ee1c057f24f01c1a",
-            "index": 5,
+            "asset": "e445fda9383a98e3",
+            "index": 6,
             "direction": "down"
           },
           "commands": [
@@ -64,8 +64,8 @@
           "through": false,
           "priority": "same",
           "graphic": {
-            "asset": "ee1c057f24f01c1a",
-            "index": 6,
+            "asset": "e445fda9383a98e3",
+            "index": 10,
             "direction": "down"
           },
           "commands": [
@@ -122,7 +122,7 @@
             {
               "code": "ShowText",
               "params": {
-                "text": "かわいた 大地に 雨が もどってくる。\\C[6]おめでとう！\\C[0]\n（水位を 切りかえて、遺跡を 渡りきった！）",
+                "text": "かわいた 大地に 雨が もどってくる。\\C[6]おめでとう！\\C[0]\n（水位を あやつって、遺跡を 渡りきった！）",
                 "position": "bottom",
                 "background": "window"
               },
@@ -147,8 +147,8 @@
           "through": false,
           "priority": "same",
           "graphic": {
-            "asset": "ee1c057f24f01c1a",
-            "index": 7,
+            "asset": "e445fda9383a98e3",
+            "index": 9,
             "direction": "down"
           },
           "commands": [

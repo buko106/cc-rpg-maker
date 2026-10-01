@@ -32,25 +32,20 @@
       "name": "入口の間",
       "order": 0
     },
-    "map_canal": {
-      "id": "map_canal",
-      "name": "水路の間",
+    "map_crates": {
+      "id": "map_crates",
+      "name": "浮き橋の間",
       "order": 1
     },
-    "map_float": {
-      "id": "map_float",
-      "name": "浮き橋の間",
+    "map_gates": {
+      "id": "map_gates",
+      "name": "連動水門の間",
       "order": 2
-    },
-    "map_sluice": {
-      "id": "map_sluice",
-      "name": "大水門の間",
-      "order": 3
     },
     "map_shrine": {
       "id": "map_shrine",
       "name": "水神の間",
-      "order": 4
+      "order": 3
     }
   },
   "tilesets": {
@@ -58,9 +53,9 @@
       "id": "ts_water",
       "name": "水門の遺跡",
       "image": {
-        "asset": "85d84fe008120380"
+        "asset": "5a7185982dec0445"
       },
-      "passage": [15, 15, 0, 15, 15, 0, 0, 0, 0, 0]
+      "passage": [15, 15, 0, 15, 15, 0, 0, 0, 0, 0, 15, 0, 15, 15, 0, 0, 15, 15, 0]
     }
   },
   "database": {
@@ -126,12 +121,12 @@
   },
   "assets": {
     "entries": {
-      "85d84fe008120380": {
+      "5a7185982dec0445": {
         "name": "water_tileset.png",
         "kind": "image",
         "mime": "image/png",
-        "size": 1544,
-        "width": 320,
+        "size": 3207,
+        "width": 608,
         "height": 32
       },
       "bb2e23b45d1f4d4d": {
@@ -150,28 +145,61 @@
         "width": 192,
         "height": 128
       },
-      "ee1c057f24f01c1a": {
+      "e445fda9383a98e3": {
         "name": "props.png",
         "kind": "image",
         "mime": "image/png",
-        "size": 5359,
+        "size": 9802,
         "width": 288,
-        "height": 384
+        "height": 640
       }
     }
   },
   "switches": {
-    "sw_low_map_canal": {
-      "name": "水路の間の水位が低い（水が引いている）"
-    },
-    "sw_low_map_float": {
+    "sw_low_map_crates": {
       "name": "浮き橋の間の水位が低い（水が引いている）"
     },
-    "sw_low_map_sluice": {
-      "name": "大水門の間の水位が低い（水が引いている）"
+    "sw_low_map_gates_a": {
+      "name": "連動水門の間の青の水路の水位が低い"
+    },
+    "sw_low_map_gates_b": {
+      "name": "連動水門の間の緑の水路の水位が低い"
+    },
+    "sw_low_map_gates_c": {
+      "name": "連動水門の間の紫の水路の水位が低い"
+    },
+    "sw_sunk_1": {
+      "name": "木箱1が沈んだ"
+    },
+    "sw_sunk_2": {
+      "name": "木箱2が沈んだ"
+    },
+    "sw_raft_0": {
+      "name": "浮き橋の間の水路 (3, 6) が浮き橋になった"
+    },
+    "sw_raft_1": {
+      "name": "浮き橋の間の水路 (5, 6) が浮き橋になった"
+    },
+    "sw_raft_2": {
+      "name": "浮き橋の間の水路 (6, 6) が浮き橋になった"
+    },
+    "sw_raft_3": {
+      "name": "浮き橋の間の水路 (9, 6) が浮き橋になった"
+    },
+    "sw_raft_4": {
+      "name": "浮き橋の間の水路 (11, 6) が浮き橋になった"
+    },
+    "sw_raft_5": {
+      "name": "浮き橋の間の水路 (13, 6) が浮き橋になった"
+    },
+    "sw_crystal_a": {
+      "name": "浮き橋の間の水晶を取った"
+    },
+    "sw_crystal_b": {
+      "name": "連動水門の間の水晶を取った"
     },
     "sw_hall_drained": {
-      "name": "大水門が開いて、入口の間の水路が干上がった"
+      "name": "水晶が二つそろって、入口の間の水路が干上がった"
     },
     "sw_orb": {
       "name": "水神の宝珠を取った"

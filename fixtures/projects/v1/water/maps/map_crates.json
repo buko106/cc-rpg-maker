@@ -1,0 +1,1879 @@
+{
+  "id": "map_crates",
+  "width": 15,
+  "height": 11,
+  "tileset": "ts_water",
+  "layers": [
+    {
+      "name": "ground",
+      "tiles": [6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 7, 7, 7, 7, 6, 7, 6, 7, 7, 7, 7, 7, 7, 6, 6, 1, 1, 1, 1, 6, 1, 7, 1, 1, 1, 1, 1, 1, 6, 6, 1, 1, 1, 1, 7, 1, 1, 1, 6, 1, 1, 1, 1, 6, 6, 7, 4, 1, 1, 1, 7, 7, 7, 7, 4, 6, 7, 4, 6, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 7, 1, 1, 6, 6, 7, 6, 2, 7, 2, 2, 7, 7, 2, 7, 2, 7, 2, 6, 6, 1, 7, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 6, 6, 6, 6, 6, 6, 6, 1, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6]
+    },
+    {
+      "name": "objects",
+      "tiles": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 9, 0, 0, 0, 9, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+  ],
+  "events": {
+    "ev_down": {
+      "id": "ev_down",
+      "name": "戻る階段",
+      "x": 7,
+      "y": 9,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "e445fda9383a98e3",
+            "index": 6,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_hall",
+                "x": 3,
+                "y": 8,
+                "dir": "right",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_crate_1": {
+      "id": "ev_crate_1",
+      "name": "木箱",
+      "x": 5,
+      "y": 7,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "e445fda9383a98e3",
+            "index": 11,
+            "direction": "down"
+          },
+          "pushable": true,
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "水に浮く 木箱だ。正面から 押せば 動かせそうだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_sunk_1",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "commands": []
+        }
+      ]
+    },
+    "ev_crate_2": {
+      "id": "ev_crate_2",
+      "name": "木箱",
+      "x": 5,
+      "y": 8,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "e445fda9383a98e3",
+            "index": 11,
+            "direction": "down"
+          },
+          "pushable": true,
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "水に浮く 木箱だ。正面から 押せば 動かせそうだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_sunk_2",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "commands": []
+        }
+      ]
+    },
+    "ev_lever_1": {
+      "id": "ev_lever_1",
+      "name": "水門のレバー",
+      "x": 1,
+      "y": 7,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_low_map_crates",
+              "value": false
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "e445fda9383a98e3",
+            "index": 0,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "古い 水門の レバーだ。いまは 水位が 高い。\n引くと、水が 引きそうだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "引く",
+                  "やめる"
+                ],
+                "cancel": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_low_map_crates"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!s(\"sw_raft_0\")"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 3,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 3
+              },
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!s(\"sw_raft_1\")"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 5,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 3
+              },
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!s(\"sw_raft_2\")"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 6,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 3
+              },
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!s(\"sw_raft_3\")"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 9,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 3
+              },
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!s(\"sw_raft_4\")"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 11,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 3
+              },
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!s(\"sw_raft_5\")"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 13,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 3
+              },
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 2,
+                "y": 4,
+                "width": 1,
+                "height": 1,
+                "tile": 5
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 10,
+                "y": 4,
+                "width": 1,
+                "height": 1,
+                "tile": 5
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 13,
+                "y": 4,
+                "width": 1,
+                "height": 1,
+                "tile": 5
+              },
+              "indent": 1
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 120,
+                  "g": 190,
+                  "b": 255,
+                  "a": 0.5
+                },
+                "duration": 14
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 3,
+                "duration": 24,
+                "wait": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]ゴゴゴ……\\C[0] 水位が 下がった！\n水路の 水が 引いて、底が 歩けるように なった。\n石の 堰が あらわれて、道を ふさいだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_low_map_crates",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "e445fda9383a98e3",
+            "index": 1,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "古い 水門の レバーだ。いまは 水位が 低い。\n引くと、水が もどって きそうだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "引く",
+                  "やめる"
+                ],
+                "cancel": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_low_map_crates"
+                ],
+                "value": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!s(\"sw_raft_0\")"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 3,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 2
+              },
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!s(\"sw_raft_1\")"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 5,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 2
+              },
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!s(\"sw_raft_2\")"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 6,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 2
+              },
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!s(\"sw_raft_3\")"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 9,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 2
+              },
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!s(\"sw_raft_4\")"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 11,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 2
+              },
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!s(\"sw_raft_5\")"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 13,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 2
+              },
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 2,
+                "y": 4,
+                "width": 1,
+                "height": 1,
+                "tile": 4
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 10,
+                "y": 4,
+                "width": 1,
+                "height": 1,
+                "tile": 4
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 13,
+                "y": 4,
+                "width": 1,
+                "height": 1,
+                "tile": 4
+              },
+              "indent": 1
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 120,
+                  "g": 190,
+                  "b": 255,
+                  "a": 0.5
+                },
+                "duration": 14
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 3,
+                "duration": 24,
+                "wait": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]ザザザ……\\C[0] 水位が 上がった！\n水路が 水に 沈み、石の 堰は 水の下の 浅瀬に なった。\n水路に あった 木箱は 沈んで いく……。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_sink": {
+      "id": "ev_sink",
+      "name": "しかけ",
+      "x": 0,
+      "y": 0,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_low_map_crates",
+              "value": false
+            }
+          ],
+          "trigger": "parallel",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!s(\"sw_sunk_1\") && !s(\"sw_raft_0\") && evx(\"ev_crate_1\") == 3 && evy(\"ev_crate_1\") == 6"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_sunk_1",
+                  "sw_raft_0"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 3,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 10
+              },
+              "indent": 1
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 230,
+                  "b": 255,
+                  "a": 0.35
+                },
+                "duration": 10
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]ブクブク……\\C[0] 木箱が 水に 沈んで、\n水の上に 浮き橋が できた！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!s(\"sw_sunk_1\") && !s(\"sw_raft_1\") && evx(\"ev_crate_1\") == 5 && evy(\"ev_crate_1\") == 6"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_sunk_1",
+                  "sw_raft_1"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 5,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 10
+              },
+              "indent": 1
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 230,
+                  "b": 255,
+                  "a": 0.35
+                },
+                "duration": 10
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]ブクブク……\\C[0] 木箱が 水に 沈んで、\n水の上に 浮き橋が できた！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!s(\"sw_sunk_1\") && !s(\"sw_raft_2\") && evx(\"ev_crate_1\") == 6 && evy(\"ev_crate_1\") == 6"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_sunk_1",
+                  "sw_raft_2"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 6,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 10
+              },
+              "indent": 1
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 230,
+                  "b": 255,
+                  "a": 0.35
+                },
+                "duration": 10
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]ブクブク……\\C[0] 木箱が 水に 沈んで、\n水の上に 浮き橋が できた！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!s(\"sw_sunk_1\") && !s(\"sw_raft_3\") && evx(\"ev_crate_1\") == 9 && evy(\"ev_crate_1\") == 6"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_sunk_1",
+                  "sw_raft_3"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 9,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 10
+              },
+              "indent": 1
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 230,
+                  "b": 255,
+                  "a": 0.35
+                },
+                "duration": 10
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]ブクブク……\\C[0] 木箱が 水に 沈んで、\n水の上に 浮き橋が できた！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!s(\"sw_sunk_1\") && !s(\"sw_raft_4\") && evx(\"ev_crate_1\") == 11 && evy(\"ev_crate_1\") == 6"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_sunk_1",
+                  "sw_raft_4"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 11,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 10
+              },
+              "indent": 1
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 230,
+                  "b": 255,
+                  "a": 0.35
+                },
+                "duration": 10
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]ブクブク……\\C[0] 木箱が 水に 沈んで、\n水の上に 浮き橋が できた！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!s(\"sw_sunk_1\") && !s(\"sw_raft_5\") && evx(\"ev_crate_1\") == 13 && evy(\"ev_crate_1\") == 6"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_sunk_1",
+                  "sw_raft_5"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 13,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 10
+              },
+              "indent": 1
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 230,
+                  "b": 255,
+                  "a": 0.35
+                },
+                "duration": 10
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]ブクブク……\\C[0] 木箱が 水に 沈んで、\n水の上に 浮き橋が できた！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!s(\"sw_sunk_2\") && !s(\"sw_raft_0\") && evx(\"ev_crate_2\") == 3 && evy(\"ev_crate_2\") == 6"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_sunk_2",
+                  "sw_raft_0"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 3,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 10
+              },
+              "indent": 1
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 230,
+                  "b": 255,
+                  "a": 0.35
+                },
+                "duration": 10
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]ブクブク……\\C[0] 木箱が 水に 沈んで、\n水の上に 浮き橋が できた！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!s(\"sw_sunk_2\") && !s(\"sw_raft_1\") && evx(\"ev_crate_2\") == 5 && evy(\"ev_crate_2\") == 6"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_sunk_2",
+                  "sw_raft_1"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 5,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 10
+              },
+              "indent": 1
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 230,
+                  "b": 255,
+                  "a": 0.35
+                },
+                "duration": 10
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]ブクブク……\\C[0] 木箱が 水に 沈んで、\n水の上に 浮き橋が できた！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!s(\"sw_sunk_2\") && !s(\"sw_raft_2\") && evx(\"ev_crate_2\") == 6 && evy(\"ev_crate_2\") == 6"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_sunk_2",
+                  "sw_raft_2"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 6,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 10
+              },
+              "indent": 1
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 230,
+                  "b": 255,
+                  "a": 0.35
+                },
+                "duration": 10
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]ブクブク……\\C[0] 木箱が 水に 沈んで、\n水の上に 浮き橋が できた！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!s(\"sw_sunk_2\") && !s(\"sw_raft_3\") && evx(\"ev_crate_2\") == 9 && evy(\"ev_crate_2\") == 6"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_sunk_2",
+                  "sw_raft_3"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 9,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 10
+              },
+              "indent": 1
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 230,
+                  "b": 255,
+                  "a": 0.35
+                },
+                "duration": 10
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]ブクブク……\\C[0] 木箱が 水に 沈んで、\n水の上に 浮き橋が できた！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!s(\"sw_sunk_2\") && !s(\"sw_raft_4\") && evx(\"ev_crate_2\") == 11 && evy(\"ev_crate_2\") == 6"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_sunk_2",
+                  "sw_raft_4"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 11,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 10
+              },
+              "indent": 1
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 230,
+                  "b": 255,
+                  "a": 0.35
+                },
+                "duration": 10
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]ブクブク……\\C[0] 木箱が 水に 沈んで、\n水の上に 浮き橋が できた！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!s(\"sw_sunk_2\") && !s(\"sw_raft_5\") && evx(\"ev_crate_2\") == 13 && evy(\"ev_crate_2\") == 6"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_sunk_2",
+                  "sw_raft_5"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 13,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 10
+              },
+              "indent": 1
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 230,
+                  "b": 255,
+                  "a": 0.35
+                },
+                "duration": 10
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]ブクブク……\\C[0] 木箱が 水に 沈んで、\n水の上に 浮き橋が できた！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_rune": {
+      "id": "ev_rune",
+      "name": "魔法陣",
+      "x": 7,
+      "y": 8,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "graphic": {
+            "asset": "e445fda9383a98e3",
+            "index": 12,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "足元の 魔法陣が かすかに 光っている。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "はじめから やりなおす",
+                  "ヒントを 読む",
+                  "やめる"
+                ],
+                "cancel": 2
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_low_map_crates"
+                ],
+                "value": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_sunk_1",
+                  "sw_sunk_2",
+                  "sw_raft_0",
+                  "sw_raft_1",
+                  "sw_raft_2",
+                  "sw_raft_3",
+                  "sw_raft_4",
+                  "sw_raft_5"
+                ],
+                "value": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 3,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 2
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 5,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 2
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 6,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 2
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 9,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 2
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 11,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 2
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 13,
+                "y": 6,
+                "width": 1,
+                "height": 1,
+                "tile": 2
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 2,
+                "y": 4,
+                "width": 1,
+                "height": 1,
+                "tile": 4
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 10,
+                "y": 4,
+                "width": 1,
+                "height": 1,
+                "tile": 4
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 13,
+                "y": 4,
+                "width": 1,
+                "height": 1,
+                "tile": 4
+              },
+              "indent": 1
+            },
+            {
+              "code": "SetEventLocation",
+              "params": {
+                "target": "ev_crate_1",
+                "x": 5,
+                "y": 7,
+                "dir": "retain"
+              },
+              "indent": 1
+            },
+            {
+              "code": "SetEventLocation",
+              "params": {
+                "target": "ev_crate_2",
+                "x": 5,
+                "y": 8,
+                "dir": "retain"
+              },
+              "indent": 1
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 120,
+                  "g": 190,
+                  "b": 255,
+                  "a": 0.5
+                },
+                "duration": 14
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "水位も、木箱も、浮き橋も、はじめの 状態に もどった。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "水位が 低いとき、水路は 乾いた 底に なる。\n箱は 乾いた 底へなら 押しこめる。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "水位を 上げると、水路の 箱は 沈んで 浮き橋に なる。\nレバーは 入口の 近くの すみに ある。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "石の 堰は 水位が 高いときだけ 渡れる。\n水晶は 堰の むこうに ある ようだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 2
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_crystal": {
+      "id": "ev_crystal",
+      "name": "水晶の祭壇",
+      "x": 6,
+      "y": 2,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_crystal_a",
+              "value": false
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "e445fda9383a98e3",
+            "index": 7,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "祭壇に、澄んだ 水晶が 浮かんでいる。\n手に取ると、ひんやりと 冷たい。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_crystal_a"
+                ],
+                "value": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 255,
+                  "g": 230,
+                  "b": 150,
+                  "a": 0.7
+                },
+                "duration": 24
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]水晶を 手に入れた！\\C[0]\n入口の間の 台座に 戻そう。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "s(\"sw_crystal_b\")"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_hall_drained"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "map_hall",
+                "layer": 0,
+                "x": 1,
+                "y": 3,
+                "width": 13,
+                "height": 1,
+                "tile": 3
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 3,
+                "duration": 40,
+                "wait": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "二つの 水晶が そろった。\\C[6]ゴゴゴ……\\C[0]\n遠くで 水の 流れる 音が する。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "入口の間の 北の 水路が 干上がった はずだ。\n入口の間へ もどって、北の 階段を めざそう。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_crystal_a",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "e445fda9383a98e3",
+            "index": 9,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "祭壇は からっぽだ。水晶は もう 持ちだした。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
