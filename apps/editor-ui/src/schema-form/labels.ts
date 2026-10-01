@@ -67,6 +67,7 @@ const FIELD_LABELS: Readonly<Record<string, string>> = {
   conditions: "出現条件",
   direction: "向き",
   through: "すり抜け",
+  pushable: "押せる（岩・箱など）",
   priority: "プライオリティ",
   moveRoute: "自律移動",
   sightRange: "視界の長さ",

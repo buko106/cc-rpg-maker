@@ -35,6 +35,15 @@ export function TilePalette(): ReactElement {
     run(cmd.upsertTileset({ ...tileset, passage: next }));
   };
 
+  const slippery = tileset?.ice?.includes(selected) === true;
+  const setSlippery = (on: boolean): void => {
+    if (tileset === undefined) return;
+    const rest = (tileset.ice ?? []).filter((t) => t !== selected);
+    const ice = on ? [...rest, selected].sort((a, b) => a - b) : rest;
+    const { ice: _old, ...base } = tileset;
+    run(cmd.upsertTileset(ice.length === 0 ? base : { ...base, ice }));
+  };
+
   return (
     <section className="tile-palette" aria-label="タイルパレット">
       <h2>タイル</h2>
@@ -66,6 +75,10 @@ export function TilePalette(): ReactElement {
               {label}から入れる
             </label>
           ))}
+          <label className="check">
+            <input type="checkbox" checked={slippery} onChange={(e) => setSlippery(e.target.checked)} />
+            滑る（氷）
+          </label>
         </fieldset>
       )}
       {error !== undefined && <p role="alert" className="notice error">{error}</p>}

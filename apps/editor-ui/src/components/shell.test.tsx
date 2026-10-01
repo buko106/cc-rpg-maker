@@ -97,7 +97,7 @@ describe("TilePalette / ToolBar", () => {
     render(t.wrap(<TilePalette />));
     fireEvent.click(screen.getByRole("button", { name: "タイル 2" }));
     const boxes = (): HTMLInputElement[] => screen.getAllByRole("checkbox") as HTMLInputElement[];
-    expect(boxes().map((b) => b.checked)).toEqual([false, false, false, false]); // 石壁（0）
+    expect(boxes().map((b) => b.checked)).toEqual([false, false, false, false, false]); // 石壁（0）。最後は「滑る（氷）」
     fireEvent.click(screen.getByLabelText("下から入れる"));
     expect(t.session.doc.project.tilesets["ts_default" as never]!.passage[2]).toBe(1);
     fireEvent.click(screen.getByRole("button", { name: "タイル 1" }));
@@ -110,6 +110,21 @@ describe("TilePalette / ToolBar", () => {
     expect(passage).toHaveLength(10);
     expect(passage[9]).toBe(13);
     expect(passage[8]).toBe(15);
+  });
+
+  it("選んだタイルの「滑る（氷）」を切り替えると、タイルセットの ice が更新される（外すと空の ice は消える）", () => {
+    render(t.wrap(<TilePalette />));
+    const ice = (): readonly number[] | undefined => t.session.doc.project.tilesets["ts_default" as never]!.ice;
+    fireEvent.click(screen.getByRole("button", { name: "タイル 2" }));
+    fireEvent.click(screen.getByLabelText("滑る（氷）"));
+    expect(ice()).toEqual([2]);
+    fireEvent.click(screen.getByRole("button", { name: "タイル 1" }));
+    fireEvent.click(screen.getByLabelText("滑る（氷）"));
+    expect(ice()).toEqual([1, 2]);
+    fireEvent.click(screen.getByLabelText("滑る（氷）"));
+    fireEvent.click(screen.getByRole("button", { name: "タイル 2" }));
+    fireEvent.click(screen.getByLabelText("滑る（氷）"));
+    expect(ice()).toBeUndefined();
   });
 
   it("タイルセットに画像が無ければ案内を出す", () => {

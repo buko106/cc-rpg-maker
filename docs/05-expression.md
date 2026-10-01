@@ -29,7 +29,7 @@ primary  := NUMBER | STRING | "true" | "false" | IDENT | "(" expr ")"
 
 - 値型：`number | string | boolean | Battler(読み取り専用ビュー) | undefined`。
 - メンバアクセスはホワイトリスト：`a.atk`, `b.def`, `a.hp`, `a.mhp`, `a.level` 等 `Param` と基本属性のみ。
-- 関数呼び出しはレジストリ登録されたもののみ：`v(id)`, `s(id)`, `min`, `max`, `floor`, `ceil`, `round`, `abs`, `rand(min,max)`, `clamp`。
+- 関数呼び出しはレジストリ登録されたもののみ：`v(id)`, `s(id)`, `evx(id)`, `evy(id)`（マップイベントの現在のタイル座標。そのイベントが居ないと `-1`）, `min`, `max`, `floor`, `ceil`, `round`, `abs`, `rand(min,max)`, `clamp`。
 - `Script` コマンドで使う副作用関数（`setVar(id, n)`, `setSwitch(id, b)`, `gainItem(id, n)` など）は `mode: "script"` のときだけ有効。評価結果として「変更操作のリスト」を返し、評価器自身は状態を変更しない。
 - `/` のゼロ除算は `0`、`NaN` は `0` に正規化する（式が不正でもゲームが止まらない）。
 - ステップ上限 10,000。超えたら `EvalError.kind === "budget"`。
@@ -49,6 +49,7 @@ export function registerBuiltinFns(r: FormulaRegistry): void;
 export interface Scope {
   vars: Record<string, Value>;                       // a, b, ...（イベントの式では `gold` = 所持金も入る）
   variable(id: VariableId): number; switch(id: SwitchId): boolean;
+  eventPos?(id: string): { x: number; y: number } | undefined;   // evx / evy が使う（イベントの式で渡される。戦闘の式では無い）
   rng: Random;
   mode: "formula" | "condition" | "script";
 }

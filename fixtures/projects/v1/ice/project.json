@@ -1,0 +1,185 @@
+{
+  "formatVersion": 1,
+  "meta": {
+    "id": "ice",
+    "title": "デモ：氷の神殿",
+    "createdAt": "2026-10-01T00:00:00Z",
+    "updatedAt": "2026-10-01T00:00:00Z"
+  },
+  "system": {
+    "startMap": "map_hall",
+    "startX": 7,
+    "startY": 8,
+    "initialParty": [
+      "actor_hero"
+    ],
+    "tileSize": 32,
+    "screen": {
+      "width": 480,
+      "height": 352
+    },
+    "bgm": {},
+    "autosave": {
+      "onTransfer": true
+    },
+    "terms": {
+      "newGame": "ニューゲーム"
+    }
+  },
+  "maps": {
+    "map_hall": {
+      "id": "map_hall",
+      "name": "入口の間",
+      "order": 0
+    },
+    "map_slide": {
+      "id": "map_slide",
+      "name": "すべる回廊",
+      "order": 1
+    },
+    "map_rock1": {
+      "id": "map_rock1",
+      "name": "岩と感圧板",
+      "order": 2
+    },
+    "map_rock2": {
+      "id": "map_rock2",
+      "name": "二つの感圧板",
+      "order": 3
+    },
+    "map_orb": {
+      "id": "map_orb",
+      "name": "炎のしずくの間",
+      "order": 4
+    }
+  },
+  "tilesets": {
+    "ts_ice": {
+      "id": "ts_ice",
+      "name": "氷の神殿",
+      "image": {
+        "asset": "df90873b97440259"
+      },
+      "passage": [15, 15, 15, 0, 0, 0, 0, 0],
+      "ice": [2]
+    }
+  },
+  "database": {
+    "actors": {
+      "actor_hero": {
+        "id": "actor_hero",
+        "name": "リオ",
+        "classId": "class_hero",
+        "initialLevel": 1,
+        "walk": {
+          "asset": "bb2e23b45d1f4d4d"
+        },
+        "equips": {}
+      }
+    },
+    "classes": {
+      "class_hero": {
+        "id": "class_hero",
+        "name": "旅人",
+        "skills": [],
+        "params": {
+          "mhp": {
+            "base": 100,
+            "growth": 2
+          },
+          "mmp": {
+            "base": 20,
+            "growth": 2
+          },
+          "atk": {
+            "base": 10,
+            "growth": 2
+          },
+          "def": {
+            "base": 10,
+            "growth": 2
+          },
+          "mat": {
+            "base": 10,
+            "growth": 2
+          },
+          "mdf": {
+            "base": 10,
+            "growth": 2
+          },
+          "agi": {
+            "base": 10,
+            "growth": 2
+          },
+          "luk": {
+            "base": 10,
+            "growth": 2
+          }
+        }
+      }
+    },
+    "skills": {},
+    "items": {},
+    "enemies": {},
+    "troops": {},
+    "states": {},
+    "commonEvents": {}
+  },
+  "assets": {
+    "entries": {
+      "df90873b97440259": {
+        "name": "ice_tileset.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 1030,
+        "width": 256,
+        "height": 32
+      },
+      "bb2e23b45d1f4d4d": {
+        "name": "hero.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 660,
+        "width": 96,
+        "height": 128
+      },
+      "476bb32799ae1d2f": {
+        "name": "people.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 1186,
+        "width": 192,
+        "height": 128
+      },
+      "acb4aae032043b8f": {
+        "name": "props.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 5954,
+        "width": 288,
+        "height": 384
+      }
+    }
+  },
+  "switches": {
+    "sw_open_map_rock1": {
+      "name": "岩と感圧板の扉が開いた"
+    },
+    "sw_open_map_rock2": {
+      "name": "二つの感圧板の扉が開いた"
+    },
+    "sw_plate_map_rock1_1": {
+      "name": "岩と感圧板の感圧板1が押されている"
+    },
+    "sw_plate_map_rock2_1": {
+      "name": "二つの感圧板の感圧板1が押されている"
+    },
+    "sw_plate_map_rock2_2": {
+      "name": "二つの感圧板の感圧板2が押されている"
+    },
+    "sw_orb": {
+      "name": "炎のしずくを取った"
+    }
+  },
+  "variables": {}
+}

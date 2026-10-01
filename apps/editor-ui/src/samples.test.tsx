@@ -20,6 +20,7 @@ const SAMPLES = [
   { id: "haunted", fixture: "haunted", title: "おばけ屋敷の追いかけっこ" },
   { id: "stealth", fixture: "stealth", title: "忍び込み！月影の宝物庫" },
   { id: "hokora", fixture: "hokora", title: "ほこらの冒険" },
+  { id: "ice", fixture: "ice", title: "氷の神殿" },
 ] as const;
 const dirOf = (fixture: string): string => join(FIXTURES_ROOT, "projects", "v1", fixture);
 const filesOf = (dir: string): string[] =>

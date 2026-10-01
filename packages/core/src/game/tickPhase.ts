@@ -4,7 +4,7 @@ import { warn } from "../effects.js";
 import type { Effect } from "../effects.js";
 import type { InputFrame } from "../input.js";
 import { isPageRouteOrigin, pageRouteCommands, pageRouteName, runInterpreters, startInterpreter } from "../interpreter/index.js";
-import { advanceCharacter, computeCamera, DEFAULT_SIGHT_RANGE, eventsToTrigger, hasSight, refreshEventPages, rollEncounter, seesPlayer, startsOnPlayerTouch } from "../map/index.js";
+import { advanceCharacter, computeCamera, DEFAULT_SIGHT_RANGE, eventsToTrigger, hasSight, refreshEventPages, rollEncounter, seesPlayer, slide, startsOnPlayerTouch } from "../map/index.js";
 import type { PassabilityCtx } from "../map/index.js";
 import { battleTick, startBattle } from "../battle/index.js";
 import type { GameState, MapState } from "../state.js";
@@ -82,7 +82,7 @@ function applyTransfer(state: GameState, ctx: Ctx): StepResult {
 
 /**
  * 移動の補間を 1 フレーム進める。プレイヤーが到着したら、足元の接触イベント（通常より下/上）を起動する。
- * 足元にイベントが無く、場所移動の予約も実行中のイベントも無ければ、ランダムエンカウントを判定する（`rollEncounter`）。
+ * 足元にイベントが無く、場所移動の予約も実行中のイベントも無ければ、氷の上ならそのまま滑り（`slide`）、止まった所でランダムエンカウントを判定する（`rollEncounter`）。
  */
 function advanceMovement(state: GameState, map: MapData, ctx: Ctx): StepResult {
   let s = state;
@@ -103,6 +103,10 @@ function advanceMovement(state: GameState, map: MapData, ctx: Ctx): StepResult {
       (ev) => ev.pageIndex !== null && startsOnPlayerTouch(ev.trigger) && ev.priority !== "same" && ev.x === player.x && ev.y === player.y,
     )?.id;
     if (here !== undefined) return { state: startMapEvent(s, map, here), effects: [] };
+    // 氷の上なら、同じ向きに滑り続ける（滑っている間は歩数を数えず、遭遇もしない。止まった所で判定する）
+    const tileset = ctx.project.tileset(map.tileset);
+    const slid = tileset === undefined ? undefined : slide(s.map.player, { map, tileset, events: s.map.events });
+    if (slid !== undefined) return { state: { ...s, map: { ...s.map, player: slid } }, effects: [] };
     return startEncounter(s, map, ctx);
   }
   return { state: s, effects: [] };

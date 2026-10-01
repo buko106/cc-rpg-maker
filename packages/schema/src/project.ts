@@ -17,6 +17,11 @@ export const tilesetSchema = z.strictObject({
    * 範囲外のタイルは全方向通行可（15）として扱う。
    */
   passage: z.array(z.number().int().min(0).max(15)),
+  /**
+   * 氷（滑る床）のタイル ID。歩いてこのタイルに着くと、同じ向きに止まるまで（壁・通れないイベント・向こうの接触イベントに突き当たるまで）滑り続ける。
+   * どのレイヤにあっても滑る。省略 = 滑るタイルは無い。
+   */
+  ice: z.array(z.number().int().min(1)).optional(),
 });
 export type Tileset = z.infer<typeof tilesetSchema>;
 
