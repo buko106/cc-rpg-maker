@@ -89,6 +89,17 @@ describe("迷宮デモ（fixtures/projects/v1/maze）", () => {
     expect(project.system.screen).toEqual({ width: 11 * 32, height: 11 * 32 });
   });
 
+  it("部屋を移るときは暗転する（フェードアウト → 場所移動 → フェードイン。終わるまで待つ）", () => {
+    for (const map of Object.values(maps)) {
+      for (const d of doorsOf(map)) {
+        const commands = d.event.pages[0]!.commands;
+        const at = commands.findIndex((c) => c.code === "TransferPlayer");
+        expect(commands[at - 1], `${map.id} の ${d.dir}`).toMatchObject({ code: "Fadeout", params: { wait: true } });
+        expect(commands[at + 1], `${map.id} の ${d.dir}`).toMatchObject({ code: "Fadein", params: { wait: true } });
+      }
+    }
+  });
+
   it("出入口の行き先はどれも、行き先の部屋の通れるタイルで、出入口の上ではない", () => {
     for (const map of Object.values(maps)) {
       for (const d of doorsOf(map)) {
