@@ -51,7 +51,10 @@ async function hold(page: Page, key: string, until: string): Promise<void> {
 /** キーを 1 回押す。続けて押した 2 回が 1 フレームに合流しないよう、数フレーム進むのを待つ。 */
 async function press(page: Page, key: string): Promise<void> {
   const tick = (await state(page)).tick;
-  await page.keyboard.press(key);
+  // 押して離すのが 1 フレームの中に収まると入力が落ちるので、少し押したままにする
+  await page.keyboard.down(key);
+  await page.waitForFunction((t) => window.__rpg.getState().tick >= t + 1, tick);
+  await page.keyboard.up(key);
   await page.waitForFunction((t) => window.__rpg.getState().tick >= t + 3, tick);
 }
 
@@ -477,7 +480,8 @@ test("商人に話しかけるとショップ画面が開き、購入・売却�
   expect((await state(page)).scene).toMatchObject({ screen: "buy", quantity: 2 });
   await page.locator("canvas").screenshot({ path: "test-results/player-shop-quantity.png" });
   await press(page, "Enter");
-  expect((await state(page)).party).toEqual({ gold: 60, members: ["actor_hero"], items: { item_potion: 2 } });
+  // 入力がフレームに反映されるまでの揺れ（負荷が高いと 1〜2 フレーム遅れる）を待つ
+  await expect.poll(async () => (await state(page)).party).toEqual({ gold: 60, members: ["actor_hero"], items: { item_potion: 2 } });
 
   // 売却：1 個（売値は半分の 10G）
   await press(page, "Escape");
@@ -486,7 +490,7 @@ test("商人に話しかけるとショップ画面が開き、購入・売却�
   expect((await state(page)).scene).toMatchObject({ screen: "sell", cursor: 0 });
   await press(page, "Enter");
   await press(page, "Enter");
-  expect((await state(page)).party).toMatchObject({ gold: 70, items: { item_potion: 1 } });
+  await expect.poll(async () => (await state(page)).party).toMatchObject({ gold: 70, items: { item_potion: 1 } });
 
   // やめる → 「また来てね！」→ マップに戻る
   await press(page, "Escape");
