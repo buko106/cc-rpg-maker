@@ -4,7 +4,8 @@ import { warn } from "../effects.js";
 import type { Effect } from "../effects.js";
 import type { InputFrame } from "../input.js";
 import { isPageRouteOrigin, pageRouteCommands, pageRouteName, runInterpreters, startInterpreter } from "../interpreter/index.js";
-import { advanceCharacter, computeCamera, eventsToTrigger, refreshEventPages, startsOnPlayerTouch } from "../map/index.js";
+import { advanceCharacter, computeCamera, DEFAULT_SIGHT_RANGE, eventsToTrigger, hasSight, refreshEventPages, seesPlayer, startsOnPlayerTouch } from "../map/index.js";
+import type { PassabilityCtx } from "../map/index.js";
 import { battleTick } from "../battle/index.js";
 import type { GameState, MapState } from "../state.js";
 import type { StepResult } from "./actions.js";
@@ -104,8 +105,28 @@ function advanceMovement(state: GameState, map: MapData): GameState {
 }
 
 /**
+ * 視界（`eventSight`）：プレイヤーが止まっているとき、有効なページが視界を持つイベントのうち、プレイヤーが見えるもの
+ * （マップ定義の順で最初の 1 つ）のページを通常のイベントとして起動する。通常のイベントの実行中・メッセージ表示中・場所移動の予約中は見ない。
+ */
+function startSightEvent(state: GameState, map: MapData, ctx: Ctx): GameState {
+  const { player } = state.map;
+  if (player.moving || state.message.open || state.map.transfer !== undefined || hasNormalInterpreter(state)) return state;
+  const tileset = ctx.project.tileset(map.tileset);
+  if (tileset === undefined) return state;
+  const pass: PassabilityCtx = { map, tileset, events: state.map.events };
+  for (const def of Object.values(map.events)) {
+    const rt = state.map.events[def.id];
+    if (rt === undefined || rt.pageIndex === null) continue;
+    const page = def.pages[rt.pageIndex];
+    if (!hasSight(page)) continue;
+    if (seesPlayer(rt, page?.sightRange ?? DEFAULT_SIGHT_RANGE, player, pass)) return startMapEvent(state, map, def.id);
+  }
+  return state;
+}
+
+/**
  * 時間を 1 フレーム進める。タイトル・ゲームオーバーの間は `tick`、メニューとショップではプレイ時間も進む。戦闘中は `battleTick`。順序：tick 加算 → イベントページ更新 → 自動実行/並列イベントの起動 →
- * インタプリタ実行 → イベントページ更新 → 場所移動 → 移動の補間 → カメラ。
+ * インタプリタ実行 → イベントページ更新 → 場所移動 → 移動の補間 → 視界のイベントの起動 → カメラ。
  */
 export function handleTick(state: GameState, input: InputFrame, ctx: Ctx): StepResult {
   const effects: Effect[] = [];
@@ -140,6 +161,7 @@ export function handleTick(state: GameState, input: InputFrame, ctx: Ctx): StepR
     const map = ctx.project.map(s.map.mapId);
     if (map) {
       s = advanceMovement(s, map);
+      s = startSightEvent(s, map, ctx);
       const camera = computeCamera(s.map.player, map, ctx.project.project.system);
       if (camera.x !== s.map.camera.x || camera.y !== s.map.camera.y) s = { ...s, map: { ...s.map, camera } };
     }

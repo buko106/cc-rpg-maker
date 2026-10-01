@@ -1,0 +1,2920 @@
+{
+  "id": "map_manor",
+  "width": 25,
+  "height": 19,
+  "tileset": "ts_stealth",
+  "layers": [
+    {
+      "name": "ground",
+      "tiles": [5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 7, 6, 8, 6, 7, 6, 8, 5, 7, 6, 8, 6, 7, 6, 8, 5, 7, 6, 8, 6, 7, 6, 8, 5, 5, 2, 2, 2, 2, 2, 2, 2, 5, 3, 3, 3, 3, 3, 3, 3, 5, 2, 2, 2, 2, 2, 2, 2, 5, 5, 2, 2, 2, 2, 2, 2, 2, 5, 3, 3, 3, 3, 3, 3, 3, 5, 2, 2, 2, 2, 2, 2, 2, 5, 5, 2, 2, 2, 2, 2, 2, 2, 5, 3, 3, 3, 3, 3, 3, 3, 5, 2, 2, 2, 2, 2, 2, 2, 5, 5, 2, 2, 2, 2, 2, 2, 2, 5, 6, 6, 6, 4, 6, 6, 6, 5, 2, 2, 2, 2, 2, 2, 2, 5, 5, 2, 2, 2, 2, 2, 2, 2, 5, 4, 4, 4, 4, 4, 4, 4, 5, 2, 2, 2, 2, 2, 2, 2, 5, 5, 2, 2, 2, 2, 2, 2, 2, 6, 4, 4, 4, 4, 4, 4, 4, 6, 2, 2, 2, 2, 2, 2, 2, 5, 5, 2, 2, 2, 2, 2, 2, 2, 4, 4, 4, 4, 4, 4, 4, 4, 4, 2, 2, 2, 2, 2, 2, 2, 5, 5, 2, 2, 2, 2, 2, 2, 2, 5, 4, 4, 4, 4, 4, 4, 4, 5, 2, 2, 2, 2, 2, 2, 2, 5, 5, 2, 2, 2, 2, 2, 2, 2, 5, 4, 4, 4, 4, 4, 4, 4, 5, 2, 2, 2, 2, 2, 2, 2, 5, 5, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 2, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 6, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 9, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5]
+    },
+    {
+      "name": "objects",
+      "tiles": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 14, 0, 0, 0, 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 0, 0, 0, 12, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0, 13, 0, 0, 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 10, 0, 0, 0, 10, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+  ],
+  "events": {
+    "ev_tint": {
+      "id": "ev_tint",
+      "name": "夜の色",
+      "x": 0,
+      "y": 0,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_alert",
+              "value": false
+            }
+          ],
+          "trigger": "parallel",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "Loop",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "TintScreen",
+              "params": {
+                "color": {
+                  "r": 6,
+                  "g": 12,
+                  "b": 44,
+                  "a": 0.4
+                },
+                "duration": 0,
+                "wait": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "Wait",
+              "params": {
+                "frames": 60
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndLoop",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_alert",
+              "value": true
+            }
+          ],
+          "trigger": "parallel",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "Loop",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "TintScreen",
+              "params": {
+                "color": {
+                  "r": 90,
+                  "g": 0,
+                  "b": 10,
+                  "a": 0.3
+                },
+                "duration": 0,
+                "wait": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "Wait",
+              "params": {
+                "frames": 60
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndLoop",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_intro": {
+      "id": "ev_intro",
+      "name": "はじまり",
+      "x": 11,
+      "y": 17,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "autorun",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "夜。大富豪の屋敷の裏庭。\nねらうのは、宝物庫の宝 \\C[6]3つ\\C[0]。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "相棒が 小声で 何か 言いたそうに している。\n（話しかけてみよう）",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSelfSwitch",
+              "params": {
+                "key": "A",
+                "value": true
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "selfSwitch",
+              "key": "A",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "commands": []
+        }
+      ]
+    },
+    "ev_partner": {
+      "id": "ev_partner",
+      "name": "相棒",
+      "x": 10,
+      "y": 17,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "f1ffc7757fbe45ba",
+            "index": 4,
+            "direction": "up"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "よう、相棒。作戦の 確認か？",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "見張りの 視界",
+                  "かくれ方",
+                  "警報のこと",
+                  "段取り",
+                  "やめる"
+                ],
+                "cancel": 4
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "見張りには 「視界」が ある。むいている 方向の\nまっすぐ 数マスが 見えて、見つかると 警報だ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "見えるのは 見張りの 正面だけ。うしろや よこは 見えん。\n見回りの うしろから ついていけば 気づかれない。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "柱・木箱・たる・茂みの かげは 見えない。\nとびらや 壁の むこうも 見えないぞ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "見張りの 向きは 決まった リズムで かわる。\n向きが かわるのを 待って、すきを つくんだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 2
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "警報が 鳴ると、見張りは ぜんいん 道を さがして\n追ってくる。つかまると 盗んだ物は とりあげだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "番犬は 足が 速い。見つかるなよ。\n追いつかれるまえに 門まで 走れ！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 3
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "宝物庫の かぎは 右の 兵舎の 宝箱。\n隊長が 見張っているから 気をつけろ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "宝は 3つ。さいごの 1つを 取ると、\n警報が 鳴りひびく。そこからが 本番だ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 4
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "いまの 戦果：宝 \\V[var_loot] / 3つ、つかまった 回数 \\V[var_caught]回。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_gate": {
+      "id": "ev_gate",
+      "name": "門",
+      "x": 12,
+      "y": 18,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_loot",
+                  "op": ">=",
+                  "value": 3
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_alert"
+                ],
+                "value": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "TintScreen",
+              "params": {
+                "color": {
+                  "r": 0,
+                  "g": 0,
+                  "b": 0,
+                  "a": 0
+                },
+                "duration": 60,
+                "wait": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "Wait",
+              "params": {
+                "frames": 60
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "門を くぐりぬけ、闇に まぎれた。\n宝は ぜんぶ 無事だ！\\C[6]おめでとう！\\C[0]",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "つかまった 回数：\\V[var_caught]回",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ReturnToTitle",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_left"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "expr",
+                  "expr": "3 - v(\"var_loot\")"
+                }
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "まだ 手ぶらでは 帰れない。宝物庫の 宝は あと \\V[var_left]つ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_key": {
+      "id": "ev_key",
+      "name": "かぎの宝箱",
+      "x": 23,
+      "y": 2,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_key",
+              "value": false
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "a04634fe26172636",
+            "index": 0,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_key"
+                ],
+                "value": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "宝箱を あけた！\n\\C[6]宝物庫の かぎ\\C[0]を 手に入れた！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_key",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "a04634fe26172636",
+            "index": 1,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "宝箱は からっぽだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_vault": {
+      "id": "ev_vault",
+      "name": "宝物庫の扉",
+      "x": 12,
+      "y": 5,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_vault",
+              "value": false
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "a04634fe26172636",
+            "index": 2,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "switch",
+                  "id": "sw_key",
+                  "value": true
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "かぎを まわす。重い 鉄の扉が ゆっくりと 開いた……",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_vault"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "鉄の扉。かぎが かかっている。\nかぎは 兵舎の 宝箱に ありそうだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_vault",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "commands": []
+        }
+      ]
+    },
+    "ev_chest_1": {
+      "id": "ev_chest_1",
+      "name": "宝箱1",
+      "x": 10,
+      "y": 3,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_got1",
+              "value": false
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "a04634fe26172636",
+            "index": 0,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_got1"
+                ],
+                "value": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_loot"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 255,
+                  "g": 230,
+                  "b": 150,
+                  "a": 0.5
+                },
+                "duration": 12
+              },
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_loot",
+                  "op": ">=",
+                  "value": 3
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "さいごの 宝を 手に入れた！ 宝は ぜんぶで \\C[6]3つ\\C[0]。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_alert"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 220,
+                  "g": 30,
+                  "b": 50,
+                  "a": 0.6
+                },
+                "duration": 20
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 5,
+                "duration": 30,
+                "wait": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]ジリリリリ――！\\C[0] 警報が 鳴りひびいた！\n見張りが いっせいに 動きだした。\\C[6]門まで 走れ！\\C[0]",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_left"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "expr",
+                  "expr": "3 - v(\"var_loot\")"
+                }
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "宝を 手に入れた！ のこりは あと \\V[var_left]つ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_got1",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "a04634fe26172636",
+            "index": 1,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "宝箱は からっぽだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_chest_2": {
+      "id": "ev_chest_2",
+      "name": "宝箱2",
+      "x": 12,
+      "y": 3,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_got2",
+              "value": false
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "a04634fe26172636",
+            "index": 0,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_got2"
+                ],
+                "value": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_loot"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 255,
+                  "g": 230,
+                  "b": 150,
+                  "a": 0.5
+                },
+                "duration": 12
+              },
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_loot",
+                  "op": ">=",
+                  "value": 3
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "さいごの 宝を 手に入れた！ 宝は ぜんぶで \\C[6]3つ\\C[0]。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_alert"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 220,
+                  "g": 30,
+                  "b": 50,
+                  "a": 0.6
+                },
+                "duration": 20
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 5,
+                "duration": 30,
+                "wait": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]ジリリリリ――！\\C[0] 警報が 鳴りひびいた！\n見張りが いっせいに 動きだした。\\C[6]門まで 走れ！\\C[0]",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_left"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "expr",
+                  "expr": "3 - v(\"var_loot\")"
+                }
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "宝を 手に入れた！ のこりは あと \\V[var_left]つ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_got2",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "a04634fe26172636",
+            "index": 1,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "宝箱は からっぽだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_chest_3": {
+      "id": "ev_chest_3",
+      "name": "宝箱3",
+      "x": 14,
+      "y": 3,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_got3",
+              "value": false
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "a04634fe26172636",
+            "index": 0,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_got3"
+                ],
+                "value": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_loot"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 255,
+                  "g": 230,
+                  "b": 150,
+                  "a": 0.5
+                },
+                "duration": 12
+              },
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_loot",
+                  "op": ">=",
+                  "value": 3
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "さいごの 宝を 手に入れた！ 宝は ぜんぶで \\C[6]3つ\\C[0]。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_alert"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 220,
+                  "g": 30,
+                  "b": 50,
+                  "a": 0.6
+                },
+                "duration": 20
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 5,
+                "duration": 30,
+                "wait": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]ジリリリリ――！\\C[0] 警報が 鳴りひびいた！\n見張りが いっせいに 動きだした。\\C[6]門まで 走れ！\\C[0]",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_left"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "expr",
+                  "expr": "3 - v(\"var_loot\")"
+                }
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "宝を 手に入れた！ のこりは あと \\V[var_left]つ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_got3",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "a04634fe26172636",
+            "index": 1,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "宝箱は からっぽだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_guard_3_1": {
+      "id": "ev_guard_3_1",
+      "name": "隊長",
+      "x": 20,
+      "y": 3,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_alert",
+              "value": false
+            },
+            {
+              "kind": "switch",
+              "id": "sw_seen_3",
+              "value": false
+            }
+          ],
+          "trigger": "eventSight",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "f1ffc7757fbe45ba",
+            "index": 2,
+            "direction": "down"
+          },
+          "sightRange": 6,
+          "moveRoute": {
+            "repeat": true,
+            "skippable": false,
+            "steps": [
+              {
+                "kind": "turn",
+                "dir": "down"
+              },
+              {
+                "kind": "wait",
+                "frames": 90
+              },
+              {
+                "kind": "turn",
+                "dir": "left"
+              },
+              {
+                "kind": "wait",
+                "frames": 90
+              },
+              {
+                "kind": "turn",
+                "dir": "down"
+              },
+              {
+                "kind": "wait",
+                "frames": 90
+              },
+              {
+                "kind": "turn",
+                "dir": "right"
+              },
+              {
+                "kind": "wait",
+                "frames": 90
+              }
+            ]
+          },
+          "commands": [
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_seen_3"
+                ],
+                "value": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 220,
+                  "g": 30,
+                  "b": 50,
+                  "a": 0.5
+                },
+                "duration": 14
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]隊長\\C[0]に 見つかった！\n「だれだ、そこに いるのは！ 賊だ！」",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "見張りが 道を さがして 追ってくる……！\n（かべや 木箱を ぐるっと まわって 引き離せ）",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_seen_3",
+              "value": true
+            }
+          ],
+          "trigger": "eventTouch",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "f1ffc7757fbe45ba",
+            "index": 2,
+            "direction": "down"
+          },
+          "moveRoute": {
+            "repeat": true,
+            "skippable": true,
+            "steps": [
+              {
+                "kind": "speed",
+                "value": 4
+              },
+              {
+                "kind": "move",
+                "dir": "chase"
+              }
+            ]
+          },
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 40,
+                  "b": 60,
+                  "a": 0.6
+                },
+                "duration": 16
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 6,
+                "duration": 20,
+                "wait": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_caught"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]隊長\\C[0]に つかまった！\n盗んだ 宝は とりあげられ、門の外へ 放り出される……",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_alert",
+                  "sw_seen_1",
+                  "sw_seen_2",
+                  "sw_seen_3",
+                  "sw_seen_4",
+                  "sw_seen_5",
+                  "sw_got1",
+                  "sw_got2",
+                  "sw_got3"
+                ],
+                "value": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_loot"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "constant",
+                  "value": 0
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_manor",
+                "x": 12,
+                "y": 17,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_alert",
+              "value": true
+            }
+          ],
+          "trigger": "eventTouch",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "f1ffc7757fbe45ba",
+            "index": 2,
+            "direction": "down"
+          },
+          "moveRoute": {
+            "repeat": true,
+            "skippable": true,
+            "steps": [
+              {
+                "kind": "speed",
+                "value": 4
+              },
+              {
+                "kind": "move",
+                "dir": "chase"
+              }
+            ]
+          },
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 40,
+                  "b": 60,
+                  "a": 0.6
+                },
+                "duration": 16
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 6,
+                "duration": 20,
+                "wait": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_caught"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]隊長\\C[0]に つかまった！\n盗んだ 宝は とりあげられ、門の外へ 放り出される……",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_alert",
+                  "sw_seen_1",
+                  "sw_seen_2",
+                  "sw_seen_3",
+                  "sw_seen_4",
+                  "sw_seen_5",
+                  "sw_got1",
+                  "sw_got2",
+                  "sw_got3"
+                ],
+                "value": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_loot"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "constant",
+                  "value": 0
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_manor",
+                "x": 12,
+                "y": 17,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_guard_2_1": {
+      "id": "ev_guard_2_1",
+      "name": "兵舎の見張り",
+      "x": 4,
+      "y": 4,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_alert",
+              "value": false
+            },
+            {
+              "kind": "switch",
+              "id": "sw_seen_2",
+              "value": false
+            }
+          ],
+          "trigger": "eventSight",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "f1ffc7757fbe45ba",
+            "index": 1,
+            "direction": "down"
+          },
+          "sightRange": 4,
+          "moveRoute": {
+            "repeat": true,
+            "skippable": false,
+            "steps": [
+              {
+                "kind": "turn",
+                "dir": "left"
+              },
+              {
+                "kind": "wait",
+                "frames": 70
+              },
+              {
+                "kind": "turn",
+                "dir": "down"
+              },
+              {
+                "kind": "wait",
+                "frames": 70
+              },
+              {
+                "kind": "turn",
+                "dir": "right"
+              },
+              {
+                "kind": "wait",
+                "frames": 70
+              },
+              {
+                "kind": "turn",
+                "dir": "down"
+              },
+              {
+                "kind": "wait",
+                "frames": 70
+              }
+            ]
+          },
+          "commands": [
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_seen_2"
+                ],
+                "value": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 220,
+                  "g": 30,
+                  "b": 50,
+                  "a": 0.5
+                },
+                "duration": 14
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]兵舎の見張り\\C[0]に 見つかった！\n「だれだ、そこに いるのは！ 賊だ！」",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "見張りが 道を さがして 追ってくる……！\n（かべや 木箱を ぐるっと まわって 引き離せ）",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_seen_2",
+              "value": true
+            }
+          ],
+          "trigger": "eventTouch",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "f1ffc7757fbe45ba",
+            "index": 1,
+            "direction": "down"
+          },
+          "moveRoute": {
+            "repeat": true,
+            "skippable": true,
+            "steps": [
+              {
+                "kind": "speed",
+                "value": 3
+              },
+              {
+                "kind": "move",
+                "dir": "chase"
+              }
+            ]
+          },
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 40,
+                  "b": 60,
+                  "a": 0.6
+                },
+                "duration": 16
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 6,
+                "duration": 20,
+                "wait": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_caught"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]兵舎の見張り\\C[0]に つかまった！\n盗んだ 宝は とりあげられ、門の外へ 放り出される……",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_alert",
+                  "sw_seen_1",
+                  "sw_seen_2",
+                  "sw_seen_3",
+                  "sw_seen_4",
+                  "sw_seen_5",
+                  "sw_got1",
+                  "sw_got2",
+                  "sw_got3"
+                ],
+                "value": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_loot"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "constant",
+                  "value": 0
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_manor",
+                "x": 12,
+                "y": 17,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_alert",
+              "value": true
+            }
+          ],
+          "trigger": "eventTouch",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "f1ffc7757fbe45ba",
+            "index": 1,
+            "direction": "down"
+          },
+          "moveRoute": {
+            "repeat": true,
+            "skippable": true,
+            "steps": [
+              {
+                "kind": "speed",
+                "value": 3
+              },
+              {
+                "kind": "move",
+                "dir": "chase"
+              }
+            ]
+          },
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 40,
+                  "b": 60,
+                  "a": 0.6
+                },
+                "duration": 16
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 6,
+                "duration": 20,
+                "wait": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_caught"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]兵舎の見張り\\C[0]に つかまった！\n盗んだ 宝は とりあげられ、門の外へ 放り出される……",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_alert",
+                  "sw_seen_1",
+                  "sw_seen_2",
+                  "sw_seen_3",
+                  "sw_seen_4",
+                  "sw_seen_5",
+                  "sw_got1",
+                  "sw_got2",
+                  "sw_got3"
+                ],
+                "value": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_loot"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "constant",
+                  "value": 0
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_manor",
+                "x": 12,
+                "y": 17,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_guard_5_1": {
+      "id": "ev_guard_5_1",
+      "name": "広間の見張り",
+      "x": 9,
+      "y": 6,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_alert",
+              "value": false
+            },
+            {
+              "kind": "switch",
+              "id": "sw_seen_5",
+              "value": false
+            }
+          ],
+          "trigger": "eventSight",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "f1ffc7757fbe45ba",
+            "index": 1,
+            "direction": "up"
+          },
+          "sightRange": 5,
+          "moveRoute": {
+            "repeat": true,
+            "skippable": false,
+            "steps": [
+              {
+                "kind": "turn",
+                "dir": "up"
+              },
+              {
+                "kind": "wait",
+                "frames": 80
+              },
+              {
+                "kind": "turn",
+                "dir": "right"
+              },
+              {
+                "kind": "wait",
+                "frames": 80
+              },
+              {
+                "kind": "turn",
+                "dir": "down"
+              },
+              {
+                "kind": "wait",
+                "frames": 80
+              },
+              {
+                "kind": "turn",
+                "dir": "left"
+              },
+              {
+                "kind": "wait",
+                "frames": 80
+              }
+            ]
+          },
+          "commands": [
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_seen_5"
+                ],
+                "value": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 220,
+                  "g": 30,
+                  "b": 50,
+                  "a": 0.5
+                },
+                "duration": 14
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]広間の見張り\\C[0]に 見つかった！\n「だれだ、そこに いるのは！ 賊だ！」",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "見張りが 道を さがして 追ってくる……！\n（かべや 木箱を ぐるっと まわって 引き離せ）",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_seen_5",
+              "value": true
+            }
+          ],
+          "trigger": "eventTouch",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "f1ffc7757fbe45ba",
+            "index": 1,
+            "direction": "up"
+          },
+          "moveRoute": {
+            "repeat": true,
+            "skippable": true,
+            "steps": [
+              {
+                "kind": "speed",
+                "value": 3
+              },
+              {
+                "kind": "move",
+                "dir": "chase"
+              }
+            ]
+          },
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 40,
+                  "b": 60,
+                  "a": 0.6
+                },
+                "duration": 16
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 6,
+                "duration": 20,
+                "wait": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_caught"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]広間の見張り\\C[0]に つかまった！\n盗んだ 宝は とりあげられ、門の外へ 放り出される……",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_alert",
+                  "sw_seen_1",
+                  "sw_seen_2",
+                  "sw_seen_3",
+                  "sw_seen_4",
+                  "sw_seen_5",
+                  "sw_got1",
+                  "sw_got2",
+                  "sw_got3"
+                ],
+                "value": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_loot"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "constant",
+                  "value": 0
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_manor",
+                "x": 12,
+                "y": 17,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_alert",
+              "value": true
+            }
+          ],
+          "trigger": "eventTouch",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "f1ffc7757fbe45ba",
+            "index": 1,
+            "direction": "up"
+          },
+          "moveRoute": {
+            "repeat": true,
+            "skippable": true,
+            "steps": [
+              {
+                "kind": "speed",
+                "value": 3
+              },
+              {
+                "kind": "move",
+                "dir": "chase"
+              }
+            ]
+          },
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 40,
+                  "b": 60,
+                  "a": 0.6
+                },
+                "duration": 16
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 6,
+                "duration": 20,
+                "wait": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_caught"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]広間の見張り\\C[0]に つかまった！\n盗んだ 宝は とりあげられ、門の外へ 放り出される……",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_alert",
+                  "sw_seen_1",
+                  "sw_seen_2",
+                  "sw_seen_3",
+                  "sw_seen_4",
+                  "sw_seen_5",
+                  "sw_got1",
+                  "sw_got2",
+                  "sw_got3"
+                ],
+                "value": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_loot"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "constant",
+                  "value": 0
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_manor",
+                "x": 12,
+                "y": 17,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_guard_1_1": {
+      "id": "ev_guard_1_1",
+      "name": "見回りの兵",
+      "x": 2,
+      "y": 14,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_alert",
+              "value": false
+            },
+            {
+              "kind": "switch",
+              "id": "sw_seen_1",
+              "value": false
+            }
+          ],
+          "trigger": "eventSight",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "f1ffc7757fbe45ba",
+            "index": 0,
+            "direction": "right"
+          },
+          "sightRange": 5,
+          "moveRoute": {
+            "repeat": true,
+            "skippable": false,
+            "steps": [
+              {
+                "kind": "speed",
+                "value": 3
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "wait",
+                "frames": 30
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "wait",
+                "frames": 30
+              }
+            ]
+          },
+          "commands": [
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_seen_1"
+                ],
+                "value": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 220,
+                  "g": 30,
+                  "b": 50,
+                  "a": 0.5
+                },
+                "duration": 14
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]見回りの兵\\C[0]に 見つかった！\n「だれだ、そこに いるのは！ 賊だ！」",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "見張りが 道を さがして 追ってくる……！\n（かべや 木箱を ぐるっと まわって 引き離せ）",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_seen_1",
+              "value": true
+            }
+          ],
+          "trigger": "eventTouch",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "f1ffc7757fbe45ba",
+            "index": 0,
+            "direction": "right"
+          },
+          "moveRoute": {
+            "repeat": true,
+            "skippable": true,
+            "steps": [
+              {
+                "kind": "speed",
+                "value": 3
+              },
+              {
+                "kind": "move",
+                "dir": "chase"
+              }
+            ]
+          },
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 40,
+                  "b": 60,
+                  "a": 0.6
+                },
+                "duration": 16
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 6,
+                "duration": 20,
+                "wait": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_caught"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]見回りの兵\\C[0]に つかまった！\n盗んだ 宝は とりあげられ、門の外へ 放り出される……",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_alert",
+                  "sw_seen_1",
+                  "sw_seen_2",
+                  "sw_seen_3",
+                  "sw_seen_4",
+                  "sw_seen_5",
+                  "sw_got1",
+                  "sw_got2",
+                  "sw_got3"
+                ],
+                "value": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_loot"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "constant",
+                  "value": 0
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_manor",
+                "x": 12,
+                "y": 17,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_alert",
+              "value": true
+            }
+          ],
+          "trigger": "eventTouch",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "f1ffc7757fbe45ba",
+            "index": 0,
+            "direction": "right"
+          },
+          "moveRoute": {
+            "repeat": true,
+            "skippable": true,
+            "steps": [
+              {
+                "kind": "speed",
+                "value": 3
+              },
+              {
+                "kind": "move",
+                "dir": "chase"
+              }
+            ]
+          },
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 40,
+                  "b": 60,
+                  "a": 0.6
+                },
+                "duration": 16
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 6,
+                "duration": 20,
+                "wait": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_caught"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]見回りの兵\\C[0]に つかまった！\n盗んだ 宝は とりあげられ、門の外へ 放り出される……",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_alert",
+                  "sw_seen_1",
+                  "sw_seen_2",
+                  "sw_seen_3",
+                  "sw_seen_4",
+                  "sw_seen_5",
+                  "sw_got1",
+                  "sw_got2",
+                  "sw_got3"
+                ],
+                "value": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_loot"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "constant",
+                  "value": 0
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_manor",
+                "x": 12,
+                "y": 17,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_guard_4_1": {
+      "id": "ev_guard_4_1",
+      "name": "番犬",
+      "x": 9,
+      "y": 16,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_alert",
+              "value": false
+            },
+            {
+              "kind": "switch",
+              "id": "sw_seen_4",
+              "value": false
+            }
+          ],
+          "trigger": "eventSight",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "f1ffc7757fbe45ba",
+            "index": 3,
+            "direction": "down"
+          },
+          "sightRange": 3,
+          "moveRoute": {
+            "repeat": true,
+            "skippable": true,
+            "steps": [
+              {
+                "kind": "speed",
+                "value": 4
+              },
+              {
+                "kind": "move",
+                "dir": "random"
+              },
+              {
+                "kind": "move",
+                "dir": "random"
+              },
+              {
+                "kind": "move",
+                "dir": "random"
+              },
+              {
+                "kind": "wait",
+                "frames": 40
+              }
+            ]
+          },
+          "commands": [
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_seen_4"
+                ],
+                "value": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 220,
+                  "g": 30,
+                  "b": 50,
+                  "a": 0.5
+                },
+                "duration": 14
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]番犬\\C[0]に 見つかった！\n「だれだ、そこに いるのは！ 賊だ！」",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "見張りが 道を さがして 追ってくる……！\n（かべや 木箱を ぐるっと まわって 引き離せ）",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_seen_4",
+              "value": true
+            }
+          ],
+          "trigger": "eventTouch",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "f1ffc7757fbe45ba",
+            "index": 3,
+            "direction": "down"
+          },
+          "moveRoute": {
+            "repeat": true,
+            "skippable": true,
+            "steps": [
+              {
+                "kind": "speed",
+                "value": 5
+              },
+              {
+                "kind": "move",
+                "dir": "chase"
+              }
+            ]
+          },
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 40,
+                  "b": 60,
+                  "a": 0.6
+                },
+                "duration": 16
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 6,
+                "duration": 20,
+                "wait": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_caught"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]番犬\\C[0]に つかまった！\n盗んだ 宝は とりあげられ、門の外へ 放り出される……",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_alert",
+                  "sw_seen_1",
+                  "sw_seen_2",
+                  "sw_seen_3",
+                  "sw_seen_4",
+                  "sw_seen_5",
+                  "sw_got1",
+                  "sw_got2",
+                  "sw_got3"
+                ],
+                "value": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_loot"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "constant",
+                  "value": 0
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_manor",
+                "x": 12,
+                "y": 17,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

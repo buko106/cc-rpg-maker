@@ -1,0 +1,186 @@
+{
+  "formatVersion": 1,
+  "meta": {
+    "id": "stealth",
+    "title": "デモ：忍び込み！月影の宝物庫",
+    "createdAt": "2026-10-01T00:00:00Z",
+    "updatedAt": "2026-10-01T00:00:00Z"
+  },
+  "system": {
+    "startMap": "map_manor",
+    "startX": 12,
+    "startY": 17,
+    "initialParty": [
+      "actor_thief"
+    ],
+    "tileSize": 32,
+    "screen": {
+      "width": 480,
+      "height": 352
+    },
+    "bgm": {},
+    "terms": {
+      "newGame": "ニューゲーム"
+    }
+  },
+  "maps": {
+    "map_manor": {
+      "id": "map_manor",
+      "name": "月影の屋敷",
+      "order": 0
+    }
+  },
+  "tilesets": {
+    "ts_stealth": {
+      "id": "ts_stealth",
+      "name": "夜の屋敷",
+      "image": {
+        "asset": "adbd6422cbc36a9f"
+      },
+      "passage": [15, 15, 15, 15, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+  },
+  "database": {
+    "actors": {
+      "actor_thief": {
+        "id": "actor_thief",
+        "name": "カゲ",
+        "classId": "class_thief",
+        "initialLevel": 1,
+        "walk": {
+          "asset": "bb2e23b45d1f4d4d"
+        },
+        "equips": {}
+      }
+    },
+    "classes": {
+      "class_thief": {
+        "id": "class_thief",
+        "name": "怪盗",
+        "skills": [],
+        "params": {
+          "mhp": {
+            "base": 100,
+            "growth": 2
+          },
+          "mmp": {
+            "base": 20,
+            "growth": 2
+          },
+          "atk": {
+            "base": 10,
+            "growth": 2
+          },
+          "def": {
+            "base": 10,
+            "growth": 2
+          },
+          "mat": {
+            "base": 10,
+            "growth": 2
+          },
+          "mdf": {
+            "base": 10,
+            "growth": 2
+          },
+          "agi": {
+            "base": 10,
+            "growth": 2
+          },
+          "luk": {
+            "base": 10,
+            "growth": 2
+          }
+        }
+      }
+    },
+    "skills": {},
+    "items": {},
+    "enemies": {},
+    "troops": {},
+    "states": {},
+    "commonEvents": {}
+  },
+  "assets": {
+    "entries": {
+      "adbd6422cbc36a9f": {
+        "name": "stealth_tileset.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 2017,
+        "width": 512,
+        "height": 32
+      },
+      "bb2e23b45d1f4d4d": {
+        "name": "hero.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 660,
+        "width": 96,
+        "height": 128
+      },
+      "f1ffc7757fbe45ba": {
+        "name": "people.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 3999,
+        "width": 480,
+        "height": 128
+      },
+      "a04634fe26172636": {
+        "name": "props.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 2228,
+        "width": 288,
+        "height": 128
+      }
+    }
+  },
+  "switches": {
+    "sw_alert": {
+      "name": "警報（最後の宝）"
+    },
+    "sw_seen_1": {
+      "name": "見回りの兵に見つかった"
+    },
+    "sw_seen_2": {
+      "name": "兵舎の見張りに見つかった"
+    },
+    "sw_seen_3": {
+      "name": "隊長に見つかった"
+    },
+    "sw_seen_4": {
+      "name": "番犬に見つかった"
+    },
+    "sw_seen_5": {
+      "name": "広間の見張りに見つかった"
+    },
+    "sw_key": {
+      "name": "宝物庫のかぎを持っている"
+    },
+    "sw_vault": {
+      "name": "宝物庫の扉が開いた"
+    },
+    "sw_got1": {
+      "name": "宝箱1を取った"
+    },
+    "sw_got2": {
+      "name": "宝箱2を取った"
+    },
+    "sw_got3": {
+      "name": "宝箱3を取った"
+    }
+  },
+  "variables": {
+    "var_loot": {
+      "name": "盗んだ宝の数"
+    },
+    "var_left": {
+      "name": "のこりの宝"
+    },
+    "var_caught": {
+      "name": "つかまった回数"
+    }
+  }
+}

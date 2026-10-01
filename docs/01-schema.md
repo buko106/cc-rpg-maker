@@ -95,7 +95,8 @@ export interface MapEvent {
 export interface EventPage {
   conditions: PageCondition[];            // すべて満たすと有効
   graphic?: { asset: AssetId; index: number; direction: Direction };
-  trigger: "action" | "touch" | "eventTouch" | "autorun" | "parallel";  // touch = プレイヤーから接触、eventTouch = イベントから接触
+  trigger: "action" | "touch" | "eventTouch" | "eventSight" | "autorun" | "parallel";  // touch = プレイヤーから接触、eventTouch = イベントから接触、eventSight = 視界に入ったとき（eventTouch を含む）
+  sightRange?: number;                    // eventSight の視界の長さ（タイル数 1〜20、既定 4）
   through: boolean; priority: "below" | "same" | "above";
   moveRoute?: MoveRoute;
   commands: EventCommand[];
@@ -227,3 +228,6 @@ export function findDanglingRefs(...): RefTarget[];
 
 - **`system.menuSave`（メニューからセーブできるか）を足した**：`boolean`（省略可）。省略または `true` ならメインメニューに「セーブ」が並ぶ。`false` なら並ばない（イベントの `SaveGame`＝セーブポータルからはセーブできる。03）。値を足しただけ（省略可）で既存のデータはそのまま読めるので `formatVersion` は上げていない。
 - **`system.autosave`（オートセーブの設定）を足した**：`{ onTransfer: boolean }`（省略可）。省略または `onTransfer: false` ならオートセーブしない。`true` なら場所移動で移動先に着くたびにスロット 0 へ保存する（02・06）。値を足しただけ（省略可）で既存のデータはそのまま読めるので `formatVersion` は上げていない。
+
+## 実装メモ（視界・経路探索）
+- **`EventPage.trigger` に `eventSight`（視界に入ったとき）を足し、ページに `sightRange`（視界の長さ。1〜20 の整数、省略可。既定 4）を足した**。`eventSight` のページは `eventTouch` と同じく、プレイヤーから触れても・向こうから触れてきても始まり、加えて、プレイヤーが止まっているとき、このイベントが向いている方向のまっすぐ `sightRange` タイル以内に見えると始まる（03）。移動ルートの歩み（`move`）の `dir` に `chase`（通れる道を探して追う）を足した。どちらも値を足しただけで既存のデータはそのまま読めるので `formatVersion` は上げていない。`SaveSnapshot` のイベントの `trigger` も同じ値を受け付ける。

@@ -69,6 +69,7 @@ const FIELD_LABELS: Readonly<Record<string, string>> = {
   through: "すり抜け",
   priority: "プライオリティ",
   moveRoute: "自律移動",
+  sightRange: "視界の長さ",
   // データベース
   classId: "職業",
   initialLevel: "初期レベル",
@@ -164,6 +165,7 @@ const OPTION_LABELS: Readonly<Record<string, string>> = {
   action: "決定ボタン",
   touch: "プレイヤーから接触",
   eventTouch: "イベントから接触",
+  eventSight: "視界に入ったとき（イベントから接触を含む）",
   autorun: "自動実行",
   parallel: "並列処理",
   below: "通常キャラの下",
@@ -192,6 +194,7 @@ const OPTION_LABELS: Readonly<Record<string, string>> = {
   random: "ランダム",
   toward: "近づく",
   away: "遠ざかる",
+  chase: "追いかける（道を探す）",
   disallow: "キャンセルできない",
   player: "プレイヤー",
   this: "このイベント",
