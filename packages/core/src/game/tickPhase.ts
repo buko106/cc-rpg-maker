@@ -4,7 +4,7 @@ import { warn } from "../effects.js";
 import type { Effect } from "../effects.js";
 import type { InputFrame } from "../input.js";
 import { isPageRouteOrigin, pageRouteCommands, pageRouteName, runInterpreters, startInterpreter } from "../interpreter/index.js";
-import { advanceCharacter, computeCamera, DEFAULT_SIGHT_RANGE, eventsToTrigger, hasSight, refreshEventPages, rollEncounter, seesPlayer, slide, startsOnPlayerTouch } from "../map/index.js";
+import { advanceCharacter, computeCamera, currentMap, DEFAULT_SIGHT_RANGE, eventsToTrigger, hasSight, refreshEventPages, rollEncounter, seesPlayer, slide, startsOnPlayerTouch } from "../map/index.js";
 import type { PassabilityCtx } from "../map/index.js";
 import { battleTick, startBattle } from "../battle/index.js";
 import type { GameState, MapState } from "../state.js";
@@ -162,7 +162,7 @@ export function handleTick(state: GameState, input: InputFrame, ctx: Ctx): StepR
   // タイマー（`ControlTimer`）：残りフレームを数え、0 になったら止まる
   if (s.timers.active) s = { ...s, timers: s.timers.ticks <= 1 ? { active: false, ticks: 0 } : { active: true, ticks: s.timers.ticks - 1 } };
 
-  const mapAtStart = s.scene.kind === "map" ? ctx.project.map(s.map.mapId) : undefined;
+  const mapAtStart = s.scene.kind === "map" ? currentMap(ctx.project, s) : undefined;
   if (mapAtStart) {
     s = refreshEventPages(s, mapAtStart);
     s = syncEventInterpreters(s, mapAtStart, ctx);
@@ -179,7 +179,7 @@ export function handleTick(state: GameState, input: InputFrame, ctx: Ctx): StepR
     s = moved.state;
     effects.push(...moved.effects);
 
-    const map = ctx.project.map(s.map.mapId);
+    const map = currentMap(ctx.project, s);
     if (map) {
       const advanced = advanceMovement(s, map, ctx);
       s = advanced.state;

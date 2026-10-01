@@ -2,7 +2,7 @@ import { eventIdSchema, moveRouteSchema, moveStepSchema } from "@rpg/schema";
 import type { Direction, EventCommand, EventId, MoveRoute } from "@rpg/schema";
 import { z } from "zod";
 import { warn } from "../../effects.js";
-import { canPass, chaseDirection, DIRECTION_VECTOR, moveCharacter, startsOnEventTouch } from "../../map/index.js";
+import { canPass, chaseDirection, currentMap, DIRECTION_VECTOR, moveCharacter, startsOnEventTouch } from "../../map/index.js";
 import type { PassabilityCtx } from "../../map/index.js";
 import type { Character, EventRuntime, GameState } from "../../state.js";
 import { defineCommand } from "../handler.js";
@@ -137,7 +137,7 @@ export const moveStep = defineCommand({
       case "wait":
         return step.frames === 0 ? {} : { control: { kind: "wait", wait: { kind: "frames", left: step.frames } }, setLocals: { retry: undefined } };
       case "move": {
-        const map = c.project.map(c.state.map.mapId);
+        const map = currentMap(c.project, c.state);
         if (map === undefined) return {};
         const pass: PassabilityCtx = { map, tileset: c.project.tileset(map.tileset) ?? { id: "" as never, name: "", passage: [] }, events: c.state.map.events };
         const dir = pickDirection(step.dir, p.who, ch, c, pass);

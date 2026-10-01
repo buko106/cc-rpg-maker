@@ -163,6 +163,7 @@ const serializedStateSchema = z.strictObject({
   switches: z.record(z.string(), z.boolean()),
   variables: z.record(z.string(), z.number()),
   selfSwitches: z.record(z.string(), z.boolean()),
+  mapTiles: z.record(z.string(), z.record(z.string(), z.number().int().min(0).max(0xffff))).optional(),
   interpreters: z.array(interpreterSchema),
   nextInterpreterId: nonNegativeInt,
   message: z.strictObject({
