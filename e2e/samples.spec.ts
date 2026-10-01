@@ -69,7 +69,11 @@ test("風鳴りの洞窟（プラグイン dungeon を使う v2 のサンプル�
   await page.waitForFunction(() => (window as unknown as { __rpgPlaytest: Play }).__rpgPlaytest.getState().message.choices !== null);
   await page.keyboard.press("Enter"); // 「入る」
   await page.waitForFunction(() => (window as unknown as { __rpgPlaytest: Play }).__rpgPlaytest.getState().pluginState?.dungeon?.floor === 1, undefined, { timeout: 15_000 });
-  await page.waitForTimeout(500);
+  // 場所移動の明転が終わって、イベントが動いていない（操作できる）ところまで待つ
+  await page.waitForFunction(() => {
+    const st = (window as unknown as { __rpgPlaytest: { getState(): { map: { mapId: string }; interpreters: { mode: string }[] } } }).__rpgPlaytest.getState();
+    return st.map.mapId === "map_floor" && !st.interpreters.some((i) => i.mode === "normal");
+  });
   await page.keyboard.press("Enter"); // その場で 1 ターン休む
   await page.waitForFunction(() => (window as unknown as { __rpgPlaytest: Play }).__rpgPlaytest.getState().pluginState?.dungeon?.turn === 1);
 });

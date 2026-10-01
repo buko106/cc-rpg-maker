@@ -21,6 +21,7 @@ interface State {
   scene: { kind: string };
   map: { mapId: string; player: { x: number; y: number; moving: boolean } };
   message: { open: boolean; choices: string[] | null };
+  interpreters: { mode: string }[];
   party: { items: Record<string, number> };
   variables: Record<string, number>;
   pluginState?: { dungeon?: Dungeon | null };
@@ -57,7 +58,11 @@ async function enter(page: Page): Promise<void> {
   await page.keyboard.press("Enter"); // 「入る」
   await page.waitForFunction(() => (window as unknown as Rpg).__rpg.getState().map.mapId === "map_floor", undefined, { timeout: 15_000 });
   await page.waitForFunction(() => (window as unknown as Rpg).__rpg.getState().pluginState?.dungeon?.floor === 1);
-  await page.waitForTimeout(500); // 明転
+  // 場所移動の明転が終わって、イベントが動いていない（操作できる）ところまで待つ
+  await page.waitForFunction(() => {
+    const st = (window as unknown as Rpg).__rpg.getState();
+    return st.map.mapId === "map_floor" && !st.interpreters.some((i) => i.mode === "normal");
+  });
   expect(errors).toEqual([]);
 }
 
