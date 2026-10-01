@@ -7,7 +7,7 @@ import { FIXTURES_ROOT, loadFixtureProject } from "@rpg/test-utils";
 const EXTENSIONS: Record<string, string> = { "image/png": "png", "audio/wav": "wav" };
 
 // サイトの「デモを選ぶ」に並ぶデモ（tools/build-demos.mjs の DEMOS）
-describe.each(["demo", "maze", "tower", "mansion", "haunted", "stealth", "hokora", "ice"])("fixtures/projects/v1/%s のアセット", (name) => {
+describe.each(["demo", "maze", "tower", "mansion", "haunted", "stealth", "hokora", "ice", "water"])("fixtures/projects/v1/%s のアセット", (name) => {
   const ASSETS = join(FIXTURES_ROOT, "projects", "v1", name, "assets");
   const { project } = loadFixtureProject(name);
   const files = readdirSync(ASSETS).sort();

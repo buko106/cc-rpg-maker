@@ -111,6 +111,7 @@ export function runInterpreters(state: GameState, input: InputFrame, ctx: Ctx): 
 | `TransferPlayer` | `{ mapId, x, y, dir, fade }` | `fade` が `black` / `white` なら `screenFade`（その色）で 15 フレーム暗転 → 場所移動 → 15 フレーム明転（`TRANSFER_FADE_TICKS`。段階は `interp.locals` に持つ）。`none` はすぐ移動。`wait: transfer`。MapData 未ロードなら `requestMapData`（暗転したまま待つ） |
 | `SetMoveRoute` | `{ target, route, wait }` | |
 | `SetEventLocation` | `{ target, x, y, dir }` | イベントを (x, y) へ瞬間移動する |
+| `ChangeMapTile` | `{ map, layer, x, y, width, height, tile }` | マップのタイルを書き換える（水門・崩れる橋・開く壁など）。書き換えは残る |
 | `ChangeGold` / `ChangeItems` / `ChangeParty` / `ChangeHp` / `ChangeLevel` … | | |
 | `ChangeBgm` / `PlaySe` / `FadeoutBgm` | | Effect のみ |
 | `ShakeScreen` / `FlashScreen` / `TintScreen` / `Fadein` / `Fadeout` | | Effect + 一時状態 |
@@ -175,6 +176,11 @@ export function runInterpreters(state: GameState, input: InputFrame, ctx: Ctx): 
 
 ## 実装メモ（イベントの瞬間移動）
 - **`SetEventLocation { target, x, y, dir }`**：`target` は `"this"`（既定。このコマンドを実行しているマップイベント）かイベント ID。いまのマップの (x, y) へ、歩かずに瞬間移動する（`realX` / `realY` も合わせ、`moving` は偽）。`dir` は向き、または `"retain"`（既定。変えない）。マップに居ないイベント・マップの外の座標は、警告してスキップする（あとのコマンドは続く）。押せる岩（`EventPage.pushable`。02）をもとの位置に戻す魔法陣などに使う。状態に足したものは無い。デモ「氷の神殿」（`fixtures/projects/v1/ice`）で使っている。
+
+## 実装メモ（マップのタイルの書き換え）
+- **`ChangeMapTile { map, layer, x, y, width, height, tile }`**：`map` は `"this"`（既定。いまのマップ）かマップ ID、`layer` はレイヤの番号（既定 0）、(x, y) から `width` × `height`（既定 1×1）マスの、そのレイヤのタイルを `tile`（0 = 空）にする。書き換えは `GameState.mapTiles`（02）に残るので、マップを出入りしても、セーブして読みなおしても戻らない。もとに戻すには、もとのタイルでもう一度書き換える。通行判定・氷・描画は書き換えたタイルを見る（`currentMap`）。
+- **検証**：存在しないマップは警告してスキップ。マップが読み込み済みなら、存在しないレイヤは警告してスキップし、はみ出す範囲は切り詰めて（警告する）書き換える。別のマップは、まだ読み込んでいなくても書き換えられる（そのマップに入ったときに反映される。読み込み前は範囲を確かめられないので、範囲外のマスの書き換えは入ったときに無視される）。
+- **使い方**：レバーのイベントが、スイッチと一緒にタイルを入れ替える（水路 ⇄ 干上がった底、閉じた壁 ⇄ 開いた通路）。プレイヤーが立っているマスを通れないタイルにすると、そこから出られなくなる（通行は出る側のタイルも見るため）ので、そうならないようにマップを作る。デモ「水門の遺跡」（`fixtures/projects/v1/water`）は、レバーで部屋の水位（水路と堰のタイル）を入れ替え、大水門のレバーはまだ入っていない別のマップの水路を干上がらせる。
 
 ## 実装メモ（ショップ画面）
 - **`ShopProcessing { goods, canSell = true }`** は `scene` を `{ kind: "shop", goods, canSell, owner, screen, cursor, quantity? }` にして `wait: { kind: "shop" }` で待つ。存在しないアイテムは並べず、1 つも無ければ警告して飛ばす。マップ以外のシーンでは警告して飛ばし、メッセージ欄が他のインタプリタに使われている間は 1 フレーム待って再試行する。閉じてマップに戻ると `resume` が次のコマンドへ進む（ゲームオーバー/タイトルに移ったときは待ち続ける。戦闘と同じ）。

@@ -47,6 +47,7 @@ export interface GameState {
   readonly switches: Record<SwitchId, boolean>;
   readonly variables: Record<VariableId, number>;
   readonly selfSwitches: Record<`${MapId}:${EventId}:${string}`, boolean>;
+  readonly mapTiles?: Record<MapId, Record<string, number>>; // ChangeMapTile で書き換えたマス（マップごと。書き換えるまで無い）
   readonly interpreters: InterpreterState[];   // 03 参照。並列イベント分含む
   readonly battle?: BattleState;                // 04 参照
   readonly message: MessageState;               // 表示中テキスト・選択肢・入力待ち
@@ -231,3 +232,4 @@ export const snapshotMigrations: readonly { from: number; to: number; migrate(s:
 - **押せる岩**（`map/slide.ts` の `pushableAt`・`game/inputPhase.ts`）：方向キーで進めなかったとき、目の前が「有効なページが `pushable` で、通常プライオリティ・`through` でない」イベントで、その先へ通れる（`canPass`）なら、岩を 1 タイル押して、プレイヤーも同じ向きに 1 タイル進む。岩の向きは変えず、引くことはできない。岩は滑らない（押した所で止まる）が、滑るプレイヤーの止まる目印になる（滑りは岩の手前で止まる）。**触れる・話しかけると何かが起こるイベント**（有効なページのトリガが `action` / `touch` / `eventTouch` / `eventSight`）のあるタイルへは押せない（階段・台座・扉の上に岩を載せて、通れなくしてしまわないため。感圧板のような `parallel` のイベントは、押された岩が上に載る）。押したときは、岩に `touch` のページがあっても突き当たりの接触は起きない。
 - **イベントの位置を読む**：式の関数 `evx(id)` / `evy(id)`（05）。押した岩が板の上にあるかを、並列イベントが毎フレーム調べられる。
 - **`SetEventLocation`**（03）：イベントを瞬間移動する（岩をもとの位置へ戻す仕掛けなど）。マップに入り直すと、イベントはマップの定義の位置に戻る（`enterMap`）。
+- **マップのタイルの書き換え**（`map/tiles.ts`・`ChangeMapTile`。03）：`GameState.mapTiles[mapId]` に、書き換えたマスだけを `"<レイヤ>:<x>,<y>"`（`tileKey`）→ タイル番号（0 = 空）で持つ。`MapData`（`ProjectView.map`）は不変のまま、通行判定・氷・移動ルート・描画は、書き換えを重ねたマップ（`currentMap(project, state, mapId?)`。同じ `MapData` と同じ書き換えには同じ結果を返すようキャッシュする）を見る。書き換えはマップを出入りしても残り、セーブにも含まれる（`snapshot` の検証スキーマに `mapTiles` を追加。無いセーブもそのまま読める）。書き換えるまで `mapTiles` は無いので、既存のリプレイのハッシュは変わらない。範囲外のレイヤ・座標の書き換えは無視する。デモ「水門の遺跡」（`fixtures/projects/v1/water`）で使っている。

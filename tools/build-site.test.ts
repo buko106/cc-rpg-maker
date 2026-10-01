@@ -20,7 +20,7 @@ describe("build-site", () => {
     for (const f of ["index.html", ".nojekyll", "editor/index.html", "editor/editor.js", "editor/player/player.js", "demo/index.html"]) {
       expect(existsSync(join(out, f)), f).toBe(true);
     }
-    expect(DEMOS.map((d: { slug: string }) => d.slug)).toEqual(["village", "maze", "tower", "mansion", "haunted", "stealth", "hokora", "ice"]);
+    expect(DEMOS.map((d: { slug: string }) => d.slug)).toEqual(["village", "maze", "tower", "mansion", "haunted", "stealth", "hokora", "ice", "water"]);
     for (const { slug } of DEMOS as { slug: string }[]) {
       for (const f of ["index.html", "player.js", "project/project.json", "assets"]) expect(existsSync(join(out, "demo", slug, f)), `demo/${slug}/${f}`).toBe(true);
     }
