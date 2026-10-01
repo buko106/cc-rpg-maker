@@ -1,6 +1,7 @@
 import { cmd, runCommands } from "@rpg/test-utils";
 import { describe, expect, it } from "vitest";
 import { createRandom } from "../random.js";
+import { TRANSFER_FADE_TICKS } from "./commands/transferPlayer.js";
 import type { GameState } from "../state.js";
 
 const v = (state: GameState, id: string): unknown => (state.variables as Record<string, number>)[id];
@@ -294,6 +295,38 @@ describe("TransferPlayer", () => {
     expect(r.history[0]!.interpreters[0]!.wait).toEqual({ kind: "transfer" });
     expect(r.state.map.player).toMatchObject({ x: 7, y: 5, realX: 7, realY: 5, direction: "up", moving: false });
     expect(sw(r.state, "after")).toBe(true);
+  });
+
+  it.each([
+    ["black", undefined],
+    ["white", "white"],
+  ] as const)("fade: %s fades out, transfers, then fades back in before the next command", (fade, color) => {
+    const r = runCommands([
+      cmd("TransferPlayer", { mapId: "map_start", x: 7, y: 5, fade }),
+      cmd("ControlSwitches", { ids: ["after"], value: true }),
+    ]);
+    const fades = r.effects.filter((e) => e.kind === "screenFade");
+    expect(fades).toEqual([
+      { kind: "screenFade", to: 1, durationTicks: TRANSFER_FADE_TICKS, ...(color ? { color } : {}) },
+      { kind: "screenFade", to: 0, durationTicks: TRANSFER_FADE_TICKS, ...(color ? { color } : {}) },
+    ]);
+    // 暗転し終わるまでは移動しない
+    const start = { x: r.history[0]!.map.player.x, y: r.history[0]!.map.player.y };
+    expect(start).not.toEqual({ x: 7, y: 5 });
+    expect(r.history[TRANSFER_FADE_TICKS - 2]!.map.player).toMatchObject(start);
+    const moved = r.history.findIndex((s) => s.map.player.x === 7 && s.map.player.y === 5);
+    expect(moved).toBeGreaterThanOrEqual(TRANSFER_FADE_TICKS);
+    // 明転し終わるまで次のコマンドへ進まない（その間プレイヤーは歩けない）
+    const after = r.history.findIndex((s) => sw(s, "after"));
+    expect(after - moved).toBeGreaterThanOrEqual(TRANSFER_FADE_TICKS - 1);
+    expect(r.finished).toBe(true);
+    expect(r.state.interpreters).toEqual([]);
+  });
+
+  it("fade: none transfers at once without screen fades", () => {
+    const r = runCommands([cmd("TransferPlayer", { mapId: "map_start", x: 7, y: 5, fade: "none" })]);
+    expect(r.effects.filter((e) => e.kind === "screenFade")).toEqual([]);
+    expect(r.frames).toBeLessThanOrEqual(2);
   });
 
   it("keeps the current direction when dir is omitted or 'retain'", () => {

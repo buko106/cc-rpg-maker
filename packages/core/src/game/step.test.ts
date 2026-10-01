@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { emptyInput, inputFrame } from "../input.js";
 import type { Button, InputFrame } from "../input.js";
 import type { GameState } from "../state.js";
+import { TRANSFER_FADE_TICKS } from "../interpreter/commands/transferPlayer.js";
 import { dispatch, initialState, step } from "./index.js";
 
 const minimal = loadFixtureProject("minimal");
@@ -194,7 +195,10 @@ describe("transfer between maps (fixtures/transfer-demo)", () => {
     expect(s.variables["var_visits" as never]).toBe(1);
     expect(s.message).toMatchObject({ open: true, text: "初めて入る。" }); // 1 回目なので Else 側
     s = press(s, "ok", demo.ctx);
-    s = idle(s, 5, demo.ctx);
+    // 扉は fade: black：暗転 → 場所移動 → 明転（それぞれ TRANSFER_FADE_TICKS フレーム）
+    s = idle(s, TRANSFER_FADE_TICKS - 2, demo.ctx);
+    expect(s.map.mapId).toBe("map_a");
+    s = idle(s, 5 + TRANSFER_FADE_TICKS, demo.ctx);
     expect(s.map.mapId).toBe("map_b");
     expect(s.map.player).toMatchObject({ x: 2, y: 3, direction: "down", moving: false });
     expect(s.map.transfer).toBeUndefined();
@@ -229,6 +233,7 @@ describe("transfer between maps (fixtures/transfer-demo)", () => {
     (lazy.maps as Record<string, unknown>)["map_b"] = mapB;
     advance(3);
     expect(s.map.mapId).toBe("map_b");
+    advance(TRANSFER_FADE_TICKS); // 明転
     expect(s.interpreters).toHaveLength(0);
   });
 

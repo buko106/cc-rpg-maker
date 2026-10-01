@@ -18,6 +18,8 @@ export interface FrameSpec {
 export interface Overlay {
   /** 0 = 通常、1 = 完全に暗転 */
   readonly fade: number;
+  /** 暗転の色（`a` は使わない）。省略は黒。 */
+  readonly fadeColor?: RGBA;
   readonly tint: RGBA;
   readonly flash?: { readonly color: RGBA; readonly alpha: number };
   /** 全レイヤに適用するカメラオフセット（ピクセル） */

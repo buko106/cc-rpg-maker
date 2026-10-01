@@ -105,6 +105,11 @@ describe("buildDrawList: overlay と UI", () => {
     expect(buildDrawList(frame({ overlay: { fade: 0, tint: { r: 0, g: 0, b: 0, a: 0 }, flash: { color: white, alpha: 0 }, shake: { dx: 0, dy: 0 } } }), env)).toEqual([]);
   });
 
+  it("暗転の色（fadeColor）が白なら、白で覆う", () => {
+    const [q] = buildDrawList(frame({ overlay: { fade: 0.5, fadeColor: white, tint: { r: 0, g: 0, b: 0, a: 0 }, shake: { dx: 0, dy: 0 } } }), env);
+    expect([q!.r, q!.g, q!.b, q!.a]).toEqual([1, 1, 1, 0.5]);
+  });
+
   it("色は Canvas2D と同じく、r/g/b を整数に丸め、範囲に収める", () => {
     const [q] = buildDrawList(frame({ overlay: { fade: 0, tint: { r: 127.6, g: -5, b: 999, a: 2 }, shake: { dx: 0, dy: 0 } } }), env);
     expect([q!.r, q!.g, q!.b, q!.a]).toEqual([128 / 255, 0, 1, 1]);

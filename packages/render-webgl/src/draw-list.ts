@@ -206,11 +206,14 @@ export function buildDrawList(frame: FrameSpec, env: DrawEnv): Quad[] {
     if (layer.kind === "tiles") tiles(out, layer, frame, ox, oy, env);
     else sprites(out, layer, ox, oy, env);
   }
-  const { tint, flash, fade } = frame.overlay;
+  const { tint, flash, fade, fadeColor } = frame.overlay;
   const { width, height } = frame.size;
   if (tint.a > 0) out.push(solid(0, 0, width, height, tint));
   if (flash !== undefined && flash.alpha > 0) out.push(solid(0, 0, width, height, { ...flash.color, a: flash.color.a * flash.alpha }));
-  if (fade > 0) out.push(solid(0, 0, width, height, { r: 0, g: 0, b: 0, a: Math.min(1, fade) }));
+  if (fade > 0) {
+    const c = fadeColor ?? { r: 0, g: 0, b: 0 };
+    out.push(solid(0, 0, width, height, { r: c.r, g: c.g, b: c.b, a: Math.min(1, fade) }));
+  }
   for (const node of frame.ui) ui(out, node, env);
   return out;
 }

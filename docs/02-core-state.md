@@ -115,7 +115,7 @@ export type Effect =
   | { kind: "screenShake"; power: number; durationTicks: number }
   | { kind: "screenFlash"; color: RGBA; durationTicks: number }
   | { kind: "screenTint"; color: RGBA; durationTicks: number }   // M6：色調（a = 0 で元に戻る）
-  | { kind: "screenFade"; to: 0 | 1; durationTicks: number }      // M6：暗転（1）/ 明転（0）。暗転は明転を指示するまで続く
+  | { kind: "screenFade"; to: 0 | 1; durationTicks: number; color?: "black" | "white" } // M6：暗転（1）/ 明転（0）。暗転は明転を指示するまで続く。color は暗転の色（省略は黒。色の無い明転は今の色のまま戻る）
   | { kind: "requestSave"; slot?: number; confirmed?: boolean }   // confirmed = 確認ダイアログで「はい」の後
   | { kind: "requestLoad"; slot?: number; confirmed?: boolean }
   | { kind: "requestMapData"; mapId: MapId }   // 遅延ロード。runtime が Ctx に供給してから再開

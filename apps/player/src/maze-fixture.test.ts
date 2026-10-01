@@ -89,13 +89,11 @@ describe("迷宮デモ（fixtures/projects/v1/maze）", () => {
     expect(project.system.screen).toEqual({ width: 11 * 32, height: 11 * 32 });
   });
 
-  it("部屋を移るときは暗転する（フェードアウト → 場所移動 → フェードイン。終わるまで待つ）", () => {
+  it("部屋を移るときは暗転する（場所移動の fade: black。暗転 → 場所移動 → 明転は TransferPlayer が行う）", () => {
     for (const map of Object.values(maps)) {
       for (const d of doorsOf(map)) {
-        const commands = d.event.pages[0]!.commands;
-        const at = commands.findIndex((c) => c.code === "TransferPlayer");
-        expect(commands[at - 1], `${map.id} の ${d.dir}`).toMatchObject({ code: "Fadeout", params: { wait: true } });
-        expect(commands[at + 1], `${map.id} の ${d.dir}`).toMatchObject({ code: "Fadein", params: { wait: true } });
+        const transfer = d.event.pages[0]!.commands.find((c) => c.code === "TransferPlayer");
+        expect(transfer?.params, `${map.id} の ${d.dir}`).toMatchObject({ fade: "black" });
       }
     }
   });
