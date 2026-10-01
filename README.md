@@ -13,6 +13,8 @@
 > プラグイン（`@rpg/plugin-api`。独自コマンド・式関数・戦闘ルール・HUD など。サンプルは `@rpg/plugin-samples`）がプレイヤーとエディタの両方で動き、
 > 描画は WebGL（`@rpg/render-webgl`）と Canvas2D を選べ（`auto` は WebGL が使えなければ Canvas2D）、フォルダ形式の配布物は Service Worker でオフラインでも遊べます。
 > プロジェクトの保存先は IndexedDB のほか、OPFS / 利用者が選んだフォルダ（File System Access API。一覧の「フォルダを選ぶ…」）も使えます。
+> エディタのプロジェクト一覧の「サンプルから作る」で、デモ（はじまりの村・地下迷宮）の編集データを新しいプロジェクトとして取り込んで、中身を見たり作り変えたりできます。
+> 編集データは一覧の「ZIP」で書き出し、「ZIP から読み込む…」で取り込めます（バックアップや、別のブラウザへの持ち運び）。
 > 設計は [`docs/`](./docs/) にあります。
 
 **公開中**： [ランディング](https://www.buko106.tokyo/cc-rpg-maker/) / [エディタ](https://www.buko106.tokyo/cc-rpg-maker/editor/) / [デモ](https://www.buko106.tokyo/cc-rpg-maker/demo/)（村のデモと迷宮のデモから選べます。`main` に入るたびに GitHub Pages へ自動で公開します）

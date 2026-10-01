@@ -8,7 +8,7 @@ export { App, AUTOSAVE_MS } from "./App.js";
 export type { AppProps } from "./App.js";
 export { EnvContext, RepoContext, SessionContext, useEnv, useRepo, useSession } from "./hooks.js";
 export { useFormContext } from "./form-context.js";
-export type { CommandFormOverrideProps, EditorEnv } from "./hooks.js";
+export type { CommandFormOverrideProps, EditorEnv, ProjectSample } from "./hooks.js";
 export { startPlaytest } from "./playtest.js";
 export type { Playtest, PlaytestDeps, PlaytestStart } from "./playtest.js";
 export { describeSchema } from "./schema-form/introspect.js";

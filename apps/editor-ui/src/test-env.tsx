@@ -9,7 +9,7 @@ import type { ReactElement, ReactNode } from "react";
 import type { PluginModule } from "@rpg/plugin-api";
 import { EnvContext, RepoContext, SessionContext } from "./hooks.js";
 import { createPluginEnv } from "./plugin-env.js";
-import type { EditorEnv } from "./hooks.js";
+import type { EditorEnv, ProjectSample } from "./hooks.js";
 
 // jsdom には Canvas の実装が無い（getContext が「未実装」と騒ぐ）ので、描画しない前提で null を返す。
 if (typeof HTMLCanvasElement !== "undefined") {
@@ -55,7 +55,9 @@ export interface TestEnv {
   wrap(children: ReactNode): ReactElement;
 }
 
-export async function createTestEnv(opts: { session?: Partial<EditorSessionDeps>; plugins?: readonly PluginModule[] } = {}): Promise<TestEnv> {
+export async function createTestEnv(
+  opts: { session?: Partial<EditorSessionDeps>; plugins?: readonly PluginModule[]; samples?: readonly { sample: ProjectSample; zip: () => Promise<Uint8Array<ArrayBuffer>> }[] } = {},
+): Promise<TestEnv> {
   const repo = createMemoryProjectRepository();
   const commands = createCommandRegistry();
   registerBuiltins(commands);
@@ -66,6 +68,11 @@ export async function createTestEnv(opts: { session?: Partial<EditorSessionDeps>
     ...pluginEnv,
     loadPlayerBundle: () => Promise.resolve({ js: "/* player */" }),
     saveFile: (name, bytes, mime) => void saved.push({ name, bytes, mime }),
+    listSamples: () => Promise.resolve((opts.samples ?? []).map((s) => s.sample)),
+    loadSample: (id) => {
+      const s = opts.samples?.find((x) => x.sample.id === id);
+      return s === undefined ? Promise.reject(new Error(`サンプル「${id}」が無い`)) : s.zip();
+    },
     commands,
     formOverrides: pluginEnv.pluginForms,
     createRenderer: () => createNullRenderer(),

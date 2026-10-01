@@ -78,6 +78,14 @@ textarea { width: 100%; resize: vertical; }
 .project-title { flex: 1; font-weight: 600; }
 .row-form { display: flex; gap: var(--gap); margin: var(--gap) 0; }
 .row-form input { flex: 1; }
+.import-zip { display: flex; flex-wrap: wrap; gap: var(--gap); align-items: center; margin: 0 0 var(--gap); }
+.project-list .samples { list-style: none; padding: 0; margin: 0 0 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--gap); }
+.project-list .samples li { display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
+.project-list .samples img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: cover; image-rendering: pixelated; background: #000; }
+.sample-body { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px 12px; flex: 1; }
+.sample-body .tags { display: flex; flex-wrap: wrap; gap: 4px; }
+.sample-body .tags span { font-size: 11px; padding: 0 8px; border: 1px solid var(--border); border-radius: 999px; }
+.sample-body button { margin-top: auto; align-self: flex-start; }
 
 /* シェル */
 .shell { display: grid; grid-template-columns: 280px 1fr; grid-template-rows: auto 1fr; height: 100vh; }
