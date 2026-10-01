@@ -10,10 +10,10 @@ export * from "./interpreter/index.js";
 export { computeCamera, activePage, activePageIndex, canPass, eventsToTrigger, moveCharacter, newCharacter, refreshEventPages } from "./map/index.js";
 export type { PassabilityCtx } from "./map/index.js";
 export {
-  AUTOSAVE_SLOT, autosaveOnTransfer, dispatch, initialState, isSellable, loadSlotNumbers, MENU_ITEMS, maxBuyQuantity, menuItemIds, menuItems, openShop, paramAt, SAVE_SLOT_COUNT, SAVE_SLOT_FIRST, saveSlotNumbers, sellableItemIds, sellPrice, SHOP_ITEM_LIMIT, shopCommands,
-  shopListIds, step, TITLE_ITEMS, titleState,
+  AUTOSAVE_SLOT, autosaveOnTransfer, dispatch, fieldItemUsable, fieldScope, fieldSkills, fieldSkillUsable, initialState, isSellable, loadSlotNumbers, MENU_ITEMS, maxBuyQuantity, menuItemIds, menuItems, needsFieldTarget, openShop, paramAt, SAVE_SLOT_COUNT, SAVE_SLOT_FIRST, saveSlotNumbers, sellableItemIds, sellPrice, SHOP_ITEM_LIMIT, shopCommands,
+  shopListIds, step, TITLE_ITEMS, titleState, useOnField,
 } from "./game/index.js";
-export type { Action, InterpreterAction, StepResult } from "./game/index.js";
+export type { Action, FieldUse, InterpreterAction, StepResult } from "./game/index.js";
 export { createCtx } from "./ctx.js";
 export type { Ctx } from "./ctx.js";
 export { warn } from "./effects.js";
@@ -28,5 +28,5 @@ export { fromSnapshot, migrateSnapshot, progressFingerprint, SNAPSHOT_VERSION, s
 export type { SaveSnapshot, SerializedGameState, SnapshotError, SnapshotMigration } from "./snapshot.js";
 export { IDLE_MESSAGE, selfSwitchKey } from "./state.js";
 export type {
-  ActorState, Character, EventRuntime, GameState, MapState, MenuConfirm, MenuScreen, MessageState, PartyState, SceneState, ShopScene, ShopScreen, TimerState, TitleScreen,
+  ActorState, Character, EventRuntime, GameState, MapState, MenuConfirm, MenuPick, MenuScreen, MessageState, PartyState, SceneState, ShopScene, ShopScreen, TimerState, TitleScreen,
 } from "./state.js";

@@ -165,6 +165,20 @@ export function character({ shirt, hair, skin }) {
   return img;
 }
 
+/** 魔物の歩行シート用：全方向・全パターン同じ絵に影を付ける。 */
+export function monsterWalk(sprite) {
+  const out = image(TILE * 3, TILE * 4);
+  for (let row = 0; row < 4; row++) {
+    for (let pattern = 0; pattern < 3; pattern++) {
+      const ox = pattern * TILE;
+      const oy = row * TILE;
+      for (let j = -2; j <= 2; j++) for (let i = -10; i <= 10; i++) if ((i * i) / 100 + (j * j) / 4 <= 1) out.set(ox + 16 + i, oy + 29 + j, [0, 0, 0, 70]);
+      blit(out, sprite, ox, oy + (pattern === 1 ? 0 : -1));
+    }
+  }
+  return out;
+}
+
 /** 勇者（デモ・迷宮で共通の歩行グラフィック）。 */
 export const HERO = { shirt: [58, 110, 165], hair: [110, 70, 40], skin: [240, 200, 160] };
 

@@ -146,7 +146,7 @@ export function runInterpreters(state: GameState, input: InputFrame, ctx: Ctx): 
 - **`skipBlock`**：同じ indent の次の `Else` / `EndBranch` に `pc` を移す（その命令は実行される）。見つからなければインタプリタを終了する。
 - **`ShowText`**：他のインタプリタがメッセージを出している間は 1 フレーム待って再試行する。閉じられるのは決定/キャンセル（入力フェーズ）。
 - **`ControlVariables`**：`div` は切り捨て除算、`div` / `mod` の除数が 0 のときは変数を変えない（MV 互換）。式オペランドが評価できなければ警告を出して変更しない。
-- **`ConditionalBranch`** の条件は式（文字列）か構造化条件（`switch` / `variable`）。式が評価できない・真偽値でないときは警告を出して偽として扱う。
+- **`ConditionalBranch`** の条件は式（文字列）か構造化条件（`switch` / `variable`）。式が評価できない・真偽値でないときは警告を出して偽として扱う。イベントの式（`ConditionalBranch` / `ControlVariables` の `expr` / `Script`）の中では `gold` が所持金になる（`gold >= 15`。宿屋の代金の判定など。呼び出し側が渡す同名の `vars` があればそちらが優先）。
 - **1 フレームの命令数の上限**（`MAX_COMMANDS_PER_FRAME = 1000`）はインタプリタごと。超えると警告を出して打ち切り、次のフレームで続ける。
 - `normal` は同時に 1 つ。`startInterpreter` は、すでに動いていれば何もしない。
 

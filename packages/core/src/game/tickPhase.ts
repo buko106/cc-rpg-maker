@@ -4,9 +4,9 @@ import { warn } from "../effects.js";
 import type { Effect } from "../effects.js";
 import type { InputFrame } from "../input.js";
 import { isPageRouteOrigin, pageRouteCommands, pageRouteName, runInterpreters, startInterpreter } from "../interpreter/index.js";
-import { advanceCharacter, computeCamera, DEFAULT_SIGHT_RANGE, eventsToTrigger, hasSight, refreshEventPages, seesPlayer, startsOnPlayerTouch } from "../map/index.js";
+import { advanceCharacter, computeCamera, DEFAULT_SIGHT_RANGE, eventsToTrigger, hasSight, refreshEventPages, rollEncounter, seesPlayer, startsOnPlayerTouch } from "../map/index.js";
 import type { PassabilityCtx } from "../map/index.js";
-import { battleTick } from "../battle/index.js";
+import { battleTick, startBattle } from "../battle/index.js";
 import type { GameState, MapState } from "../state.js";
 import type { StepResult } from "./actions.js";
 import { enterMap } from "./initial.js";
@@ -80,8 +80,11 @@ function applyTransfer(state: GameState, ctx: Ctx): StepResult {
   return { state: { ...s, map: { ...s.map, camera: computeCamera(player, target, ctx.project.project.system) } }, effects };
 }
 
-/** 移動の補間を 1 フレーム進める。プレイヤーが到着したら、足元の接触イベント（通常より下/上）を起動する。 */
-function advanceMovement(state: GameState, map: MapData): GameState {
+/**
+ * 移動の補間を 1 フレーム進める。プレイヤーが到着したら、足元の接触イベント（通常より下/上）を起動する。
+ * 足元にイベントが無く、場所移動の予約も実行中のイベントも無ければ、ランダムエンカウントを判定する（`rollEncounter`）。
+ */
+function advanceMovement(state: GameState, map: MapData, ctx: Ctx): StepResult {
   let s = state;
   const events = { ...s.map.events };
   let eventsChanged = false;
@@ -92,16 +95,30 @@ function advanceMovement(state: GameState, map: MapData): GameState {
   }
   const wasMoving = s.map.player.moving;
   const player = advanceCharacter(s.map.player);
-  if (!eventsChanged && player === s.map.player) return s;
+  if (!eventsChanged && player === s.map.player) return { state: s, effects: [] };
   s = { ...s, map: { ...s.map, player, ...(eventsChanged ? { events } : {}) } };
 
   if (wasMoving && !player.moving && !hasNormalInterpreter(s) && s.map.transfer === undefined) {
     const here: EventId | undefined = Object.values(s.map.events).find(
       (ev) => ev.pageIndex !== null && startsOnPlayerTouch(ev.trigger) && ev.priority !== "same" && ev.x === player.x && ev.y === player.y,
     )?.id;
-    if (here !== undefined) s = startMapEvent(s, map, here);
+    if (here !== undefined) return { state: startMapEvent(s, map, here), effects: [] };
+    return startEncounter(s, map, ctx);
   }
-  return s;
+  return { state: s, effects: [] };
+}
+
+/**
+ * ランダムエンカウント：1 歩あるいたので歩数を数え、遭遇したら戦闘を始める（逃走可・敗北でゲームオーバー）。
+ * 戦闘の開始で歩数は 0 に戻る（`startBattle`）ので、勝っても逃げても、直後はしばらく遭遇しない。
+ */
+function startEncounter(state: GameState, map: MapData, ctx: Ctx): StepResult {
+  if (map.encounters === undefined || map.encounters.length === 0) return { state, effects: [] };
+  const steps = state.map.encounterSteps + 1;
+  const troop = rollEncounter(map, steps, state.rng.seed, state.tick);
+  if (troop === undefined || ctx.project.troop(troop) === undefined) return { state: { ...state, map: { ...state.map, encounterSteps: steps } }, effects: [] };
+  const bgm = ctx.project.project.system.bgm.battle;
+  return { state: startBattle(state, troop, { canEscape: true, canLose: false }, ctx), effects: bgm === undefined ? [] : [{ kind: "playBgm", audio: bgm, fadeMs: 300 }] };
 }
 
 /**
@@ -126,7 +143,7 @@ function startSightEvent(state: GameState, map: MapData, ctx: Ctx): GameState {
 
 /**
  * 時間を 1 フレーム進める。タイトル・ゲームオーバーの間は `tick`、メニューとショップではプレイ時間も進む。戦闘中は `battleTick`。順序：tick 加算 → イベントページ更新 → 自動実行/並列イベントの起動 →
- * インタプリタ実行 → イベントページ更新 → 場所移動 → 移動の補間 → 視界のイベントの起動 → カメラ。
+ * インタプリタ実行 → イベントページ更新 → 場所移動 → 移動の補間（到着したら接触イベント、無ければランダムエンカウント）→ 視界のイベントの起動 → カメラ。
  */
 export function handleTick(state: GameState, input: InputFrame, ctx: Ctx): StepResult {
   const effects: Effect[] = [];
@@ -160,8 +177,10 @@ export function handleTick(state: GameState, input: InputFrame, ctx: Ctx): StepR
 
     const map = ctx.project.map(s.map.mapId);
     if (map) {
-      s = advanceMovement(s, map);
-      s = startSightEvent(s, map, ctx);
+      const advanced = advanceMovement(s, map, ctx);
+      s = advanced.state;
+      effects.push(...advanced.effects);
+      if (s.scene.kind === "map") s = startSightEvent(s, map, ctx);
       const camera = computeCamera(s.map.player, map, ctx.project.project.system);
       if (camera.x !== s.map.camera.x || camera.y !== s.map.camera.y) s = { ...s, map: { ...s.map, camera } };
     }

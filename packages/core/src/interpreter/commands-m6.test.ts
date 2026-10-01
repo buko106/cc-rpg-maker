@@ -427,6 +427,18 @@ describe("システム", () => {
     expect(r.state.party.items).toEqual({});
     expect(warnings(r.effects)).toHaveLength(2);
   });
+  it("式の中の `gold` は所持金（ConditionalBranch / ControlVariables の式で使える）", () => {
+    const rich = { ...fresh(), party: { ...fresh().party, gold: 40 } };
+    const branch = (cond: string) =>
+      run(
+        [cmd("ConditionalBranch", { condition: cond }), cmd("ControlVariables", { ids: ["hit"], op: "set", operand: c(1) }, 1), cmd("EndBranch")],
+        { state: rich },
+      );
+    expect(v(branch("gold >= 40").state, "hit")).toBe(1);
+    expect(v(branch("gold >= 41").state, "hit")).toBeUndefined();
+    const copied = run([cmd("ControlVariables", { ids: ["g"], op: "set", operand: { kind: "expr", expr: "gold / 2" } })], { state: rich });
+    expect(v(copied.state, "g")).toBe(20);
+  });
   it("side-effect functions are rejected in ConditionalBranch (condition mode)", () => {
     const r = run([cmd("ConditionalBranch", { condition: 'setVar("n", 1) > 0' }), cmd("Comment", {}, 1), cmd("EndBranch")]);
     expect(warnings(r.effects)).toHaveLength(1);

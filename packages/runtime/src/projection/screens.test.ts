@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { inputFrame, SAVE_SLOT_COUNT } from "@rpg/core";
+import { createProjectView, inputFrame, SAVE_SLOT_COUNT } from "@rpg/core";
+import type { Project } from "@rpg/schema";
 import type { GameState } from "@rpg/core";
 import { createRuntimeHarness, deepFreeze } from "@rpg/test-utils";
 import type { RuntimeHarness } from "@rpg/test-utils";
@@ -99,6 +100,70 @@ describe("projectFrame（メニュー）", () => {
     expect(projectFrame(state, h.loaded.view).ui).toMatchSnapshot();
     const empty = await menuState("item");
     expect(textsOf(projectFrame(empty.state, empty.h.loaded.view).ui)).toContain("（なし）");
+  });
+
+  describe("アイテム・スキルの使用", () => {
+    /** minimal に、ポーション・ヒール（習得済み）を足し、メニューに「スキル」を出す。 */
+    const fieldState = async (scene: unknown) => {
+      const h = await boot();
+      const p = h.loaded.project;
+      const patched = {
+        ...p,
+        system: { ...p.system, menuSkill: true },
+        database: {
+          ...p.database,
+          skills: { sk_heal: { id: "sk_heal", name: "ヒール", mpCost: 3, scope: "one-ally", formula: "", effects: [{ kind: "recoverHp", value: 30 }] } },
+          items: {
+            potion: { id: "potion", name: "ポーション", kind: "consumable", price: 10, effects: [{ kind: "recoverHp", value: 50 }] },
+            sword: { id: "sword", name: "鉄の剣", kind: "weapon", price: 1, effects: [] },
+          },
+          classes: { class_hero: { ...p.database.classes["class_hero" as never]!, skills: [{ level: 1, skill: "sk_heal" }] } },
+        },
+      } as unknown as Project;
+      const view = createProjectView(patched, h.loaded.maps);
+      const base = h.runtime.getState();
+      const state = { ...base, party: { ...base.party, items: { potion: 3, sword: 1 } }, scene } as GameState;
+      return { h: { loaded: { view } }, state };
+    };
+    const cursors = (nodes: readonly UiNode[]) => flatten(nodes).filter((n) => n.kind === "cursor");
+
+    it("メインメニューに「スキル」が並ぶ（system.menuSkill）", async () => {
+      const { h, state } = await fieldState({ kind: "menu", screen: "main", cursor: 0 });
+      expect(textsOf(projectFrame(state, h.loaded.view).ui)).toEqual(expect.arrayContaining(["アイテム", "スキル", "ステータス"]));
+    });
+
+    it("アイテム：使えない物（武器）は灰色。対象を選んでいる間は右にパーティが出て、選んでいる人にカーソルが付く", async () => {
+      const { h, state } = await fieldState({ kind: "menu", screen: "item", cursor: 0 });
+      const colorOf = (s: GameState, text: string) => flatten(projectFrame(s, h.loaded.view).ui).find((n) => n.kind === "text" && n.text === text);
+      expect(colorOf(state, "ポーション")).toMatchObject({ color: { r: 255, g: 255, b: 255 } });
+      expect(colorOf(state, "鉄の剣")).toMatchObject({ color: { r: 128, g: 128, b: 128 } });
+
+      expect(textsOf(projectFrame(state, h.loaded.view).ui).some((t) => t.startsWith("HP"))).toBe(false);
+      const picking = { ...state, scene: { kind: "menu", screen: "item", cursor: 0, pick: { kind: "item", id: "potion", cursor: 0 } } } as GameState;
+      const ui = projectFrame(picking, h.loaded.view).ui;
+      expect(textsOf(ui).some((t) => t.startsWith("勇者"))).toBe(true);
+      expect(textsOf(ui).some((t) => t.startsWith("HP"))).toBe(true);
+      expect(flatten(ui).filter((n) => n.kind === "window")).toHaveLength(3); // 暗幕・アイテム一覧・パーティ
+      expect(cursors(ui)).toHaveLength(2); // 一覧のカーソルと、対象のカーソル
+    });
+
+    it("スキル：使う人の一覧 → その人のスキル（MP の消費つき。MP が足りないと灰色）→ 対象のパーティ", async () => {
+      const { h, state } = await fieldState({ kind: "menu", screen: "skill", cursor: 0 });
+      const who = textsOf(projectFrame(state, h.loaded.view).ui);
+      expect(who.some((t) => t.startsWith("勇者") && t.includes("Lv"))).toBe(true);
+
+      const listed = { ...state, scene: { kind: "menu", screen: "skill", cursor: 0, actor: 0 } } as GameState;
+      const ui = projectFrame(listed, h.loaded.view).ui;
+      expect(textsOf(ui)).toEqual(expect.arrayContaining(["スキル  勇者", "ヒール", "MP 3"]));
+      const heal = flatten(ui).find((n) => n.kind === "text" && n.text === "ヒール");
+      expect(heal).toMatchObject({ color: { r: 255, g: 255, b: 255 } });
+
+      const noMp = { ...listed, actors: { ...listed.actors, actor_hero: { ...listed.actors["actor_hero" as never]!, mp: 1 } } } as GameState;
+      expect(flatten(projectFrame(noMp, h.loaded.view).ui).find((n) => n.kind === "text" && n.text === "ヒール")).toMatchObject({ color: { r: 128, g: 128, b: 128 } });
+
+      const picking = { ...listed, scene: { kind: "menu", screen: "skill", cursor: 0, actor: 0, pick: { kind: "skill", id: "sk_heal", user: "actor_hero", cursor: 0 } } } as GameState;
+      expect(flatten(projectFrame(picking, h.loaded.view).ui).filter((n) => n.kind === "window")).toHaveLength(3);
+    });
   });
 
   it("[snapshot] ステータス：名前・クラス・レベル・HP/MP・能力値", async () => {

@@ -13,6 +13,8 @@ import { handleTick } from "./tickPhase.js";
 export type { Action, InterpreterAction, StepResult } from "./actions.js";
 export { paramAt } from "../params.js";
 export { initialState, titleState } from "./initial.js";
+export type { FieldUse } from "./fieldUse.js";
+export { fieldItemUsable, fieldScope, fieldSkills, fieldSkillUsable, needsFieldTarget, useOnField } from "./fieldUse.js";
 export { isSellable, maxBuyQuantity, openShop, sellableItemIds, sellPrice, SHOP_ITEM_LIMIT, shopCommands, shopListIds } from "./shop.js";
 export type { MenuItem } from "./scenes.js";
 export { AUTOSAVE_SLOT, autosaveOnTransfer, loadSlotNumbers, MENU_ITEMS, menuItemIds, menuItems, SAVE_SLOT_COUNT, SAVE_SLOT_FIRST, saveSlotNumbers, TITLE_ITEMS } from "./scenes.js";

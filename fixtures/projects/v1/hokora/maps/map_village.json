@@ -1,0 +1,619 @@
+{
+  "id": "map_village",
+  "width": 17,
+  "height": 13,
+  "tileset": "ts_hokora",
+  "layers": [
+    {
+      "name": "ground",
+      "tiles": [1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 6, 1, 6, 1, 1, 2, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 8, 8, 1, 1, 2, 1, 1, 9, 9, 9, 1, 1, 1, 1, 1, 1, 7, 10, 7, 1, 1, 2, 1, 1, 7, 10, 7, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 6, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 3, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 3, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 6, 6, 6, 6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
+    },
+    {
+      "name": "objects",
+      "tiles": [4, 4, 4, 4, 4, 4, 4, 4, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 18, 18, 18, 0, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4]
+    }
+  ],
+  "events": {
+    "ev_intro": {
+      "id": "ev_intro",
+      "name": "はじまり",
+      "x": 9,
+      "y": 11,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "autorun",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ここは ミルト村。村の 北の ほこらに 魔物の 主が\nすみついて、旅人も 村人も こまっている。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "村長の 話を 聞いてみよう。\n（村の まん中の 広場に いる）",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSelfSwitch",
+              "params": {
+                "key": "A",
+                "value": true
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "selfSwitch",
+              "key": "A",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "commands": []
+        }
+      ]
+    },
+    "ev_elder": {
+      "id": "ev_elder",
+      "name": "村長",
+      "x": 9,
+      "y": 6,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_key",
+              "value": false
+            },
+            {
+              "kind": "selfSwitch",
+              "key": "A",
+              "value": false
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "3e9334f1351ae4c9",
+            "index": 0,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おお、よく 来てくれた。わしが 村長じゃ。\n村の 北の 草原を 越えた 先の ほこらに、\n魔物の 主が すみついておる。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ほこらへは 草原の 北の \\C[6]洞窟\\C[0]を 通る。\n洞窟の 奥の 扉は 古い \\C[6]かぎ\\C[0]で 封印されておる。\nかぎは 洞窟の どこかに あるはずじゃ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "草原や 洞窟では、歩くたびに 魔物に 出会う。\nあぶなくなったら \\C[3]逃げて\\C[0]も よいぞ。\n逃げたあとは しばらく 魔物に 出会わん。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "支度金に \\C[6]50G\\C[0]と ポーション 3個じゃ。\nメニューの \\C[6]アイテム\\C[0]から 使えるぞ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChangeGold",
+              "params": {
+                "op": "gain",
+                "amount": {
+                  "kind": "constant",
+                  "value": 50
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChangeItems",
+              "params": {
+                "item": "item_potion",
+                "op": "gain",
+                "amount": {
+                  "kind": "constant",
+                  "value": 3
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]50G\\C[0]と ポーション 3個を 受け取った！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSelfSwitch",
+              "params": {
+                "key": "A",
+                "value": true
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_key",
+              "value": false
+            },
+            {
+              "kind": "selfSwitch",
+              "key": "A",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "3e9334f1351ae4c9",
+            "index": 0,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ほこらの 封印の かぎは 洞窟の どこかじゃ。\n草原の 北の 洞窟に 行ってみなさい。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "傷ついたら メニューの \\C[6]スキル\\C[0]で ミナの\n\\C[3]ヒール\\C[0]を 使えば MPで 回復できる。\n宿屋で 休めば ぜんぶ 回復じゃ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_key",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "3e9334f1351ae4c9",
+            "index": 0,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おお、かぎを 見つけたか！\n宿屋で 休み、薬を そろえて、\nほこらの 主に 挑むのじゃ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ほこらの 中の \\C[3]泉\\C[0]では 回復できる。\nだが 主の 前では 逃げられんぞ。覚悟して 行け！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_woman": {
+      "id": "ev_woman",
+      "name": "村の女",
+      "x": 5,
+      "y": 6,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "3e9334f1351ae4c9",
+            "index": 1,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "草原には スライムや こうもりが 出るわ。\n洞窟の 魔物は ずっと 強いから 気をつけてね。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "魔物に 出会うと すぐ 戦闘よ。\nいやなら \\C[3]逃げる\\C[0]を 選べば いいの。\n足の 速い 勇者さんなら 成功しやすいわ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_kid": {
+      "id": "ev_kid",
+      "name": "村の子",
+      "x": 13,
+      "y": 7,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "3e9334f1351ae4c9",
+            "index": 2,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ぼく 見たよ！ 歩いてると 急に 魔物が とびだすんだ。\n村の中なら 安全だけどね！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "お金は 魔物を 倒すと もらえるよ。\n貯めて よろず屋で 薬を 買おう。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_sign_village": {
+      "id": "ev_sign_village",
+      "name": "看板",
+      "x": 7,
+      "y": 1,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "70295766bb1b5fe9",
+            "index": 2,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]ミルト村\\C[0]\n北 → 草原・ほこらの洞窟\n宿屋 やすらぎ亭（左）／ よろず屋（右）",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_inn": {
+      "id": "ev_inn",
+      "name": "宿屋 やすらぎ亭",
+      "x": 4,
+      "y": 3,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "いらっしゃい！ 宿屋 \\C[6]やすらぎ亭\\C[0]だよ。\n1泊 \\C[6]15G\\C[0]。ぐっすり 休めば ぜんぶ 回復さ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "泊まる（15G）",
+                  "冒険を記録する",
+                  "やめる"
+                ],
+                "cancel": 2
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "gold >= 15"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeGold",
+              "params": {
+                "op": "lose",
+                "amount": {
+                  "kind": "constant",
+                  "value": 15
+                }
+              },
+              "indent": 2
+            },
+            {
+              "code": "Fadeout",
+              "params": {
+                "duration": 30
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChangeHp",
+              "params": {
+                "target": "party",
+                "op": "gain",
+                "amount": {
+                  "kind": "constant",
+                  "value": 9999
+                },
+                "allowDeath": false
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChangeMp",
+              "params": {
+                "target": "party",
+                "op": "gain",
+                "amount": {
+                  "kind": "constant",
+                  "value": 9999
+                }
+              },
+              "indent": 2
+            },
+            {
+              "code": "Wait",
+              "params": {
+                "frames": 40
+              },
+              "indent": 2
+            },
+            {
+              "code": "Fadein",
+              "params": {
+                "duration": 30
+              },
+              "indent": 2
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ぐっすり 眠った。\nHP と MP が 回復した！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 2
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おっと、おかねが たりないようだね。\n魔物を 倒して 稼いでおいで。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "冒険の 記録を つけておくかい？",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "SaveGame",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 2
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "またの おこしを！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_shop": {
+      "id": "ev_shop",
+      "name": "よろず屋",
+      "x": 12,
+      "y": 3,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "いらっしゃい！ 旅の 薬なら おまかせだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShopProcessing",
+              "params": {
+                "goods": [
+                  "item_potion",
+                  "item_hipotion",
+                  "item_ether"
+                ],
+                "canSell": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "気をつけてな！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_to_field": {
+      "id": "ev_to_field",
+      "name": "草原へ",
+      "x": 8,
+      "y": 0,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_field",
+                "x": 13,
+                "y": 20,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

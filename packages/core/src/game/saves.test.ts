@@ -6,7 +6,7 @@ import type { Button } from "../input.js";
 import { startInterpreter } from "../interpreter/index.js";
 import { createProjectView } from "../project-view.js";
 import type { GameState } from "../state.js";
-import { AUTOSAVE_SLOT, dispatch, initialState, loadSlotNumbers, MENU_ITEMS, SAVE_SLOT_COUNT, saveSlotNumbers, step, titleState } from "./index.js";
+import { AUTOSAVE_SLOT, dispatch, initialState, loadSlotNumbers, menuItems, SAVE_SLOT_COUNT, saveSlotNumbers, step, titleState } from "./index.js";
 import type { StepResult } from "./index.js";
 
 /** プロジェクトに `system.autosave` を足した ctx。 */
@@ -20,7 +20,7 @@ const auto = withAutosave("minimal", true);
 
 const press = (ctx: typeof plain.ctx, state: GameState, ...buttons: Button[]): StepResult => step(state, inputFrame(buttons, buttons), ctx);
 const pressAll = (ctx: typeof plain.ctx, state: GameState, ...buttons: Button[]): GameState => buttons.reduce((s, b) => press(ctx, s, b).state, state);
-const loadScreen = (ctx: typeof plain.ctx): GameState => pressAll(ctx, initialState(ctx, "seed"), "menu", ...Array<Button>(MENU_ITEMS.indexOf("load")).fill("down"), "ok");
+const loadScreen = (ctx: typeof plain.ctx): GameState => pressAll(ctx, initialState(ctx, "seed"), "menu", ...Array<Button>(menuItems(ctx.project).indexOf("load")).fill("down"), "ok");
 
 describe("スロット番号", () => {
   it("手動セーブは 1〜10。ロードはオートセーブが有効なときだけ先頭にスロット 0 が付く", () => {
@@ -46,7 +46,7 @@ describe("スロット番号", () => {
   });
 
   it("セーブ画面にはオートセーブは並ばない（手動では書けない）", () => {
-    const save = pressAll(auto.ctx, initialState(auto.ctx, "seed"), "menu", ...Array<Button>(MENU_ITEMS.indexOf("save")).fill("down"), "ok");
+    const save = pressAll(auto.ctx, initialState(auto.ctx, "seed"), "menu", ...Array<Button>(menuItems(auto.ctx.project).indexOf("save")).fill("down"), "ok");
     expect(press(auto.ctx, save, "ok").effects).toEqual([{ kind: "requestSave", slot: 1 }]);
     expect(press(auto.ctx, pressAll(auto.ctx, save, "up"), "ok").effects).toEqual([{ kind: "requestSave", slot: SAVE_SLOT_COUNT }]);
   });

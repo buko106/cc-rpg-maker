@@ -92,7 +92,7 @@ export const defaultBattleRules: BattleRules;
 - 敗北時 `canLose=false` で `gameover` シーンへ遷移する。
 
 ## 実装メモ（M4 で確定した点）
-- **実装範囲**：`BattleState`・行動の解決・敵AI・報酬・`BattleRules`・コマンド入力・状態異常/強化・逃走・ゲームオーバー。ソースは `packages/core/src/battle/`（`state` `battlers` `rules` `damage` `resolve` `ai` `rewards` `flow` `helpers`）。**未実装**：トループのイベントページ（`Troop.pages`）、ランダムエンカウント（`MapData.encounters`）、隠れた敵（`hidden` は型だけ）、戦闘中のコモンイベント効果（警告して無視）、アニメーション、味方の並び替え、後衛、戦闘中の装備変更。
+- **実装範囲**：`BattleState`・行動の解決・敵AI・報酬・`BattleRules`・コマンド入力・状態異常/強化・逃走・ゲームオーバー。ソースは `packages/core/src/battle/`（`state` `battlers` `rules` `damage` `resolve` `ai` `rewards` `flow` `helpers`）。**未実装**：トループのイベントページ（`Troop.pages`）、隠れた敵（`hidden` は型だけ）、戦闘中のコモンイベント効果（警告して無視）、アニメーション、味方の並び替え、後衛、戦闘中の装備変更。
 - **公開インターフェースとの差**：
   - `Battler.params` は**装備適用後・強化/状態適用前の基本値**。実効値は `effectiveParam(ctx, b, param)` / `effective(ctx, b)`（式やルールには実効値のコピーを渡す）。`Battler.level` を追加。
   - `BattleState` に `enemyOrder`（敵の並び順）、`allies`（戦闘者としての味方。HP/MP は戦闘の終わりに `GameState.actors` へ書き戻す）、`guarding`、`popups`（ダメージ数字の一時表示）、`wait`（次の処理までの待ちフレーム）、`result` を追加。`inputCursor` は `{ actorIndex, menu, index, pick }`（対象選択の途中経過は `pick`）。`BattlerId` は味方 = `ActorId`、敵 = `e:<番号>`（ID に `:` は使えないので衝突しない）。敵の名前は同じ種類が複数いれば A, B… が付く。
@@ -108,3 +108,7 @@ export const defaultBattleRules: BattleRules;
 - **終了**：結果表示（最低 30 フレーム）の後に決定/キャンセルで抜ける。勝利・逃走・`canLose` の敗北はマップに戻り、結果（`victory` / `escape` / `defeat` / `aborted`）を待っているインタプリタの `locals.battleResult` に渡す。`canLose` でない敗北は `gameover` シーン（決定でタイトルに戻る）。戦闘中はマップの世界（イベント・移動・並列処理）が止まり、メニューも開かない。
 - **セーブ**：`battle` は保存しない。`stripTransient` は `title` / `menu` / `battle` / `gameover` のシーンをマップに戻して `battle` を落とす。戦闘の途中で復元されたインタプリタ（`BattleProcessing` の待機中）は結果が無いので逃走の分岐に進む。
 - **テスト**：`damage` `resolve` `ai`（1000 回の分布）`rewards` `rules` `input`（メニュー操作）`flow`（勝利・敗北・逃走・報酬・独立した乱数）`battleProcessing`（コマンド経由の全経路）と、`battle.property.test.ts`（任意の入力列で HP/MP が範囲内・状態を変更しない・毎フレーム進む・同じ入力で同じ結果）。`fixtures/replays/battle-win.json` / `battle-escape.json`（タイトル → ニューゲーム → 歩く → 話しかけて戦闘 → 勝利/逃走 → マップ復帰。`title: true` で開始）。戦闘のテストデータは `test-utils` の `battleProject()` / `battleKit()`。
+
+## 実装メモ（ランダムエンカウント）
+- **ランダムエンカウント**（`MapData.encounters` / `encounterStep`。02）：歩くたびに `rollEncounter` で判定し、遭遇したら `startBattle(state, troop, { canEscape: true, canLose: false }, ctx)` で戦闘シーンに入る（インタプリタを介さない）。戦闘の乱数は他と同じ `battle:<tick>` の独立の列で、遭遇の判定は `encounter:<tick>` の別の列。戦闘が終わると `leaveBattle` がマップに戻し（待っているインタプリタが無いので結果は捨てる）、全滅は `gameover`。勝っても逃げても、`startBattle` が歩数を 0 にするので、直後は平均の半分ほどの歩数は遭遇しない。
+- **メニューでの使用は戦闘の解決の再利用**：マップ（メニュー）でのアイテム・スキルの使用（`useOnField`。02）は、敵のいない戦闘状態を作って `resolveAction` に渡す。式・回復・蘇生・消費は戦闘と同じ結果になる。

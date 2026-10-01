@@ -1,12 +1,20 @@
-import type { ActorId, AssetId, AssetRef, Direction, EventId, EventPage, ItemId, MapId, SwitchId, VariableId } from "@rpg/schema";
+import type { ActorId, AssetId, AssetRef, Direction, EventId, EventPage, ItemId, MapId, SkillId, SwitchId, VariableId } from "@rpg/schema";
 import type { BattleState } from "./battle/state.js";
 import type { InterpreterState } from "./interpreter/state.js";
 import type { RandomState } from "./random.js";
 
 export type TitleScreen = "main" | "continue";
-export type MenuScreen = "main" | "item" | "status" | "save" | "load";
+export type MenuScreen = "main" | "item" | "skill" | "status" | "save" | "load";
 /** ショップの画面：コマンド（購入/売却/やめる）→ 商品の一覧（`buy`）または所持品の一覧（`sell`）。 */
 export type ShopScreen = "command" | "buy" | "sell";
+
+/**
+ * メニューで使うもの（アイテム / スキル）を選んだあと、対象の味方を選んでいる状態。`cursor` は `party.members` の位置（`self`・全体のスキルでは使わない）。
+ * スキルは使う人（`user`）を持つ（アイテムは誰が使っても同じ）。
+ */
+export type MenuPick =
+  | { readonly kind: "item"; readonly id: ItemId; readonly cursor: number }
+  | { readonly kind: "skill"; readonly id: SkillId; readonly user: ActorId; readonly cursor: number };
 
 /**
  * セーブ/ロード画面の確認ダイアログ（上書き・進行の破棄）。`cursor` は 0 = はい / 1 = いいえ（誤操作しにくいよう「いいえ」から始める）。
@@ -40,7 +48,17 @@ export type SceneState =
   | { readonly kind: "map" }
   | { readonly kind: "title"; readonly screen: TitleScreen; readonly cursor: number }
   /** `portal` は、イベント（`SaveGame` / `LoadGame`）がセーブ/ロード画面を直接開いたとき。キャンセルでメインメニューではなくマップに戻る。 */
-  | { readonly kind: "menu"; readonly screen: MenuScreen; readonly cursor: number; readonly confirm?: MenuConfirm; readonly portal?: boolean }
+  | {
+      readonly kind: "menu";
+      readonly screen: MenuScreen;
+      readonly cursor: number;
+      readonly confirm?: MenuConfirm;
+      readonly portal?: boolean;
+      /** `skill` 画面で、使う人（`party.members` の位置）を選んだあと。ないあいだは `cursor` が使う人を指す。 */
+      readonly actor?: number;
+      /** `item` / `skill` 画面で、使うものを選んで対象を選んでいる間。 */
+      readonly pick?: MenuPick;
+    }
   | ShopScene
   | { readonly kind: "battle" | "gameover" };
 

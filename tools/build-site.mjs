@@ -7,7 +7,7 @@
  * 出力（既定は site-dist/。https://<host>/cc-rpg-maker/ の直下に置く想定）:
  *   index.html       ランディングページ（site/ をそのままコピー）
  *   editor/          エディタ（apps/editor-ui/scripts/build-web.mjs）
- *   demo/            デモを選ぶページと、デモごとのプレイヤー（tools/build-demos.mjs。demo/village/・demo/maze/・demo/tower/・demo/mansion/・demo/haunted/・demo/stealth/）
+ *   demo/            デモを選ぶページと、デモごとのプレイヤー（tools/build-demos.mjs。demo/village/・demo/maze/・demo/tower/・demo/mansion/・demo/haunted/・demo/stealth/・demo/hokora/）
  *   .nojekyll        Jekyll の処理を止める
  * どのページも相対パスだけで参照し合うので、サブパス（/cc-rpg-maker/）でも動く。
  */

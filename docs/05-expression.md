@@ -47,7 +47,7 @@ export function createFormulaRegistry(): FormulaRegistry;
 export function registerBuiltinFns(r: FormulaRegistry): void;
 
 export interface Scope {
-  vars: Record<string, Value>;                       // a, b, ...
+  vars: Record<string, Value>;                       // a, b, ...（イベントの式では `gold` = 所持金も入る）
   variable(id: VariableId): number; switch(id: SwitchId): boolean;
   rng: Random;
   mode: "formula" | "condition" | "script";
