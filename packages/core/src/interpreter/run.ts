@@ -105,7 +105,8 @@ function evaluateIn(state: GameState, rng: Random, ctx: Ctx, expr: string, mode:
   const parsed = parse(expr);
   if (!parsed.ok) return err({ kind: "argument" as const, message: `構文エラー: ${parsed.error.message}`, pos: parsed.error.pos });
   const scope: Scope = {
-    vars,
+    // `gold` は所持金（宿屋の代金の判定などに使える）。呼び出し側の `vars` が同名なら、そちらが優先
+    vars: { gold: state.party.gold, ...vars },
     variable: (id) => (Object.hasOwn(state.variables, id) ? (state.variables[id] as number) : 0),
     switch: (id) => Object.hasOwn(state.switches, id) && state.switches[id] === true,
     rng,

@@ -82,7 +82,8 @@ export interface MapData {
   layers: TileLayer[];                    // 描画順。長さ >= 1
   events: Record<EventId, MapEvent>;
   bgm?: AudioRef;
-  encounters?: { troop: TroopId; weight: number }[];
+  encounters?: { troop: TroopId; weight: number }[];   // ランダムエンカウント（歩くたびに weight の比で選ぶ）
+  encounterStep?: number;                              // 平均歩数（1〜999、省略 = 30）
 }
 
 export interface TileLayer { name: string; tiles: Uint16Array | number[] }  // width*height、0 = 空
@@ -231,3 +232,7 @@ export function findDanglingRefs(...): RefTarget[];
 
 ## 実装メモ（視界・経路探索）
 - **`EventPage.trigger` に `eventSight`（視界に入ったとき）を足し、ページに `sightRange`（視界の長さ。1〜20 の整数、省略可。既定 4）を足した**。`eventSight` のページは `eventTouch` と同じく、プレイヤーから触れても・向こうから触れてきても始まり、加えて、プレイヤーが止まっているとき、このイベントが向いている方向のまっすぐ `sightRange` タイル以内に見えると始まる（03）。移動ルートの歩み（`move`）の `dir` に `chase`（通れる道を探して追う）を足した。どちらも値を足しただけで既存のデータはそのまま読めるので `formatVersion` は上げていない。`SaveSnapshot` のイベントの `trigger` も同じ値を受け付ける。
+
+## 実装メモ（ランダムエンカウント・メニューでの使用）
+- **`MapData.encounterStep`（ランダムエンカウントの平均歩数）を足した**：1〜999 の整数（省略可。既定 30）。`encounters`（`MapData` に型だけあった敵グループの表）が 1 つ以上あるマップで、歩くたびにこの歩数に 1 回ほど、重み（`weight`）の比でトループを選んで戦闘になる（02・04）。`encounters` が無い・空のマップ（村・ダンジョンの安全な部屋）では出会わない。値を足しただけ（省略可）で既存のデータはそのまま読めるので `formatVersion` は上げていない。エディタの `setMapProperties` は `encounterStep`（`null` で既定に戻す）も受け取る。
+- **`system.menuSkill`（メニューに「スキル」を出すか）を足した**：`boolean`（省略可）。`true` のときだけメインメニューの「アイテム」の次に「スキル」が並び、味方に向けたスキル（回復など）をマップで使える（02・06）。省略または `false` なら並ばない（従来のメニューのまま）。`menuSave` と違って省略時は出さない（既存のゲームのメニューを変えないため）。値を足しただけで `formatVersion` は上げていない。

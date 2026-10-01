@@ -1,8 +1,11 @@
+import type { ActorId } from "@rpg/schema";
 import type { Ctx } from "../ctx-types.js";
 import type { Effect } from "../effects.js";
 import type { InputFrame } from "../input.js";
-import type { GameState, MenuConfirm, MenuScreen, SceneState } from "../state.js";
+import type { GameState, MenuConfirm, MenuPick, SceneState } from "../state.js";
 import type { StepResult } from "./actions.js";
+import { fieldItemUsable, fieldScope, fieldSkills, fieldSkillUsable, needsFieldTarget, useOnField } from "./fieldUse.js";
+import type { FieldUse } from "./fieldUse.js";
 import { initialState, titleState } from "./initial.js";
 import { loadSlotNumbers, menuItemIds, menuItems, saveSlotNumbers, TITLE_ITEMS } from "./scenes.js";
 
@@ -42,13 +45,19 @@ export function handleTitleInput(state: GameState, input: InputFrame, ctx: Ctx):
   return { state, effects: [] };
 }
 
-/** 各画面のカーソルの取りうる個数。 */
-function screenSize(state: GameState, screen: MenuScreen, ctx: Ctx): number {
-  switch (screen) {
+type MenuScene = Extract<SceneState, { kind: "menu" }>;
+
+/** 各画面のカーソルの取りうる個数。スキル画面は、使う人を選ぶ間は人数、選んだあとはその人のスキルの数。 */
+function screenSize(state: GameState, scene: MenuScene, ctx: Ctx): number {
+  switch (scene.screen) {
     case "main":
       return menuItems(ctx.project).length;
     case "item":
       return menuItemIds(state).length;
+    case "skill": {
+      const user = scene.actor === undefined ? undefined : state.party.members[scene.actor];
+      return user === undefined ? state.party.members.length : fieldSkills(state, ctx, user).length;
+    }
     case "status":
       return state.party.members.length;
     case "save":
@@ -73,6 +82,35 @@ function handleConfirmInput(state: GameState, scene: Extract<SceneState, { kind:
   return withScene(state, open, [{ kind, slot: confirm.slot, confirmed: true }]);
 }
 
+/** 使うものを決めたあとの動き：`self`・全体はすぐに使い、一人を選ぶ範囲なら対象の選択に進む。 */
+function startUse(state: GameState, scene: MenuScene, use: Extract<FieldUse, { kind: "skill" }>, ctx: Ctx): StepResult {
+  const scope = fieldScope(use, ctx);
+  if (!needsFieldTarget(scope)) return applyUse(state, scene, use, undefined, ctx);
+  return withScene(state, { ...scene, pick: { kind: "skill", id: use.id, user: use.user, cursor: 0 } });
+}
+
+/** 使う（できなければ何も起きない）。対象の選択は終わる。 */
+function applyUse(state: GameState, scene: MenuScene, use: FieldUse, target: ActorId | undefined, ctx: Ctx): StepResult {
+  const { pick: _pick, ...open } = scene;
+  const used = useOnField(state, ctx, use, target);
+  const next = used ?? state;
+  // 使い切ったアイテムは一覧から消えるので、カーソルを範囲内に収める
+  const cursor = scene.screen === "item" ? Math.min(scene.cursor, Math.max(0, menuItemIds(next).length - 1)) : scene.cursor;
+  return withScene(next, { ...open, cursor });
+}
+
+/** 対象を選んでいる間の入力（一人を選ぶ範囲のものだけ）：上下で味方を選び、決定で使い、キャンセルで戻る。 */
+function handlePickInput(state: GameState, scene: MenuScene, pick: MenuPick, input: InputFrame, ctx: Ctx): StepResult {
+  const { pick: _pick, ...open } = scene;
+  if (input.triggered.has("cancel")) return withScene(state, open);
+  const count = state.party.members.length;
+  const dy = vertical(input);
+  if (dy !== 0) return withScene(state, { ...scene, pick: { ...pick, cursor: move(pick.cursor, dy, count) } });
+  if (!input.triggered.has("ok")) return { state, effects: [] };
+  const target = state.party.members[pick.cursor];
+  return applyUse(state, scene, pick.kind === "item" ? { kind: "item", id: pick.id } : { kind: "skill", id: pick.id, user: pick.user }, target, ctx);
+}
+
 /**
  * メニューの入力。キャンセルで一つ前の画面（メインならマップ）へ、メニューボタンで一度に閉じる。
  * セーブ/ロード画面の決定は `requestSave` / `requestLoad`（書き込み・読み込みは runtime）。
@@ -83,13 +121,19 @@ export function handleMenuInput(state: GameState, input: InputFrame, ctx: Ctx): 
 
   if (input.triggered.has("menu")) return withScene(state, { kind: "map" });
   if (scene.confirm !== undefined) return handleConfirmInput(state, scene, scene.confirm, input);
+  // 対象を選んでいる間・スキル画面で使う人を選んだあとは、キャンセルで一つ内側に戻るだけ（メインメニューへは戻らない）
+  if (scene.pick !== undefined) return handlePickInput(state, scene, scene.pick, input, ctx);
+  if (scene.screen === "skill" && scene.actor !== undefined && input.triggered.has("cancel")) {
+    const { actor, ...rest } = scene;
+    return withScene(state, { ...rest, cursor: actor });
+  }
   if (input.triggered.has("cancel")) {
     // イベントが直接開いたセーブ/ロード画面（ポータル）は、メインメニューを経由せずマップに戻る
     if (scene.screen === "main" || scene.portal === true) return withScene(state, { kind: "map" });
     return withScene(state, { kind: "menu", screen: "main", cursor: Math.max(0, menuItems(ctx.project).indexOf(scene.screen)) });
   }
 
-  const count = screenSize(state, scene.screen, ctx);
+  const count = screenSize(state, scene, ctx);
   const delta = scene.screen === "status" ? (input.triggered.has("pagedown") ? 1 : 0) - (input.triggered.has("pageup") ? 1 : 0) || vertical(input) : vertical(input);
   if (delta !== 0) return withScene(state, { ...scene, cursor: move(scene.cursor, delta, count) });
 
@@ -98,6 +142,19 @@ export function handleMenuInput(state: GameState, input: InputFrame, ctx: Ctx): 
     case "main": {
       const next = menuItems(ctx.project)[scene.cursor];
       return next === undefined ? { state, effects: [] } : withScene(state, { kind: "menu", screen: next, cursor: 0 });
+    }
+    case "item": {
+      const id = menuItemIds(state)[scene.cursor];
+      const item = id === undefined ? undefined : ctx.project.item(id as never);
+      if (id === undefined || !fieldItemUsable(item)) return { state, effects: [] };
+      return withScene(state, { ...scene, pick: { kind: "item", id: id as never, cursor: 0 } });
+    }
+    case "skill": {
+      if (scene.actor === undefined) return state.party.members[scene.cursor] === undefined ? { state, effects: [] } : withScene(state, { ...scene, actor: scene.cursor, cursor: 0 });
+      const user = state.party.members[scene.actor];
+      const skill = user === undefined ? undefined : fieldSkills(state, ctx, user)[scene.cursor];
+      if (user === undefined || skill === undefined || !fieldSkillUsable(skill)) return { state, effects: [] };
+      return startUse(state, scene, { kind: "skill", id: skill.id, user }, ctx);
     }
     case "save": {
       const slot = saveSlotNumbers()[scene.cursor];

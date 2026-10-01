@@ -56,7 +56,7 @@ const wrap = (n: number, size: number): number => (size <= 0 ? 0 : ((n % size) +
 
 /**
  * 戦闘を始める：戦闘シーンにして `BattleState` を作る（敵の名前は同じ種類が複数いれば A, B… を付ける）。
- * 戦闘の乱数は `seed` と `tick` から作る独立ストリームで、マップの乱数には触れない。
+ * 戦闘の乱数は `seed` と `tick` から作る独立ストリームで、マップの乱数には触れない。エンカウントの歩数（`map.encounterSteps`）は 0 に戻す。
  * トループが存在しなければ何もしない。BGM は呼び出し側（BattleProcessing）が鳴らす。
  */
 export function startBattle(state: GameState, troopId: TroopId, opts: { canEscape: boolean; canLose: boolean }, ctx: ProjectCtx): GameState {
@@ -108,7 +108,8 @@ export function startBattle(state: GameState, troopId: TroopId, opts: { canEscap
     wait: 0,
     result: null,
   };
-  return { ...state, scene: { kind: "battle" }, battle };
+  // 戦闘を始めると、ランダムエンカウントの歩数は数え直す（勝っても逃げても、直後はしばらく遭遇しない）
+  return { ...state, scene: { kind: "battle" }, map: { ...state.map, encounterSteps: 0 }, battle };
 }
 
 // ---- ターンの進行 ----

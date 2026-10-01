@@ -313,9 +313,9 @@ exports[`projectFrame（メニュー） > [snapshot] アイテム：所持品を
       {
         "color": {
           "a": 1,
-          "b": 255,
-          "g": 255,
-          "r": 255,
+          "b": 128,
+          "g": 128,
+          "r": 128,
         },
         "font": {
           "family": "sans-serif",
@@ -330,9 +330,9 @@ exports[`projectFrame（メニュー） > [snapshot] アイテム：所持品を
         "align": "right",
         "color": {
           "a": 1,
-          "b": 255,
-          "g": 255,
-          "r": 255,
+          "b": 128,
+          "g": 128,
+          "r": 128,
         },
         "font": {
           "family": "sans-serif",
@@ -346,9 +346,9 @@ exports[`projectFrame（メニュー） > [snapshot] アイテム：所持品を
       {
         "color": {
           "a": 1,
-          "b": 255,
-          "g": 255,
-          "r": 255,
+          "b": 128,
+          "g": 128,
+          "r": 128,
         },
         "font": {
           "family": "sans-serif",
@@ -363,9 +363,9 @@ exports[`projectFrame（メニュー） > [snapshot] アイテム：所持品を
         "align": "right",
         "color": {
           "a": 1,
-          "b": 255,
-          "g": 255,
-          "r": 255,
+          "b": 128,
+          "g": 128,
+          "r": 128,
         },
         "font": {
           "family": "sans-serif",

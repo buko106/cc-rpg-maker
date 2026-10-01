@@ -61,7 +61,7 @@ export interface MapState {
   readonly followers: Character[];
   readonly camera: { x: number; y: number };
   readonly transfer?: { to: MapId; x: number; y: number; dir: Direction; fade: "black" | "white" | "none" };
-  readonly encounterSteps: number;
+  readonly encounterSteps: number;   // 戦闘から（逃走も含む）あるいた歩数。ランダムエンカウントの判定に使う
 }
 
 export interface Character {
@@ -216,5 +216,12 @@ export const snapshotMigrations: readonly { from: number; to: number; migrate(s:
 - **`SceneState` に `shop`**：`{ kind: "shop"; goods; canSell; owner; screen: "command" | "buy" | "sell"; cursor; quantity? }`（`ShopScene`）。`ShopProcessing`（03）が開き、閉じるとマップに戻る。入力は `game/shop.ts`、`handleTick` はメニューと同じく `tick` とプレイ時間だけを進める。`stripTransient` はマップに戻す。`WaitState` に `{ kind: "shop" }` を追加した。
 - **セーブの 3 種類**：①メニューから（従来。`save` 画面の決定が `requestSave { slot }`。`system.menuSave: false` でメインメニューから「セーブ」を外せる）、②イベントから（`SaveGame`＝セーブポータル。同じセーブ画面を直接開く。03）、③オートセーブ（`system.autosave.onTransfer`）。どれも `requestSave` Effect で、書き込みは runtime（06）。
 - **オートセーブ**：`handleTick` の場所移動（`applyTransfer`）が移動先に着いたとき、`autosaveOnTransfer(project)` なら `{ kind: "requestSave", slot: AUTOSAVE_SLOT }`（`AUTOSAVE_SLOT = 0`、`confirmed` なし）を 1 つ出す。保存されるのは移動が済んだ状態で、移動を待っていたインタプリタは次の `tick` で続きから動く（ロードしても同じ）。
-- **メニューのコマンドの並び**（`game/scenes.ts`）：`menuItems(project)`。`MENU_ITEMS`（`item` / `status` / `save` / `load`）から、`system.menuSave === false` のとき `save` を除いたもの。メインメニューのカーソル・行数・サブ画面から戻るときのカーソル位置はこの並びに従う。`MenuScene.portal`（イベントが開いたセーブ/ロード画面）はキャンセルで直接マップに戻る。`handleMenuInput` の「キャンセルは一つ前の画面へ」の例外。
+- **メニューのコマンドの並び**（`game/scenes.ts`）：`menuItems(project)`。`MENU_ITEMS`（`item` / `skill` / `status` / `save` / `load`）から、`system.menuSave === false` のとき `save` を、`system.menuSkill` が `true` でないとき `skill` を除いたもの。メインメニューのカーソル・行数・サブ画面から戻るときのカーソル位置はこの並びに従う。`MenuScene.portal`（イベントが開いたセーブ/ロード画面）はキャンセルで直接マップに戻る。`handleMenuInput` の「キャンセルは一つ前の画面へ」の例外。
 - **スロット一覧の対応**（`game/scenes.ts`）：カーソル位置 → スロット番号は `saveSlotNumbers()`（セーブ画面。1〜`SAVE_SLOT_COUNT`）と `loadSlotNumbers(project)`（ロード画面とタイトルのコンティニュー。オートセーブが有効なら先頭にスロット 0 が付き、11 行になる。無効なら従来どおり 10 行）。セーブ画面にスロット 0 は並ばず、手動では書けない。`handleMenuInput` は `ctx` を取る（ロード画面の行数がプロジェクトの設定に依るため）。
+
+## 実装メモ（ランダムエンカウント・メニューでの使用）
+- **ランダムエンカウント**（`map/encounter.ts`・`game/tickPhase.ts`）：プレイヤーが 1 歩を歩き終えたとき（移動の補間が終わった `advanceMovement`）、足元に「接触」のイベントが無く、通常のインタプリタも場所移動の予約も無ければ、`MapData.encounters` のあるマップで判定する（`startEncounter`）。`encounterSteps` を 1 足して `rollEncounter(map, steps, seed, tick)`：戦闘（逃走も含む）から `floor(encounterStep / 2)` 歩までは遭遇せず、それ以降は 1 歩ごとに `1 / (encounterStep - 安全歩数)` の確率で遭遇する（平均がほぼ `encounterStep` 歩になる）。遭遇したらトループを `weight` の比で選び、`startBattle`（逃走可・敗北でゲームオーバー）で戦闘シーンに入る。戦闘 BGM（`system.bgm.battle`）は `BattleProcessing` と同じに `playBgm` で鳴らす。
+- **乱数は独立の列**：判定は `createRandom(seed).fork("encounter:" + tick)` から引くので、マップの乱数（`rng`）を進めない（`battle:<tick>` の戦闘の列とも別）。エンカウントがあるかどうかでイベントの乱数列は変わらず、同じシード・同じ歩き方なら、リプレイでも同じ歩数・同じ敵で遭遇する。
+- **歩数のリセット**：`startBattle` が `map.encounterSteps` を 0 に戻す（`BattleProcessing` で始めた戦闘も、勝っても逃げても）。戦闘が終わったら、最初の `floor(encounterStep / 2)` 歩は安全。場所移動（`enterMap`）でも 0 から数え直す。戦闘の結果は、インタプリタが待っていなければ（ランダムエンカウント）`leaveBattle` がそのままマップに戻す（`BattleProcessing` の分岐は無い）。全滅（`canLose: false`）は `gameover`。
+- **メニューでのアイテム・スキルの使用**（`game/fieldUse.ts`・`game/uiPhase.ts`）：`MenuScreen` に `skill` を足した。`item` 画面の決定で、使えるアイテム（効果のある消耗品。`fieldItemUsable`）なら対象の味方の選択（`MenuScene.pick`、`MenuPick`：`{ kind: "item", id, cursor }` / `{ kind: "skill", id, user, cursor }`。`cursor` は `party.members` の位置）に進み、上下で選んで決定で使う。キャンセルで選択をやめる。`skill` 画面は、使う人を選び（`cursor`）、決定でその人（`MenuScene.actor`）のスキル一覧に進み、キャンセルで使う人の選択に戻る。スキルは味方に向けたもの（`self` / `one-ally` / `all-allies` / `one-dead-ally`。`fieldSkillUsable`）だけ使え、`self`・全体のスキルは決定でそのまま使う（対象を選ばない）。
+- **効果は戦闘と同じ解決**：`useOnField(state, ctx, use, target?)` は、パーティだけの戦闘状態（敵なし）を作って `resolveAction` を呼ぶので、式（ダメージ式のばらつきも）・HP/MP の回復・蘇生・MP の消費・アイテムの消費は戦闘と同じ。何も回復しなかった（満タン・MP 不足・対象が合わない・アイテムが無い）ときは `undefined`（アイテム・MP は減らさず、画面は対象の選択を終えるだけ）。状態異常・強化は戦闘の外には持ち越されないので、HP/MP の回復だけが残る。乱数は `field:<tick>` の独立の列で、マップの乱数には触れない。

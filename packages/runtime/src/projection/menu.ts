@@ -1,5 +1,5 @@
-import type { GameState, ProjectView } from "@rpg/core";
-import { menuItemIds, menuItems, paramAt } from "@rpg/core";
+import type { GameState, MenuPick, ProjectView } from "@rpg/core";
+import { fieldItemUsable, fieldSkills, fieldSkillUsable, menuItemIds, menuItems, paramAt } from "@rpg/core";
 import type { Param } from "@rpg/schema";
 import type { UiNode } from "../frame-spec.js";
 import { projectConfirm } from "./confirm.js";
@@ -53,11 +53,27 @@ function projectMain(state: GameState, view: ProjectView, screen: Screen, cursor
   ];
 }
 
-function projectItems(state: GameState, view: ProjectView, screen: Screen, cursor: number): UiNode[] {
+/** 対象の味方を選ぶ画面の右側：パーティの一覧（HP/MP のゲージつき）。選んでいる人にカーソルが付く（一人を選ぶ範囲のときだけ、この画面が出る）。 */
+function projectTargets(state: GameState, view: ProjectView, screen: Screen, x: number, pick: MenuPick): UiNode[] {
+  const w = screen.width - x - UI_MARGIN;
+  const rowH = 76;
+  const children: UiNode[] = [];
+  state.party.members.slice(0, 4).forEach((id, i) => {
+    const y = UI_MARGIN + UI_PADDING + i * rowH;
+    children.push(...memberSummary(state, view, id, x, y, w));
+    if (i === pick.cursor) children.push({ kind: "cursor", x: x + 4, y: y - 4, w: w - 8, h: rowH - 4, blink: false });
+  });
+  return [windowNode(x, UI_MARGIN, w, screen.height - UI_MARGIN * 2, children)];
+}
+
+/** 一覧の窓の幅（対象を選んでいる間は左に寄せて、右にパーティを出す）。 */
+const listWidth = (screen: Screen, picking: boolean): number => (picking ? Math.floor(screen.width * 0.5) - UI_MARGIN : screen.width - UI_MARGIN * 2);
+
+function projectItems(state: GameState, view: ProjectView, screen: Screen, cursor: number, pick: MenuPick | undefined): UiNode[] {
   const ids = menuItemIds(state);
   const x = UI_MARGIN;
   const y = UI_MARGIN;
-  const w = screen.width - UI_MARGIN * 2;
+  const w = listWidth(screen, pick !== undefined);
   const h = screen.height - UI_MARGIN * 2;
   const rows = Math.max(1, Math.floor((h - 28 - UI_PADDING) / UI_ROW_HEIGHT));
   const first = firstVisible(cursor, ids.length, rows);
@@ -65,12 +81,57 @@ function projectItems(state: GameState, view: ProjectView, screen: Screen, curso
   if (ids.length === 0) children.push(textNode(x + UI_PADDING, y + 30, term(view, "noItems"), textColor(7)));
   ids.slice(first, first + rows).forEach((id, i) => {
     const ty = y + 28 + i * UI_ROW_HEIGHT + 2;
-    const name = view.item(id as never)?.name ?? id;
-    children.push(textNode(x + UI_PADDING, ty, name));
-    children.push(textNode(x + w - UI_PADDING, ty, `× ${state.party.items[id as keyof typeof state.party.items]}`, textColor(0), { align: "right" }));
+    const item = view.item(id as never);
+    const color = fieldItemUsable(item) ? textColor(0) : textColor(7);
+    children.push(textNode(x + UI_PADDING, ty, item?.name ?? id, color));
+    children.push(textNode(x + w - UI_PADDING, ty, `× ${state.party.items[id as keyof typeof state.party.items]}`, color, { align: "right" }));
   });
   if (ids.length > 0) children.push(cursorNode(x + 4, y + 28 + (cursor - first) * UI_ROW_HEIGHT, w - 8));
-  return [windowNode(x, y, w, h, children)];
+  const list = windowNode(x, y, w, h, children);
+  return pick === undefined ? [list] : [list, ...projectTargets(state, view, screen, x + w + UI_MARGIN, pick)];
+}
+
+/** スキル画面：使う人を選ぶ（パーティ一覧）→ その人のスキルの一覧 →（一人を選ぶ範囲なら）対象の味方。 */
+function projectSkills(state: GameState, view: ProjectView, screen: Screen, scene: Extract<GameState["scene"], { kind: "menu" }>): UiNode[] {
+  const x = UI_MARGIN;
+  const y = UI_MARGIN;
+  const h = screen.height - UI_MARGIN * 2;
+  const userId = scene.actor === undefined ? undefined : state.party.members[scene.actor];
+  const user = userId === undefined ? undefined : actorOf(state, userId);
+  if (userId === undefined || user === undefined) {
+    const w = listWidth(screen, false);
+    const children: UiNode[] = [textNode(x + UI_PADDING, y + UI_PADDING, term(view, "skill"), textColor(6))];
+    state.party.members.forEach((id, i) => {
+      const actor = actorOf(state, id);
+      if (actor === undefined) return;
+      const ty = y + 28 + i * UI_ROW_HEIGHT + 2;
+      children.push(textNode(x + UI_PADDING, ty, `${actor.name}  ${term(view, "level")}${actor.level}`));
+      children.push(textNode(x + w - UI_PADDING, ty, `${term(view, "hp")} ${actor.hp}   ${term(view, "mp")} ${actor.mp}`, textColor(0), { align: "right" }));
+    });
+    if (state.party.members.length > 0) children.push(cursorNode(x + 4, y + 28 + scene.cursor * UI_ROW_HEIGHT, w - 8));
+    return [windowNode(x, y, w, h, children)];
+  }
+
+  const w = listWidth(screen, scene.pick !== undefined);
+  const cls = view.class(view.actor(user.id)?.classId ?? ("" as never));
+  const mmp = paramAt(cls, "mmp", user.level);
+  const skills = fieldSkills(state, { project: view }, user.id);
+  const rows = Math.max(1, Math.floor((h - 28 - UI_PADDING) / UI_ROW_HEIGHT));
+  const first = firstVisible(scene.cursor, skills.length, rows);
+  const children: UiNode[] = [
+    textNode(x + UI_PADDING, y + UI_PADDING, `${term(view, "skill")}  ${user.name}`, textColor(6)),
+    textNode(x + w - UI_PADDING, y + UI_PADDING, `${term(view, "mp")} ${user.mp}/${mmp}`, MP_COLOR, { align: "right" }),
+  ];
+  if (skills.length === 0) children.push(textNode(x + UI_PADDING, y + 30, term(view, "noItems"), textColor(7)));
+  skills.slice(first, first + rows).forEach((skill, i) => {
+    const ty = y + 28 + i * UI_ROW_HEIGHT + 2;
+    const color = fieldSkillUsable(skill) && skill.mpCost <= user.mp ? textColor(0) : textColor(7);
+    children.push(textNode(x + UI_PADDING, ty, skill.name, color));
+    children.push(textNode(x + w - UI_PADDING, ty, `${term(view, "mp")} ${skill.mpCost}`, color, { align: "right" }));
+  });
+  if (skills.length > 0) children.push(cursorNode(x + 4, y + 28 + (scene.cursor - first) * UI_ROW_HEIGHT, w - 8));
+  const list = windowNode(x, y, w, h, children);
+  return scene.pick === undefined ? [list] : [list, ...projectTargets(state, view, screen, x + w + UI_MARGIN, scene.pick)];
 }
 
 function projectStatus(state: GameState, view: ProjectView, screen: Screen, cursor: number): UiNode[] {
@@ -108,7 +169,7 @@ function projectStatus(state: GameState, view: ProjectView, screen: Screen, curs
   return [windowNode(x, y, w, h, children)];
 }
 
-/** メニューの投影。画面（メイン/アイテム/ステータス/セーブ/ロード）ごとに 1 つのウィンドウ構成。 */
+/** メニューの投影。画面（メイン/アイテム/スキル/ステータス/セーブ/ロード）ごとに 1 つのウィンドウ構成。 */
 export function projectMenu(state: GameState, view: ProjectView, screen: Screen, ui: UiContext): UiNode[] {
   const scene = state.scene;
   if (scene.kind !== "menu") return [];
@@ -116,7 +177,9 @@ export function projectMenu(state: GameState, view: ProjectView, screen: Screen,
     case "main":
       return projectMain(state, view, screen, scene.cursor);
     case "item":
-      return projectItems(state, view, screen, scene.cursor);
+      return projectItems(state, view, screen, scene.cursor, scene.pick);
+    case "skill":
+      return projectSkills(state, view, screen, scene);
     case "status":
       return projectStatus(state, view, screen, scene.cursor);
     case "save":

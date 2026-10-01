@@ -4,7 +4,7 @@ import { fromSnapshot, toSnapshot } from "../snapshot.js";
 import { emptyInput, inputFrame } from "../input.js";
 import type { Button } from "../input.js";
 import type { GameState } from "../state.js";
-import { dispatch, initialState, MENU_ITEMS, menuItemIds, SAVE_SLOT_COUNT, step, TITLE_ITEMS, titleState } from "./index.js";
+import { dispatch, initialState, menuItemIds, menuItems, SAVE_SLOT_COUNT, step, TITLE_ITEMS, titleState } from "./index.js";
 import type { StepResult } from "./index.js";
 
 const { ctx } = loadFixtureProject("minimal");
@@ -12,7 +12,7 @@ const { ctx } = loadFixtureProject("minimal");
 const press = (state: GameState, ...buttons: Button[]): StepResult => step(state, inputFrame(buttons, buttons), ctx);
 const pressAll = (state: GameState, ...buttons: Button[]): GameState => buttons.reduce((s, b) => press(s, b).state, state);
 const inMenu = (state: GameState, screen: "item" | "status" | "save" | "load"): GameState =>
-  pressAll(state, "menu", ...Array<Button>(MENU_ITEMS.indexOf(screen)).fill("down"), "ok");
+  pressAll(state, "menu", ...Array<Button>(menuItems(ctx.project).indexOf(screen)).fill("down"), "ok");
 
 describe("title", () => {
   const title = titleState(ctx, "seed");
@@ -88,7 +88,7 @@ describe("menu", () => {
 
   it("main: the cursor moves and ok enters the chosen screen; cancel returns with the cursor on that entry", () => {
     const opened = press(map, "menu").state;
-    expect(press(opened, "up").state.scene).toEqual({ kind: "menu", screen: "main", cursor: MENU_ITEMS.length - 1 });
+    expect(press(opened, "up").state.scene).toEqual({ kind: "menu", screen: "main", cursor: menuItems(ctx.project).length - 1 });
     const status = pressAll(opened, "down", "ok");
     expect(status.scene).toEqual({ kind: "menu", screen: "status", cursor: 0 });
     expect(press(status, "cancel").state.scene).toEqual({ kind: "menu", screen: "main", cursor: 1 });

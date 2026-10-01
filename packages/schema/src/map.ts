@@ -84,7 +84,10 @@ export const MapDataSchema = z
     layers: z.array(tileLayerSchema).min(1),
     events: idRecord<EventId, typeof mapEventSchema>(mapEventSchema),
     bgm: audioRefSchema.optional(),
+    /** ランダムエンカウント。歩くたびに（`encounterStep` 歩に 1 回ほど）、`weight` の比でトループを選んで戦闘になる。省略または空 = 出ない。 */
     encounters: z.array(z.strictObject({ troop: troopIdSchema, weight: z.number().positive() })).optional(),
+    /** ランダムエンカウントの平均歩数。省略 = 30。戦闘（逃走を含む）の直後は、この半分ほどは遭遇しない。 */
+    encounterStep: z.number().int().min(1).max(999).optional(),
   })
   .superRefine((map, ctx) => {
     const cells = map.width * map.height;

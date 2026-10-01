@@ -1,0 +1,846 @@
+{
+  "formatVersion": 1,
+  "meta": {
+    "id": "hokora",
+    "title": "デモ：ほこらの冒険",
+    "createdAt": "2026-10-01T00:00:00Z",
+    "updatedAt": "2026-10-01T00:00:00Z"
+  },
+  "system": {
+    "startMap": "map_village",
+    "startX": 8,
+    "startY": 11,
+    "initialParty": [
+      "actor_hero",
+      "actor_mina"
+    ],
+    "tileSize": 32,
+    "screen": {
+      "width": 480,
+      "height": 352
+    },
+    "bgm": {
+      "battle": {
+        "asset": "87073bd84cdaced6",
+        "volume": 0.6,
+        "pitch": 1,
+        "loop": true
+      }
+    },
+    "menuSkill": true,
+    "terms": {
+      "newGame": "ニューゲーム",
+      "attack": "攻撃",
+      "skill": "スキル",
+      "guard": "防御",
+      "escape": "逃げる"
+    }
+  },
+  "maps": {
+    "map_village": {
+      "id": "map_village",
+      "name": "ミルト村",
+      "order": 0
+    },
+    "map_field": {
+      "id": "map_field",
+      "name": "ミルトの草原",
+      "order": 1
+    },
+    "map_cave": {
+      "id": "map_cave",
+      "name": "ほこらの洞窟",
+      "order": 2
+    },
+    "map_shrine": {
+      "id": "map_shrine",
+      "name": "ほこら",
+      "order": 3
+    }
+  },
+  "tilesets": {
+    "ts_hokora": {
+      "id": "ts_hokora",
+      "name": "ほこら",
+      "image": {
+        "asset": "c3e44044903352d2"
+      },
+      "passage": [15, 15, 15, 0, 0, 0, 15, 0, 0, 0, 0, 15, 0, 15, 0, 0, 0, 15, 0, 15, 0, 15]
+    }
+  },
+  "database": {
+    "actors": {
+      "actor_hero": {
+        "id": "actor_hero",
+        "name": "勇者",
+        "classId": "class_warrior",
+        "initialLevel": 1,
+        "walk": {
+          "asset": "bb2e23b45d1f4d4d"
+        },
+        "equips": {
+          "weapon": "wp_sword",
+          "armor": "ar_leather"
+        }
+      },
+      "actor_mina": {
+        "id": "actor_mina",
+        "name": "ミナ",
+        "classId": "class_cleric",
+        "initialLevel": 1,
+        "equips": {
+          "weapon": "wp_staff",
+          "armor": "ar_robe"
+        }
+      }
+    },
+    "classes": {
+      "class_warrior": {
+        "id": "class_warrior",
+        "name": "戦士",
+        "params": {
+          "mhp": {
+            "base": 72,
+            "growth": 14
+          },
+          "mmp": {
+            "base": 8,
+            "growth": 2
+          },
+          "atk": {
+            "base": 12,
+            "growth": 3
+          },
+          "def": {
+            "base": 8,
+            "growth": 2
+          },
+          "mat": {
+            "base": 4,
+            "growth": 1
+          },
+          "mdf": {
+            "base": 6,
+            "growth": 1
+          },
+          "agi": {
+            "base": 10,
+            "growth": 2
+          },
+          "luk": {
+            "base": 8,
+            "growth": 1
+          }
+        },
+        "skills": [
+          {
+            "level": 1,
+            "skill": "sk_smash"
+          },
+          {
+            "level": 5,
+            "skill": "sk_break"
+          }
+        ]
+      },
+      "class_cleric": {
+        "id": "class_cleric",
+        "name": "僧侶",
+        "params": {
+          "mhp": {
+            "base": 50,
+            "growth": 9
+          },
+          "mmp": {
+            "base": 22,
+            "growth": 4
+          },
+          "atk": {
+            "base": 6,
+            "growth": 1
+          },
+          "def": {
+            "base": 7,
+            "growth": 2
+          },
+          "mat": {
+            "base": 12,
+            "growth": 3
+          },
+          "mdf": {
+            "base": 12,
+            "growth": 2
+          },
+          "agi": {
+            "base": 9,
+            "growth": 1
+          },
+          "luk": {
+            "base": 10,
+            "growth": 1
+          }
+        },
+        "skills": [
+          {
+            "level": 1,
+            "skill": "sk_heal"
+          },
+          {
+            "level": 3,
+            "skill": "sk_holy"
+          },
+          {
+            "level": 5,
+            "skill": "sk_healall"
+          }
+        ]
+      }
+    },
+    "skills": {
+      "sk_smash": {
+        "id": "sk_smash",
+        "name": "強打",
+        "mpCost": 3,
+        "scope": "one-enemy",
+        "formula": "a.atk * 6 - b.def * 2",
+        "effects": []
+      },
+      "sk_break": {
+        "id": "sk_break",
+        "name": "かぶと割り",
+        "mpCost": 5,
+        "scope": "one-enemy",
+        "formula": "a.atk * 4 - b.def",
+        "effects": [
+          {
+            "kind": "buff",
+            "param": "def",
+            "level": -1
+          }
+        ]
+      },
+      "sk_heal": {
+        "id": "sk_heal",
+        "name": "ヒール",
+        "mpCost": 3,
+        "scope": "one-ally",
+        "formula": "-(a.mat * 2 + 25)",
+        "effects": []
+      },
+      "sk_holy": {
+        "id": "sk_holy",
+        "name": "ホーリー",
+        "mpCost": 5,
+        "scope": "one-enemy",
+        "formula": "a.mat * 5 - b.mdf * 2",
+        "effects": []
+      },
+      "sk_healall": {
+        "id": "sk_healall",
+        "name": "ヒールオール",
+        "mpCost": 9,
+        "scope": "all-allies",
+        "formula": "-(a.mat + 20)",
+        "effects": []
+      },
+      "sk_tackle": {
+        "id": "sk_tackle",
+        "name": "たいあたり",
+        "mpCost": 0,
+        "scope": "one-enemy",
+        "formula": "a.atk * 4 - b.def * 2",
+        "effects": []
+      },
+      "sk_bite": {
+        "id": "sk_bite",
+        "name": "かみつく",
+        "mpCost": 0,
+        "scope": "one-enemy",
+        "formula": "a.atk * 4 - b.def * 2",
+        "effects": []
+      },
+      "sk_wing": {
+        "id": "sk_wing",
+        "name": "つばさで うつ",
+        "mpCost": 0,
+        "scope": "one-enemy",
+        "formula": "a.atk * 3 - b.def * 2",
+        "effects": []
+      },
+      "sk_howl": {
+        "id": "sk_howl",
+        "name": "遠ぼえ",
+        "mpCost": 0,
+        "scope": "self",
+        "formula": "",
+        "effects": [
+          {
+            "kind": "buff",
+            "param": "atk",
+            "level": 1
+          }
+        ]
+      },
+      "sk_slash": {
+        "id": "sk_slash",
+        "name": "斬りつける",
+        "mpCost": 0,
+        "scope": "one-enemy",
+        "formula": "a.atk * 4 - b.def * 2",
+        "effects": []
+      },
+      "sk_claw": {
+        "id": "sk_claw",
+        "name": "石の爪",
+        "mpCost": 0,
+        "scope": "one-enemy",
+        "formula": "a.atk * 4 - b.def * 2",
+        "effects": []
+      },
+      "sk_gale": {
+        "id": "sk_gale",
+        "name": "暗黒の風",
+        "mpCost": 0,
+        "scope": "all-enemies",
+        "formula": "a.mat * 3 - b.mdf * 2",
+        "effects": []
+      },
+      "sk_harden": {
+        "id": "sk_harden",
+        "name": "石化の守り",
+        "mpCost": 0,
+        "scope": "self",
+        "formula": "",
+        "effects": [
+          {
+            "kind": "buff",
+            "param": "def",
+            "level": 1
+          }
+        ]
+      },
+      "sk_rage": {
+        "id": "sk_rage",
+        "name": "ほこらの怒り",
+        "mpCost": 0,
+        "scope": "all-enemies",
+        "formula": "a.mat * 4 - b.mdf * 2",
+        "effects": []
+      }
+    },
+    "items": {
+      "item_potion": {
+        "id": "item_potion",
+        "name": "ポーション",
+        "kind": "consumable",
+        "price": 20,
+        "effects": [
+          {
+            "kind": "recoverHp",
+            "value": 60
+          }
+        ]
+      },
+      "item_hipotion": {
+        "id": "item_hipotion",
+        "name": "ハイポーション",
+        "kind": "consumable",
+        "price": 80,
+        "effects": [
+          {
+            "kind": "recoverHp",
+            "value": 160
+          }
+        ]
+      },
+      "item_ether": {
+        "id": "item_ether",
+        "name": "エーテル",
+        "kind": "consumable",
+        "price": 90,
+        "effects": [
+          {
+            "kind": "recoverMp",
+            "value": 30
+          }
+        ]
+      },
+      "wp_sword": {
+        "id": "wp_sword",
+        "name": "銅の剣",
+        "kind": "weapon",
+        "price": 100,
+        "effects": [],
+        "params": {
+          "atk": 4
+        }
+      },
+      "wp_staff": {
+        "id": "wp_staff",
+        "name": "樫の杖",
+        "kind": "weapon",
+        "price": 80,
+        "effects": [],
+        "params": {
+          "mat": 3
+        }
+      },
+      "ar_leather": {
+        "id": "ar_leather",
+        "name": "革の鎧",
+        "kind": "armor",
+        "price": 60,
+        "effects": [],
+        "params": {
+          "def": 3
+        }
+      },
+      "ar_robe": {
+        "id": "ar_robe",
+        "name": "旅のローブ",
+        "kind": "armor",
+        "price": 50,
+        "effects": [],
+        "params": {
+          "def": 2,
+          "mdf": 2
+        }
+      }
+    },
+    "enemies": {
+      "en_slime": {
+        "id": "en_slime",
+        "name": "スライム",
+        "graphic": {
+          "asset": "43f0ce9b62d309f4"
+        },
+        "params": {
+          "mhp": 80,
+          "mmp": 0,
+          "atk": 10,
+          "def": 3,
+          "mat": 0,
+          "mdf": 2,
+          "agi": 5,
+          "luk": 4
+        },
+        "actions": [
+          {
+            "skill": "sk_tackle",
+            "rating": 5
+          }
+        ],
+        "drops": [
+          {
+            "item": "item_potion",
+            "rate": 0.08
+          }
+        ],
+        "exp": 10,
+        "gold": 6
+      },
+      "en_bat": {
+        "id": "en_bat",
+        "name": "こうもり",
+        "graphic": {
+          "asset": "0a065d0c4e35bf2c"
+        },
+        "params": {
+          "mhp": 65,
+          "mmp": 0,
+          "atk": 10,
+          "def": 2,
+          "mat": 0,
+          "mdf": 2,
+          "agi": 14,
+          "luk": 6
+        },
+        "actions": [
+          {
+            "skill": "sk_wing",
+            "rating": 5
+          }
+        ],
+        "drops": [],
+        "exp": 12,
+        "gold": 7
+      },
+      "en_wolf": {
+        "id": "en_wolf",
+        "name": "野犬",
+        "graphic": {
+          "asset": "6142e4e6d8215b93"
+        },
+        "params": {
+          "mhp": 170,
+          "mmp": 0,
+          "atk": 11,
+          "def": 6,
+          "mat": 0,
+          "mdf": 3,
+          "agi": 11,
+          "luk": 5
+        },
+        "actions": [
+          {
+            "skill": "sk_bite",
+            "rating": 5
+          },
+          {
+            "skill": "sk_howl",
+            "rating": 2,
+            "condition": "turn == 1"
+          }
+        ],
+        "drops": [
+          {
+            "item": "item_potion",
+            "rate": 0.2
+          }
+        ],
+        "exp": 30,
+        "gold": 14
+      },
+      "en_skeleton": {
+        "id": "en_skeleton",
+        "name": "ガイコツ",
+        "graphic": {
+          "asset": "701c9426cc25f0b1"
+        },
+        "params": {
+          "mhp": 260,
+          "mmp": 0,
+          "atk": 15,
+          "def": 9,
+          "mat": 0,
+          "mdf": 4,
+          "agi": 9,
+          "luk": 4
+        },
+        "actions": [
+          {
+            "skill": "sk_slash",
+            "rating": 5
+          }
+        ],
+        "drops": [
+          {
+            "item": "item_ether",
+            "rate": 0.1
+          }
+        ],
+        "exp": 48,
+        "gold": 22
+      },
+      "en_gargoyle": {
+        "id": "en_gargoyle",
+        "name": "ほこらの主",
+        "graphic": {
+          "asset": "3cd4c4c44e8df741"
+        },
+        "params": {
+          "mhp": 1250,
+          "mmp": 60,
+          "atk": 19,
+          "def": 12,
+          "mat": 18,
+          "mdf": 10,
+          "agi": 12,
+          "luk": 8
+        },
+        "actions": [
+          {
+            "skill": "sk_claw",
+            "rating": 5
+          },
+          {
+            "skill": "sk_gale",
+            "rating": 4,
+            "condition": "turn >= 2"
+          },
+          {
+            "skill": "sk_harden",
+            "rating": 3,
+            "condition": "turn == 1"
+          },
+          {
+            "skill": "sk_rage",
+            "rating": 8,
+            "condition": "a.hp * 2 < a.mhp && turn % 2 == 0"
+          }
+        ],
+        "drops": [],
+        "exp": 200,
+        "gold": 300
+      }
+    },
+    "troops": {
+      "tr_slime": {
+        "id": "tr_slime",
+        "name": "スライム",
+        "members": [
+          {
+            "enemy": "en_slime",
+            "x": 240,
+            "y": 150
+          }
+        ],
+        "pages": []
+      },
+      "tr_slimes": {
+        "id": "tr_slimes",
+        "name": "スライム×2",
+        "members": [
+          {
+            "enemy": "en_slime",
+            "x": 180,
+            "y": 150
+          },
+          {
+            "enemy": "en_slime",
+            "x": 300,
+            "y": 150
+          }
+        ],
+        "pages": []
+      },
+      "tr_bat": {
+        "id": "tr_bat",
+        "name": "こうもり",
+        "members": [
+          {
+            "enemy": "en_bat",
+            "x": 240,
+            "y": 150
+          }
+        ],
+        "pages": []
+      },
+      "tr_slime_bat": {
+        "id": "tr_slime_bat",
+        "name": "スライムとこうもり",
+        "members": [
+          {
+            "enemy": "en_slime",
+            "x": 180,
+            "y": 150
+          },
+          {
+            "enemy": "en_bat",
+            "x": 300,
+            "y": 150
+          }
+        ],
+        "pages": []
+      },
+      "tr_wolf": {
+        "id": "tr_wolf",
+        "name": "野犬",
+        "members": [
+          {
+            "enemy": "en_wolf",
+            "x": 240,
+            "y": 150
+          }
+        ],
+        "pages": []
+      },
+      "tr_bats": {
+        "id": "tr_bats",
+        "name": "こうもり×2",
+        "members": [
+          {
+            "enemy": "en_bat",
+            "x": 180,
+            "y": 150
+          },
+          {
+            "enemy": "en_bat",
+            "x": 300,
+            "y": 150
+          }
+        ],
+        "pages": []
+      },
+      "tr_skeleton": {
+        "id": "tr_skeleton",
+        "name": "ガイコツ",
+        "members": [
+          {
+            "enemy": "en_skeleton",
+            "x": 240,
+            "y": 150
+          }
+        ],
+        "pages": []
+      },
+      "tr_wolf_bat": {
+        "id": "tr_wolf_bat",
+        "name": "野犬とこうもり",
+        "members": [
+          {
+            "enemy": "en_wolf",
+            "x": 180,
+            "y": 150
+          },
+          {
+            "enemy": "en_bat",
+            "x": 300,
+            "y": 150
+          }
+        ],
+        "pages": []
+      },
+      "tr_skel_bat": {
+        "id": "tr_skel_bat",
+        "name": "ガイコツとこうもり",
+        "members": [
+          {
+            "enemy": "en_skeleton",
+            "x": 180,
+            "y": 150
+          },
+          {
+            "enemy": "en_bat",
+            "x": 300,
+            "y": 150
+          }
+        ],
+        "pages": []
+      },
+      "tr_skeletons": {
+        "id": "tr_skeletons",
+        "name": "ガイコツ×2",
+        "members": [
+          {
+            "enemy": "en_skeleton",
+            "x": 180,
+            "y": 150
+          },
+          {
+            "enemy": "en_skeleton",
+            "x": 300,
+            "y": 150
+          }
+        ],
+        "pages": []
+      },
+      "tr_boss": {
+        "id": "tr_boss",
+        "name": "ほこらの主",
+        "members": [
+          {
+            "enemy": "en_gargoyle",
+            "x": 240,
+            "y": 150
+          }
+        ],
+        "pages": []
+      }
+    },
+    "states": {},
+    "commonEvents": {}
+  },
+  "assets": {
+    "entries": {
+      "c3e44044903352d2": {
+        "name": "hokora_tileset.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 3240,
+        "width": 704,
+        "height": 32
+      },
+      "bb2e23b45d1f4d4d": {
+        "name": "hero.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 660,
+        "width": 96,
+        "height": 128
+      },
+      "3e9334f1351ae4c9": {
+        "name": "people.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 2192,
+        "width": 288,
+        "height": 128
+      },
+      "21b6a5f4f0d795e9": {
+        "name": "monsters.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 824,
+        "width": 96,
+        "height": 128
+      },
+      "70295766bb1b5fe9": {
+        "name": "props.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 2608,
+        "width": 384,
+        "height": 128
+      },
+      "43f0ce9b62d309f4": {
+        "name": "slime.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 278,
+        "width": 64,
+        "height": 64
+      },
+      "0a065d0c4e35bf2c": {
+        "name": "bat.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 392,
+        "width": 64,
+        "height": 64
+      },
+      "6142e4e6d8215b93": {
+        "name": "wolf.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 361,
+        "width": 64,
+        "height": 64
+      },
+      "701c9426cc25f0b1": {
+        "name": "skeleton.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 305,
+        "width": 64,
+        "height": 64
+      },
+      "3cd4c4c44e8df741": {
+        "name": "gargoyle.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 533,
+        "width": 96,
+        "height": 96
+      },
+      "87073bd84cdaced6": {
+        "name": "battle.wav",
+        "kind": "audio",
+        "mime": "audio/wav",
+        "size": 70604
+      }
+    }
+  },
+  "switches": {
+    "sw_key": {
+      "name": "古いかぎを持っている"
+    },
+    "sw_door": {
+      "name": "封印の扉が開いた"
+    },
+    "sw_boss": {
+      "name": "ほこらの主を倒した"
+    }
+  },
+  "variables": {}
+}

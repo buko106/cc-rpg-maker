@@ -210,10 +210,10 @@ export function setMapMeta(mapId: MapId, patch: Partial<Omit<MapMeta, "id" | "pa
   });
 }
 
-/** マップのタイルセット・BGM・エンカウントを変える（`null` は「なし」）。 */
+/** マップのタイルセット・BGM・エンカウント（敵グループと平均歩数）を変える（`null` は「なし」）。 */
 export function setMapProperties(
   mapId: MapId,
-  patch: { tileset?: TilesetId; bgm?: AudioRef | null; encounters?: MapData["encounters"] | null },
+  patch: { tileset?: TilesetId; bgm?: AudioRef | null; encounters?: MapData["encounters"] | null; encounterStep?: number | null },
 ): EditorCommand {
   return defineEdit({
     kind: "setMapProperties",
@@ -222,10 +222,19 @@ export function setMapProperties(
     apply(doc) {
       const map = mapOf(doc, mapId);
       if (map === undefined) return err(notFound("マップ", mapId));
-      const { bgm: _b, encounters: _e, ...rest } = map;
+      const { bgm: _b, encounters: _e, encounterStep: _s, ...rest } = map;
       const bgm = patch.bgm === undefined ? map.bgm : (patch.bgm ?? undefined);
       const encounters = patch.encounters === undefined ? map.encounters : (patch.encounters ?? undefined);
-      return ok(withMap(doc, { ...rest, ...(patch.tileset === undefined ? {} : { tileset: patch.tileset }), ...(bgm === undefined ? {} : { bgm }), ...(encounters === undefined ? {} : { encounters }) }));
+      const encounterStep = patch.encounterStep === undefined ? map.encounterStep : (patch.encounterStep ?? undefined);
+      return ok(
+        withMap(doc, {
+          ...rest,
+          ...(patch.tileset === undefined ? {} : { tileset: patch.tileset }),
+          ...(bgm === undefined ? {} : { bgm }),
+          ...(encounters === undefined ? {} : { encounters }),
+          ...(encounterStep === undefined ? {} : { encounterStep }),
+        }),
+      );
     },
   });
 }

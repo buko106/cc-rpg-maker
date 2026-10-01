@@ -119,6 +119,7 @@ const FIELD_LABELS: Readonly<Record<string, string>> = {
   battle: "戦闘",
   terms: "用語",
   menuSave: "メニューからセーブできる",
+  menuSkill: "メニューにスキルを出す",
   autosave: "オートセーブ",
   onTransfer: "場所移動のとき",
   // 能力値
