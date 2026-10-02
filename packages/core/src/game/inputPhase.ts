@@ -17,7 +17,7 @@ const OPEN_TILESET: Tileset = { id: "" as Tileset["id"], name: "", passage: [] }
 const DIRECTION_PRIORITY: readonly Direction[] = ["down", "left", "right", "up"];
 
 /** 振り向きのあと、押しっぱなしでも歩き出さずに待つフレーム数（`system.turnInPlace`）。 */
-export const TURN_IN_PLACE_FRAMES = 10;
+export const TURN_IN_PLACE_FRAMES = 6;
 
 export const hasNormalInterpreter = (s: GameState): boolean => s.interpreters.some((i) => i.mode === "normal");
 
