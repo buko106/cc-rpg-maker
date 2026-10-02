@@ -59,7 +59,7 @@ describe("洞窟に入る", () => {
       await g.ok(); // 文章を送って、選択肢まで進める
       await g.idle(5);
       expect(g.state().message.choices).toEqual(["入る", "やめておく"]);
-      if (pick === "down") await g.step("down");
+      if (pick === "down") g.h.play(...expandInputs([{ press: "down" }, { wait: 1 }])); // 選択肢のカーソル（歩かない）
       await (pick === "down" ? g.ok() : g.h.play(...expandInputs([{ press: "cancel" }])));
       await g.idle(120);
       expect(g.state().map.mapId).toBe("map_town");
@@ -273,7 +273,8 @@ describe("セーブとロード（中断セーブ）", () => {
       }
     };
     // 洞窟に入る
-    await frames(...expandInputs([{ press: "up" }, { wait: 15 }, { press: "up" }, { wait: 15 }, { press: "up" }, { wait: 15 }, { press: "up" }, { wait: 15 }, { press: "up" }]));
+    // 最初の「上」は振り向き（system.turnInPlace）
+    await frames(...expandInputs([{ press: "up" }, { wait: 2 }, { press: "up" }, { wait: 15 }, { press: "up" }, { wait: 15 }, { press: "up" }, { wait: 15 }, { press: "up" }, { wait: 15 }, { press: "up" }]));
     for (let i = 0; i < 600 && h.runtime.getState().map.mapId !== "map_floor"; i++) await frames(...expandInputs([i % 20 === 0 ? { press: "ok" } : { wait: 1 }]));
     await frames(...expandInputs([{ wait: 60 }]));
     for (let i = 0; i < 3; i++) await frames(...expandInputs([{ press: "ok" }, { wait: 2 }])); // 3 ターン休む

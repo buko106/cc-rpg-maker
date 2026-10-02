@@ -48,6 +48,11 @@ export const systemSettingsSchema = z
     menuSkill: z.boolean().optional(),
     /** オートセーブ（スロット 0）。省略 = しない。`onTransfer` は場所移動のたびに保存する（docs/06-runtime.md）。 */
     autosave: z.strictObject({ onTransfer: z.boolean() }).optional(),
+    /**
+     * 向きだけ変える操作（振り向き）。省略 = 無効。
+     * `true` のとき、いま向いている方向と違う方向キーを**押した瞬間**は、移動せずその向きに変わるだけ（手数にも数えない）。そのまま押し続ける・もう一度押すと歩き出す。
+     */
+    turnInPlace: z.boolean().optional(),
     /** UI 文言 */
     terms: z.record(z.string(), z.string()),
     /** このプロジェクトが使うプラグイン（docs/14-plugin-api.md）。`params` は各プラグインが解釈する。 */

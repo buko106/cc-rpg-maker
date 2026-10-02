@@ -53,6 +53,7 @@ function directionOf(input: InputFrame): Direction | undefined {
  * - タイトル・メニュー・ゲームオーバー：`uiPhase.ts`。ショップ：`shop.ts`。戦闘：`battle/flow.ts`。
  * - メッセージ表示中：決定/キャンセルで閉じる。
  * - イベント実行中・場所移動の予約中・移動中：プレイヤーは操作できない。
+ * - 振り向き（`system.turnInPlace`）：今の向きと違う方向キーを押した瞬間は、向きだけ変えて移動しない。
  * - メニュー/キャンセル：メニューを開く。決定：目の前/足元のアクションイベントを起動。方向キー：1タイル移動を開始（通れなければ向きだけ変わり、
  *   通常プライオリティの「接触」イベントに突き当たったらそれを起動）。
  */
@@ -85,6 +86,12 @@ export function handleInput(state: GameState, input: InputFrame, ctx: Ctx): Step
     if (started) return { state: started, effects: [] };
     // 何も起こらない決定ボタンは「足踏み」：ターン制のイベントが居るときだけ、1 手として数える（その場で待つ）
     if (paced) return { state: withTurn(state), effects: [] };
+  }
+
+  // 振り向き（`system.turnInPlace`）：いまの向きと違う方向キーを押した瞬間は、移動せずに向きだけ変える（手数にも数えない）
+  if (ctx.project.project.system.turnInPlace === true) {
+    const turnTo = DIRECTION_PRIORITY.find((d) => input.triggered.has(d) && d !== state.map.player.direction);
+    if (turnTo !== undefined) return { state: { ...state, map: { ...state.map, player: { ...state.map.player, direction: turnTo } } }, effects: [] };
   }
 
   const dir = directionOf(input);
