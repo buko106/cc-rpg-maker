@@ -6,6 +6,7 @@ import { currentMap, DIRECTION_VECTOR, hasPacedEvents, moveCharacter, pacedEvent
 import type { EventRuntime, GameState } from "../state.js";
 import type { StepResult } from "./actions.js";
 import { battleInput } from "../battle/index.js";
+import { boxesMoving, carryBoxes } from "./carry.js";
 import { handleMessageInput } from "./messageInput.js";
 import { handleShopInput } from "./shop.js";
 import { handleGameoverInput, handleMenuInput, handleTitleInput, openMenu } from "./uiPhase.js";
@@ -78,6 +79,9 @@ export function handleInput(state: GameState, input: InputFrame, ctx: Ctx): Step
   // （`SetMoveRoute` のターン制のルートで動かされているイベントも含む）
   const forced = state.interpreters.flatMap((i) => pacedRouteTarget(i) ?? []);
   if (pacedEventsMoving(state, map, forced)) return idle;
+  // ベルトで運ばれている箱が動いている間も、次の手は打てない
+  const tileset = ctx.project.tileset(map.tileset) ?? OPEN_TILESET;
+  if (boxesMoving(state, map, tileset)) return idle;
   // 手数を数えるのは、ターン制のイベントが居るマップだけ（居なければ、状態に何も足さない）
   const paced = hasPacedEvents(state, map, forced);
   const turn = (s: GameState): GameState => (paced ? withTurn(s) : s);
@@ -109,7 +113,6 @@ export function handleInput(state: GameState, input: InputFrame, ctx: Ctx): Step
   }
   if (dir === undefined) return idle;
 
-  const tileset = ctx.project.tileset(map.tileset) ?? OPEN_TILESET;
   const { player } = state.map;
   const pass = { map, tileset, events: state.map.events };
   // この 1 歩の速さ：足元のタイル・状態・走る操作（Shift）で、基準の速さ（`player.speed`）から変わる。変わらなければ状態に何も足さない
@@ -120,7 +123,8 @@ export function handleInput(state: GameState, input: InputFrame, ctx: Ctx): Step
   const moved = moveCharacter(player, dir, pass);
   let next: GameState = { ...state, map: { ...state.map, player: moved } };
   // 歩き出したら 1 手（通れずに向きだけ変わったときは数えない）
-  if (moved.x !== player.x || moved.y !== player.y) next = turn({ ...next, map: withSpeed(next.map) });
+  // （ベルトの上の箱も、同じ 1 歩の速さで、同時に 1 タイル運ばれる）
+  if (moved.x !== player.x || moved.y !== player.y) next = carryBoxes(turn({ ...next, map: withSpeed(next.map) }), map, tileset, speed);
   if (moved.x === player.x && moved.y === player.y) {
     // 押せる岩：その先が通れるなら、岩を 1 タイル押して、プレイヤーも同じ向きに 1 タイル進む（岩の向きは変えない）
     const rock = pushableAt(pass, player, dir, (ev) => ev.pageIndex !== null && map.events[ev.id]?.pages[ev.pageIndex]?.pushable === true);
@@ -129,7 +133,9 @@ export function handleInput(state: GameState, input: InputFrame, ctx: Ctx): Step
       // 岩はプレイヤーと同じ速さで動く（遅い足元・走るときも、岩とプレイヤーが離れない）
       const pushed = { ...rock, x: rock.x + dx, y: rock.y + dy, moving: true, speed };
       const stepped = { ...player, x: player.x + dx, y: player.y + dy, direction: dir, moving: true };
-      return { state: turn({ ...state, map: withSpeed({ ...state.map, player: stepped, events: { ...state.map.events, [rock.id]: pushed } }) }), effects: [] };
+      const pushedState = turn({ ...state, map: withSpeed({ ...state.map, player: stepped, events: { ...state.map.events, [rock.id]: pushed } }) });
+      // ベルトの上のほかの箱は運ばれる（いま押した箱は、押した分で動いたので運ばない）
+      return { state: carryBoxes(pushedState, map, tileset, speed, new Set([rock.id])), effects: [] };
     }
     // 突き当たり：目の前の通常プライオリティの接触イベント（プレイヤーから / イベントから）を起動
     const { dx, dy } = DIRECTION_VECTOR[dir];

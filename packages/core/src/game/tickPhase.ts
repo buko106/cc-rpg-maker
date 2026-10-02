@@ -11,6 +11,7 @@ import type { GameState, MapState } from "../state.js";
 import type { StepResult } from "./actions.js";
 import { enterMap } from "./initial.js";
 import { AUTOSAVE_SLOT, autosaveOnTransfer } from "./scenes.js";
+import { carryPlayerAndBoxes } from "./carry.js";
 import { hasNormalInterpreter, startMapEvent } from "./inputPhase.js";
 
 /** 自動実行・並列処理イベントのインタプリタを、現在の有効ページに合わせて起動・停止する。 */
@@ -116,8 +117,11 @@ function arrive(s: GameState, map: MapData, ctx: Ctx, slidSpeed: GameState["map"
       (ev) => ev.pageIndex !== null && startsOnPlayerTouch(ev.trigger) && ev.priority !== "same" && ev.x === player.x && ev.y === player.y,
     )?.id;
     if (here !== undefined) return { state: startMapEvent(s, map, here), effects: [] };
-    // 氷の上なら、同じ向きに滑り続ける（滑っている間は歩数を数えず、遭遇もしない。止まった所で判定する）
+    // ベルトの上なら、プレイヤーと、ベルトの上の箱が、いっせいに 1 タイル運ばれる（運ばれている間は歩数を数えず、遭遇もしない。氷より先に効く）
     const tileset = ctx.project.tileset(map.tileset);
+    const carried = tileset === undefined ? undefined : carryPlayerAndBoxes(s, map, tileset, slidSpeed);
+    if (carried !== undefined) return { state: carried, effects: [] };
+    // 氷の上なら、同じ向きに滑り続ける（滑っている間は歩数を数えず、遭遇もしない。止まった所で判定する）
     const slid = tileset === undefined ? undefined : slide(s.map.player, { map, tileset, events: s.map.events });
     if (slid !== undefined) return { state: { ...s, map: { ...s.map, player: slid, ...(slidSpeed === undefined ? {} : { moveSpeed: slidSpeed }) } }, effects: [] };
     return startEncounter(s, map, ctx);

@@ -26,6 +26,15 @@ function tilePassable(map: MapData, tileset: Tileset, x: number, y: number, dir:
   return true;
 }
 
+/** タイル (x, y) から `dir` 方向の隣のタイルへ、タイルの通行フラグだけで進めるか（マップの外・イベントは見ない）。出る側と入る側の両方が許可していること。 */
+export function tilesConnect(map: MapData, tileset: Tileset, x: number, y: number, dir: Direction): boolean {
+  const { dx, dy } = DIRECTION_VECTOR[dir];
+  const x2 = x + dx;
+  const y2 = y + dy;
+  if (!inside(map, x2, y2)) return false;
+  return tilePassable(map, tileset, x, y, dir) && tilePassable(map, tileset, x2, y2, REVERSE[dir]);
+}
+
 /**
  * `ch` が `dir` 方向に 1 タイル進めるか。
  * - マップの外へは常に出られない（`through` でも）。
@@ -45,8 +54,7 @@ export function canPass(
   const y2 = ch.y + dy;
   if (!inside(map, x2, y2)) return false;
   if (ch.through) return true;
-  if (!tilePassable(map, tileset, ch.x, ch.y, dir)) return false;
-  if (!tilePassable(map, tileset, x2, y2, REVERSE[dir])) return false;
+  if (!tilesConnect(map, tileset, ch.x, ch.y, dir)) return false;
   const selfId = "id" in ch ? (ch as EventRuntime).id : undefined;
   for (const ev of Object.values(events)) {
     if (ev.id === selfId || ev.pageIndex === null || ev.through || ev.priority !== "same") continue;

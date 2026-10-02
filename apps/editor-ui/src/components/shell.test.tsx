@@ -138,6 +138,28 @@ describe("TilePalette / ToolBar", () => {
     expect(ice()).toBeUndefined();
   });
 
+  it("選んだタイルの「ベルト（運ぶ向き）」を切り替えると、タイルセットの conveyor が更新される（なしに戻すと、空の conveyor は消える）", () => {
+    render(t.wrap(<TilePalette />));
+    const conveyor = (): unknown => t.session.doc.project.tilesets["ts_default" as never]!.conveyor;
+    const select = (): HTMLSelectElement => screen.getByLabelText("ベルト（運ぶ向き）") as HTMLSelectElement;
+    fireEvent.click(screen.getByRole("button", { name: "タイル 3" }));
+    expect(select().value).toBe("");
+    fireEvent.change(select(), { target: { value: "right" } });
+    expect(conveyor()).toEqual({ "3": "right" });
+    // 別のタイルは別の向き。選んだタイルの向きを選び直せる
+    fireEvent.click(screen.getByRole("button", { name: "タイル 1" }));
+    expect(select().value).toBe("");
+    fireEvent.change(select(), { target: { value: "up" } });
+    expect(conveyor()).toEqual({ "1": "up", "3": "right" });
+    fireEvent.change(select(), { target: { value: "left" } });
+    expect(conveyor()).toEqual({ "1": "left", "3": "right" });
+    fireEvent.change(select(), { target: { value: "" } });
+    fireEvent.click(screen.getByRole("button", { name: "タイル 3" }));
+    expect(select().value).toBe("right");
+    fireEvent.change(select(), { target: { value: "" } });
+    expect(conveyor()).toBeUndefined();
+  });
+
   it("選んだタイルの「足元の速さ」と「走れない」を切り替えると、タイルセットの terrain が更新される（何も変えない設定は持たず、空になれば消える）", () => {
     render(t.wrap(<TilePalette />));
     const terrain = (): unknown => t.session.doc.project.tilesets["ts_default" as never]!.terrain;
