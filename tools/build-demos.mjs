@@ -93,6 +93,14 @@ export const DEMOS = [
     tags: ["マップの書き換え", "押せる箱", "水位", "パズル", "戦闘なし"],
   },
   {
+    slug: "clock",
+    project: "fixtures/projects/v1/clock",
+    title: "時の番人の回廊",
+    image: "site/img/clock.png",
+    description: "止まった大時計の塔を登り、最上階の「時の歯車」を取り戻す。番人は、あなたが 1 歩歩くたびに 1 歩だけ動くターン制。決定ボタンで足踏みして待ち、柱や押した石の箱のかげに隠れて、視界をすり抜けます。見つかっても部屋の入口からやり直せます。",
+    tags: ["ターン制の移動ルート", "視界", "押せる箱", "パズル", "戦闘なし"],
+  },
+  {
     slug: "dungeon",
     project: "fixtures/projects/v2/dungeon",
     title: "風鳴りの洞窟（不思議のダンジョン）",

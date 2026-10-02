@@ -64,6 +64,7 @@ const cases: [EventCommand, string, unknown[]][] = [
   [cmd("ChangeMapTile", { map: "map_b", x: 1, y: 2, width: 3, height: 2, tile: 9 }), "マップタイル：map_b 層0 (1, 2) から 3×2 → 9", [{ kind: "map", id: "map_b" }]],
   [cmd("SetMoveRoute", { target: "ev_x", route: { repeat: false, skippable: false, steps: [] } }), "移動ルート：イベント ev_x（0歩）", []],
   [cmd("MoveStep", { who: "player", step: { kind: "turn", dir: "up" } }), "移動ルート：turn", []],
+  [cmd("WaitPlayerStep", { turns: 2 }), "プレイヤーの 2 手を待つ", []],
   [cmd("ChangeBgm", { audio: { asset: "0123456789abcdef", volume: 1, pitch: 1, loop: true } }), "BGM：0123456789abcdef", [{ kind: "asset", id: "0123456789abcdef" }]],
   [cmd("PlaySe", { audio: { asset: "0123456789abcdef", volume: 1, pitch: 1, loop: false } }), "SE：0123456789abcdef", [{ kind: "asset", id: "0123456789abcdef" }]],
   [cmd("FadeoutBgm"), "BGM をフェードアウト：1000ms", []],
@@ -131,6 +132,7 @@ describe("builtin command metadata", () => {
       SetEventLocation: { x: 0, y: 0 },
       ChangeMapTile: { x: 0, y: 0, tile: 0 },
       MoveStep: { who: "player", step: { kind: "wait", frames: 1 } },
+      WaitPlayerStep: {},
       ChangeBgm: { audio: { asset: "0123456789abcdef", volume: 1, pitch: 1, loop: true } },
       PlaySe: { audio: { asset: "0123456789abcdef", volume: 1, pitch: 1, loop: false } },
       FadeoutBgm: {}, ShakeScreen: {}, FlashScreen: {}, TintScreen: { color: { r: 0, g: 0, b: 0, a: 0 } }, Fadeout: {}, Fadein: {},
@@ -158,7 +160,7 @@ describe("ブロックの構造（meta.block / meta.internal）", () => {
     expect(roles("open")).toEqual(["BattleProcessing", "ConditionalBranch", "Loop", "ShowChoices"]);
     expect(roles("divider")).toEqual(["ChoiceBranch", "Else"]);
     expect(roles("close")).toEqual(["EndBranch", "EndLoop"]);
-    expect(ctx.commands.list().filter((h) => h.meta.internal === true).map((h) => h.code)).toEqual(["MoveStep"]);
+    expect(ctx.commands.list().filter((h) => h.meta.internal === true).map((h) => h.code)).toEqual(["MoveStep", "WaitPlayerStep"]);
   });
 
   it("開始の close は終端のコマンド、dividers が返す行は区切りのコマンドで、params は検証を通る", () => {

@@ -63,6 +63,7 @@ export interface MapState {
   readonly camera: { x: number; y: number };
   readonly transfer?: { to: MapId; x: number; y: number; dir: Direction; fade: "black" | "white" | "none" };
   readonly encounterSteps: number;   // 戦闘から（逃走も含む）あるいた歩数。ランダムエンカウントの判定に使う
+  readonly turns?: number;           // このマップに入ってからの、プレイヤーの手数（歩く・岩を押す・足踏み）。`pace: "playerStep"` のルートが見る。数え始めるまで無い（0 と同じ）
 }
 
 export interface Character {
@@ -233,6 +234,12 @@ export const snapshotMigrations: readonly { from: number; to: number; migrate(s:
 - **イベントの位置を読む**：式の関数 `evx(id)` / `evy(id)`（05）。押した岩が板の上にあるかを、並列イベントが毎フレーム調べられる。
 - **`SetEventLocation`**（03）：イベントを瞬間移動する（岩をもとの位置へ戻す仕掛けなど）。マップに入り直すと、イベントはマップの定義の位置に戻る（`enterMap`）。
 - **マップのタイルの書き換え**（`map/tiles.ts`・`ChangeMapTile`。03）：`GameState.mapTiles[mapId]` に、書き換えたマスだけを `"<レイヤ>:<x>,<y>"`（`tileKey`）→ タイル番号（0 = 空）で持つ。`MapData`（`ProjectView.map`）は不変のまま、通行判定・氷・移動ルート・描画は、書き換えを重ねたマップ（`currentMap(project, state, mapId?)`。同じ `MapData` と同じ書き換えには同じ結果を返すようキャッシュする）を見る。書き換えはマップを出入りしても残り、セーブにも含まれる（`snapshot` の検証スキーマに `mapTiles` を追加。無いセーブもそのまま読める）。書き換えるまで `mapTiles` は無いので、既存のリプレイのハッシュは変わらない。範囲外のレイヤ・座標の書き換えは無視する。デモ「水門の遺跡」（`fixtures/projects/v1/water`）で使っている。
+
+## 実装メモ（ターン制の移動ルート）
+- **`MapState.turns?: number`**（`state.ts`）：このマップに入ってからの、プレイヤーの手数。`enterMap` が新しい `MapState` を作るので、マップに入り直すたびに 0 から数え直す（場所移動・同じマップへの場所移動でも）。セーブ（`snapshot`）の検証スキーマに省略可の項目として足した（`SNAPSHOT_VERSION` は上げない。数え始めるまで無いので、ターン制を使わないゲームの状態・ハッシュは変わらない）。
+- **数えるもの**（`game/inputPhase.ts`・`map/paced.ts` の `withTurn`）：方向キーで**歩き出した**（通れずに向きだけ変わったときは数えない）、岩を押した、決定ボタンで**足踏みした**（目の前・足元の `action` イベントが無く、有効なページが `moveRoute.pace: "playerStep"` のイベント、または `SetMoveRoute` のターン制のルートで動かされているイベントがマップに居るときだけ。居なければ何も起こらず、数えない。歩いたときも岩を押したときも同じで、居なければ状態に `turns` を足さない）。氷の上で滑っている間は数えない（滑りは歩きの続き）。数えるのは歩き出した入力フェーズなので、同じフレームの `handleTick` で、ターン制のイベントがもう動き出す。
+- **ターン制のイベントが歩いている間は、プレイヤーは次の手を打てない**（`pacedEventsMoving`。入力フェーズは何もしない）。プレイヤーとイベントの速さが同じなら、みんなが同じフレームに着く。ターン制のイベントは、速さを変えないこと（遅いと、その分プレイヤーも待つ）。
+- **使い道**：デモ「時の番人の回廊」（`fixtures/projects/v1/clock`）。倉庫番風の謎解き、忍び込みの見張り、チェスのようなパズルにも使える。
 
 ## 実装メモ（プラグインの保存領域 `pluginState`）
 - **`GameState.pluginState?: Readonly<Record<string, JsonValue>>`**（`state.ts`）：プラグインが自分の状態を置く領域。キーはプラグインの名前、値は JSON にできる値（`JsonValue`。`undefined` は含めない）。書き込むまで無いので、プラグインを使わないゲームの状態・リプレイのハッシュは変わらない。読み書きは `pluginStateOf(state, name)` / `withPluginState(state, name, value)`（どちらも `@rpg/plugin-api` から再エクスポート。後者は自分以外のプラグインのキーに触れない）。`null` を書けば「持っていない」ことを表せる（キーは残る）。

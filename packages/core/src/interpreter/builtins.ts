@@ -7,7 +7,7 @@ import { conditionalBranch } from "./commands/conditionalBranch.js";
 import { controlSwitches } from "./commands/controlSwitches.js";
 import { controlVariables } from "./commands/controlVariables.js";
 import { breakLoop, callCommonEvent, comment, endLoop, exitEventProcessing, jumpToLabel, label, loop } from "./commands/flow.js";
-import { moveStep, setMoveRoute } from "./commands/moveRoute.js";
+import { moveStep, setMoveRoute, waitPlayerStep } from "./commands/moveRoute.js";
 import { changeMapTile } from "./commands/changeMapTile.js";
 import { setEventLocation } from "./commands/setEventLocation.js";
 import { changeExp, changeGold, changeHp, changeItems, changeLevel, changeMp, changeParty, controlSelfSwitch, controlTimer } from "./commands/progress.js";
@@ -31,7 +31,7 @@ export const BUILTIN_COMMANDS = [
   // フロー制御
   conditionalBranch, elseCommand, endBranch, choiceBranch, loop, breakLoop, endLoop, exitEventProcessing, callCommonEvent, label, jumpToLabel, wait, comment,
   // 移動
-  setMoveRoute, moveStep, setEventLocation, changeMapTile,
+  setMoveRoute, moveStep, waitPlayerStep, setEventLocation, changeMapTile,
   // オーディオ・画面
   changeBgm, playSe, fadeoutBgm, shakeScreen, flashScreen, tintScreen, fadeout, fadein,
   // システム

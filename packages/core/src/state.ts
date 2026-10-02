@@ -108,6 +108,11 @@ export interface MapState {
     readonly requested: boolean;
   };
   readonly encounterSteps: number;
+  /**
+   * このマップに入ってからの、プレイヤーの手数（歩いた・岩を押した・決定ボタンで足踏みした回数。滑っている間は数えない）。
+   * `pace: "playerStep"` の移動ルートがこれを見て進む。数え始めるまで無い（0 と同じ）。
+   */
+  readonly turns?: number;
 }
 
 export interface ActorState {

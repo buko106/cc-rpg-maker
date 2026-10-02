@@ -8,7 +8,7 @@ const EXTENSIONS: Record<string, string> = { "image/png": "png", "audio/wav": "w
 
 // サイトの「デモを選ぶ」に並ぶデモ（tools/build-demos.mjs の DEMOS）
 // `dungeon`・`fishing` は v2（プラグインの設定 `system.plugins` を持つ）
-const DEMOS: readonly (readonly [string, number])[] = [["demo", 1], ["maze", 1], ["tower", 1], ["mansion", 1], ["haunted", 1], ["stealth", 1], ["hokora", 1], ["ice", 1], ["water", 1], ["dungeon", 2], ["fishing", 2]];
+const DEMOS: readonly (readonly [string, number])[] = [["demo", 1], ["maze", 1], ["tower", 1], ["mansion", 1], ["haunted", 1], ["stealth", 1], ["hokora", 1], ["ice", 1], ["water", 1], ["clock", 1], ["dungeon", 2], ["fishing", 2]];
 describe.each(DEMOS)("fixtures/projects/v%2$d/%1$s のアセット", (name, version) => {
   const ASSETS = join(FIXTURES_ROOT, "projects", `v${version}`, name, "assets");
   const { project } = loadFixtureProject(name, version);

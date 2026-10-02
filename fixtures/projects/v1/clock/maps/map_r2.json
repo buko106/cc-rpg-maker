@@ -1,0 +1,321 @@
+{
+  "id": "map_r2",
+  "width": 15,
+  "height": 11,
+  "tileset": "ts_clock",
+  "layers": [
+    {
+      "name": "ground",
+      "tiles": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 5, 4, 6, 4, 6, 4, 6, 5, 6, 9, 6, 4, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 8, 1, 1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+    },
+    {
+      "name": "objects",
+      "tiles": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+  ],
+  "events": {
+    "ev_exit": {
+      "id": "ev_exit",
+      "name": "出口の扉",
+      "x": 11,
+      "y": 1,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_r3",
+                "x": 7,
+                "y": 8,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_stairs": {
+      "id": "ev_stairs",
+      "name": "入口の階段",
+      "x": 7,
+      "y": 9,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "下へ おりる 階段だ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "この 部屋を はじめから やりなおす",
+                  "やめる"
+                ],
+                "cancel": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_r2",
+                "x": 7,
+                "y": 8,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_guard_b": {
+      "id": "ev_guard_b",
+      "name": "ふりこ兵",
+      "x": 12,
+      "y": 2,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "eventSight",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "5d83bd9b74805e53",
+            "index": 1,
+            "direction": "left"
+          },
+          "sightRange": 4,
+          "moveRoute": {
+            "repeat": true,
+            "skippable": true,
+            "pace": "playerStep",
+            "steps": [
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              }
+            ]
+          },
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 220,
+                  "g": 40,
+                  "b": 60,
+                  "a": 0.55
+                },
+                "duration": 14
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 5,
+                "duration": 18,
+                "wait": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_caught"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]ふりこ兵\\C[0]に 見つかった！\n部屋の 入口へ 戻される……",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_r2",
+                "x": 7,
+                "y": 8,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_guard_a": {
+      "id": "ev_guard_a",
+      "name": "ふりこ兵",
+      "x": 7,
+      "y": 5,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "eventSight",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "5d83bd9b74805e53",
+            "index": 1,
+            "direction": "right"
+          },
+          "sightRange": 3,
+          "moveRoute": {
+            "repeat": true,
+            "skippable": true,
+            "pace": "playerStep",
+            "steps": [
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              }
+            ]
+          },
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 220,
+                  "g": 40,
+                  "b": 60,
+                  "a": 0.55
+                },
+                "duration": 14
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 5,
+                "duration": 18,
+                "wait": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_caught"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]ふりこ兵\\C[0]に 見つかった！\n部屋の 入口へ 戻される……",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_r2",
+                "x": 7,
+                "y": 8,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

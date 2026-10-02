@@ -1,0 +1,511 @@
+{
+  "id": "map_r4",
+  "width": 15,
+  "height": 11,
+  "tileset": "ts_clock",
+  "layers": [
+    {
+      "name": "ground",
+      "tiles": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 5, 9, 6, 4, 6, 4, 6, 5, 6, 4, 6, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 3, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1, 4, 4, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 1, 4, 4, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 8, 1, 1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+    },
+    {
+      "name": "objects",
+      "tiles": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+  ],
+  "events": {
+    "ev_exit": {
+      "id": "ev_exit",
+      "name": "時の歯車",
+      "x": 3,
+      "y": 1,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": true,
+          "priority": "below",
+          "graphic": {
+            "asset": "c9577b58a36be869",
+            "index": 1,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 255,
+                  "g": 230,
+                  "b": 150,
+                  "a": 0.7
+                },
+                "duration": 40
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "台座の 上で 金色の 歯車が かすかに 回っている。\n\\C[6]時の歯車\\C[0]を 手に とった！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "カチ、コチ、コチ……。塔の 底から 大時計の 音が ひびきはじめた。\n町の 時が 動き出す。\\C[6]おめでとう！\\C[0]",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "つかまった 回数：\\V[var_caught]回",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ReturnToTitle",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_stairs": {
+      "id": "ev_stairs",
+      "name": "入口の階段",
+      "x": 7,
+      "y": 9,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "下へ おりる 階段だ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "この 部屋を はじめから やりなおす",
+                  "やめる"
+                ],
+                "cancel": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_r4",
+                "x": 7,
+                "y": 8,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_rock_1": {
+      "id": "ev_rock_1",
+      "name": "石の箱",
+      "x": 8,
+      "y": 2,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "c9577b58a36be869",
+            "index": 0,
+            "direction": "down"
+          },
+          "pushable": true,
+          "commands": []
+        }
+      ]
+    },
+    "ev_rock_2": {
+      "id": "ev_rock_2",
+      "name": "石の箱",
+      "x": 4,
+      "y": 7,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "c9577b58a36be869",
+            "index": 0,
+            "direction": "down"
+          },
+          "pushable": true,
+          "commands": []
+        }
+      ]
+    },
+    "ev_guard_b": {
+      "id": "ev_guard_b",
+      "name": "石の見張り",
+      "x": 1,
+      "y": 2,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "eventSight",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "5d83bd9b74805e53",
+            "index": 2,
+            "direction": "right"
+          },
+          "sightRange": 12,
+          "moveRoute": {
+            "repeat": true,
+            "skippable": true,
+            "pace": "playerStep",
+            "steps": [
+              {
+                "kind": "wait",
+                "frames": 1
+              },
+              {
+                "kind": "turn",
+                "dir": "right"
+              }
+            ]
+          },
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 220,
+                  "g": 40,
+                  "b": 60,
+                  "a": 0.55
+                },
+                "duration": 14
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 5,
+                "duration": 18,
+                "wait": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_caught"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]石の見張り\\C[0]に 見つかった！\n部屋の 入口へ 戻される……",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_r4",
+                "x": 7,
+                "y": 8,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_guard_a": {
+      "id": "ev_guard_a",
+      "name": "石の見張り",
+      "x": 13,
+      "y": 4,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "eventSight",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "5d83bd9b74805e53",
+            "index": 2,
+            "direction": "left"
+          },
+          "sightRange": 12,
+          "moveRoute": {
+            "repeat": true,
+            "skippable": true,
+            "pace": "playerStep",
+            "steps": [
+              {
+                "kind": "wait",
+                "frames": 1
+              },
+              {
+                "kind": "turn",
+                "dir": "left"
+              }
+            ]
+          },
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 220,
+                  "g": 40,
+                  "b": 60,
+                  "a": 0.55
+                },
+                "duration": 14
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 5,
+                "duration": 18,
+                "wait": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_caught"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]石の見張り\\C[0]に 見つかった！\n部屋の 入口へ 戻される……",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_r4",
+                "x": 7,
+                "y": 8,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_guard_c": {
+      "id": "ev_guard_c",
+      "name": "ふりこ兵",
+      "x": 12,
+      "y": 7,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "eventSight",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "5d83bd9b74805e53",
+            "index": 1,
+            "direction": "left"
+          },
+          "sightRange": 4,
+          "moveRoute": {
+            "repeat": true,
+            "skippable": true,
+            "pace": "playerStep",
+            "steps": [
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "move",
+                "dir": "left"
+              },
+              {
+                "kind": "wait",
+                "frames": 1
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "move",
+                "dir": "right"
+              },
+              {
+                "kind": "wait",
+                "frames": 1
+              }
+            ]
+          },
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 220,
+                  "g": 40,
+                  "b": 60,
+                  "a": 0.55
+                },
+                "duration": 14
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 5,
+                "duration": 18,
+                "wait": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_caught"
+                ],
+                "op": "add",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]ふりこ兵\\C[0]に 見つかった！\n部屋の 入口へ 戻される……",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_r4",
+                "x": 7,
+                "y": 8,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

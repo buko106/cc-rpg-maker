@@ -44,7 +44,7 @@ export interface CommandHandler<P = unknown> {
     branchLabel?(p: P, index: number): string;   // 分岐を持つコマンドの、index 番目の ChoiceBranch の行の見出し（「[はい] のとき」など）
     refs(p: P): RefTarget[];                 // 参照整合性チェック用（01 の collectRefs に渡す）
     block?: CommandBlock<P>;                 // ブロック（分岐・ループ）の構造。省略は単独の 1 行（下）
-    internal?: boolean;                      // 内部用（他のコマンドが展開して作る）。エディタの追加の一覧に出さない（MoveStep）
+    internal?: boolean;                      // 内部用（他のコマンドが展開して作る）。エディタの追加の一覧に出さない（MoveStep / WaitPlayerStep）
   };
   /** 命令を実行する。純関数。 */
   run(p: P, ctx: CommandCtx): CommandResult;
@@ -109,7 +109,7 @@ export function runInterpreters(state: GameState, input: InputFrame, ctx: Ctx): 
 | `Label` / `JumpToLabel` | `{ name }` | |
 | `Wait` | `{ frames }` | |
 | `TransferPlayer` | `{ mapId, x, y, dir, fade }` | `fade` が `black` / `white` なら `screenFade`（その色）で 15 フレーム暗転 → 場所移動 → 15 フレーム明転（`TRANSFER_FADE_TICKS`。段階は `interp.locals` に持つ）。`none` はすぐ移動。`wait: transfer`。MapData 未ロードなら `requestMapData`（暗転したまま待つ） |
-| `SetMoveRoute` | `{ target, route, wait }` | |
+| `SetMoveRoute` | `{ target, route, wait }` | `route.pace: "playerStep"` ならターン制（下の実装メモ） |
 | `SetEventLocation` | `{ target, x, y, dir }` | イベントを (x, y) へ瞬間移動する |
 | `ChangeMapTile` | `{ map, layer, x, y, width, height, tile }` | マップのタイルを書き換える（水門・崩れる橋・開く壁など）。書き換えは残る |
 | `ChangeGold` / `ChangeItems` / `ChangeParty` / `ChangeHp` / `ChangeLevel` … | | |
@@ -162,7 +162,7 @@ export function runInterpreters(state: GameState, input: InputFrame, ctx: Ctx): 
 - `params` の zod にエディタ向けのメタデータを付けた：`ShowText.text` は `{ multiline: true }`、`ConditionalBranch.condition`（式の文字列）は `{ formula: true }`。ID を取る params は 01 の `ref` メタデータを持つ ID スキーマを使う。プラグインのコマンドも同じ方法で自動フォームに載る（13）。
 
 ## 実装メモ（M6 で確定した点）
-- **全コマンドが登録済み**（`BUILTIN_COMMANDS`。表のコマンドに加え、内部用の `ChoiceBranch` / `MoveStep`）。`fixtures/projects/v1/commands-smoke/`（`commands-smoke.json` の代わりに、エディタのプロジェクトと同じ形のフォルダ）の `ev_smoke` が、`Comment` から `Script` まで一通りを使って警告なしに完走する。ほかのイベント（`ev_transfer` / `ev_battle` / `ev_save` / `ev_load` / `ev_gameover` / `ev_title`）は、シーンを動かすコマンド用。「レジストリの全コマンドがこのマップのどこかで使われている」ことと「全コマンドの params が zod を通る」ことをテストで固定している。
+- **全コマンドが登録済み**（`BUILTIN_COMMANDS`。表のコマンドに加え、内部用の `ChoiceBranch` / `MoveStep` / `WaitPlayerStep`）。`fixtures/projects/v1/commands-smoke/`（`commands-smoke.json` の代わりに、エディタのプロジェクトと同じ形のフォルダ）の `ev_smoke` が、`Comment` から `Script` まで一通りを使って警告なしに完走する。ほかのイベント（`ev_transfer` / `ev_battle` / `ev_save` / `ev_load` / `ev_gameover` / `ev_title`）は、シーンを動かすコマンド用。「レジストリの全コマンドがこのマップのどこかで使われている」ことと「全コマンドの params が zod を通る」ことをテストで固定している。
 - **`CommandResult` の追加**：`setLocals`（`interp.locals` への書き込み。値が `undefined` のキーは消す）。**`CommandCtx` の追加**：`script(expr)`（`script` モードで評価して変更操作を返す。`Script` コマンドが `setVar` / `setSwitch` / `gainItem` を状態に反映する）。
 - **フロー**：`Loop` / `EndLoop`（`EndLoop` は対応する `Loop` へ戻る。入れ子は数えて対応を取る）、`BreakLoop`（内側のループの `EndLoop` の次へ。ループの外なら警告）、`ExitEventProcessing`（呼び出し元があっても全部終わる）、`CallCommonEvent`（深さ 16 まで。超えたら警告してスキップ）、`Label` / `JumpToLabel`（同じコマンド列の中で最初の同名ラベル。無ければ警告）、`Comment`。無限ループは 1 フレーム 1000 命令の上限で止まり、毎フレーム警告する。ネストした `Loop` × `ConditionalBranch` が必ず終わることは fast-check で確かめている。
 - **ゲーム進行**：`ControlSelfSwitch`（マップイベントの中だけ）、`ControlTimer`、`ChangeGold` / `ChangeItems`（量は定数か変数。0 未満にならない）、`ChangeParty`、`ChangeHp`（既定は 1 で止まる。`allowDeath` で 0 まで。戦闘不能には効かない）/ `ChangeMp` / `ChangeExp`（増やすだけ）/ `ChangeLevel`（1〜99。経験値はそのレベルの下限に合わせ、HP/MP は新しい最大値に収める）。対象は `"party"`（既定）かアクター ID。
@@ -173,6 +173,14 @@ export function runInterpreters(state: GameState, input: InputFrame, ctx: Ctx): 
 - **視界**：有効なページのトリガが `eventSight` のイベントは、`eventTouch` と同じに触れてきても始まり、加えて**視界**にプレイヤーが入ると、そのページを通常のイベントとして起動する。毎フレーム、移動の補間のあとに、マップ定義の順で見て最初に見えたものだけを起動する（プレイヤーが歩いている途中・通常のイベントの実行中・メッセージ表示中・場所移動の予約中は見ない）。見えるのは、イベントが向いている方向（`direction`）のまっすぐ `sightRange`（既定 4）タイル以内。1 タイルずつ「そこへ進める」間だけ視界が通り、通れないタイル・通れない（有効なページを持つ `same` で `through` でない）イベントがあるとそこでさえぎられる（`through` のイベント自身でも視界は壁を抜けない）。同じタイルに居れば見える。うしろ・よこは見えない。見つけたあとは、ページの `commands` が見張りの反応（スイッチを入れる・メッセージ・移動）を書く。見えている間は、そのイベントが終わるたびにまた始まる（続けて見られているのだから）ので、ふつうは起動したら、スイッチでページを切り替えて視界のページから抜ける。デモ「忍び込み」（`fixtures/projects/v1/stealth`）の見張りがこれで見つけにくる。
 - **経路探索の移動（`chase`）**：`MoveStep` の `dir: "chase"` は、いまの位置からプレイヤーのタイルへ、通れる道（タイルの通行・通れないイベント）をたどる最短経路（幅優先。同じ長さなら下・左・右・上の順に探した方）の最初の 1 歩へ進む。探索するのは `CHASE_SEARCH_LIMIT`（1500）タイルまで。たどり着けない・上限を超えたときは `toward`（大きい軸の側へ近づく）と同じ。すでにプレイヤーの居るタイルに居るときは向きを変えない。`toward` が壁に突き当たって動けなくなるのに対して、`chase` は壁や木箱を回りこんで追う。`eventTouch` / `eventSight` のイベントは、プレイヤーの隣に着いたら（入らずに）触れて起動する。- **音・画面**：`ChangeBgm` / `PlaySe` / `FadeoutBgm` は Effect のみ。`ShakeScreen` / `FlashScreen` / `TintScreen` / `Fadeout` / `Fadein` は Effect を発行し、`wait` が真で時間があればその分待つ（色は r/g/b が 0〜255、a が 0〜1。`Fadeout` / `Fadein` の `wait` の既定は真）。
 - **システム**：`SaveGame` / `LoadGame` はメニューのセーブ/ロード画面を開く（`scene` を `menu` にするだけ。閉じるとマップに戻り、続きから実行される）、`GameOver`（ゲームオーバー画面へ。インタプリタは全部消える）、`ReturnToTitle`（状態を作り直してタイトルへ）、`Script { expr }`（副作用は `setVar` / `setSwitch` / `gainItem` のみ）。
+
+## 実装メモ（ターン制の移動ルート）
+- **`moveRoute.pace: "playerStep"`**（`SetMoveRoute` のルートも、ページの `moveRoute`（自律移動）も同じ）：ルートが時間ではなく、プレイヤーの手に合わせて進む。ルートは `routeSteps` が次のように展開する：`move` の前に `WaitPlayerStep { turns: 1 }`（1 手待つ）、`wait` は `WaitPlayerStep { turns: frames }`（待つ手数。0 なら何もしない）、`turn` / `speed` はそのまま（時間がかからない）。展開した `MoveStep` は `paced: true` を持ち、通れなければ待たずにその手をあきらめる（警告も出さない。待つと、プレイヤーの手とずれていくため）。`pace` を省略した（`frames` の）ルートの展開は変わらない。
+- **`SetMoveRoute` でターン制のルートを動かすとき**：`wait: true` でも、このインタプリタの中では実行せず、常に並列のインタプリタ（`moveRoute:<who>`）で動かす（プレイヤーは通常のイベントの実行中は動けないので、手を待つと止まってしまうため）。入力フェーズは、`pacedRouteTarget`（`WaitPlayerStep` を含む `moveRoute:` のインタプリタの対象）のイベントも、ページがターン制のイベントと同じに扱う（手数を数える・歩いている間は次の手を打てない）。
+- **`WaitPlayerStep { turns }`**（内部用。`meta.internal`）：`MapState.turns`（02）が `turns` だけ増えるのを待つ。数えはじめは、このコマンドが最初に動いた時点の手数（`locals.consumed`）。そのあとは、使った手を 1 手ずつ消費していくので、プレイヤーが先に何手か進んでも取りこぼさない（番人が追いつく）。待っている間は 1 フレームごとにやり直す（`MoveStep` の `retry` と同じ）。
+- **手の中の順序**：プレイヤーの 1 手は入力フェーズで数える（02）ので、同じフレームの `runInterpreters` で、ターン制のイベントが（インタプリタの順に）プレイヤーより後に、1 手ぶん動き出す。イベントがプレイヤーのタイルへ進もうとしたら、`eventTouch` / `eventSight` なら触れてそのページが始まる（プレイヤーのタイルへは入らない）。みんなが歩き終えて（プレイヤーが止まって）から、視界（`eventSight`）の判定が行われる。
+- **`turn` は、待ったすぐあとに置く**：`turn` は時間がかからず、前の歩きが終わった次のフレームに実行される。歩いたすぐあとに置くと、視界の判定が向きを変える前に行われて、1 フレームだけ古い向きで見えることがある。向きを変えて待つ番人は `wait 1` → `turn` の組にして、手の頭で向きを変える。
+- **使い道**：デモ「時の番人の回廊」（`fixtures/projects/v1/clock`）。番人の動きはすべてこのルート。規則のモデルは `apps/player/src/clock-model.testkit.ts`。
 
 ## 実装メモ（イベントの瞬間移動）
 - **`SetEventLocation { target, x, y, dir }`**：`target` は `"this"`（既定。このコマンドを実行しているマップイベント）かイベント ID。いまのマップの (x, y) へ、歩かずに瞬間移動する（`realX` / `realY` も合わせ、`moving` は偽）。`dir` は向き、または `"retain"`（既定。変えない）。マップに居ないイベント・マップの外の座標は、警告してスキップする（あとのコマンドは続く）。押せる岩（`EventPage.pushable`。02）をもとの位置に戻す魔法陣などに使う。状態に足したものは無い。デモ「氷の神殿」（`fixtures/projects/v1/ice`）で使っている。
@@ -192,7 +200,7 @@ export function runInterpreters(state: GameState, input: InputFrame, ctx: Ctx): 
 ## 実装メモ（ブロックの構造）
 分岐・ループの「開始・区切り・終端」が同じ字下げの行として並ぶ、という構造の知識は、エディタ側にハードコードせず、各コマンドの `meta` に持たせた。**実行には使わない**（インタプリタは従来どおり `Else` / `ChoiceBranch` / `EndBranch` / `EndLoop` を字下げで追う）。
 - **`meta.block`**（`CommandBlock<P>`）：`{ role: "open"; close; bodyFirst; dividers(p) }`（開始）、`{ role: "divider" }`（区切り）、`{ role: "close" }`（終端）。`close` は終端のコマンドの code。`bodyFirst` は、開始の直後が本体か（条件分岐・ループ：開始の行に続けて足したコマンドはブロックの中に入る）、区切りか（選択肢・戦闘の処理）。`dividers(p)` は、その設定のときに開始と終端の間に並べる区切りの行（条件分岐 = `Else` 1 つ、選択肢 = 選択肢の数だけの `ChoiceBranch { index }`、戦闘の処理 = `ChoiceBranch` 0/1/2、ループ = 無し）。設定が変わったら（選択肢の数など）エディタが区切りの数を合わせる。
-- **`meta.internal`**：内部用（他のコマンドが展開して作る）。`MoveStep` だけ。エディタの追加の一覧に出さず、単独では扱えない。
+- **`meta.internal`**：内部用（他のコマンドが展開して作る）。`MoveStep` と `WaitPlayerStep` だけ。エディタの追加の一覧に出さず、単独では扱えない。
 - **組み込みの対応**：開始 = `ConditionalBranch`（`bodyFirst`・`Else`）/ `ShowChoices` / `BattleProcessing` / `Loop`（`bodyFirst`）、区切り = `Else` / `ChoiceBranch`、終端 = `EndBranch` / `EndLoop`。プラグインのコマンドも同じ `meta.block` を書けばエディタで同じように扱える（14）。
 - **テスト**：`meta.test.ts`（組み込みの役割、`close` と `dividers` が登録済みの終端・区切りを指すこと、区切りの並び）。
 - **`SaveGame` / `LoadGame` はセーブポータル**：メニューと同じセーブ/ロード画面を、イベントから直接開く（`scene` を `{ kind: "menu", screen, cursor: 0, portal: true }` にする）。`portal` の画面は、キャンセルするとメインメニューを経由せずマップに戻り、イベントが続きから動く（メニューから開いた画面は従来どおりメインメニューに戻る）。`system.menuSave: false`（02）のゲームでも、これで開けばセーブできる。保存は画面での選択で行うので、コマンドに引数は無い。

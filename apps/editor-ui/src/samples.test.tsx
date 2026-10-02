@@ -22,6 +22,7 @@ const SAMPLES = [
   { id: "hokora", fixture: "hokora", title: "ほこらの冒険" },
   { id: "ice", fixture: "ice", title: "氷の神殿" },
   { id: "water", fixture: "water", title: "水門の遺跡" },
+  { id: "clock", fixture: "clock", title: "時の番人の回廊" },
   { id: "dungeon", fixture: "dungeon", title: "風鳴りの洞窟（不思議のダンジョン）" },
   { id: "fishing", fixture: "fishing", title: "港町の釣り大会" },
 ] as const;
