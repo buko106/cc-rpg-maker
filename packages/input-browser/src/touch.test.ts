@@ -7,7 +7,6 @@ import type { TouchControl } from "./index.js";
 const R = 60;
 const dpad: TouchControl = { kind: "dpad", radius: R };
 const btn = (button: Button): TouchControl => ({ kind: "button", button });
-const toggle = (button: Button): TouchControl => ({ kind: "toggle", button });
 const set = (...b: Button[]): Set<Button> => new Set(b);
 
 inputSourceContract("browser-touch", () => {
@@ -105,54 +104,6 @@ describe("createTouchInput", () => {
     t.releaseAll();
     expect(t.poll().pressed.size).toBe(0);
     expect(t.held().size).toBe(0);
-  });
-
-  it("トグル：タップするたびにオン/オフが入れ替わり、指を離しても続く", () => {
-    const t = createTouchInput();
-    t.pointerDown(1, toggle("shift"), { x: 0, y: 0 });
-    expect(t.held()).toEqual(set("shift"));
-    const on = t.poll();
-    expect(on.pressed).toEqual(set("shift"));
-    expect(on.triggered).toEqual(set("shift"));
-    t.pointerUp(1); // 指を離しても押下のまま
-    const kept = t.poll();
-    expect(kept.pressed).toEqual(set("shift"));
-    expect(kept.triggered.size).toBe(0);
-    expect(t.held()).toEqual(set("shift"));
-
-    t.pointerDown(2, toggle("shift"), { x: 0, y: 0 }); // もう一度タップするとオフ
-    t.pointerUp(2);
-    expect(t.held().size).toBe(0);
-    expect(t.poll().pressed.size).toBe(0);
-  });
-
-  it("トグルは十字キー・ほかのボタンと同時に使える。同じボタンの通常ボタンとも合わさる", () => {
-    const t = createTouchInput();
-    t.pointerDown(1, toggle("shift"), { x: 0, y: 0 });
-    t.pointerUp(1);
-    t.pointerDown(2, dpad, { x: 40, y: 0 });
-    t.pointerDown(3, btn("ok"), { x: 0, y: 0 });
-    expect(t.poll().pressed).toEqual(set("shift", "right", "ok"));
-    t.pointerUp(2);
-    t.pointerUp(3);
-    expect(t.poll().pressed).toEqual(set("shift"));
-    t.pointerDown(4, btn("shift"), { x: 0, y: 0 }); // オンのまま、通常ボタンを離しても残る
-    t.pointerUp(4);
-    expect(t.held()).toEqual(set("shift"));
-  });
-
-  it("releaseAll・dispose でトグルもオフに戻る", () => {
-    const t = createTouchInput();
-    t.pointerDown(1, toggle("shift"), { x: 0, y: 0 });
-    t.pointerUp(1);
-    t.poll();
-    t.releaseAll();
-    expect(t.held().size).toBe(0);
-    expect(t.poll().pressed.size).toBe(0);
-    t.pointerDown(2, toggle("shift"), { x: 0, y: 0 });
-    t.dispose();
-    expect(t.held().size).toBe(0);
-    expect(t.poll()).toEqual({ pressed: new Set(), triggered: new Set() });
   });
 
   it("dispose 後は何も受け付けず、空のフレームを返す", () => {

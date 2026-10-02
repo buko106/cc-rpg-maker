@@ -3,7 +3,7 @@ import type { Page } from "@playwright/test";
 import { startNewGame } from "./helpers.js";
 
 // 走る機能（system.dash）：デモ「ほこらの冒険」（fixtures/projects/v1/hokora）は有効にしてある。
-// キーボードは Shift を押しながら、スマホは操作パッドの走るボタン（タップでオン・オフ）で、歩くより速く進む。
+// キーボードは Shift を押しながら、スマホは操作パッドの走るボタン（押している間だけ）で、歩くより速く進む。
 // 走れないゲームの操作パッドが従来のままであることは、e2e/touchpad.spec.ts で確かめる。
 // 速さは時計の時間ではなく、ゲームのフレーム数（`tick`）で比べる。
 
@@ -68,26 +68,42 @@ test.describe("キーボード", () => {
 test.describe("タッチ端末", () => {
   test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 780 } });
 
-  const centerOf = async (page: Page, control: string): Promise<{ x: number; y: number }> => {
+  const boxOf = async (page: Page, control: string): Promise<{ x: number; y: number; width: number; height: number }> => {
     const box = await page.locator(`[data-touch-pad] [data-control="${control}"]`).boundingBox();
     if (box === null) throw new Error(`${control} が見えない`);
+    return box;
+  };
+  const centerOf = async (page: Page, control: string): Promise<{ x: number; y: number }> => {
+    const box = await boxOf(page, control);
     return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
   };
 
-  test("操作パッドに走るボタンが出て、タップでオン・オフでき、オンなら十字キーで速く歩く", async ({ page }) => {
+  test("操作パッドに A・B と同じ大きさの走るボタンが出て、押している間だけ十字キーで速く歩く", async ({ page }) => {
     await boot(page);
     const dash = page.locator('[data-touch-pad] [data-control="shift"]');
     // 走れるゲームの操作パッド：従来の 4 つ（十字キー・メニュー・B・A）に走るボタンが 1 つ足される。矢印・メニューと同じく SVG
     await expect(page.locator("[data-touch-pad] [data-control]")).toHaveCount(5);
     await expect(dash).toBeVisible();
     await expect(dash.locator("svg")).toHaveCount(1);
-    await expect(dash).toHaveAttribute("aria-pressed", "false");
+    await expect(dash).toHaveAttribute("data-pressed", "false");
+    // A・B と同じ大きさ
+    const [d, a, b] = await Promise.all([boxOf(page, "shift"), boxOf(page, "ok"), boxOf(page, "cancel")]);
+    expect([d.width, d.height]).toEqual([a.width, a.height]);
+    expect([d.width, d.height]).toEqual([b.width, b.height]);
+    expect(d.y + d.height).toBeLessThanOrEqual(a.y); // 走るボタンは A・B の上の段
 
     const cdp = await page.context().newCDPSession(page);
-    const dpad = await centerOf(page, "dpad");
-    const measure = async (dy: number): Promise<number> => {
+    const stick = await centerOf(page, "dpad");
+    const dashAt = await centerOf(page, "shift");
+    // 十字キー（指 1）を押し続け、`withDash` なら走るボタン（指 2）も押して、4 マス進むまでのフレーム数
+    const measure = async (dy: number, withDash: boolean): Promise<number> => {
       const from = await state(page);
-      await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: dpad.x, y: dpad.y + dy }] });
+      const finger1 = { x: stick.x, y: stick.y + dy, id: 1 };
+      await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [finger1] });
+      if (withDash) {
+        await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [finger1, { x: dashAt.x, y: dashAt.y, id: 2 }] });
+        await expect(dash).toHaveAttribute("data-pressed", "true");
+      }
       await page.waitForFunction(FAR(from.map.player));
       const to = await state(page);
       await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
@@ -95,18 +111,11 @@ test.describe("タッチ端末", () => {
       return to.tick - from.tick;
     };
 
-    const walk = await measure(-50); // オフ：上へ 4 マス歩く
-    const at = await centerOf(page, "shift");
-    await page.touchscreen.tap(at.x, at.y);
-    await expect(dash).toHaveAttribute("aria-pressed", "true");
-    await expect(dash).toHaveAttribute("data-pressed", "true");
-    const run = await measure(50); // オン：下へ 4 マス走る
+    const walk = await measure(-50, false); // 走るボタンを押さない：上へ 4 マス歩く
+    const run = await measure(50, true); // 押している間：下へ 4 マス走る
     expect(run).toBeLessThan(walk * 0.75);
-
-    // もう一度タップするとオフに戻り、歩きの速さに戻る
-    await page.touchscreen.tap(at.x, at.y);
-    await expect(dash).toHaveAttribute("aria-pressed", "false");
-    const again = await measure(-50);
+    await expect(dash).toHaveAttribute("data-pressed", "false"); // 指を離せば、ボタンも離れる
+    const again = await measure(-50, false); // 離したら歩きの速さに戻る
     expect(again).toBeGreaterThan(run * 1.3);
   });
 });

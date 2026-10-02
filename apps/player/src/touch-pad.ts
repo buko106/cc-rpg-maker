@@ -20,8 +20,8 @@ export interface TouchPadView {
 
 export interface TouchPadOptions {
   /**
-   * 走る機能のあるゲーム（`system.dash`）か。真のときだけ、メニューボタンの左に「走る」ボタンを足す。省略 = 出さない（従来どおりの操作パッド）。
-   * 走るボタンはタップでオン/オフが切り替わる（押しっぱなしにしなくてよい）。キーボードの Shift（ゲームパッドは X / RT）と同じ `shift` ボタン。
+   * 走る機能のあるゲーム（`system.dash`）か。真のときだけ、メニューボタンの左に「走る」ボタン（A・B と同じ大きさ）を足す。省略 = 出さない（従来どおりの操作パッド）。
+   * 走るボタンは押している間だけ走る（長押し）。キーボードの Shift（ゲームパッドは X / RT）と同じ `shift` ボタン。
    */
   dash?: boolean;
 }
@@ -46,7 +46,7 @@ function menuIcon(): SVGElement {
 
 /** 走るボタンの ≫（二重の山形）。 */
 function dashIcon(): SVGElement {
-  const icon = svg("svg", { viewBox: "0 0 24 24", width: "24", height: "24", "aria-hidden": "true" });
+  const icon = svg("svg", { viewBox: "0 0 24 24", width: "30", height: "30", "aria-hidden": "true" });
   for (const x of [4, 11]) {
     icon.append(svg("polyline", { points: `${x},6 ${x + 8},12 ${x},18`, fill: "none", stroke: "currentColor", "stroke-width": "2.6", "stroke-linecap": "round", "stroke-linejoin": "round" }));
   }
@@ -54,9 +54,9 @@ function dashIcon(): SVGElement {
   return icon;
 }
 
-/** 走るボタンの背景（オフ / オン）。 */
-const TOGGLE_OFF = "rgba(255,255,255,0.22)";
-const TOGGLE_ON = "rgba(255,255,255,0.65)";
+/** 走るボタンの背景（離しているとき / 押しているとき）。押している間は走っているのが分かるよう明るくする。 */
+const DASH_UP = "rgba(255,255,255,0.22)";
+const DASH_DOWN = "rgba(255,255,255,0.65)";
 
 const BUTTONS: readonly { button: Button; label: string; aria: string; size: number }[] = [
   { button: "cancel", label: "B", aria: "キャンセル", size: 64 },
@@ -137,9 +137,7 @@ export function mountTouchPad(root: HTMLElement, input: TouchInput, options: Tou
   const faces = document.createElement("div");
   faces.style.cssText = "display:flex;gap:16px;align-items:flex-end;";
   const buttonEls = new Map<Button, HTMLElement>();
-  /** タップでオン/オフが切り替わるボタン（`aria-pressed` と背景で状態を出す）。 */
-  const toggleEls = new Set<HTMLElement>();
-  const makeButton = (button: Button, label: string | SVGElement, aria: string, size: number, mode: "hold" | "toggle" = "hold"): HTMLElement => {
+  const makeButton = (button: Button, label: string | SVGElement, aria: string, size: number): HTMLElement => {
     const el = document.createElement("div");
     el.dataset["control"] = button;
     el.setAttribute("role", "button");
@@ -147,20 +145,19 @@ export function mountTouchPad(root: HTMLElement, input: TouchInput, options: Tou
     if (typeof label === "string") el.textContent = label;
     else el.append(label);
     el.style.cssText = `${BASE}${FACE}width:${size}px;height:${size}px;`;
-    attach(el, { kind: mode === "toggle" ? "toggle" : "button", button });
-    if (mode === "toggle") {
-      el.setAttribute("aria-pressed", "false");
-      toggleEls.add(el);
-    }
+    attach(el, { kind: "button", button });
     buttonEls.set(button, el);
     return el;
   };
   for (const b of BUTTONS) faces.append(makeButton(b.button, b.label, b.aria, b.size));
   menu.append(makeButton("menu", menuIcon(), "メニュー", 44));
+  let dashEl: HTMLElement | undefined;
   if (options.dash === true) {
-    // メニューの左に、同じ大きさの走るボタン（ほかのボタンの位置は変わらない）
-    menu.style.cssText = "display:flex;gap:12px;align-items:center;";
-    menu.prepend(makeButton("shift", dashIcon(), "走る（タップでオン・オフ）", 44, "toggle"));
+    // メニューの左に、A・B と同じ大きさの走るボタン（ほかのボタンの位置は変わらない）
+    menu.style.cssText = "display:flex;gap:12px;align-items:flex-end;";
+    dashEl = makeButton("shift", dashIcon(), "走る（押している間だけ）", 64);
+    dashEl.style.background = DASH_UP;
+    menu.prepend(dashEl);
   }
   right.append(menu, faces);
   pad.append(dpad, right);
@@ -169,11 +166,7 @@ export function mountTouchPad(root: HTMLElement, input: TouchInput, options: Tou
   function refresh(): void {
     const held = input.held();
     for (const [button, el] of buttonEls) el.dataset["pressed"] = String(held.has(button));
-    for (const el of toggleEls) {
-      const on = el.dataset["pressed"] === "true";
-      el.setAttribute("aria-pressed", String(on));
-      el.style.background = on ? TOGGLE_ON : TOGGLE_OFF;
-    }
+    if (dashEl !== undefined) dashEl.style.background = held.has("shift") ? DASH_DOWN : DASH_UP;
     for (const [button, el] of arrowEls) el.style.opacity = held.has(button) ? "1" : "0.7";
     dpad.dataset["pressed"] = String(["up", "down", "left", "right"].some((b) => held.has(b as Button)));
   }
