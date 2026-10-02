@@ -176,6 +176,48 @@ describe("データベースとシステムのフォーム", () => {
   }
 });
 
+describe("システムの速さの設定", () => {
+  it("歩く速さ・走る機能・状態による変化（スイッチや変数の条件つき）を編集できる", () => {
+    let last: unknown;
+    render(<Harness schema={systemSettingsSchema} initial={project.system} onValue={(v) => (last = v)} />);
+    const get = () => last as { walkSpeed?: number; dash?: { bonus?: number }; speedRules?: { when: unknown[]; speed?: number; noDash?: boolean }[] };
+
+    fireEvent.click(screen.getByLabelText(/^歩く速さ.*を設定$/));
+    expect(get().walkSpeed).toBe(1);
+    fireEvent.change(screen.getByRole("spinbutton", { name: /^歩く速さ（/ }), { target: { value: "3" } });
+    expect(get().walkSpeed).toBe(3);
+
+    fireEvent.click(screen.getByLabelText(/^走る機能.*を設定$/));
+    expect(get().dash).toEqual({});
+    fireEvent.click(screen.getByLabelText(/^走る機能.* 走ると速くなる段階.*を設定$/));
+    expect(get().dash).toEqual({ bonus: 1 });
+
+    fireEvent.click(screen.getByLabelText("状態による歩く速さの変化を設定"));
+    expect(get().speedRules).toEqual([]);
+    fireEvent.click(screen.getByText("＋ 状態による歩く速さの変化を追加"));
+    expect(get().speedRules).toEqual([{ when: [] }]);
+    // ルールに条件を足す：スイッチ（空腹の印）か変数（満腹度）かを選び、速さを遅くして、走れなくもする
+    fireEvent.click(screen.getByText(/^＋ 状態による歩く速さの変化 1 条件.*を追加$/));
+    expect(get().speedRules?.[0]?.when).toEqual([{ kind: "switch", id: "sw_a", value: true }]);
+    fireEvent.change(screen.getByLabelText(/^状態による歩く速さの変化 1 条件.* 1の種類$/), { target: { value: "1" } });
+    expect(get().speedRules?.[0]?.when).toMatchObject([{ kind: "variable" }]);
+    fireEvent.click(screen.getByLabelText(/^状態による歩く速さの変化 1 歩く速さの増減.*を設定$/));
+    fireEvent.change(screen.getByRole("spinbutton", { name: /^状態による歩く速さの変化 1 歩く速さの増減/ }), { target: { value: "-1" } });
+    fireEvent.click(screen.getByLabelText("状態による歩く速さの変化 1 走れなくするを設定"));
+    expect(get().speedRules?.[0]).toMatchObject({ speed: -1, noDash: false });
+  });
+
+  it("速さの設定のスキーマ：範囲外の値と、セルフスイッチの条件は受け付けない", () => {
+    const ok = { ...project.system, walkSpeed: 3, dash: { bonus: 2 }, speedRules: [{ when: [{ kind: "variable", id: "v", op: "<=", value: 10 }], speed: -1, noDash: true }] };
+    expect(systemSettingsSchema.safeParse(ok).success).toBe(true);
+    expect(systemSettingsSchema.safeParse({ ...ok, walkSpeed: 7 }).success).toBe(false);
+    expect(systemSettingsSchema.safeParse({ ...ok, walkSpeed: 0 }).success).toBe(false);
+    expect(systemSettingsSchema.safeParse({ ...ok, dash: { bonus: 4 } }).success).toBe(false);
+    expect(systemSettingsSchema.safeParse({ ...ok, speedRules: [{ when: [{ kind: "selfSwitch", key: "A", value: true }], speed: 1 }] }).success).toBe(false);
+    expect(systemSettingsSchema.safeParse({ ...ok, speedRules: [{ when: [], speed: 6 }] }).success).toBe(false);
+  });
+});
+
 describe("ウィジェット", () => {
   it("文字列・数値・真偽・列挙を編集できる（数値は空欄で NaN）", () => {
     let last: unknown;

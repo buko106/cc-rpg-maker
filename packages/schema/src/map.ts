@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { assetIdSchema, actorIdSchema, eventIdSchema, idRecord, itemIdSchema, mapIdSchema, switchIdSchema, tilesetIdSchema, troopIdSchema, variableIdSchema } from "./ids.js";
 import type { EventId } from "./ids.js";
-import { audioRefSchema, directionSchema, nonNegativeInt } from "./common.js";
+import { audioRefSchema, directionSchema, nonNegativeInt, speedLevelSchema } from "./common.js";
 import { eventCommandSchema } from "./command.js";
 
 export const mapMetaSchema = z.strictObject({
@@ -12,15 +12,19 @@ export const mapMetaSchema = z.strictObject({
 });
 export type MapMeta = z.infer<typeof mapMetaSchema>;
 
-export const pageConditionSchema = z.discriminatedUnion("kind", [
-  // `initial` はエディタで新しく作るときの初期値（検証には影響しない）
-  z.strictObject({ kind: z.literal("switch"), id: switchIdSchema, value: z.boolean().meta({ initial: true }) }),
-  z.strictObject({ kind: z.literal("variable"), id: variableIdSchema, op: z.enum([">=", "==", "<="]), value: z.number() }),
-  z.strictObject({ kind: z.literal("selfSwitch"), key: z.enum(["A", "B", "C", "D"]), value: z.boolean().meta({ initial: true }) }),
-  z.strictObject({ kind: z.literal("item"), id: itemIdSchema }),
-  z.strictObject({ kind: z.literal("actor"), id: actorIdSchema }),
-]);
+// `initial` はエディタで新しく作るときの初期値（検証には影響しない）
+const switchCondition = z.strictObject({ kind: z.literal("switch"), id: switchIdSchema, value: z.boolean().meta({ initial: true }) });
+const variableCondition = z.strictObject({ kind: z.literal("variable"), id: variableIdSchema, op: z.enum([">=", "==", "<="]), value: z.number() });
+const selfSwitchCondition = z.strictObject({ kind: z.literal("selfSwitch"), key: z.enum(["A", "B", "C", "D"]), value: z.boolean().meta({ initial: true }) });
+const itemCondition = z.strictObject({ kind: z.literal("item"), id: itemIdSchema });
+const actorCondition = z.strictObject({ kind: z.literal("actor"), id: actorIdSchema });
+
+export const pageConditionSchema = z.discriminatedUnion("kind", [switchCondition, variableCondition, selfSwitchCondition, itemCondition, actorCondition]);
 export type PageCondition = z.infer<typeof pageConditionSchema>;
+
+/** ゲーム全体の状態（イベントに属さない）への条件：ページの条件のうち、セルフスイッチ以外。`system.speedRules` が使う。 */
+export const stateConditionSchema = z.discriminatedUnion("kind", [switchCondition, variableCondition, itemCondition, actorCondition]);
+export type StateCondition = z.infer<typeof stateConditionSchema>;
 
 export const moveStepSchema = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("move"), dir: z.union([directionSchema, z.enum(["random", "toward", "away", "chase"])]) }),
@@ -98,6 +102,10 @@ export const MapDataSchema = z
     encounters: z.array(z.strictObject({ troop: troopIdSchema, weight: z.number().positive() })).optional(),
     /** ランダムエンカウントの平均歩数。省略 = 30。戦闘（逃走を含む）の直後は、この半分ほどは遭遇しない。 */
     encounterStep: z.number().int().min(1).max(999).optional(),
+    /** このマップに入ったときの歩く速さ（1〜6）。省略 = `system.walkSpeed`（それも無ければ変えない）。 */
+    walkSpeed: speedLevelSchema.optional(),
+    /** 真ならこのマップでは走れない（`system.dash` があるとき）。省略 = 走れる。 */
+    noDash: z.boolean().optional(),
   })
   .superRefine((map, ctx) => {
     const cells = map.width * map.height;

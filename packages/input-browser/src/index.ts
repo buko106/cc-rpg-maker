@@ -43,9 +43,11 @@ export const defaultKeyMap: KeyMap = {
 const GAMEPAD_BUTTONS: Readonly<Record<number, Button>> = {
   0: "ok",
   1: "cancel",
+  2: "shift",
   3: "menu",
   4: "pageup",
   5: "pagedown",
+  7: "shift",
   12: "up",
   13: "down",
   14: "left",

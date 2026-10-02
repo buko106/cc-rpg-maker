@@ -65,6 +65,7 @@ export interface MapState {
   readonly encounterSteps: number;   // 戦闘から（逃走も含む）あるいた歩数。ランダムエンカウントの判定に使う
   readonly turns?: number;           // このマップに入ってからの、プレイヤーの手数（歩く・岩を押す・足踏み）。`pace: "playerStep"` のルートが見る。数え始めるまで無い（0 と同じ）
   readonly turnWait?: number;        // 振り向き（system.turnInPlace）のあと、押しっぱなしでも歩き出さずに待つ残りのフレーム数。無ければ待たない
+  readonly moveSpeed?: 1 | 2 | 3 | 4 | 5 | 6;  // プレイヤーが歩いている 1 歩の速さ（足元・状態・走るで player.speed と違うときだけ。歩き終えると消え、セーブにも入らない）
 }
 
 export interface Character {
@@ -235,6 +236,14 @@ export const snapshotMigrations: readonly { from: number; to: number; migrate(s:
 - **イベントの位置を読む**：式の関数 `evx(id)` / `evy(id)`（05）。押した岩が板の上にあるかを、並列イベントが毎フレーム調べられる。
 - **`SetEventLocation`**（03）：イベントを瞬間移動する（岩をもとの位置へ戻す仕掛けなど）。マップに入り直すと、イベントはマップの定義の位置に戻る（`enterMap`）。
 - **マップのタイルの書き換え**（`map/tiles.ts`・`ChangeMapTile`。03）：`GameState.mapTiles[mapId]` に、書き換えたマスだけを `"<レイヤ>:<x>,<y>"`（`tileKey`）→ タイル番号（0 = 空）で持つ。`MapData`（`ProjectView.map`）は不変のまま、通行判定・氷・移動ルート・描画は、書き換えを重ねたマップ（`currentMap(project, state, mapId?)`。同じ `MapData` と同じ書き換えには同じ結果を返すようキャッシュする）を見る。書き換えはマップを出入りしても残り、セーブにも含まれる（`snapshot` の検証スキーマに `mapTiles` を追加。無いセーブもそのまま読める）。書き換えるまで `mapTiles` は無いので、既存のリプレイのハッシュは変わらない。範囲外のレイヤ・座標の書き換えは無視する。デモ「水門の遺跡」（`fixtures/projects/v1/water`）で使っている。
+
+## 実装メモ（歩く速さ・走る）
+- **基準は `player.speed`、1 歩の速さは `MapState.moveSpeed`**（`map/speed.ts`・`game/inputPhase.ts`・`game/tickPhase.ts`）：`player.speed` は「基準の歩く速さ」のまま触らない（`SetMoveRoute` の `speed` と、プラグインが直接書く速さ（ダンジョンの 5）がこれ）。方向キーで歩き出すとき `playerStepSpeed` が、基準に足元のタイル（`Tileset.terrain`）・状態（`system.speedRules`）・走る操作（`input.pressed` の `shift`。`system.dash` があり、走れるとき）を合わせた速さ（1〜6）を決め、基準と違うときだけ `moveSpeed` に置く。補間（`advanceMovement` の `advanceCharacter(player, moveSpeed)`）はその速さで進み、1 歩を歩き終えると `moveSpeed` は消える。氷で滑り続ける間は同じ速さのまま滑る。`SetMoveRoute` などで動かされる歩みは、`moveSpeed` を見ずに基準（`player.speed`）で進む。
+- **足元はいま立っているタイル**（歩き出す前のタイル）。砂へ入る 1 歩は砂の外の速さで、砂から出る 1 歩は砂の速さ。`currentMap`（`ChangeMapTile` を重ねたマップ）を見る。同じタイルがレイヤに何枚あっても 1 回だけ数え、`Tileset.terrain` の `speed` は足し合わせ、`noDash` はどれか 1 つでも真なら走れない。
+- **押した岩も同じ速さで動く**：岩の `speed` を、その歩みの速さにそろえる（走っても遅くても、岩とプレイヤーが離れない）。
+- **マップに入ると基準の速さが決まる**（`applyTransfer`・`initialState`）：`MapData.walkSpeed`、無ければ `system.walkSpeed` を `player.speed` に入れる。どちらも無ければ、いまの速さのまま（従来どおり）。
+- **決定論・セーブ**：走る操作は入力（`shift`）、足元はマップとタイル、状態はスイッチ・変数・所持品から決まるので、同じ入力列からは同じ状態になる。`moveSpeed` は歩行の途中だけの一時状態なので、`stripTransient` が捨てる（セーブの検証スキーマには足していない）。設定が無いゲームでは状態に何も足さず、既存のリプレイのハッシュは変わらない。
+- **走れるかどうかは、UI からは判定しない**：スマホの走るボタンは、`system.dash` があるゲームでだけ出る（マップや足元で走れないときも出したまま。押しても無視される）。
 
 ## 実装メモ（ターン制の移動ルート）
 - **`MapState.turns?: number`**（`state.ts`）：このマップに入ってからの、プレイヤーの手数。`enterMap` が新しい `MapState` を作るので、マップに入り直すたびに 0 から数え直す（場所移動・同じマップへの場所移動でも）。セーブ（`snapshot`）の検証スキーマに省略可の項目として足した（`SNAPSHOT_VERSION` は上げない。数え始めるまで無いので、ターン制を使わないゲームの状態・ハッシュは変わらない）。

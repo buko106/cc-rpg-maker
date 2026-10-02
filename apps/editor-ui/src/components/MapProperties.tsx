@@ -19,7 +19,17 @@ const ANCHORS: readonly [Anchor, string][] = [
   ["se", "右下"],
 ];
 
-/** マップの名前・大きさ・タイルセット・BGM。 */
+/** 歩く速さの段階（`Character.speed`。1 段階ごとに 2 倍）。 */
+const WALK_SPEEDS: readonly [number, string][] = [
+  [1, "1（とても遅い）"],
+  [2, "2（遅い）"],
+  [3, "3（やや遅い）"],
+  [4, "4（ふつう）"],
+  [5, "5（やや速い）"],
+  [6, "6（速い）"],
+];
+
+/** マップの名前・大きさ・タイルセット・BGM・歩く速さ・走れるか。 */
 export function MapProperties({ mapId, onClose }: { mapId: MapId; onClose: () => void }): ReactElement | null {
   const session = useSession();
   const { run, error } = useExecute();
@@ -63,6 +73,21 @@ export function MapProperties({ mapId, onClose }: { mapId: MapId; onClose: () =>
               </option>
             ))}
           </select>
+        </label>
+        <label>
+          歩く速さ
+          <select value={map.walkSpeed ?? ""} onChange={(e) => run(cmd.setMapProperties(mapId, { walkSpeed: e.target.value === "" ? null : Number(e.target.value) }))}>
+            <option value="">システム設定に従う</option>
+            {WALK_SPEEDS.map(([speed, label]) => (
+              <option key={speed} value={speed}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label className="check">
+          <input type="checkbox" checked={map.noDash === true} onChange={(e) => run(cmd.setMapProperties(mapId, { noDash: e.target.checked }))} />
+          このマップでは走れない
         </label>
       </div>
       <fieldset>

@@ -8,8 +8,11 @@ export interface Point {
   y: number;
 }
 
-/** 画面上のタッチコントロール。ボタンは押している間だけ、十字キーは指の位置で方向が決まる。 */
-export type TouchControl = { kind: "button"; button: Button } | { kind: "dpad"; radius: number; deadZone?: number };
+/**
+ * 画面上のタッチコントロール。ボタンは押している間だけ、十字キーは指の位置で方向が決まる。
+ * `toggle` は、タップするたびに押しっぱなし（オン）と離した状態（オフ）が入れ替わるボタン（走る、など。指を離しても続く）。
+ */
+export type TouchControl = { kind: "button"; button: Button } | { kind: "toggle"; button: Button } | { kind: "dpad"; radius: number; deadZone?: number };
 
 const DEFAULT_DEAD_ZONE = 0.3;
 /** 22.5°（45° ごとの 8 方向の境目）の sin。斜めは、両方の成分がこの割合を超えたとき。 */
@@ -42,7 +45,7 @@ export interface TouchInput extends InputSource {
   pointerMove(id: number, at: Point): void;
   /** 指が離れた（キャンセルも同じ）。 */
   pointerUp(id: number): void;
-  /** 全部の指を離す（画面が隠れたときなど）。 */
+  /** 全部の指を離す（画面が隠れたときなど）。オンにしてあるトグルもオフに戻る。 */
   releaseAll(): void;
   /** 今押されているボタン（ビューの見た目用。`poll` と違い状態を消費しない）。 */
   held(): ReadonlySet<Button>;
@@ -51,14 +54,17 @@ export interface TouchInput extends InputSource {
 export function createTouchInput(): TouchInput {
   const latch = createButtonLatch();
   const pointers = new Map<number, { control: TouchControl; buttons: Set<Button> }>();
+  /** オンになっているトグルのボタン。指を離しても、もう一度タップするまで押下のまま。 */
+  const toggled = new Set<Button>();
   let current = new Set<Button>();
   let disposed = false;
 
-  const buttonsOf = (control: TouchControl, at: Point): Set<Button> => (control.kind === "button" ? new Set([control.button]) : dpadButtons(at, control.radius, control.deadZone));
+  const buttonsOf = (control: TouchControl, at: Point): Set<Button> =>
+    control.kind === "button" ? new Set([control.button]) : control.kind === "toggle" ? new Set() : dpadButtons(at, control.radius, control.deadZone);
 
-  /** 全ポインタの押下を合わせて、ラッチに差分を反映する。 */
+  /** 全ポインタの押下とオンのトグルを合わせて、ラッチに差分を反映する。 */
   const sync = (): void => {
-    const next = new Set<Button>();
+    const next = new Set<Button>(toggled);
     for (const p of pointers.values()) for (const b of p.buttons) next.add(b);
     for (const b of current) if (!next.has(b)) latch.up(b);
     for (const b of next) if (!current.has(b)) latch.down(b);
@@ -69,6 +75,7 @@ export function createTouchInput(): TouchInput {
     pointerDown(id, control, at) {
       if (disposed) return;
       pointers.set(id, { control, buttons: buttonsOf(control, at) });
+      if (control.kind === "toggle" && !toggled.delete(control.button)) toggled.add(control.button);
       sync();
     },
     pointerMove(id, at) {
@@ -83,6 +90,7 @@ export function createTouchInput(): TouchInput {
     },
     releaseAll() {
       pointers.clear();
+      toggled.clear();
       sync();
     },
     held: () => current,
@@ -93,6 +101,7 @@ export function createTouchInput(): TouchInput {
       if (disposed) return;
       disposed = true;
       pointers.clear();
+      toggled.clear();
       current = new Set();
       latch.reset();
     },

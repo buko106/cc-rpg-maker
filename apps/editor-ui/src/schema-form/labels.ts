@@ -126,6 +126,10 @@ const FIELD_LABELS: Readonly<Record<string, string>> = {
   menuSave: "メニューからセーブできる",
   menuSkill: "メニューにスキルを出す",
   turnInPlace: "その場で振り向ける（方向キーを押した瞬間は向きだけ変える）",
+  walkSpeed: "歩く速さ（1〜6。4 が標準。マップの設定が優先）",
+  dash: "走る機能（Shift・走るボタン。空のままで有効）",
+  speedRules: "状態による歩く速さの変化",
+  noDash: "走れなくする",
   autosave: "オートセーブ",
   onTransfer: "場所移動のとき",
   // 能力値

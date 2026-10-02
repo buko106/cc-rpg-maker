@@ -69,6 +69,17 @@ describe("MapTree", () => {
     expect(t.session.doc.maps[M1]!.bgm).toBeUndefined();
     fireEvent.change(within(dialog).getByLabelText("タイルセット"), { target: { value: "ts_default" } });
 
+    // 歩く速さ（空 = システム設定に従う）と、走れないマップ
+    expect(t.session.doc.maps[M1]).not.toHaveProperty("walkSpeed");
+    fireEvent.change(within(dialog).getByLabelText("歩く速さ"), { target: { value: "3" } });
+    expect(t.session.doc.maps[M1]!.walkSpeed).toBe(3);
+    fireEvent.click(within(dialog).getByLabelText("このマップでは走れない"));
+    expect(t.session.doc.maps[M1]!.noDash).toBe(true);
+    fireEvent.change(within(dialog).getByLabelText("歩く速さ"), { target: { value: "" } });
+    fireEvent.click(within(dialog).getByLabelText("このマップでは走れない"));
+    expect(t.session.doc.maps[M1]).not.toHaveProperty("walkSpeed");
+    expect(t.session.doc.maps[M1]).not.toHaveProperty("noDash");
+
     fireEvent.change(within(dialog).getByLabelText("幅"), { target: { value: "12" } });
     fireEvent.change(within(dialog).getByLabelText("高さ"), { target: { value: "9" } });
     fireEvent.change(within(dialog).getByLabelText("固定する位置"), { target: { value: "se" } });
@@ -97,7 +108,7 @@ describe("TilePalette / ToolBar", () => {
     render(t.wrap(<TilePalette />));
     fireEvent.click(screen.getByRole("button", { name: "タイル 2" }));
     const boxes = (): HTMLInputElement[] => screen.getAllByRole("checkbox") as HTMLInputElement[];
-    expect(boxes().map((b) => b.checked)).toEqual([false, false, false, false, false]); // 石壁（0）。最後は「滑る（氷）」
+    expect(boxes().map((b) => b.checked)).toEqual([false, false, false, false, false, false]); // 石壁（0）。最後の 2 つは「滑る（氷）」「走れない」
     fireEvent.click(screen.getByLabelText("下から入れる"));
     expect(t.session.doc.project.tilesets["ts_default" as never]!.passage[2]).toBe(1);
     fireEvent.click(screen.getByRole("button", { name: "タイル 1" }));
@@ -125,6 +136,29 @@ describe("TilePalette / ToolBar", () => {
     fireEvent.click(screen.getByRole("button", { name: "タイル 2" }));
     fireEvent.click(screen.getByLabelText("滑る（氷）"));
     expect(ice()).toBeUndefined();
+  });
+
+  it("選んだタイルの「足元の速さ」と「走れない」を切り替えると、タイルセットの terrain が更新される（何も変えない設定は持たず、空になれば消える）", () => {
+    render(t.wrap(<TilePalette />));
+    const terrain = (): unknown => t.session.doc.project.tilesets["ts_default" as never]!.terrain;
+    fireEvent.click(screen.getByRole("button", { name: "タイル 3" }));
+    expect((screen.getByLabelText("足元の速さ") as HTMLSelectElement).value).toBe("0");
+    fireEvent.change(screen.getByLabelText("足元の速さ"), { target: { value: "-1" } });
+    expect(terrain()).toEqual({ "3": { speed: -1 } });
+    fireEvent.click(screen.getByLabelText("走れない"));
+    expect(terrain()).toEqual({ "3": { speed: -1, noDash: true } });
+    // 別のタイルは別の設定を持つ
+    fireEvent.click(screen.getByRole("button", { name: "タイル 1" }));
+    expect((screen.getByLabelText("足元の速さ") as HTMLSelectElement).value).toBe("0");
+    fireEvent.click(screen.getByLabelText("走れない"));
+    expect(terrain()).toEqual({ "1": { noDash: true }, "3": { speed: -1, noDash: true } });
+    // ふつう・走れる に戻すと、そのタイルの設定は消え、全部消えれば terrain も消える
+    fireEvent.click(screen.getByLabelText("走れない"));
+    fireEvent.click(screen.getByRole("button", { name: "タイル 3" }));
+    fireEvent.change(screen.getByLabelText("足元の速さ"), { target: { value: "0" } });
+    expect(terrain()).toEqual({ "3": { noDash: true } });
+    fireEvent.click(screen.getByLabelText("走れない"));
+    expect(terrain()).toBeUndefined();
   });
 
   it("タイルセットに画像が無ければ案内を出す", () => {

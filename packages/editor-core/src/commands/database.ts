@@ -160,7 +160,15 @@ export function upsertTileset(tileset: Tileset): EditorCommand {
     kind: "upsertTileset",
     label: "タイルセットの編集",
     project: true,
-    apply: (doc) => (tileset.passage.some((v) => !Number.isInteger(v) || v < 0 || v > 15) ? err(invalid("通行設定は 0〜15 の整数")) : tileset.ice?.some((v) => !Number.isInteger(v) || v < 1) ? err(invalid("氷のタイルは 1 以上の整数")) : ok({ ...doc, project: { ...doc.project, tilesets: withEntry(doc.project.tilesets, tileset.id, tileset) } })),
+    apply(doc) {
+      if (tileset.passage.some((v) => !Number.isInteger(v) || v < 0 || v > 15)) return err(invalid("通行設定は 0〜15 の整数"));
+      if (tileset.ice?.some((v) => !Number.isInteger(v) || v < 1)) return err(invalid("氷のタイルは 1 以上の整数"));
+      for (const [tile, effect] of Object.entries(tileset.terrain ?? {})) {
+        if (!/^[1-9][0-9]*$/.test(tile)) return err(invalid(`足元の設定のタイル ${tile} は 1 以上の整数`));
+        if (effect.speed !== undefined && (!Number.isInteger(effect.speed) || effect.speed < -5 || effect.speed > 5)) return err(invalid("歩く速さの増減は −5〜5 の整数"));
+      }
+      return ok({ ...doc, project: { ...doc.project, tilesets: withEntry(doc.project.tilesets, tileset.id, tileset) } });
+    },
   });
 }
 

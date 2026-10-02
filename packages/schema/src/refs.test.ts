@@ -48,6 +48,10 @@ describe("collectRefs / findDanglingRefs", () => {
     ["class skill", (p) => { p.database.classes["class_hero" as never]!.skills = [{ level: 1, skill: "noskill" as never }]; }, { kind: "skill", id: "noskill" }],
     ["bgm asset", (p) => { p.system.bgm = { title: { asset: "eeeeeeeeeeeeeeee" as never, volume: 1, pitch: 1, loop: true } }; }, { kind: "asset", id: "eeeeeeeeeeeeeeee" }],
     ["map parent", (p) => { p.maps["map_start" as never]!.parent = "noparent" as never; }, { kind: "map", id: "noparent" }],
+    ["speed rule switch", (p) => { p.system.speedRules = [{ when: [{ kind: "switch", id: "sw_gone" as never, value: true }], speed: -1 }]; }, { kind: "switch", id: "sw_gone" }],
+    ["speed rule variable", (p) => { p.system.speedRules = [{ when: [{ kind: "variable", id: "v_gone" as never, op: "<=", value: 10 }], noDash: true }]; }, { kind: "variable", id: "v_gone" }],
+    ["speed rule item", (p) => { p.system.speedRules = [{ when: [{ kind: "item", id: "boots" as never }], speed: 1 }]; }, { kind: "item", id: "boots" }],
+    ["speed rule actor", (p) => { p.system.speedRules = [{ when: [{ kind: "actor", id: "ghost" as never }] }]; }, { kind: "actor", id: "ghost" }],
   ];
   it.each(projectCases)("detects a dangling ref: %s", (_name, mutate, expected) => {
     const { project, maps } = loadMinimal();

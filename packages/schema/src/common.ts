@@ -22,3 +22,17 @@ export const audioRefSchema = z.strictObject({
 export type AudioRef = z.infer<typeof audioRefSchema>;
 
 export const nonNegativeInt = z.number().int().min(0);
+
+/** 歩く速さの段階（1〜6）。1 段階ごとに 2 倍（4 で 16 フレーム/タイル、5 で 8、3 で 32）。 */
+export const speedLevelSchema = z.number().int().min(1).max(6);
+
+/**
+ * 足元のタイル・ゲームの状態によって変わる、歩く速さへの影響。
+ * `speed` は段階の増減（マイナスで遅く、プラスで速く。省略 = 0）、`noDash` が真なら走れない。
+ */
+export const speedEffectSchema = z.strictObject({
+  // `title` はエディタのフォームの見出し（検証には影響しない）
+  speed: z.number().int().min(-5).max(5).optional().meta({ title: "歩く速さの増減（段階。マイナスで遅く）" }),
+  noDash: z.boolean().optional(),
+});
+export type SpeedEffect = z.infer<typeof speedEffectSchema>;

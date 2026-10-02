@@ -119,6 +119,15 @@ describe("map commands", () => {
     expect(cleared.maps[M1]).not.toHaveProperty("bgm");
     expect(cleared.maps[M1]).not.toHaveProperty("encounters");
     expect(failure(cmd.setMapProperties("nope" as MapId, {})).kind).toBe("notFound");
+
+    // 歩く速さ（1〜6）と走れないマップ。null / false で消える
+    const slow = applied(cmd.setMapProperties(M1, { walkSpeed: 3, noDash: true }));
+    expect(slow.maps[M1]).toMatchObject({ walkSpeed: 3, noDash: true });
+    expect(applied(cmd.setMapProperties(M1, { tileset: "ts_default" as TilesetId }), slow).maps[M1]).toMatchObject({ walkSpeed: 3, noDash: true }); // ほかの設定を変えても残る
+    const reset = applied(cmd.setMapProperties(M1, { walkSpeed: null, noDash: false }), slow);
+    expect(reset.maps[M1]).not.toHaveProperty("walkSpeed");
+    expect(reset.maps[M1]).not.toHaveProperty("noDash");
+    for (const bad of [0, 7, 2.5, Number.NaN]) expect(failure(cmd.setMapProperties(M1, { walkSpeed: bad })).kind).toBe("invalid");
   });
 
   it("blankLayers は空のレイヤを必要な数だけ作る", () => {
@@ -292,6 +301,12 @@ describe("database / system commands", () => {
     const doc = applied(cmd.upsertTileset(ts));
     expect(Object.keys(doc.project.tilesets)).toEqual(["ts_default", "ts2"]);
     expect(failure(cmd.upsertTileset({ id: "ts3", name: "x", passage: [16] } as never)).kind).toBe("invalid");
+    // 足元のタイルによる速さ：タイル番号は 1 以上の整数、増減は −5〜5 の整数
+    const sand = { id: "ts4", name: "砂", passage: [15, 15], terrain: { "1": { speed: -1, noDash: true } } } as never;
+    expect(applied(cmd.upsertTileset(sand)).project.tilesets["ts4" as TilesetId]).toMatchObject({ terrain: { "1": { speed: -1, noDash: true } } });
+    for (const terrain of [{ "0": { speed: -1 } }, { a: {} }, { "1": { speed: 6 } }, { "1": { speed: 0.5 } }]) {
+      expect(failure(cmd.upsertTileset({ id: "ts5", name: "x", passage: [], terrain } as never)).kind).toBe("invalid");
+    }
     expect(applied(cmd.deleteTileset("ts2" as TilesetId), doc).project.tilesets["ts2" as TilesetId]).toBeUndefined();
     expect(failure(cmd.deleteTileset("nope" as TilesetId)).kind).toBe("notFound");
     expect(cmd.deleteTileset("ts2" as TilesetId).removes()).toEqual([{ kind: "tileset", id: "ts2" }]);

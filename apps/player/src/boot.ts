@@ -43,7 +43,7 @@ export interface PlayerConfig {
   debug?: boolean;
   /** ビルドに入っているプラグインの一覧。プロジェクトの `system.plugins` で有効にされたものだけが読み込まれる。 */
   plugins?: readonly PluginModule[];
-  /** スマホ用の操作パッド（十字キー・決定・キャンセル・メニュー）。`auto`（既定）は主入力が指の端末だけ、`on` / `off` で固定。 */
+  /** スマホ用の操作パッド（十字キー・決定・キャンセル・メニュー。走れるゲームは走るボタンも）。`auto`（既定）は主入力が指の端末だけ、`on` / `off` で固定。 */
   touchPad?: TouchPadMode;
   /** 同じオリジンで複数のゲームを配るときの、セーブの保存先を分けるキー。 */
   saveScope?: string;
@@ -109,7 +109,8 @@ export async function bootPlayer(root: HTMLElement, config: PlayerConfig): Promi
     const keyboard = createBrowserInput(window, { gamepad: true });
     const touch = shouldShowTouchPad(config.touchPad, isCoarsePointer) ? createTouchInput() : undefined;
     const input = touch === undefined ? keyboard : mergeInputSources(keyboard, touch);
-    const touchPad = touch === undefined ? undefined : mountTouchPad(root, touch);
+    // 走れるゲーム（`system.dash`）のときだけ、操作パッドに走るボタンを足す。走れないゲームの操作パッドは変わらない
+    const touchPad = touch === undefined ? undefined : mountTouchPad(root, touch, { dash: project.system.dash !== undefined });
     const logger = consoleLogger(debug);
     // プラグイン：プロジェクトが有効にしたものだけを読み込む。読み込めなくてもゲームは始める（警告だけ）
     const selection = selectPlugins(config.plugins ?? [], project.system.plugins);

@@ -115,6 +115,11 @@ export interface MapState {
   readonly turns?: number;
   /** 振り向き（`system.turnInPlace`）のあと、押しっぱなしでも歩き出さずに待つ残りのフレーム数。無ければ待たない。 */
   readonly turnWait?: number;
+  /**
+   * プレイヤーが歩いている 1 歩の速さ。足元のタイル・状態・走る操作で `player.speed`（基準）と違うときだけある（`playerStepSpeed`）。
+   * 歩き終えると消える（氷で滑り続けている間は残る）。
+   */
+  readonly moveSpeed?: Character["speed"];
 }
 
 export interface ActorState {

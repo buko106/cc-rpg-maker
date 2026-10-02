@@ -1,6 +1,6 @@
 import type { Actor, Class, MapData } from "@rpg/schema";
 import type { Ctx } from "../ctx-types.js";
-import { computeCamera, initialEventRuntimes, newCharacter, refreshEventPages } from "../map/index.js";
+import { computeCamera, initialEventRuntimes, mapWalkSpeed, newCharacter, refreshEventPages } from "../map/index.js";
 import { paramAt } from "../params.js";
 import { createRandom } from "../random.js";
 import { IDLE_MESSAGE } from "../state.js";
@@ -34,12 +34,14 @@ export function initialState(ctx: Pick<Ctx, "project">, seed: string): GameState
   const members = system.initialParty.filter((id) => actors[id] !== undefined);
 
   const leader = members[0] === undefined ? undefined : ctx.project.actor(members[0]);
-  const player = {
-    ...newCharacter(system.startX, system.startY, "down"),
-    ...(leader?.walk ? { graphic: { asset: leader.walk.asset, index: 0 } } : {}),
-  };
   const mapName = ctx.project.project.maps[system.startMap]?.name ?? "";
   const startMap = ctx.project.map(system.startMap);
+  const walkSpeed = mapWalkSpeed(system, startMap);
+  const player = {
+    ...newCharacter(system.startX, system.startY, "down"),
+    ...(walkSpeed === undefined ? {} : { speed: walkSpeed }),
+    ...(leader?.walk ? { graphic: { asset: leader.walk.asset, index: 0 } } : {}),
+  };
 
   const base: GameState = {
     tick: 0,

@@ -18,6 +18,14 @@ export interface TouchPadView {
   dispose(): void;
 }
 
+export interface TouchPadOptions {
+  /**
+   * 走る機能のあるゲーム（`system.dash`）か。真のときだけ、メニューボタンの左に「走る」ボタンを足す。省略 = 出さない（従来どおりの操作パッド）。
+   * 走るボタンはタップでオン/オフが切り替わる（押しっぱなしにしなくてよい）。キーボードの Shift（ゲームパッドは X / RT）と同じ `shift` ボタン。
+   */
+  dash?: boolean;
+}
+
 const DPAD_SIZE = 140;
 const BASE = "position:relative;pointer-events:auto;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;";
 const FACE = "display:flex;align-items:center;justify-content:center;border-radius:50%;background:rgba(255,255,255,0.22);border:2px solid rgba(255,255,255,0.5);color:#fff;font:bold 20px sans-serif;";
@@ -36,16 +44,30 @@ function menuIcon(): SVGElement {
   return icon;
 }
 
+/** 走るボタンの ≫（二重の山形）。 */
+function dashIcon(): SVGElement {
+  const icon = svg("svg", { viewBox: "0 0 24 24", width: "24", height: "24", "aria-hidden": "true" });
+  for (const x of [4, 11]) {
+    icon.append(svg("polyline", { points: `${x},6 ${x + 8},12 ${x},18`, fill: "none", stroke: "currentColor", "stroke-width": "2.6", "stroke-linecap": "round", "stroke-linejoin": "round" }));
+  }
+  icon.style.pointerEvents = "none";
+  return icon;
+}
+
+/** 走るボタンの背景（オフ / オン）。 */
+const TOGGLE_OFF = "rgba(255,255,255,0.22)";
+const TOGGLE_ON = "rgba(255,255,255,0.65)";
+
 const BUTTONS: readonly { button: Button; label: string; aria: string; size: number }[] = [
   { button: "cancel", label: "B", aria: "キャンセル", size: 64 },
   { button: "ok", label: "A", aria: "決定", size: 64 },
 ];
 
 /**
- * 画面下に操作パッド（十字キー・決定・キャンセル・メニュー）を出す。指の位置をそのまま `TouchInput` に渡すだけで、判定はそちらが持つ。
+ * 画面下に操作パッド（十字キー・決定・キャンセル・メニュー。走れるゲームでは走るボタンも）を出す。指の位置をそのまま `TouchInput` に渡すだけで、判定はそちらが持つ。
  * 見た目は素朴な DOM。ボタンの押下状態は `data-pressed` に出す（テストと見た目用）。
  */
-export function mountTouchPad(root: HTMLElement, input: TouchInput): TouchPadView {
+export function mountTouchPad(root: HTMLElement, input: TouchInput, options: TouchPadOptions = {}): TouchPadView {
   const pad = document.createElement("div");
   pad.dataset["touchPad"] = "";
   pad.style.cssText = "position:fixed;left:0;right:0;bottom:0;display:flex;justify-content:space-between;align-items:flex-end;padding:12px 16px calc(12px + env(safe-area-inset-bottom));pointer-events:none;z-index:10;";
@@ -115,7 +137,9 @@ export function mountTouchPad(root: HTMLElement, input: TouchInput): TouchPadVie
   const faces = document.createElement("div");
   faces.style.cssText = "display:flex;gap:16px;align-items:flex-end;";
   const buttonEls = new Map<Button, HTMLElement>();
-  const makeButton = (button: Button, label: string | SVGElement, aria: string, size: number): HTMLElement => {
+  /** タップでオン/オフが切り替わるボタン（`aria-pressed` と背景で状態を出す）。 */
+  const toggleEls = new Set<HTMLElement>();
+  const makeButton = (button: Button, label: string | SVGElement, aria: string, size: number, mode: "hold" | "toggle" = "hold"): HTMLElement => {
     const el = document.createElement("div");
     el.dataset["control"] = button;
     el.setAttribute("role", "button");
@@ -123,12 +147,21 @@ export function mountTouchPad(root: HTMLElement, input: TouchInput): TouchPadVie
     if (typeof label === "string") el.textContent = label;
     else el.append(label);
     el.style.cssText = `${BASE}${FACE}width:${size}px;height:${size}px;`;
-    attach(el, { kind: "button", button });
+    attach(el, { kind: mode === "toggle" ? "toggle" : "button", button });
+    if (mode === "toggle") {
+      el.setAttribute("aria-pressed", "false");
+      toggleEls.add(el);
+    }
     buttonEls.set(button, el);
     return el;
   };
   for (const b of BUTTONS) faces.append(makeButton(b.button, b.label, b.aria, b.size));
   menu.append(makeButton("menu", menuIcon(), "メニュー", 44));
+  if (options.dash === true) {
+    // メニューの左に、同じ大きさの走るボタン（ほかのボタンの位置は変わらない）
+    menu.style.cssText = "display:flex;gap:12px;align-items:center;";
+    menu.prepend(makeButton("shift", dashIcon(), "走る（タップでオン・オフ）", 44, "toggle"));
+  }
   right.append(menu, faces);
   pad.append(dpad, right);
 
@@ -136,6 +169,11 @@ export function mountTouchPad(root: HTMLElement, input: TouchInput): TouchPadVie
   function refresh(): void {
     const held = input.held();
     for (const [button, el] of buttonEls) el.dataset["pressed"] = String(held.has(button));
+    for (const el of toggleEls) {
+      const on = el.dataset["pressed"] === "true";
+      el.setAttribute("aria-pressed", String(on));
+      el.style.background = on ? TOGGLE_ON : TOGGLE_OFF;
+    }
     for (const [button, el] of arrowEls) el.style.opacity = held.has(button) ? "1" : "0.7";
     dpad.dataset["pressed"] = String(["up", "down", "left", "right"].some((b) => held.has(b as Button)));
   }
