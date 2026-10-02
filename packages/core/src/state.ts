@@ -3,6 +3,9 @@ import type { BattleState } from "./battle/state.js";
 import type { InterpreterState } from "./interpreter/state.js";
 import type { RandomState } from "./random.js";
 
+/** JSON にできる値（`GameState.pluginState` の値）。`undefined` は含まない（セーブ・リプレイの比較で消えるため）。 */
+export type JsonValue = null | boolean | number | string | readonly JsonValue[] | { readonly [key: string]: JsonValue };
+
 export type TitleScreen = "main" | "continue";
 export type MenuScreen = "main" | "item" | "skill" | "status" | "save" | "load";
 /** ショップの画面：コマンド（購入/売却/やめる）→ 商品の一覧（`buy`）または所持品の一覧（`sell`）。 */
@@ -160,6 +163,11 @@ export interface GameState {
    * マップを出入りしても残り、セーブに含まれる。通行・氷・描画は `currentMap` がこれを重ねたマップを見る。
    */
   readonly mapTiles?: Record<MapId, Record<string, number>>;
+  /**
+   * プラグインが自分の状態を置く領域。キーはプラグインの名前、値は JSON にできる値（セーブに含まれる）。書き込むまで無い。
+   * プラグインは自分の名前のキーだけを読み書きする（`pluginStateOf` / `withPluginState`）。
+   */
+  readonly pluginState?: Readonly<Record<string, JsonValue>>;
   /** 並列イベント分を含む。 */
   readonly interpreters: readonly InterpreterState[];
   /** 次に発行するインタプリタ id の連番。 */
@@ -183,3 +191,13 @@ export const IDLE_MESSAGE: MessageState = {
 
 export const selfSwitchKey = (mapId: MapId, eventId: EventId, key: string): `${MapId}:${EventId}:${string}` =>
   `${mapId}:${eventId}:${key}`;
+
+/** `name` のプラグインの状態（書き込む前は `undefined`）。 */
+export const pluginStateOf = (state: Pick<GameState, "pluginState">, name: string): JsonValue | undefined =>
+  state.pluginState !== undefined && Object.hasOwn(state.pluginState, name) ? state.pluginState[name] : undefined;
+
+/** `name` のプラグインの状態を `value` にした新しい状態。ほかのプラグインの状態には触れない。 */
+export const withPluginState = <S extends Pick<GameState, "pluginState">>(state: S, name: string, value: JsonValue): S => ({
+  ...state,
+  pluginState: { ...state.pluginState, [name]: value },
+});

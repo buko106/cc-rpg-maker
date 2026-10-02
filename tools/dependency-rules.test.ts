@@ -49,6 +49,7 @@ describe("dependency rules (docs/00-principles.md §2)", () => {
         const target = `import { x } from "../../../${LOCATIONS[to]}/${to}/src/index";\nexport const y = x;\n`;
         files[`${LOCATIONS[from]}/${from}/src/to-${to}.ts`] = target;
         files[`${LOCATIONS[from]}/${from}/src/to-${to}.test.ts`] = target;
+        files[`${LOCATIONS[from]}/${from}/src/to-${to}.testkit.ts`] = target; // テスト専用のヘルパも、テストファイルと同じ扱い
         if (!isAllowed(from, to)) expected.add(`${from} -> ${to}`);
         if (!isAllowed(from, to, { test: true })) expected.add(`${from} (test) -> ${to}`);
       }

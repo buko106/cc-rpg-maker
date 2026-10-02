@@ -26,7 +26,7 @@ export { createRandom, restoreRandom } from "./random.js";
 export type { Clock, Random, RandomState } from "./random.js";
 export { fromSnapshot, migrateSnapshot, progressFingerprint, SNAPSHOT_VERSION, snapshotMigrations, stripTransient, toSnapshot } from "./snapshot.js";
 export type { SaveSnapshot, SerializedGameState, SnapshotError, SnapshotMigration } from "./snapshot.js";
-export { IDLE_MESSAGE, selfSwitchKey } from "./state.js";
+export { IDLE_MESSAGE, pluginStateOf, selfSwitchKey, withPluginState } from "./state.js";
 export type {
-  ActorState, Character, EventRuntime, GameState, MapState, MenuConfirm, MenuPick, MenuScreen, MessageState, PartyState, SceneState, ShopScene, ShopScreen, TimerState, TitleScreen,
+  ActorState, Character, EventRuntime, GameState, JsonValue, MapState, MenuConfirm, MenuPick, MenuScreen, MessageState, PartyState, SceneState, ShopScene, ShopScreen, TimerState, TitleScreen,
 } from "./state.js";

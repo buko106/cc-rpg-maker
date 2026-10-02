@@ -1,0 +1,237 @@
+{
+  "id": "map_town",
+  "width": 20,
+  "height": 14,
+  "tileset": "ts_dungeon",
+  "layers": [
+    {
+      "name": "ground",
+      "tiles": [10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 7, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 11, 7, 10, 10, 7, 11, 11, 11, 11, 11, 11, 11, 11, 12, 11, 11, 11, 11, 11, 11, 11, 7, 10, 10, 7, 7, 7, 7, 7, 7, 7, 7, 7, 9, 7, 7, 7, 7, 7, 7, 7, 7, 10, 10, 8, 7, 10, 7, 7, 7, 7, 7, 7, 9, 7, 7, 7, 7, 7, 10, 7, 7, 10, 10, 7, 7, 7, 7, 7, 7, 7, 7, 8, 9, 7, 7, 7, 8, 7, 7, 7, 7, 10, 10, 7, 7, 7, 7, 8, 7, 7, 7, 7, 9, 7, 7, 7, 7, 7, 8, 8, 7, 10, 10, 7, 7, 7, 7, 7, 9, 9, 9, 9, 9, 9, 9, 9, 9, 7, 7, 7, 7, 10, 10, 7, 7, 7, 7, 7, 7, 7, 7, 7, 9, 7, 7, 7, 7, 7, 7, 10, 7, 10, 10, 7, 7, 8, 10, 7, 7, 7, 8, 7, 9, 7, 7, 7, 7, 7, 7, 7, 8, 10, 10, 7, 7, 7, 8, 7, 7, 8, 7, 7, 9, 7, 7, 7, 7, 10, 7, 8, 7, 10, 10, 7, 10, 7, 7, 7, 10, 8, 7, 7, 9, 7, 7, 7, 8, 7, 7, 7, 7, 10, 10, 8, 7, 7, 7, 7, 7, 7, 7, 7, 9, 7, 7, 7, 7, 7, 7, 7, 7, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10]
+    }
+  ],
+  "events": {
+    "ev_cave": {
+      "id": "ev_cave",
+      "name": "洞窟の入口",
+      "x": 10,
+      "y": 2,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "風鳴りの洞窟だ。奥から ひゅうひゅうと 風の音がする。\n\n入るたびに 中の様子は 変わるという。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "入る",
+                  "やめておく"
+                ],
+                "cancel": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "plugin:dungeon/Enter",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_elder": {
+      "id": "ev_elder",
+      "name": "長老",
+      "x": 7,
+      "y": 5,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "よく来た、旅人よ。\n北の洞窟は『風鳴りの洞窟』。入るたびに 姿を変える 不思議な洞窟じゃ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "洞窟では、おぬしが 1 歩 歩くと 魔物も 1 歩 動く。\n魔物に ぶつかると 攻撃じゃ。\n\\C[6]決定ボタン\\C[0]で 目の前を攻撃、何もいなければ その場で 1 ターン 休める。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "洞窟に入ると レベルは 1 に戻る。\n倒れたら 持ち物と 洞窟で拾ったお金は 失うぞ。\n\nおなかが すくと 力が出ない。\\C[6]おにぎり\\C[0]を 見つけて 食べるのじゃ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "最深部は 地下 7 階。\n奥の宝を 持ち帰れば 一人前じゃ。 くすり草は \\C[6]メニュー\\C[0]から 使えるぞ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ],
+          "graphic": {
+            "asset": "91fa9a1d5187f397",
+            "index": 0,
+            "direction": "down"
+          }
+        },
+        {
+          "conditions": [
+            {
+              "kind": "variable",
+              "id": "var_dungeon_best",
+              "op": ">=",
+              "value": 2
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "洞窟で 一番 深く 降りたのは 地下 \\V[var_dungeon_best] 階か。\n\n無理はするな。倒れても 命までは 取られんが……持ち物は 失うからのう。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ],
+          "graphic": {
+            "asset": "91fa9a1d5187f397",
+            "index": 0,
+            "direction": "down"
+          }
+        },
+        {
+          "conditions": [
+            {
+              "kind": "variable",
+              "id": "var_dungeon_clears",
+              "op": ">=",
+              "value": 1
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おお、宝を 持ち帰ったか！\n\\C[6]一人前の冒険者じゃ\\C[0]。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "洞窟は 何度でも 入れる。\n宝を持ち帰った回数は \\V[var_dungeon_clears] 回。\n次は 奥まで 1 度も 休まずに 行けるかな？",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ],
+          "graphic": {
+            "asset": "91fa9a1d5187f397",
+            "index": 0,
+            "direction": "down"
+          }
+        }
+      ]
+    },
+    "ev_sign": {
+      "id": "ev_sign",
+      "name": "立て札",
+      "x": 13,
+      "y": 5,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "〜 風鳴りの洞窟 〜\n\n矢印キー（WASD）… 1 歩 歩く（敵にぶつかると 攻撃）\nZ / Enter … 目の前を攻撃・その場で 1 ターン 休む\nM / Esc … メニュー（くすり草を使う・セーブ）",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "・おにぎり … 拾うと その場で 食べる（満腹度が増える）\n・ちからの種 … 食べると 攻撃力が 上がる\n・満腹度が 0 になると 少しずつ 弱っていく",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ],
+          "graphic": {
+            "asset": "61b7b2e9a0ba3848",
+            "index": 0,
+            "direction": "down"
+          }
+        }
+      ]
+    }
+  }
+}

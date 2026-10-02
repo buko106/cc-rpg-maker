@@ -7,9 +7,11 @@ import { FIXTURES_ROOT, loadFixtureProject } from "@rpg/test-utils";
 const EXTENSIONS: Record<string, string> = { "image/png": "png", "audio/wav": "wav" };
 
 // サイトの「デモを選ぶ」に並ぶデモ（tools/build-demos.mjs の DEMOS）
-describe.each(["demo", "maze", "tower", "mansion", "haunted", "stealth", "hokora", "ice", "water"])("fixtures/projects/v1/%s のアセット", (name) => {
-  const ASSETS = join(FIXTURES_ROOT, "projects", "v1", name, "assets");
-  const { project } = loadFixtureProject(name);
+// `dungeon` だけは v2（プラグインの設定 `system.plugins` を持つ）
+const DEMOS: readonly (readonly [string, number])[] = [["demo", 1], ["maze", 1], ["tower", 1], ["mansion", 1], ["haunted", 1], ["stealth", 1], ["hokora", 1], ["ice", 1], ["water", 1], ["dungeon", 2]];
+describe.each(DEMOS)("fixtures/projects/v%2$d/%1$s のアセット", (name, version) => {
+  const ASSETS = join(FIXTURES_ROOT, "projects", `v${version}`, name, "assets");
+  const { project } = loadFixtureProject(name, version);
   const files = readdirSync(ASSETS).sort();
 
   it("[inv-5] ファイル名（AssetId）は内容の sha256 先頭 16 桁と一致する", async () => {

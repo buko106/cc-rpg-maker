@@ -7,4 +7,5 @@ playwright-report/
 .DS_Store
 dist-web/
 dist-demos/
+dist-dungeon/
 site-dist/

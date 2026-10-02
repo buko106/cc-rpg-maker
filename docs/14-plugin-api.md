@@ -82,3 +82,9 @@ export function loadPlugins(mods: PluginModule[], host: PluginHost): Promise<{ l
 - **書き方**（型 `CommandBlock` を再エクスポートしている）：開始 = `block: { role: "open", close, bodyFirst, dividers(p) }`、区切り = `block: { role: "divider" }`、終端 = `block: { role: "close" }`。**`close` と `dividers` が返す `code` は、接頭辞の付いた完全な code**（`plugin:<name>/EndPick` のように。`commands.add` が接頭辞を付けるのは登録する `code` だけ）。
 - **実行はプラグインの責任**：`meta.block` はエディタのための情報。実行時に本体を飛ばす・戻るのは、コマンドの `run` が `control`（`skipBlock` / `jump`）と `setBranch` で行う（組み込みの `Else` / `ChoiceBranch` / `EndBranch` / `EndLoop` と同じ流儀）。
 - **テスト**：editor-ui の `plugins.test.tsx`（分岐コマンドの追加・区切りの数の同期・区切りは単独で扱えない・ブロックごと削除）、editor-core の `command-blocks.test.ts`。
+
+## 実装メモ（プラグインの保存領域）
+- **`GameState.pluginState`**（02）：プラグインは、自分の名前（`host.name`）のキーだけを読み書きする。書き込み口は、コマンドの結果の `state`（`withPluginState(state, name, value)` で作る。`@rpg/plugin-api` から再エクスポート）。読み取りは `pluginStateOf(state, name)`（コマンドの `c.state` からも、`projection.after` の `state` からも読める）。値は JSON にできるもの（`JsonValue` を再エクスポート）で、セーブに含まれる。上の「プラグインが書き換えてよいのは `locals` と `variables` だけ」の取り決めは、この領域まで広がった（型では強制していない）。
+- **コマンドで状態を変える**：コマンドの `run` は、完全な `GameState` を返せる（`pluginState` のほか、`mapTiles`・`actors`・`party`・`map.player` など）。プラグインが触ってよいと決めてあるのは、そのプラグインの設計文書（18）に書いたものだけ。コマンドからほかのコマンドを呼ぶには、`control: { kind: "call", commands }` を返す（呼び出した列が終わると、続きから戻る）。**並列イベントの中から `TransferPlayer` を呼んではいけない**：場所移動は、元のマップの並列イベントのインタプリタをすべて終わらせるので、移動を待っている並列イベント自身も消え、明転が終わらない。移動する前提のコマンドは、通常のイベント（自動実行・話しかけ）から呼ぶ。
+- **`projection.after` は `Ctx`（データベース）を受け取らない**：描くのに必要な値（最大 HP・設定・絵の位置など）は、`host.params`（設定）と `pluginState`（コマンドが毎ターン書いておく）から取る。FrameSpec の `layers` を差し込むときは、タイルの層とキャラクターの層（`sprites`、`z` が 100・200・300）の間に、`z` の小さい順になるよう並べる。
+

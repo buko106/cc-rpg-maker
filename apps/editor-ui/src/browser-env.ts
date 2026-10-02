@@ -5,6 +5,7 @@ import type { EditorSession } from "@rpg/editor-core";
 import { createBrowserInput } from "@rpg/input-browser";
 import { createCanvas2dRenderer } from "@rpg/render-canvas2d";
 import type { PluginModule } from "@rpg/plugin-api";
+import { dungeonPlugin } from "@rpg/plugin-dungeon";
 import { samplePlugins } from "@rpg/plugin-samples";
 import { writeZip } from "@rpg/project-store";
 import type { AssetManifest } from "@rpg/runtime";
@@ -76,7 +77,7 @@ export function createSampleSource(baseUrl: string, fetchFn: typeof fetch = (inp
 export async function createBrowserEnv(options: { playerUrl?: string; samplesUrl?: string; plugins?: readonly PluginModule[] } = {}): Promise<EditorEnv> {
   const commands = createCommandRegistry();
   registerBuiltins(commands);
-  const pluginEnv = await createPluginEnv(options.plugins ?? samplePlugins, commands, { debug() {}, info() {}, warn: (m) => console.warn(`[plugin] ${m}`), error: (m) => console.error(`[plugin] ${m}`) });
+  const pluginEnv = await createPluginEnv(options.plugins ?? [...samplePlugins, dungeonPlugin], commands, { debug() {}, info() {}, warn: (m) => console.warn(`[plugin] ${m}`), error: (m) => console.error(`[plugin] ${m}`) });
   const createAssets = (session: EditorSession) => createAssetSource(session.assetStore().bytesSource(), liveManifest(session), { verifyHash: true });
   return {
     ...pluginEnv,

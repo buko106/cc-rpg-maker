@@ -233,3 +233,9 @@ export const snapshotMigrations: readonly { from: number; to: number; migrate(s:
 - **イベントの位置を読む**：式の関数 `evx(id)` / `evy(id)`（05）。押した岩が板の上にあるかを、並列イベントが毎フレーム調べられる。
 - **`SetEventLocation`**（03）：イベントを瞬間移動する（岩をもとの位置へ戻す仕掛けなど）。マップに入り直すと、イベントはマップの定義の位置に戻る（`enterMap`）。
 - **マップのタイルの書き換え**（`map/tiles.ts`・`ChangeMapTile`。03）：`GameState.mapTiles[mapId]` に、書き換えたマスだけを `"<レイヤ>:<x>,<y>"`（`tileKey`）→ タイル番号（0 = 空）で持つ。`MapData`（`ProjectView.map`）は不変のまま、通行判定・氷・移動ルート・描画は、書き換えを重ねたマップ（`currentMap(project, state, mapId?)`。同じ `MapData` と同じ書き換えには同じ結果を返すようキャッシュする）を見る。書き換えはマップを出入りしても残り、セーブにも含まれる（`snapshot` の検証スキーマに `mapTiles` を追加。無いセーブもそのまま読める）。書き換えるまで `mapTiles` は無いので、既存のリプレイのハッシュは変わらない。範囲外のレイヤ・座標の書き換えは無視する。デモ「水門の遺跡」（`fixtures/projects/v1/water`）で使っている。
+
+## 実装メモ（プラグインの保存領域 `pluginState`）
+- **`GameState.pluginState?: Readonly<Record<string, JsonValue>>`**（`state.ts`）：プラグインが自分の状態を置く領域。キーはプラグインの名前、値は JSON にできる値（`JsonValue`。`undefined` は含めない）。書き込むまで無いので、プラグインを使わないゲームの状態・リプレイのハッシュは変わらない。読み書きは `pluginStateOf(state, name)` / `withPluginState(state, name, value)`（どちらも `@rpg/plugin-api` から再エクスポート。後者は自分以外のプラグインのキーに触れない）。`null` を書けば「持っていない」ことを表せる（キーは残る）。
+- **セーブ**：`snapshot` の検証スキーマに `pluginState`（キーごとに JSON の値）を足した。JSON でない値（関数・`undefined` など）の入ったセーブは弾く。`pluginState` の無いセーブはそのまま読める。**`SNAPSHOT_VERSION` は上げていない**：足したのは省略できる項目だけで、これまでのセーブは変換なしで読めるから（バージョンを上げると、`pluginState` を使わないゲームのセーブまで古いビルドで読めなくなる）。古いビルドが `pluginState` の入ったセーブを読むと、検証で「不正」として弾かれる。
+- **使い道**：デモ「風鳴りの洞窟」（`@rpg/plugin-dungeon`。18）が、何階か・敵の位置と HP・落ちている物・歩いた場所・満腹度・ログを持つ。ほかに、クエストの記録・図鑑・クラフトなど、数値の変数に収まらない状態をプラグインが持てる。
+
