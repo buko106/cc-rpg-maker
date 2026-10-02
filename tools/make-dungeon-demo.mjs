@@ -571,6 +571,7 @@ const project = {
     tileSize: TILE,
     screen: SCREEN,
     bgm: {},
+    turnInPlace: true,
     terms: { newGame: "ニューゲーム" },
     plugins: [{ name: "dungeon", version: "1.0.0", params: dungeonParams }],
   },

@@ -19,7 +19,7 @@ export interface Game {
   h: RuntimeHarness;
   state(): ReturnType<RuntimeHarness["runtime"]["getState"]>;
   ds(): DungeonState | undefined;
-  /** 1 マス歩く（または、敵にぶつかる）。動きが終わるまで進める。 */
+  /** 1 マス歩く（または、敵にぶつかる）。向きが違うときは、先に向きだけ変える。動きが終わるまで進める。 */
   step(dir: Dir): Promise<void>;
   /** 決定ボタンを 1 回押して、動きが終わるまで進める。 */
   ok(): Promise<void>;
@@ -53,6 +53,8 @@ export async function boot(seed = "dungeon", patch?: (params: Record<string, unk
     state,
     ds: () => readDungeon(state()),
     async step(dir) {
+      // 振り向き（system.turnInPlace）が有効なので、向きが違うときは、まず向きだけ変える
+      if (state().map.player.direction !== dir) await frames(press(dir), blank());
       await frames(press(dir));
       await settle();
     },
@@ -62,6 +64,7 @@ export async function boot(seed = "dungeon", patch?: (params: Record<string, unk
     },
     idle: (n) => frames(...Array.from({ length: n }, blank)),
     async enter() {
+      await frames(press("up"), blank()); // 上を向く（振り向き）
       for (let i = 0; i < 4; i++) await frames(press("up"), ...Array.from({ length: 15 }, blank)); // 洞窟の入口の手前まで
       await frames(press("up"));
       for (let i = 0; i < 600 && state().map.mapId !== "map_floor"; i++) await frames(i % 20 === 0 ? press("ok") : blank());
