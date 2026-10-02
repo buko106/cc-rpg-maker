@@ -115,6 +115,7 @@ export async function exportGame(repo: ProjectRepository, projectId: string, opt
 - **公開先**：https://www.buko106.tokyo/cc-rpg-maker/ 。`/` がランディングページ（`site/index.html`。画像は `site/img/`）、`/editor/` がエディタ、`/demo/` が demo プロジェクト付きのプレイヤー。
 - **ビルド**：`pnpm build:site`（`tools/build-site.mjs`）が `site-dist/`（git 管理外）に、エディタ（`apps/editor-ui/scripts/build-web.mjs`）・プレイヤー（`apps/player/scripts/build-web.mjs --project fixtures/projects/v1/demo`）・`site/` をまとめて出力し、`.nojekyll` を置く。`pnpm site` はビルドして http://127.0.0.1:4175/ で配信する。
 - **サブパスで動く条件**：どの HTML も `editor.js` / `project/project.json` / `player/player.js` のように**相対パス**だけで参照する（`/` 始まりを使わない）。`tools/build-site.test.ts` が、出力の HTML に絶対パスが無いことと、ランディングのリンク先が実在することを確かめる。
+- **存在しない URL は 404**：`site/404.html`（そのまま出力の直下に入る）。GitHub Pages も Cloudflare Pages も、これがあれば存在しない URL に 404 で返す。**無いと Cloudflare Pages は、存在しない URL にも最上位の `index.html` を 200 で返す**ので、壊れたパス（デモのアセットなど）が 404 として現れず、気づけない。どの階層の URL でも返るので、`404.html` は `href` / `src` を持たない自己完結のページにする（テストで確かめる）。
 - **デプロイ**：`.github/workflows/pages.yml`。`main` への push と手動実行（`workflow_dispatch`）で、ビルド → `actions/upload-pages-artifact` → `actions/deploy-pages`。**初回だけ**、リポジトリの Settings → Pages → Source を「GitHub Actions」にする。独自ドメイン（`www.buko106.tokyo`）はアカウント側の設定で、このリポジトリに `CNAME` は置かない。
 - **保存先の注意**：エディタのプロジェクト（IndexedDB `rpg-projects`）とデモのセーブ（`rpg-saves-*`）は**オリジン単位**で、パスでは分かれない。同じドメインの別サイトが同じ名前を使うと混ざる。
 
