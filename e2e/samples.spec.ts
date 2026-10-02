@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { expect, test } from "@playwright/test";
-import { unzip } from "./helpers";
+import { startNewGame, unzip } from "./helpers";
 
 // プロジェクト一覧の「サンプルから作る」：エディタのビルドに同梱したデモの編集データ（samples/）を、新しいプロジェクトとして取り込む。
 // 取り込んだプロジェクトは「ZIP」で編集データとして書き出せて、「ZIP から読み込む…」で取り込み直せる。
@@ -41,9 +41,7 @@ test("サンプル（はじまりの村・地下迷宮・バトルタワー・�
   expect(await page.evaluate(() => Object.keys((window as unknown as Handles).__editor.doc.maps).length)).toBe(20);
 
   await page.getByRole("button", { name: "テストプレイ", exact: true }).click();
-  await page.waitForFunction(() => (window as unknown as Handles).__rpgPlaytest?.getState().scene.kind === "title");
-  await page.keyboard.press("Enter");
-  await page.waitForFunction(() => (window as unknown as Handles).__rpgPlaytest!.getState().scene.kind === "map");
+  await startNewGame(page, "__rpgPlaytest");
   expect(await page.evaluate(() => (window as unknown as Handles).__rpgPlaytest!.getState().map.mapId)).toBe("map_room01");
 });
 
@@ -55,9 +53,8 @@ test("風鳴りの洞窟（プラグイン dungeon を使う v2 のサンプル�
 
   await page.getByRole("button", { name: "テストプレイ", exact: true }).click();
   type Play = { getState(): { scene: { kind: string }; map: { mapId: string; player: { moving: boolean } }; message: { open: boolean; choices: string[] | null }; pluginState?: { dungeon?: { floor: number; turn: number } | null } } };
-  await page.waitForFunction(() => (window as unknown as { __rpgPlaytest?: Play }).__rpgPlaytest?.getState().scene.kind === "title");
-  await page.keyboard.press("Enter");
-  await page.waitForFunction(() => (window as unknown as { __rpgPlaytest: Play }).__rpgPlaytest.getState().map.mapId === "map_town");
+  await startNewGame(page, "__rpgPlaytest");
+  expect(await page.evaluate(() => (window as unknown as { __rpgPlaytest: Play }).__rpgPlaytest.getState().map.mapId)).toBe("map_town");
   // 洞窟の入口にぶつかって、文章が開くまで上を押し続ける（短く押すだけだと、遅い環境では入力を取りこぼす）
   await page.keyboard.down("ArrowUp");
   await page.waitForFunction(() => (window as unknown as { __rpgPlaytest: Play }).__rpgPlaytest.getState().message.open);
@@ -106,9 +103,8 @@ test("港町の釣り大会（プラグイン fishing を使う v2 のサンプ�
 
   await page.getByRole("button", { name: "テストプレイ", exact: true }).click();
   type Play = { getState(): { scene: { kind: string }; map: { mapId: string }; interpreters: { mode: string }[] } };
-  await page.waitForFunction(() => (window as unknown as { __rpgPlaytest?: Play }).__rpgPlaytest?.getState().scene.kind === "title");
-  await page.keyboard.press("Enter");
-  await page.waitForFunction(() => (window as unknown as { __rpgPlaytest: Play }).__rpgPlaytest.getState().map.mapId === "map_harbor");
+  await startNewGame(page, "__rpgPlaytest");
+  expect(await page.evaluate(() => (window as unknown as { __rpgPlaytest: Play }).__rpgPlaytest.getState().map.mapId)).toBe("map_harbor");
   // 最初の説明（自動実行のイベント）が動いている
   await page.waitForFunction(() => (window as unknown as { __rpgPlaytest: Play }).__rpgPlaytest.getState().interpreters.some((i) => i.mode === "normal"));
 });

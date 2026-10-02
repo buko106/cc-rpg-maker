@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
+import { startNewGame } from "./helpers";
 
 // デモ「港町の釣り大会」（fixtures/projects/v2/fishing。プラグイン @rpg/plugin-fishing）を、ブラウザで遊ぶ。
 // 桟橋で竿を振り、あたりを待ち、巻き上げのバーが描かれる。受付で大会に申しこむと、タイマーと点数が出る。
@@ -46,9 +47,8 @@ async function start(page: Page): Promise<string[]> {
   const errors: string[] = [];
   page.on("pageerror", (e) => errors.push(e.message));
   await page.goto("/?renderer=canvas2d");
-  await page.waitForFunction(() => (window as unknown as Rpg).__rpg !== undefined && (window as unknown as Rpg).__rpg.getState().scene.kind === "title" && (window as unknown as Rpg).__rpg.getState().map.mapId !== undefined);
-  await page.keyboard.press("Enter");
-  await waitFor(page, "s.scene.kind === 'map' && s.map.mapId === 'map_harbor'");
+  await startNewGame(page);
+  await waitFor(page, "s.map.mapId === 'map_harbor'");
   // 説明の文章を、終わるまで送る
   for (let i = 0; i < 60 && !(await state(page)).switches["sw_intro"]; i++) {
     await page.keyboard.press("Enter");
