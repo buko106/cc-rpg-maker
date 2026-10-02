@@ -160,6 +160,7 @@ const serializedStateSchema = z.strictObject({
       .optional(),
     encounterSteps: nonNegativeInt,
     turns: nonNegativeInt.optional(),
+    turnWait: nonNegativeInt.optional(),
   }),
   party: z.strictObject({ gold: nonNegativeInt, members: z.array(z.string()), items: z.record(z.string(), nonNegativeInt) }),
   actors: z.record(z.string(), z.strictObject({ id: z.string(), name: z.string(), level: int, exp: nonNegativeInt, hp: int, mp: int })),

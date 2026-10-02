@@ -113,6 +113,8 @@ export interface MapState {
    * `pace: "playerStep"` の移動ルートがこれを見て進む。数え始めるまで無い（0 と同じ）。
    */
   readonly turns?: number;
+  /** 振り向き（`system.turnInPlace`）のあと、押しっぱなしでも歩き出さずに待つ残りのフレーム数。無ければ待たない。 */
+  readonly turnWait?: number;
 }
 
 export interface ActorState {
