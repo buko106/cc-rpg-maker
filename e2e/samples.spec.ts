@@ -57,14 +57,10 @@ test("風鳴りの洞窟（プラグイン dungeon を使う v2 のサンプル�
   await page.waitForFunction(() => (window as unknown as { __rpgPlaytest?: Play }).__rpgPlaytest?.getState().scene.kind === "title");
   await page.keyboard.press("Enter");
   await page.waitForFunction(() => (window as unknown as { __rpgPlaytest: Play }).__rpgPlaytest.getState().map.mapId === "map_town");
-  const settle = (): Promise<unknown> => page.waitForFunction(() => !(window as unknown as { __rpgPlaytest: Play }).__rpgPlaytest.getState().map.player.moving);
-  for (let i = 0; i < 5; i++) {
-    await page.keyboard.down("ArrowUp");
-    await page.waitForTimeout(40);
-    await page.keyboard.up("ArrowUp");
-    await settle();
-  }
+  // 洞窟の入口にぶつかって、文章が開くまで上を押し続ける（短く押すだけだと、遅い環境では入力を取りこぼす）
+  await page.keyboard.down("ArrowUp");
   await page.waitForFunction(() => (window as unknown as { __rpgPlaytest: Play }).__rpgPlaytest.getState().message.open);
+  await page.keyboard.up("ArrowUp");
   await page.keyboard.press("Enter");
   await page.waitForFunction(() => (window as unknown as { __rpgPlaytest: Play }).__rpgPlaytest.getState().message.choices !== null);
   await page.keyboard.press("Enter"); // 「入る」

@@ -33,11 +33,17 @@ test.use({ baseURL: "http://127.0.0.1:4176" });
 
 const state = (page: Page): Promise<State> => page.evaluate(() => (window as unknown as Rpg).__rpg.getState());
 const idle = (page: Page): Promise<unknown> => page.waitForFunction(() => !(window as unknown as Rpg).__rpg.getState().map.player.moving);
-const tap = async (page: Page, key: string): Promise<void> => {
+/** キーを押し続けて、`until`（ページ内で評価）が真になったら離し、動きが終わるのを待つ（短く押すだけだと、遅い環境では入力を取りこぼす）。 */
+const hold = async (page: Page, key: string, until: string): Promise<void> => {
   await page.keyboard.down(key);
-  await page.waitForTimeout(40);
+  await page.waitForFunction(`(() => { const s = window.__rpg.getState(); const ds = s.pluginState && s.pluginState.dungeon; return ${until}; })()`);
   await page.keyboard.up(key);
   await idle(page);
+};
+/** ダンジョンの中で 1 ターン（1 歩・攻撃）進める：ターン数・階・イベントのどれかが変わるまで押す。 */
+const tap = async (page: Page, key: string): Promise<void> => {
+  const before = (await state(page)).pluginState?.dungeon;
+  await hold(page, key, `!ds || ds.turn !== ${before?.turn ?? -1} || ds.floor !== ${before?.floor ?? -1} || s.variables.var_dungeon_event`);
 };
 const pixel = (page: Page, x: number, y: number): Promise<number[]> =>
   page.evaluate(([px, py]) => [...(document.querySelector("canvas") as HTMLCanvasElement).getContext("2d")!.getImageData(px!, py!, 1, 1).data], [x, y] as const);
@@ -50,9 +56,7 @@ async function enter(page: Page): Promise<void> {
   await page.waitForFunction(() => (window as unknown as Rpg).__rpg !== undefined && (window as unknown as Rpg).__rpg.getState().scene.kind === "title" && (window as unknown as Rpg).__rpg.getState().map.mapId !== undefined);
   await page.keyboard.press("Enter");
   await page.waitForFunction(() => (window as unknown as Rpg).__rpg.getState().scene.kind === "map" && (window as unknown as Rpg).__rpg.getState().map.mapId === "map_town");
-  for (let i = 0; i < 4; i++) await tap(page, "ArrowUp");
-  await tap(page, "ArrowUp"); // 洞窟の入口に触れる
-  await page.waitForFunction(() => (window as unknown as Rpg).__rpg.getState().message.open);
+  await hold(page, "ArrowUp", "s.message.open"); // 洞窟の入口に触れるまで上へ歩く
   await page.keyboard.press("Enter"); // 文章を閉じて、選択肢が出る
   await page.waitForFunction(() => (window as unknown as Rpg).__rpg.getState().message.choices !== null);
   await page.keyboard.press("Enter"); // 「入る」
