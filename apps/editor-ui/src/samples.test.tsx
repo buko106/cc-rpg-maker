@@ -23,9 +23,11 @@ const SAMPLES = [
   { id: "ice", fixture: "ice", title: "氷の神殿" },
   { id: "water", fixture: "water", title: "水門の遺跡" },
   { id: "dungeon", fixture: "dungeon", title: "風鳴りの洞窟（不思議のダンジョン）" },
+  { id: "fishing", fixture: "fishing", title: "港町の釣り大会" },
 ] as const;
-// `dungeon` だけは v2（プラグインの設定を持つ）
-const dirOf = (fixture: string): string => join(FIXTURES_ROOT, "projects", fixture === "dungeon" ? "v2" : "v1", fixture);
+// `dungeon`・`fishing` は v2（プラグインの設定を持つ）
+const V2 = new Set(["dungeon", "fishing"]);
+const dirOf = (fixture: string): string => join(FIXTURES_ROOT, "projects", V2.has(fixture) ? "v2" : "v1", fixture);
 const filesOf = (dir: string): string[] =>
   readdirSync(dir, { recursive: true, withFileTypes: true })
     .filter((e) => e.isFile())
@@ -63,7 +65,7 @@ describe("サンプルから作る", () => {
     fireEvent.click(screen.getByRole("button", { name: `${s.title} のサンプルから作る` }));
     await waitFor(() => expect(screen.getByRole("application")).toBeTruthy());
 
-    const fixture = loadFixtureProject(s.fixture, s.fixture === "dungeon" ? 2 : 1);
+    const fixture = loadFixtureProject(s.fixture, V2.has(s.fixture) ? 2 : 1);
     const doc = editor().doc;
     expect(doc.project.meta.title).toBe(fixture.project.meta.title);
     expect(doc.project.meta.id).not.toBe(fixture.project.meta.id);
@@ -155,7 +157,7 @@ describe("createSampleSource（ブラウザでのサンプルの取得）", () =
       const r = await t.repo.importZip(await src.loadSample(s.id));
       expect(r.ok, s.id).toBe(true);
       const loaded = await t.repo.load(r.ok ? r.value.id : "");
-      expect(loaded.ok && loaded.value.maps).toEqual(loadFixtureProject(s.fixture, s.fixture === "dungeon" ? 2 : 1).maps);
+      expect(loaded.ok && loaded.value.maps).toEqual(loadFixtureProject(s.fixture, V2.has(s.fixture) ? 2 : 1).maps);
     }
   });
 

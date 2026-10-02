@@ -1,0 +1,1570 @@
+{
+  "id": "map_harbor",
+  "width": 26,
+  "height": 18,
+  "tileset": "ts_harbor",
+  "layers": [
+    {
+      "name": "ground",
+      "tiles": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 15, 3, 15, 3, 3, 3, 3, 7, 7, 7, 7, 7, 7, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 1, 1, 15, 1, 2, 1, 1, 15, 1, 2, 1, 1, 7, 7, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 2, 1, 15, 1, 8, 2, 15, 1, 1, 1, 2, 1, 7, 7, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 15, 1, 1, 8, 1, 2, 1, 15, 1, 1, 2, 7, 7, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 15, 1, 8, 1, 1, 15, 1, 1, 1, 1, 7, 7, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 2, 8, 1, 1, 1, 2, 1, 1, 1, 7, 7, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 1, 4, 4, 16, 4, 4, 4, 4, 4, 4, 4, 4, 16, 19, 19, 16, 4, 4, 17, 4, 18, 4, 4, 4, 4, 4, 4, 14, 5, 5, 9, 9, 9, 9, 9, 17, 18, 5, 5, 19, 19, 5, 5, 10, 10, 10, 10, 10, 5, 5, 5, 5, 14, 14, 5, 14, 12, 11, 13, 11, 12, 5, 5, 5, 5, 19, 19, 5, 5, 12, 11, 13, 11, 12, 5, 5, 5, 14, 14, 14, 5, 5, 5, 5, 5, 5, 6, 5, 5, 5, 5, 19, 19, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 14, 14, 5, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 19, 5, 14, 14, 5, 5, 5, 14, 5, 5, 5, 5, 5, 6, 5, 19, 19, 5, 5, 5, 5, 5, 5, 5, 6, 5, 5, 5, 14, 14, 5, 14, 5, 5, 5, 6, 14, 5, 5, 5, 5, 19, 19, 5, 5, 5, 5, 5, 6, 5, 5, 5, 14, 5, 14, 14, 5, 5, 5, 5, 5, 5, 5, 5, 5, 14, 5, 19, 19, 6, 5, 5, 5, 14, 5, 5, 5, 5, 5, 6, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14, 14]
+    }
+  ],
+  "events": {
+    "ev_spot_01": {
+      "id": "ev_spot_01",
+      "name": "釣り場（pier）",
+      "x": 11,
+      "y": 4,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "plugin:fishing/Cast",
+              "params": {
+                "spot": "pier"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_spot_02": {
+      "id": "ev_spot_02",
+      "name": "釣り場（pier）",
+      "x": 14,
+      "y": 4,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "plugin:fishing/Cast",
+              "params": {
+                "spot": "pier"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_spot_03": {
+      "id": "ev_spot_03",
+      "name": "釣り場（pier）",
+      "x": 11,
+      "y": 5,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "plugin:fishing/Cast",
+              "params": {
+                "spot": "pier"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_spot_04": {
+      "id": "ev_spot_04",
+      "name": "釣り場（pier）",
+      "x": 11,
+      "y": 6,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "plugin:fishing/Cast",
+              "params": {
+                "spot": "pier"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_spot_05": {
+      "id": "ev_spot_05",
+      "name": "釣り場（pier）",
+      "x": 14,
+      "y": 6,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "plugin:fishing/Cast",
+              "params": {
+                "spot": "pier"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_spot_06": {
+      "id": "ev_spot_06",
+      "name": "釣り場（pier）",
+      "x": 11,
+      "y": 7,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "plugin:fishing/Cast",
+              "params": {
+                "spot": "pier"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_spot_07": {
+      "id": "ev_spot_07",
+      "name": "釣り場（pier）",
+      "x": 14,
+      "y": 7,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "plugin:fishing/Cast",
+              "params": {
+                "spot": "pier"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_spot_08": {
+      "id": "ev_spot_08",
+      "name": "釣り場（pier）",
+      "x": 11,
+      "y": 8,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "plugin:fishing/Cast",
+              "params": {
+                "spot": "pier"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_spot_09": {
+      "id": "ev_spot_09",
+      "name": "釣り場（pier）",
+      "x": 14,
+      "y": 8,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "plugin:fishing/Cast",
+              "params": {
+                "spot": "pier"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_spot_10": {
+      "id": "ev_spot_10",
+      "name": "釣り場（deep）",
+      "x": 10,
+      "y": 2,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "plugin:fishing/Cast",
+              "params": {
+                "spot": "deep"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_spot_11": {
+      "id": "ev_spot_11",
+      "name": "釣り場（deep）",
+      "x": 11,
+      "y": 2,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "plugin:fishing/Cast",
+              "params": {
+                "spot": "deep"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_spot_12": {
+      "id": "ev_spot_12",
+      "name": "釣り場（deep）",
+      "x": 12,
+      "y": 2,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "plugin:fishing/Cast",
+              "params": {
+                "spot": "deep"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_spot_13": {
+      "id": "ev_spot_13",
+      "name": "釣り場（deep）",
+      "x": 13,
+      "y": 2,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "plugin:fishing/Cast",
+              "params": {
+                "spot": "deep"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_spot_14": {
+      "id": "ev_spot_14",
+      "name": "釣り場（deep）",
+      "x": 14,
+      "y": 2,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "plugin:fishing/Cast",
+              "params": {
+                "spot": "deep"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_spot_15": {
+      "id": "ev_spot_15",
+      "name": "釣り場（deep）",
+      "x": 15,
+      "y": 2,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "plugin:fishing/Cast",
+              "params": {
+                "spot": "deep"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_spot_16": {
+      "id": "ev_spot_16",
+      "name": "釣り場（deep）",
+      "x": 9,
+      "y": 3,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "plugin:fishing/Cast",
+              "params": {
+                "spot": "deep"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_spot_17": {
+      "id": "ev_spot_17",
+      "name": "釣り場（deep）",
+      "x": 16,
+      "y": 3,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "plugin:fishing/Cast",
+              "params": {
+                "spot": "deep"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_spot_18": {
+      "id": "ev_spot_18",
+      "name": "釣り場（rocks）",
+      "x": 3,
+      "y": 6,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "plugin:fishing/Cast",
+              "params": {
+                "spot": "rocks"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_spot_19": {
+      "id": "ev_spot_19",
+      "name": "釣り場（rocks）",
+      "x": 5,
+      "y": 6,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "plugin:fishing/Cast",
+              "params": {
+                "spot": "rocks"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_spot_20": {
+      "id": "ev_spot_20",
+      "name": "釣り場（rocks）",
+      "x": 3,
+      "y": 7,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "plugin:fishing/Cast",
+              "params": {
+                "spot": "rocks"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_spot_21": {
+      "id": "ev_spot_21",
+      "name": "釣り場（rocks）",
+      "x": 5,
+      "y": 7,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "plugin:fishing/Cast",
+              "params": {
+                "spot": "rocks"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_spot_22": {
+      "id": "ev_spot_22",
+      "name": "釣り場（rocks）",
+      "x": 3,
+      "y": 8,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "plugin:fishing/Cast",
+              "params": {
+                "spot": "rocks"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_spot_23": {
+      "id": "ev_spot_23",
+      "name": "釣り場（rocks）",
+      "x": 5,
+      "y": 8,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "plugin:fishing/Cast",
+              "params": {
+                "spot": "rocks"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_intro": {
+      "id": "ev_intro",
+      "name": "はじまり",
+      "x": 25,
+      "y": 0,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_intro",
+              "value": false
+            }
+          ],
+          "trigger": "autorun",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ここは 港町 \\C[6]ナミマ\\C[0]。\n今日は 年に一度の \\C[6]釣り大会\\C[0]の 日だ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "桟橋の先で 釣りを しながら、腕を みがこう。\n水に 向かって \\C[6]決定ボタン\\C[0]で 竿を ふる！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChangeGold",
+              "params": {
+                "op": "gain",
+                "amount": {
+                  "kind": "constant",
+                  "value": 300
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChangeItems",
+              "params": {
+                "item": "item_worm",
+                "op": "gain",
+                "amount": {
+                  "kind": "constant",
+                  "value": 8
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "旅の おこづかいと エサを 受け取った。\n（\\C[6]300G\\C[0]・ミミズ ×8）",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_intro"
+                ],
+                "value": true
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_controller": {
+      "id": "ev_controller",
+      "name": "大会の進行役",
+      "x": 0,
+      "y": 0,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "parallel",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "plugin:fishing/Watch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "variable",
+              "id": "var_fishing_event",
+              "op": "==",
+              "value": 1
+            }
+          ],
+          "trigger": "autorun",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "カーン　カーン　カーン！\n\n\\C[6]終了の鐘\\C[0]が 鳴りひびいた。釣りは そこまで！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "plugin:fishing/Result",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_tournament"
+                ],
+                "value": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_fishing_rank",
+                  "op": "==",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]優勝\\C[0]！ おめでとう！\n賞金 \\C[6]1500G\\C[0]と、\\C[6]金のトロフィー\\C[0]を 受け取った！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_fishing_rank",
+                  "op": "==",
+                  "value": 2
+                }
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]2位\\C[0]！ 惜しかった！\n賞金 \\C[6]700G\\C[0]を 受け取った。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_fishing_rank",
+                  "op": "==",
+                  "value": 3
+                }
+              },
+              "indent": 2
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]3位\\C[0]。入賞だ！\n賞金 \\C[6]300G\\C[0]を 受け取った。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 2
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 2
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]4位\\C[0]……。\nもっと 良い竿と エサで 来年こそ！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_clerk": {
+      "id": "ev_clerk",
+      "name": "受付",
+      "x": 5,
+      "y": 12,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "釣り大会の 受付だよ！\n参加費は \\C[6]100G\\C[0]。制限時間は \\C[6]2 分\\C[0]。釣った魚の 点数で 競うんだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "参加する（100G）",
+                  "ルールを聞く",
+                  "やめる"
+                ],
+                "cancel": 2
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "gold >= 100"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeGold",
+              "params": {
+                "op": "lose",
+                "amount": {
+                  "kind": "constant",
+                  "value": 100
+                }
+              },
+              "indent": 2
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "参加ありがとう！ ミミズも おまけに 3 つ あげるよ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 2
+            },
+            {
+              "code": "ChangeItems",
+              "params": {
+                "item": "item_worm",
+                "op": "gain",
+                "amount": {
+                  "kind": "constant",
+                  "value": 3
+                }
+              },
+              "indent": 2
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "それじゃあ……\\C[6]よーい、スタート！\\C[0]\n右上の タイマーが 0 になるまで だよ！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 2
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_tournament"
+                ],
+                "value": true
+              },
+              "indent": 2
+            },
+            {
+              "code": "plugin:fishing/Start",
+              "params": {},
+              "indent": 2
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おっと、参加費が たりないね。\nまずは 魚を 釣って 釣具屋で 売っておいで。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "点数は 魚の 種類と 大きさで 決まるよ。\n大物ほど 高得点！ 釣れなかった時間は もったいない！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "釣った魚は そのまま 持ち物に 入る。\n大会が 終わったら 釣具屋で 売れるよ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ライバルは \\C[6]ミナ\\C[0]、\\C[6]ゴンさん\\C[0]、\\C[6]トビさん\\C[0]。\n1 位は 賞金 \\C[6]1500G\\C[0]と トロフィーだ！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 2
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "またの 申しこみを まってるよ！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ],
+          "graphic": {
+            "asset": "02809b84f1b29c00",
+            "index": 0,
+            "direction": "down"
+          }
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_tournament",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "大会 じっこうちゅうだよ！\nタイマーが 0 になるまで、がんばって！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ],
+          "graphic": {
+            "asset": "02809b84f1b29c00",
+            "index": 0,
+            "direction": "down"
+          }
+        }
+      ]
+    },
+    "ev_shop": {
+      "id": "ev_shop",
+      "name": "釣具屋",
+      "x": 18,
+      "y": 12,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "いらっしゃい！ 釣具屋だ。\n\\C[6]良い竿\\C[0]ほど 大物に 負けにくく、\\C[6]良いエサ\\C[0]ほど 早く 大物が 来る。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShopProcessing",
+              "params": {
+                "goods": [
+                  "item_worm",
+                  "item_shrimp",
+                  "item_lure",
+                  "item_rod1",
+                  "item_rod2"
+                ],
+                "canSell": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "釣った魚は いつでも 買い取るぜ。\n大物を 期待してるよ！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ],
+          "graphic": {
+            "asset": "964b90f723ccaf12",
+            "index": 0,
+            "direction": "down"
+          }
+        }
+      ]
+    },
+    "ev_board": {
+      "id": "ev_board",
+      "name": "魚拓の板",
+      "x": 9,
+      "y": 12,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "〜 魚拓の板 〜\n釣った魚の 記録を 見られる。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "plugin:fishing/Album",
+              "params": {},
+              "indent": 0
+            }
+          ],
+          "graphic": {
+            "asset": "61b7b2e9a0ba3848",
+            "index": 0,
+            "direction": "down"
+          }
+        }
+      ]
+    },
+    "ev_guide": {
+      "id": "ev_guide",
+      "name": "釣り場の案内",
+      "x": 11,
+      "y": 12,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "〜 釣り場の ご案内 〜\n\\C[6]桟橋\\C[0] イワシ・アジ・クロダイ\n\\C[6]岩場の突堤\\C[0] アジ・メバル・カサゴ・クロダイ",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]桟橋の 先（沖）\\C[0] スズキ・マダイ・\\C[6]まぼろしのマグロ\\C[0]\n※ 沖の大物は 良い竿と エサが ないと 逃げられる。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "・水に 向かって 決定ボタンで 竿を ふる\n・「！」が 出たら すぐ 決定ボタン\n・決定ボタンを 押している間は バーが 右へ、離すと 左へ\n  魚（●）を 緑の 範囲に 入れ続けて 巻き上げろ",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ],
+          "graphic": {
+            "asset": "61b7b2e9a0ba3848",
+            "index": 0,
+            "direction": "down"
+          }
+        }
+      ]
+    },
+    "ev_master": {
+      "id": "ev_master",
+      "name": "港のおじさん",
+      "x": 15,
+      "y": 14,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "わしは この港の 主みたいなもんじゃ。\n釣りの 腕は 竿と エサと 根気で 決まる。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]つり手帳\\C[0]（魚拓の板）の 魚を すべて 釣りあげたら、\nおぬしを 一人前の 釣り人と 認めよう。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ],
+          "graphic": {
+            "asset": "346da51910fd4e03",
+            "index": 0,
+            "direction": "down"
+          }
+        },
+        {
+          "conditions": [
+            {
+              "kind": "variable",
+              "id": "var_fishing_species",
+              "op": ">=",
+              "value": 9
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "な、なんと！ 港に いる 魚を\n\\C[6]ぜんぶ\\C[0] 釣りあげたのか！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChangeGold",
+              "params": {
+                "op": "gain",
+                "amount": {
+                  "kind": "constant",
+                  "value": 3000
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おぬしは 港いちばんの \\C[6]釣りの達人\\C[0]じゃ！\nこれは 祝いの 品じゃ。（\\C[6]3000G\\C[0]）",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSelfSwitch",
+              "params": {
+                "key": "A",
+                "value": true
+              },
+              "indent": 0
+            }
+          ],
+          "graphic": {
+            "asset": "346da51910fd4e03",
+            "index": 0,
+            "direction": "down"
+          }
+        },
+        {
+          "conditions": [
+            {
+              "kind": "variable",
+              "id": "var_fishing_species",
+              "op": ">=",
+              "value": 9
+            },
+            {
+              "kind": "selfSwitch",
+              "key": "A",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おぬしは もう 立派な 達人じゃ。\n大会で トビに 勝つ姿も 見たいのう。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ],
+          "graphic": {
+            "asset": "346da51910fd4e03",
+            "index": 0,
+            "direction": "down"
+          }
+        }
+      ]
+    },
+    "ev_gon": {
+      "id": "ev_gon",
+      "name": "ゴンさん",
+      "x": 13,
+      "y": 5,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ワシは 30年 この桟橋で 釣っとる ゴンじゃ。\n桟橋の 先の 沖は 大物の 巣じゃが……",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "バーの 幅が せまい 竿では 逃げられる。\nまずは 浅いところで 腕を みがくんじゃな。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ],
+          "graphic": {
+            "asset": "04a331882d3297ad",
+            "index": 0,
+            "direction": "up"
+          }
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_tournament",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "しっ！ 今 ウキが 沈みそうなんじゃ。\n話しかけるな！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ],
+          "graphic": {
+            "asset": "04a331882d3297ad",
+            "index": 0,
+            "direction": "up"
+          }
+        },
+        {
+          "conditions": [
+            {
+              "kind": "variable",
+              "id": "var_fishing_rank",
+              "op": ">=",
+              "value": 1
+            },
+            {
+              "kind": "switch",
+              "id": "sw_tournament",
+              "value": false
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "先の 大会は おぬしが \\C[6]\\V[var_fishing_rank]位\\C[0]、\n点数は \\V[var_fishing_score] てんじゃったな。\n次は 負けんぞ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ],
+          "graphic": {
+            "asset": "04a331882d3297ad",
+            "index": 0,
+            "direction": "up"
+          }
+        }
+      ]
+    },
+    "ev_mina": {
+      "id": "ev_mina",
+      "name": "ミナ",
+      "x": 4,
+      "y": 5,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "岩場は メバルや カサゴが 釣れるのよ。\nちょっと 引きが 強いけど、点数も 高いわ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "エサは 良いものほど 大物が 来やすいの。\n\\C[6]エビ\\C[0]や \\C[6]ひかるルアー\\C[0]、おすすめよ！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ],
+          "graphic": {
+            "asset": "d3dff4c9fd5694df",
+            "index": 0,
+            "direction": "up"
+          }
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_tournament",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "今 いい ところなの！ 邪魔しないでね！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ],
+          "graphic": {
+            "asset": "d3dff4c9fd5694df",
+            "index": 0,
+            "direction": "up"
+          }
+        },
+        {
+          "conditions": [
+            {
+              "kind": "variable",
+              "id": "var_fishing_rank",
+              "op": ">=",
+              "value": 1
+            },
+            {
+              "kind": "switch",
+              "id": "sw_tournament",
+              "value": false
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "大会、おつかれさま！ あなたは \\C[6]\\V[var_fishing_rank]位\\C[0]だったのね。\nわたしも もっと 腕を みがかなきゃ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ],
+          "graphic": {
+            "asset": "d3dff4c9fd5694df",
+            "index": 0,
+            "direction": "up"
+          }
+        }
+      ]
+    },
+    "ev_tobi": {
+      "id": "ev_tobi",
+      "name": "トビさん",
+      "x": 22,
+      "y": 12,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "俺は 去年の 優勝者、\\C[6]トビ\\C[0]だ。\n今年も 賞金は いただくぜ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "沖の 大物を 狙えば 点数は 桁ちがいだ。\nだが 良い竿が なければ 話に ならん。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ],
+          "graphic": {
+            "asset": "d9c4b9dc87b4fd9c",
+            "index": 0,
+            "direction": "down"
+          }
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_tournament",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "大会中に 無駄口を たたくな。\n釣れ、釣れ！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ],
+          "graphic": {
+            "asset": "d9c4b9dc87b4fd9c",
+            "index": 0,
+            "direction": "down"
+          }
+        },
+        {
+          "conditions": [
+            {
+              "kind": "variable",
+              "id": "var_fishing_wins",
+              "op": ">=",
+              "value": 1
+            },
+            {
+              "kind": "switch",
+              "id": "sw_tournament",
+              "value": false
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "……やるな。俺に 勝つとは。\n来年は こうは いかんぞ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ],
+          "graphic": {
+            "asset": "d9c4b9dc87b4fd9c",
+            "index": 0,
+            "direction": "down"
+          }
+        }
+      ]
+    }
+  }
+}

@@ -98,6 +98,9 @@ function defaultResume(c: CommandCtx): CommandResult {
     case "shop":
       // この待機の発行元は M1 には無い。詰まらないよう、警告して解除する。
       return { effects: [warn(`未対応の待機 "${wait.kind}" を解除した（${c.interp.id}）`)] };
+    case "plugin":
+      // 解除を判定する `resume` を持つのは、待機を発行したプラグインのコマンドだけ。無いなら（プラグインが読み込まれていない）、詰まらないよう解除する。
+      return { effects: [warn(`プラグイン "${wait.name}" の待機を解除した（resume が無い。${c.interp.id}）`)] };
   }
 }
 

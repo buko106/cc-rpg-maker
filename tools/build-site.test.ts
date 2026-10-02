@@ -20,7 +20,7 @@ describe("build-site", () => {
     for (const f of ["index.html", ".nojekyll", "editor/index.html", "editor/editor.js", "editor/player/player.js", "demo/index.html"]) {
       expect(existsSync(join(out, f)), f).toBe(true);
     }
-    expect(DEMOS.map((d: { slug: string }) => d.slug)).toEqual(["village", "maze", "tower", "mansion", "haunted", "stealth", "hokora", "ice", "water", "dungeon"]);
+    expect(DEMOS.map((d: { slug: string }) => d.slug)).toEqual(["village", "maze", "tower", "mansion", "haunted", "stealth", "hokora", "ice", "water", "dungeon", "fishing"]);
     for (const { slug } of DEMOS as { slug: string }[]) {
       for (const f of ["index.html", "player.js", "project/project.json", "assets"]) expect(existsSync(join(out, "demo", slug, f)), `demo/${slug}/${f}`).toBe(true);
     }
@@ -57,7 +57,7 @@ describe("build-site", () => {
   });
 
   it("エディタとデモの HTML も相対パスで参照している", () => {
-    for (const f of ["editor/index.html", "demo/village/index.html", "demo/maze/index.html", "demo/tower/index.html", "demo/mansion/index.html", "demo/haunted/index.html", "demo/stealth/index.html", "demo/hokora/index.html", "demo/ice/index.html", "demo/water/index.html", "demo/dungeon/index.html"]) {
+    for (const f of ["editor/index.html", "demo/village/index.html", "demo/maze/index.html", "demo/tower/index.html", "demo/mansion/index.html", "demo/haunted/index.html", "demo/stealth/index.html", "demo/hokora/index.html", "demo/ice/index.html", "demo/water/index.html", "demo/dungeon/index.html", "demo/fishing/index.html"]) {
       const html = readFileSync(join(out, f), "utf8");
       const refs = [...html.matchAll(/\b(?:href|src)="([^"]+)"/g)].map((m) => m[1]!);
       expect(refs.filter((r) => r.startsWith("/")), f).toEqual([]);

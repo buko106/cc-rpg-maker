@@ -120,6 +120,14 @@ describe("fromSnapshot", () => {
     expect(r.value.tick).toBe(s.tick);
   });
 
+  it("プラグインの待機（kind: plugin）の途中でも、セーブ → JSON → ロードで同じ状態に戻る", () => {
+    const base = startInterpreter(walked(), { kind: "plugin", name: "fishing" }, [{ code: "plugin:fishing/Cast", params: { spot: "pier" }, indent: 0 }], "normal");
+    const s = { ...base, interpreters: base.interpreters.map((i) => ({ ...i, wait: { kind: "plugin" as const, name: "fishing" } })) };
+    const r = load(JSON.parse(JSON.stringify(toSnapshot(s, meta))));
+    if (!r.ok) throw new Error("must load");
+    expect(r.value.interpreters[0]!.wait).toEqual({ kind: "plugin", name: "fishing" });
+  });
+
   it("returns a state that does not alias the snapshot", () => {
     const snap = clone(toSnapshot(walked(), meta));
     const r = load(snap);

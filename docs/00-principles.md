@@ -43,8 +43,9 @@ editor-core   → schema, core（CommandRegistry のメタデータ参照のみ�
 plugin-api    → core, runtime, editor-core（公開型のみ）
 plugin-samples → plugin-api（サンプルプラグイン。第三者のプラグインと同じ立場）
 plugin-dungeon → plugin-api（不思議のダンジョン。同じく第三者のプラグインと同じ立場。docs/18）
-editor-ui     → editor-core, runtime, plugin-api, plugin-samples, plugin-dungeon, schema, core（CommandRegistry のメタデータ参照のみ）, exporter, 任意のアダプタ
-player        → runtime, plugin-api, plugin-samples, plugin-dungeon, schema（project.json の検証用）, 任意のアダプタ
+plugin-fishing → plugin-api（釣り大会。同じく第三者のプラグインと同じ立場。docs/19）
+editor-ui     → editor-core, runtime, plugin-api, plugin-samples, plugin-dungeon, plugin-fishing, schema, core（CommandRegistry のメタデータ参照のみ）, exporter, 任意のアダプタ
+player        → runtime, plugin-api, plugin-samples, plugin-dungeon, plugin-fishing, schema（project.json の検証用）, 任意のアダプタ
 test-utils    → 任意（テスト専用）
 ```
 

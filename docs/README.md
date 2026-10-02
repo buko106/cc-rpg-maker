@@ -38,6 +38,7 @@
 | 16 | [16-testing.md](./16-testing.md) | 全体 | テスト戦略、共通テストユーティリティ、契約テスト |
 | 17 | [17-milestones.md](./17-milestones.md) | 全体 | 実装順序、マイルストーン、各段階の完了条件 |
 | 18 | [18-dungeon-plugin.md](./18-dungeon-plugin.md) | `@rpg/plugin-dungeon` | 不思議のダンジョンのプラグイン（デモ実装済み）と、そのために core に足した汎用の部品 |
+| 19 | [19-fishing-plugin.md](./19-fishing-plugin.md) | `@rpg/plugin-fishing` | 釣り大会（ミニゲーム・図鑑・制限時間つきの大会）のプラグイン（デモ実装済み）と、そのために core に足した「プラグインの待機」 |
 
 ## システム概要
 

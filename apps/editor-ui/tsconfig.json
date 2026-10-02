@@ -32,6 +32,9 @@
       "path": "../../packages/plugin-dungeon"
     },
     {
+      "path": "../../packages/plugin-fishing"
+    },
+    {
       "path": "../../packages/plugin-samples"
     },
     {

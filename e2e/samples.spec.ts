@@ -18,9 +18,9 @@ test.beforeEach(async ({ page }) => {
   await page.reload();
 });
 
-test("サンプル（はじまりの村・地下迷宮・バトルタワー・謎解きの館・おばけ屋敷の追いかけっこ・忍び込み・ほこらの冒険・氷の神殿・水門の遺跡・風鳴りの洞窟）が画面写真つきで並び、地下迷宮から作るとテストプレイで遊べる", async ({ page }) => {
+test("サンプル（はじまりの村・地下迷宮・バトルタワー・謎解きの館・おばけ屋敷の追いかけっこ・忍び込み・ほこらの冒険・氷の神殿・水門の遺跡・風鳴りの洞窟・港町の釣り大会）が画面写真つきで並び、地下迷宮から作るとテストプレイで遊べる", async ({ page }) => {
   const samples = page.getByRole("list", { name: "サンプル" });
-  await expect(samples.getByRole("listitem")).toHaveCount(10);
+  await expect(samples.getByRole("listitem")).toHaveCount(11);
   await expect(samples.getByText("はじまりの村", { exact: true })).toBeVisible();
   await expect(samples.getByText("地下迷宮", { exact: true })).toBeVisible();
   await expect(samples.getByText("バトルタワー", { exact: true })).toBeVisible();
@@ -31,8 +31,9 @@ test("サンプル（はじまりの村・地下迷宮・バトルタワー・�
   await expect(samples.getByText("氷の神殿", { exact: true })).toBeVisible();
   await expect(samples.getByText("水門の遺跡", { exact: true })).toBeVisible();
   await expect(samples.getByText("風鳴りの洞窟（不思議のダンジョン）", { exact: true })).toBeVisible();
+  await expect(samples.getByText("港町の釣り大会", { exact: true })).toBeVisible();
   // 画面写真が読み込めている
-  await expect.poll(() => samples.locator("img").evaluateAll((imgs) => imgs.map((i) => (i as HTMLImageElement).naturalWidth > 0))).toEqual(Array.from({ length: 10 }, () => true));
+  await expect.poll(() => samples.locator("img").evaluateAll((imgs) => imgs.map((i) => (i as HTMLImageElement).naturalWidth > 0))).toEqual(Array.from({ length: 11 }, () => true));
 
   await page.getByRole("button", { name: "地下迷宮 のサンプルから作る" }).click();
   await expect(page.getByRole("application")).toBeVisible();
@@ -95,4 +96,19 @@ test("はじまりの村から作ったプロジェクトを ZIP に書き出し
   expect(await page.evaluate(() => Object.keys((window as unknown as Handles).__editor.doc.maps).sort())).toEqual(maps);
   await page.getByRole("button", { name: "← プロジェクト一覧" }).click();
   await expect(page.getByRole("button", { name: "デモ：はじまりの村 を開く" })).toHaveCount(2);
+});
+
+test("港町の釣り大会（プラグイン fishing を使う v2 のサンプル）から作ると、テストプレイでプラグインを読み込んで始まる", async ({ page }) => {
+  await page.getByRole("button", { name: "港町の釣り大会 のサンプルから作る" }).click();
+  await expect(page.getByRole("application")).toBeVisible();
+  const plugins = await page.evaluate(() => (window as unknown as Handles).__editor.doc.project.system.plugins.map((p) => p.name));
+  expect(plugins).toEqual(["fishing"]);
+
+  await page.getByRole("button", { name: "テストプレイ", exact: true }).click();
+  type Play = { getState(): { scene: { kind: string }; map: { mapId: string }; interpreters: { mode: string }[] } };
+  await page.waitForFunction(() => (window as unknown as { __rpgPlaytest?: Play }).__rpgPlaytest?.getState().scene.kind === "title");
+  await page.keyboard.press("Enter");
+  await page.waitForFunction(() => (window as unknown as { __rpgPlaytest: Play }).__rpgPlaytest.getState().map.mapId === "map_harbor");
+  // 最初の説明（自動実行のイベント）が動いている
+  await page.waitForFunction(() => (window as unknown as { __rpgPlaytest: Play }).__rpgPlaytest.getState().interpreters.some((i) => i.mode === "normal"));
 });

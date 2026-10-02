@@ -26,7 +26,7 @@ export interface InterpreterState {
   readonly mode: "normal" | "parallel";
   readonly commands: readonly EventCommand[];
   readonly pc: number;                       // 次に実行する命令のインデックス
-  readonly wait: WaitState;                  // { kind: "none" } | { kind: "frames"; left } | { kind: "message" } | { kind: "choice" } | { kind: "move"; who } | { kind: "battle" } | { kind: "transfer" } | { kind: "child"; id }
+  readonly wait: WaitState;                  // { kind: "none" } | { kind: "frames"; left } | { kind: "message" } | { kind: "choice" } | { kind: "move"; who } | { kind: "battle" } | { kind: "transfer" } | { kind: "child"; id } | { kind: "plugin"; name }
   readonly branch: Record<number, number>;   // indent → 選択された分岐番号（Choice / Conditional 用）
   readonly callStack: { commands: readonly EventCommand[]; pc: number; branch: Record<number,number> }[];
   readonly locals: Record<string, unknown>;  // プラグイン用
@@ -196,3 +196,10 @@ export function runInterpreters(state: GameState, input: InputFrame, ctx: Ctx): 
 - **組み込みの対応**：開始 = `ConditionalBranch`（`bodyFirst`・`Else`）/ `ShowChoices` / `BattleProcessing` / `Loop`（`bodyFirst`）、区切り = `Else` / `ChoiceBranch`、終端 = `EndBranch` / `EndLoop`。プラグインのコマンドも同じ `meta.block` を書けばエディタで同じように扱える（14）。
 - **テスト**：`meta.test.ts`（組み込みの役割、`close` と `dividers` が登録済みの終端・区切りを指すこと、区切りの並び）。
 - **`SaveGame` / `LoadGame` はセーブポータル**：メニューと同じセーブ/ロード画面を、イベントから直接開く（`scene` を `{ kind: "menu", screen, cursor: 0, portal: true }` にする）。`portal` の画面は、キャンセルするとメインメニューを経由せずマップに戻り、イベントが続きから動く（メニューから開いた画面は従来どおりメインメニューに戻る）。`system.menuSave: false`（02）のゲームでも、これで開けばセーブできる。保存は画面での選択で行うので、コマンドに引数は無い。
+
+## 実装メモ（プラグインの待機 `wait: plugin`）
+- **`WaitState` に `{ kind: "plugin"; name }` を足した**（`name` はプラグイン名）。プラグインのコマンドが、ミニゲームや独自の画面のように、**毎フレーム自分で入力を読んで解除を判定する**ための待機。`run` が `control: { kind: "wait", wait: { kind: "plugin", name } }` を返し、`resume`（毎フレーム呼ばれる。`CommandCtx.input` が読める）が、解除するときに `control: { kind: "next" }`、続けるときに `control: { kind: "wait", wait: c.interp.wait }` を返す。`resume` の中で `state` を返して状態を更新してよい。
+- **`resume` を持たないコマンドが発行した場合**（プラグインを読み込まずに、プラグインの待機の入ったセーブを読んだときなど）は、既定の解除（`defaultResume`）が警告（`プラグイン "<name>" の待機を解除した`）を出して解除する。詰まらない。
+- **待機中の規則は変わらない**：`normal` のインタプリタが待っている間、プレイヤーは歩けず・メニューも開けない（`handleInput`）。並列のインタプリタが待っているときは、ほかのイベントもプレイヤーも動く。
+- **セーブ**：`snapshot` の検証スキーマ（`waitSchema`）に `plugin` を追加（`SNAPSHOT_VERSION` は上げない）。これまでのセーブはそのまま読める。
+- 使い道：釣りのミニゲームと図鑑・結果発表の画面（`@rpg/plugin-fishing`。19）。テスト：`run.test.ts`、`snapshot.test.ts`。

@@ -1,4 +1,5 @@
 import { dungeonPlugin } from "@rpg/plugin-dungeon";
+import { fishingPlugin } from "@rpg/plugin-fishing";
 import { samplePlugins } from "@rpg/plugin-samples";
 import { bootPlayer } from "./boot.js";
 import type { PlayerConfig, RendererKind } from "./boot.js";
@@ -28,7 +29,7 @@ const embeddedElement = document.getElementById("rpg-embedded");
 const debug = params.has("debug");
 let config: PlayerConfig;
 try {
-  const common = { debug, renderer, touchPad, plugins: [...samplePlugins, dungeonPlugin] };
+  const common = { debug, renderer, touchPad, plugins: [...samplePlugins, dungeonPlugin, fishingPlugin] };
   config = embeddedElement === null ? { projectUrl: params.get("project") ?? "project/project.json", ...common } : { embedded: JSON.parse(embeddedElement.textContent ?? "") as EmbeddedData, ...common };
 } catch (e) {
   // 埋め込みの JSON が壊れているときも、白い画面ではなくエラー画面を出す

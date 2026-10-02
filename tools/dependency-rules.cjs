@@ -26,6 +26,7 @@ const LOCATIONS = {
   "plugin-api": "packages",
   "plugin-samples": "packages",
   "plugin-dungeon": "packages",
+  "plugin-fishing": "packages",
   "test-utils": "packages",
   "editor-ui": "apps",
   player: "apps",
@@ -68,8 +69,9 @@ const ALLOWED = {
   "plugin-api": ["core", "runtime", "editor-core"],
   "plugin-samples": ["plugin-api"],
   "plugin-dungeon": ["plugin-api"],
-  "editor-ui": ["editor-core", "runtime", "plugin-api", "plugin-samples", "plugin-dungeon", "schema", "core", "exporter", ...ADAPTERS],
-  player: ["runtime", "plugin-api", "plugin-samples", "plugin-dungeon", "schema", ...ADAPTERS],
+  "plugin-fishing": ["plugin-api"],
+  "editor-ui": ["editor-core", "runtime", "plugin-api", "plugin-samples", "plugin-dungeon", "plugin-fishing", "schema", "core", "exporter", ...ADAPTERS],
+  player: ["runtime", "plugin-api", "plugin-samples", "plugin-dungeon", "plugin-fishing", "schema", ...ADAPTERS],
   "test-utils": "*",
 };
 
