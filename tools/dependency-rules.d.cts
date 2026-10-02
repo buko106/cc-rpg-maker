@@ -1,4 +1,8 @@
-export const LOCATIONS: Record<string, "packages" | "apps">;
+export const ROOTS: string[];
+export function dirName(name: string): string;
+export function pathOf(name: string): string;
+export function nameAt(root: string, dir: string): string | undefined;
+export const LOCATIONS: Record<string, "packages" | "plugins" | "apps">;
 export const ADAPTERS: string[];
 export const ALLOWED: Record<string, string[] | "*">;
 export const NAMES: string[];

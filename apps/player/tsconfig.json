@@ -36,13 +36,13 @@
       "path": "../../packages/plugin-api"
     },
     {
-      "path": "../../packages/plugin-dungeon"
+      "path": "../../plugins/dungeon"
     },
     {
-      "path": "../../packages/plugin-fishing"
+      "path": "../../plugins/fishing"
     },
     {
-      "path": "../../packages/plugin-samples"
+      "path": "../../plugins/samples"
     },
     {
       "path": "../../packages/project-store"

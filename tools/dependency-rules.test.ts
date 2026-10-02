@@ -12,7 +12,7 @@ const rules = require("./dependency-rules.cjs") as typeof import("./dependency-r
 const { options: baseOptions, ...ruleSet } = require("../.dependency-cruiser.cjs") as IConfiguration & {
   options: ICruiseOptions;
 };
-const { LOCATIONS, NAMES, isAllowed } = rules;
+const { ROOTS, NAMES, isAllowed, pathOf, nameAt } = rules;
 
 const write = (root: string, path: string, content: string): void => {
   mkdirSync(dirname(join(root, path)), { recursive: true });
@@ -21,11 +21,11 @@ const write = (root: string, path: string, content: string): void => {
 
 /** ルール検査を、実ソースではなく合成したツリーに対して実行する。 */
 async function cruiseTree(root: string, files: Record<string, string>) {
-  for (const dir of ["packages", "apps"]) mkdirSync(join(root, dir), { recursive: true });
+  for (const dir of ROOTS) mkdirSync(join(root, dir), { recursive: true });
   for (const [path, content] of Object.entries(files)) write(root, path, content);
   // 合成ツリーには tsconfig が無いので、tsConfig 以外は本物の設定をそのまま使う
   const { tsConfig: _tsConfig, ...options } = baseOptions;
-  const result = await cruise(["packages", "apps"], { ...options, ruleSet, validate: true, baseDir: root });
+  const result = await cruise(ROOTS, { ...options, ruleSet, validate: true, baseDir: root });
   if (typeof result.output === "string") throw new Error("unexpected string output");
   return result.output.summary.violations;
 }
@@ -41,15 +41,15 @@ afterAll(() => {
 describe("dependency rules (docs/00-principles.md §2)", () => {
   it("flags exactly the forbidden package pairs", async () => {
     const files: Record<string, string> = {};
-    for (const name of NAMES) files[`${LOCATIONS[name]}/${name}/src/index.ts`] = "export const x = 1;\n";
+    for (const name of NAMES) files[`${pathOf(name)}/src/index.ts`] = "export const x = 1;\n";
     const expected = new Set<string>();
     for (const from of NAMES) {
       for (const to of NAMES) {
         if (from === to) continue;
-        const target = `import { x } from "../../../${LOCATIONS[to]}/${to}/src/index";\nexport const y = x;\n`;
-        files[`${LOCATIONS[from]}/${from}/src/to-${to}.ts`] = target;
-        files[`${LOCATIONS[from]}/${from}/src/to-${to}.test.ts`] = target;
-        files[`${LOCATIONS[from]}/${from}/src/to-${to}.testkit.ts`] = target; // テスト専用のヘルパも、テストファイルと同じ扱い
+        const target = `import { x } from "../../../${pathOf(to)}/src/index";\nexport const y = x;\n`;
+        files[`${pathOf(from)}/src/to-${to}.ts`] = target;
+        files[`${pathOf(from)}/src/to-${to}.test.ts`] = target;
+        files[`${pathOf(from)}/src/to-${to}.testkit.ts`] = target; // テスト専用のヘルパも、テストファイルと同じ扱い
         if (!isAllowed(from, to)) expected.add(`${from} -> ${to}`);
         if (!isAllowed(from, to, { test: true })) expected.add(`${from} (test) -> ${to}`);
       }
@@ -60,7 +60,8 @@ describe("dependency rules (docs/00-principles.md §2)", () => {
       violations
         .filter((v) => v.rule.name.startsWith("package-deps-"))
         .map((v) => {
-          const to = /^(?:packages|apps)\/([^/]+)\//.exec(v.to)?.[1];
+          const m = /^(packages|plugins|apps)\/([^/]+)\//.exec(v.to);
+          const to = m === null ? undefined : nameAt(m[1]!, m[2]!);
           const from = v.rule.name.slice("package-deps-".length);
           return from.endsWith("-tests") ? `${from.slice(0, -"-tests".length)} (test) -> ${to}` : `${from} -> ${to}`;
         }),
@@ -116,7 +117,7 @@ describe("package manifests", () => {
 
   function scaffold(overrides: Record<string, string> = {}): string {
     const dir = mkdtempSync(join(tmpdir(), "rpg-manifests-"));
-    for (const name of NAMES) write(dir, `${LOCATIONS[name]}/${name}/package.json`, manifest(name));
+    for (const name of NAMES) write(dir, `${pathOf(name)}/package.json`, manifest(name));
     for (const [path, content] of Object.entries(overrides)) write(dir, path, content);
     return dir;
   }

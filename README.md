@@ -75,7 +75,8 @@
 ```
 /
 ├── docs/           設計ドキュメント
-├── packages/       schema, core, runtime, 各アダプタ, editor-core, plugin-api, test-utils
+├── packages/       schema, core, runtime, 各アダプタ, editor-core, plugin-api（プラグインの土台）, test-utils
+├── plugins/        プラグインの実装（samples, dungeon, fishing。パッケージ名は @rpg/plugin-*）
 ├── apps/           editor-ui, player
 └── fixtures/       サンプルプロジェクト、リプレイ、マイグレーション用データ
 ```

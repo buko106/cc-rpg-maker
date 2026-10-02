@@ -86,8 +86,12 @@
 │   ├── project-store/
 │   ├── save-store/
 │   ├── editor-core/
-│   ├── plugin-api/
+│   ├── plugin-api/       ← プラグインの土台（PluginHost・ローダ）。プラグイン自体は plugins/
 │   └── test-utils/       ← 16-testing.md 参照
+├── plugins/              ← プラグインの実装（plugin-api だけに依存する。第三者のプラグインと同じ立場）
+│   ├── samples/          ← @rpg/plugin-samples
+│   ├── dungeon/          ← @rpg/plugin-dungeon（18-dungeon-plugin.md）
+│   └── fishing/          ← @rpg/plugin-fishing（19-fishing-plugin.md）
 ├── apps/
 │   ├── editor-ui/
 │   └── player/

@@ -10,5 +10,5 @@
     "types": ["node"],
     "jsx": "react-jsx"
   },
-  "include": ["packages/*/src", "apps/*/src", "tools/**/*.ts", "e2e", "vitest.config.ts", "playwright.config.ts"]
+  "include": ["packages/*/src", "plugins/*/src", "apps/*/src", "tools/**/*.ts", "e2e", "vitest.config.ts", "playwright.config.ts"]
 }
