@@ -125,6 +125,18 @@ describe("createBrowserInput（ゲームパッド）", () => {
     expect(new Set(source.poll().pressed)).toEqual(new Set(["left", "down"]));
   });
 
+  it("X ボタンと右トリガー（RT）は走る（shift）", () => {
+    let current = pad([2]);
+    const source = createBrowserInput(new EventTarget(), { gamepad: true, readGamepads: () => current });
+    expect(new Set(source.poll().pressed)).toEqual(new Set(["shift"]));
+    current = pad([]);
+    source.poll();
+    current = pad([7, 13]);
+    const f = source.poll();
+    expect(new Set(f.pressed)).toEqual(new Set(["shift", "down"]));
+    expect(new Set(f.triggered)).toEqual(new Set(["shift", "down"]));
+  });
+
   it("gamepad を有効にしなければ読まない。接続されていない（null）パッドは無視する", () => {
     let reads = 0;
     const off = createBrowserInput(new EventTarget(), { readGamepads: () => (reads++, pad([0])) });

@@ -33,7 +33,7 @@ export const snapshotMigrations: readonly SnapshotMigration[] = [];
 const snapCharacter = <C extends Character>(ch: C): C => (ch.moving || ch.realX !== ch.x || ch.realY !== ch.y ? { ...ch, realX: ch.x, realY: ch.y, moving: false } : ch);
 
 /**
- * セーブ時に捨てる一時状態を落とす：移動の補間中の位置（`realX/realY/moving`）を目的のタイルに確定させ、
+ * セーブ時に捨てる一時状態を落とす：移動の補間中の位置（`realX/realY/moving`）を目的のタイルに確定させ（歩いている 1 歩の速さ `moveSpeed` も捨てる）、
  * タイトル・メニュー・戦闘・ゲームオーバーの状態（`scene` と `battle`）をマップに戻す。
  * `fromSnapshot(toSnapshot(s))` は `stripTransient(s)` と一致する。
  */
@@ -42,7 +42,8 @@ export function stripTransient(s: GameState): SerializedGameState {
   const events: Record<string, EventRuntime> = {};
   for (const [id, ev] of Object.entries(s.map.events)) events[id] = snapCharacter(ev);
   const scene: SerializedGameState["scene"] = { kind: "map" };
-  return { ...rest, scene, map: { ...s.map, player: snapCharacter(s.map.player), events, followers: s.map.followers.map(snapCharacter) } };
+  const { moveSpeed: _moveSpeed, ...map } = s.map;
+  return { ...rest, scene, map: { ...map, player: snapCharacter(s.map.player), events, followers: s.map.followers.map(snapCharacter) } };
 }
 
 /** キーの順序に依存しない JSON 文字列（値が同じなら同じ文字列）。 */

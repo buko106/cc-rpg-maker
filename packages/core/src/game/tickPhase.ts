@@ -4,7 +4,7 @@ import { warn } from "../effects.js";
 import type { Effect } from "../effects.js";
 import type { InputFrame } from "../input.js";
 import { isPageRouteOrigin, pageRouteCommands, pageRouteName, runInterpreters, startInterpreter } from "../interpreter/index.js";
-import { advanceCharacter, computeCamera, currentMap, DEFAULT_SIGHT_RANGE, eventsToTrigger, hasSight, refreshEventPages, rollEncounter, seesPlayer, slide, startsOnPlayerTouch } from "../map/index.js";
+import { advanceCharacter, computeCamera, currentMap, DEFAULT_SIGHT_RANGE, eventsToTrigger, hasSight, mapWalkSpeed, refreshEventPages, rollEncounter, seesPlayer, slide, startsOnPlayerTouch } from "../map/index.js";
 import type { PassabilityCtx } from "../map/index.js";
 import { battleTick, startBattle } from "../battle/index.js";
 import type { GameState, MapState } from "../state.js";
@@ -69,7 +69,8 @@ function applyTransfer(state: GameState, ctx: Ctx): StepResult {
   const y = Math.min(Math.max(t.y, 0), target.height - 1);
   if (x !== t.x || y !== t.y) effects.push(warn(`場所移動先 (${t.x}, ${t.y}) が ${t.to} の外なので (${x}, ${y}) に補正した`));
 
-  const player = { ...state.map.player, x, y, realX: x, realY: y, direction: t.dir, moving: false };
+  // マップに入ると、歩く速さはそのマップの既定（`walkSpeed`）になる。どちらも無ければ、いまの速さのまま
+  const player = { ...state.map.player, x, y, realX: x, realY: y, direction: t.dir, moving: false, speed: mapWalkSpeed(ctx.project.project.system, target) ?? state.map.player.speed };
   const name = ctx.project.project.maps[t.to]?.name ?? "";
   const entered = enterMap(target, name, player);
   // 元のマップの並列イベントは終了する（移動先で必要なら再び起動される）。移動を待っているインタプリタ自身は残す。
@@ -94,11 +95,23 @@ function advanceMovement(state: GameState, map: MapData, ctx: Ctx): StepResult {
     eventsChanged = true;
   }
   const wasMoving = s.map.player.moving;
-  const player = advanceCharacter(s.map.player);
+  const player = advanceCharacter(s.map.player, s.map.moveSpeed);
   if (!eventsChanged && player === s.map.player) return { state: s, effects: [] };
   s = { ...s, map: { ...s.map, player, ...(eventsChanged ? { events } : {}) } };
 
-  if (wasMoving && !player.moving && !hasNormalInterpreter(s) && s.map.transfer === undefined) {
+  if (wasMoving && !player.moving) {
+    // 1 歩が終わったので、その歩きだけの速さ（足元・状態・走る）は消す。氷で滑り続けるときは、同じ速さで滑る（下）
+    const { moveSpeed, ...rest } = s.map;
+    if (moveSpeed !== undefined) s = { ...s, map: rest };
+    return arrive(s, map, ctx, moveSpeed);
+  }
+  return { state: s, effects: [] };
+}
+
+/** プレイヤーが 1 歩を歩き終えた（`slidSpeed` は、いまの 1 歩の速さ。氷で滑り続けるとき引き継ぐ）。 */
+function arrive(s: GameState, map: MapData, ctx: Ctx, slidSpeed: GameState["map"]["moveSpeed"]): StepResult {
+  const { player } = s.map;
+  if (!hasNormalInterpreter(s) && s.map.transfer === undefined) {
     const here: EventId | undefined = Object.values(s.map.events).find(
       (ev) => ev.pageIndex !== null && startsOnPlayerTouch(ev.trigger) && ev.priority !== "same" && ev.x === player.x && ev.y === player.y,
     )?.id;
@@ -106,7 +119,7 @@ function advanceMovement(state: GameState, map: MapData, ctx: Ctx): StepResult {
     // 氷の上なら、同じ向きに滑り続ける（滑っている間は歩数を数えず、遭遇もしない。止まった所で判定する）
     const tileset = ctx.project.tileset(map.tileset);
     const slid = tileset === undefined ? undefined : slide(s.map.player, { map, tileset, events: s.map.events });
-    if (slid !== undefined) return { state: { ...s, map: { ...s.map, player: slid } }, effects: [] };
+    if (slid !== undefined) return { state: { ...s, map: { ...s.map, player: slid, ...(slidSpeed === undefined ? {} : { moveSpeed: slidSpeed }) } }, effects: [] };
     return startEncounter(s, map, ctx);
   }
   return { state: s, effects: [] };

@@ -7,6 +7,16 @@ import { useExecute } from "./useExecute.js";
 /** 通行可能方向のビット（docs/01-schema.md：下=1, 左=2, 右=4, 上=8）。範囲外のタイルは全方向通行可（15）。 */
 const PASSAGE: readonly [number, string][] = [[1, "下"], [2, "左"], [4, "右"], [8, "上"]];
 
+/** 足元のタイルによる歩く速さの増減（段階。1 段階ごとに 2 倍）。 */
+const FOOTING_SPEEDS: readonly [number, string][] = [
+  [2, "とても速い（+2）"],
+  [1, "速い（+1）"],
+  [0, "ふつう"],
+  [-1, "遅い（−1）"],
+  [-2, "とても遅い（−2）"],
+  [-3, "ほとんど進めない（−3）"],
+];
+
 /**
  * タイルパレット：タイルセット画像を 1 タイルずつのボタンに分けて並べる（キーボードで選べる）。
  * タイル番号は画像の左→右、上→下の順（0 は「空」なので並べない。消しゴムで消す）。
@@ -44,6 +54,19 @@ export function TilePalette(): ReactElement {
     run(cmd.upsertTileset(ice.length === 0 ? base : { ...base, ice }));
   };
 
+  // 足元の速さ（砂地・沼など）。何も変えない設定（ふつう・走れる）は持たない
+  const footing = tileset?.terrain?.[String(selected)];
+  const setFooting = (next: { speed?: number; noDash?: boolean }): void => {
+    if (tileset === undefined) return;
+    const speed = next.speed ?? footing?.speed ?? 0;
+    const noDash = next.noDash ?? footing?.noDash === true;
+    const rest = Object.fromEntries(Object.entries(tileset.terrain ?? {}).filter(([tile]) => tile !== String(selected)));
+    const effect = { ...(speed === 0 ? {} : { speed }), ...(noDash ? { noDash: true } : {}) };
+    const terrain = Object.keys(effect).length === 0 ? rest : { ...rest, [String(selected)]: effect };
+    const { terrain: _old, ...base } = tileset;
+    run(cmd.upsertTileset(Object.keys(terrain).length === 0 ? base : { ...base, terrain }));
+  };
+
   return (
     <section className="tile-palette" aria-label="タイルパレット">
       <h2>タイル</h2>
@@ -78,6 +101,20 @@ export function TilePalette(): ReactElement {
           <label className="check">
             <input type="checkbox" checked={slippery} onChange={(e) => setSlippery(e.target.checked)} />
             滑る（氷）
+          </label>
+          <label>
+            足元の速さ
+            <select value={footing?.speed ?? 0} onChange={(e) => setFooting({ speed: Number(e.target.value) })}>
+              {FOOTING_SPEEDS.map(([speed, label]) => (
+                <option key={speed} value={speed}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="check">
+            <input type="checkbox" checked={footing?.noDash === true} onChange={(e) => setFooting({ noDash: e.target.checked })} />
+            走れない
           </label>
         </fieldset>
       )}

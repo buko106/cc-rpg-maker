@@ -33,6 +33,9 @@ test.describe("タッチ端末", () => {
     await expect(page.locator('[data-touch-pad] [data-control="dpad"] svg')).toHaveCount(4);
     await expect(page.locator('[data-touch-pad] [data-control="menu"] svg')).toHaveCount(1);
     expect(await page.locator('[data-touch-pad] [data-control="dpad"]').innerText()).toBe("");
+    // 走る機能のないゲーム（デモ「はじまりの村」）の操作パッドは、走るボタンの無い従来のまま（十字キー・メニュー・B・A だけ）
+    await expect(page.locator("[data-touch-pad] [data-control]")).toHaveCount(4);
+    await expect(page.locator('[data-touch-pad] [data-control="shift"]')).toHaveCount(0);
     const prevented = await page.evaluate(() => {
       const el = document.querySelector('[data-touch-pad] [data-control="ok"]') as HTMLElement;
       const ev = new Event("touchstart", { bubbles: true, cancelable: true });

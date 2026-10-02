@@ -84,6 +84,8 @@ export interface MapData {
   bgm?: AudioRef;
   encounters?: { troop: TroopId; weight: number }[];   // ランダムエンカウント（歩くたびに weight の比で選ぶ）
   encounterStep?: number;                              // 平均歩数（1〜999、省略 = 30）
+  walkSpeed?: number;                                  // このマップに入ったときの歩く速さ（1〜6。省略 = system.walkSpeed）
+  noDash?: boolean;                                    // 真ならこのマップでは走れない
 }
 
 export interface TileLayer { name: string; tiles: Uint16Array | number[] }  // width*height、0 = 空
@@ -241,4 +243,10 @@ export function findDanglingRefs(...): RefTarget[];
 - **`Tileset.ice`（氷の床）と `EventPage.pushable`（押せるイベント）を足した**：`ice` はタイル ID の配列（`1` 以上の整数、省略可）。そのタイルがどのレイヤにあっても、歩いて着くと同じ向きに止まるまで滑る床になる。`pushable` は `boolean`（省略可）で、有効なページが真のとき、通常プライオリティで `through` でないイベントを、プレイヤーが突き当たって 1 タイル押せる（02）。どちらも省略可なので `formatVersion` は上げない。
 - **`MoveRoute.pace`（ルートの進み方）を足した**：`"frames"`（既定。時間で進む）| `"playerStep"`（プレイヤーが 1 手打つたびに進む＝ターン制。`move` は 1 手で 1 歩、`wait` の `frames` は待つ手数、`turn` / `speed` は時間がかからない）。省略可なので `formatVersion` は上げない（03）。
 - **`system.turnInPlace`（振り向き）を足した**：`boolean`（省略可）。`true` のとき、いまの向きと違う方向キーを**押した瞬間**は、移動せずに向きだけ変わる（手数にも数えない）。向いた方向にもう一度押すか、押し続けて少し待つと歩き出す。省略または `false` なら従来どおり、押した方向へそのまま歩く（通れなければ向きだけ変わる）。ゲーム全体のオプション。値を足しただけで `formatVersion` は上げていない（02）。
+- **歩く速さの設定を足した**（すべて省略可。値を足しただけで `formatVersion` は上げていない。02）：
+  - **基準**：`system.walkSpeed`（1〜6、4 が標準）と `MapData.walkSpeed`（同）。マップに入るたびに、プレイヤーの歩く速さ（`Character.speed`）がマップの `walkSpeed`、無ければ `system.walkSpeed` になる。どちらも無ければ変えない（従来どおり。ダンジョンのプラグインのように `speed` を自分で決めるものも、そのまま動く）。速さの 1 段階は 2 倍（3 → 32、4 → 16、5 → 8 フレーム/タイル）。
+  - **走る**：`system.dash`（`{ bonus?: 1〜3 }`。空のオブジェクトで有効）。方向キーを押しながら Shift（ゲームパッドは X / RT、スマホは操作パッドの走るボタン。08）で、歩く速さが `bonus` 段階（既定 1）速くなる（上限は 6）。`system.dash` が無いゲームでは走れず、スマホの操作パッドにも走るボタンは出ない。`MapData.noDash: true` のマップでは走れない。
+  - **足元のタイル**：`Tileset.terrain`（タイル ID を文字列にしたキー → `{ speed?, noDash? }`。砂地・沼など）。プレイヤーが歩き出すとき、いま立っているタイルがどのレイヤにあっても効く（同じタイルが重なっても 1 回）。`speed` は段階の増減（−5〜5。マイナスで遅く）、`noDash: true` はそのタイルの上では走れない。
+  - **ゲームの状態**：`system.speedRules`（`{ when: StateCondition[], speed?, noDash? }` の配列）。`when` がすべて成り立つとき効く（空ならいつでも）。条件はイベントのページの条件と同じ種類のうち、スイッチ・変数・所持品・パーティ（`stateConditionSchema`。セルフスイッチは除く）。「空腹（スイッチ・満腹度の変数）だと遅い・走れない」などに使う。参照先（スイッチ・変数・アイテム・アクター）は `collectRefs` が拾い、参照切れの診断と削除の確認の対象になる。
+  - **合わせ方**：歩き出す 1 歩の速さ = 基準（`player.speed`）+ 足元の `speed` + 成り立っているルールの `speed` の合計 + 走るときの `bonus`、を 1〜6 に丸めた値。走れるのは、`system.dash` があり、マップが `noDash` でなく、足元のタイルにも成り立っているルールにも `noDash` が無いとき（走れないときは Shift を押しても無視する）。
 - **`system.menuSkill`（メニューに「スキル」を出すか）を足した**：`boolean`（省略可）。`true` のときだけメインメニューの「アイテム」の次に「スキル」が並び、味方に向けたスキル（回復など）をマップで使える（02・06）。省略または `false` なら並ばない（従来のメニューのまま）。`menuSave` と違って省略時は出さない（既存のゲームのメニューを変えないため）。値を足しただけで `formatVersion` は上げていない。

@@ -1,11 +1,13 @@
 export { computeCamera } from "./camera.js";
 export { advanceCharacter, DIRECTION_VECTOR, newCharacter, REVERSE, stepDistance } from "./character.js";
-export { activePage, activePageIndex, eventsToTrigger, initialEventRuntimes, refreshEventPages, startsOnEventTouch, startsOnPlayerTouch } from "./pages.js";
+export { activePage, activePageIndex, eventsToTrigger, initialEventRuntimes, refreshEventPages, startsOnEventTouch, startsOnPlayerTouch, stateConditionHolds } from "./pages.js";
 export { hasPacedEvents, isPacedPage, pacedEventsMoving, withTurn } from "./paced.js";
 export { canPass, moveCharacter } from "./passability.js";
 export type { PassabilityCtx } from "./passability.js";
 export { CHASE_SEARCH_LIMIT, chaseDirection, DEFAULT_SIGHT_RANGE, hasSight, seesPlayer } from "./sight.js";
 export { DEFAULT_ENCOUNTER_STEP, encounterSafeSteps, hasEncounters, rollEncounter } from "./encounter.js";
 export { isIce, pushableAt, slide } from "./slide.js";
+export { DEFAULT_DASH_BONUS, DEFAULT_WALK_SPEED, footingChange, mapWalkSpeed, playerStepSpeed, ruleChange } from "./speed.js";
+export type { StepSpeedInput } from "./speed.js";
 export { currentMap, tileKey, withTileChanges } from "./tiles.js";
 export type { MapTileChanges } from "./tiles.js";

@@ -1,9 +1,10 @@
-import type { EventId, EventPage, MapData, MapEvent, MapId, PageCondition } from "@rpg/schema";
+import type { EventId, EventPage, MapData, MapEvent, MapId, PageCondition, StateCondition } from "@rpg/schema";
 import type { Ctx } from "../ctx-types.js";
 import type { EventRuntime, GameState } from "../state.js";
 import { selfSwitchKey } from "../state.js";
 
-function holds(cond: PageCondition, state: GameState, mapId: MapId, eventId: EventId): boolean {
+/** ゲーム全体の状態への条件（スイッチ・変数・所持品・パーティ）が成り立つか。ページの条件と、`system.speedRules` が共通で使う。 */
+export function stateConditionHolds(cond: StateCondition, state: GameState): boolean {
   switch (cond.kind) {
     case "switch":
       return (Object.hasOwn(state.switches, cond.id) && state.switches[cond.id] === true) === cond.value;
@@ -11,13 +12,15 @@ function holds(cond: PageCondition, state: GameState, mapId: MapId, eventId: Eve
       const v = Object.hasOwn(state.variables, cond.id) ? (state.variables[cond.id] as number) : 0;
       return cond.op === ">=" ? v >= cond.value : cond.op === "<=" ? v <= cond.value : v === cond.value;
     }
-    case "selfSwitch":
-      return (state.selfSwitches[selfSwitchKey(mapId, eventId, cond.key)] === true) === cond.value;
     case "item":
       return (Object.hasOwn(state.party.items, cond.id) ? (state.party.items[cond.id] as number) : 0) > 0;
     case "actor":
       return state.party.members.includes(cond.id);
   }
+}
+
+function holds(cond: PageCondition, state: GameState, mapId: MapId, eventId: EventId): boolean {
+  return cond.kind === "selfSwitch" ? (state.selfSwitches[selfSwitchKey(mapId, eventId, cond.key)] === true) === cond.value : stateConditionHolds(cond, state);
 }
 
 /** プレイヤーから触れたときに始まるトリガか（`touch` と、向こうからも触れてくる `eventTouch` / `eventSight`）。 */

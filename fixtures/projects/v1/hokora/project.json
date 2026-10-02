@@ -28,6 +28,7 @@
       }
     },
     "menuSkill": true,
+    "dash": {},
     "terms": {
       "newGame": "ニューゲーム",
       "attack": "攻撃",

@@ -210,10 +210,12 @@ export function setMapMeta(mapId: MapId, patch: Partial<Omit<MapMeta, "id" | "pa
   });
 }
 
-/** マップのタイルセット・BGM・エンカウント（敵グループと平均歩数）を変える（`null` は「なし」）。 */
+/**
+ * マップのタイルセット・BGM・エンカウント（敵グループと平均歩数）・歩く速さ（1〜6）・走れないか（`true` のとき）を変える（`null` は「なし」。`noDash` は `false` も「なし」）。
+ */
 export function setMapProperties(
   mapId: MapId,
-  patch: { tileset?: TilesetId; bgm?: AudioRef | null; encounters?: MapData["encounters"] | null; encounterStep?: number | null },
+  patch: { tileset?: TilesetId; bgm?: AudioRef | null; encounters?: MapData["encounters"] | null; encounterStep?: number | null; walkSpeed?: number | null; noDash?: boolean | null },
 ): EditorCommand {
   return defineEdit({
     kind: "setMapProperties",
@@ -222,10 +224,13 @@ export function setMapProperties(
     apply(doc) {
       const map = mapOf(doc, mapId);
       if (map === undefined) return err(notFound("マップ", mapId));
-      const { bgm: _b, encounters: _e, encounterStep: _s, ...rest } = map;
+      if (patch.walkSpeed != null && (!Number.isInteger(patch.walkSpeed) || patch.walkSpeed < 1 || patch.walkSpeed > 6)) return err(invalid("歩く速さは 1〜6 の整数"));
+      const { bgm: _b, encounters: _e, encounterStep: _s, walkSpeed: _w, noDash: _n, ...rest } = map;
       const bgm = patch.bgm === undefined ? map.bgm : (patch.bgm ?? undefined);
       const encounters = patch.encounters === undefined ? map.encounters : (patch.encounters ?? undefined);
       const encounterStep = patch.encounterStep === undefined ? map.encounterStep : (patch.encounterStep ?? undefined);
+      const walkSpeed = patch.walkSpeed === undefined ? map.walkSpeed : (patch.walkSpeed ?? undefined);
+      const noDash = patch.noDash === undefined ? map.noDash : patch.noDash === true ? true : undefined;
       return ok(
         withMap(doc, {
           ...rest,
@@ -233,6 +238,8 @@ export function setMapProperties(
           ...(bgm === undefined ? {} : { bgm }),
           ...(encounters === undefined ? {} : { encounters }),
           ...(encounterStep === undefined ? {} : { encounterStep }),
+          ...(walkSpeed === undefined ? {} : { walkSpeed }),
+          ...(noDash === undefined ? {} : { noDash }),
         }),
       );
     },

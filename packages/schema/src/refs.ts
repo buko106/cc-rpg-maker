@@ -56,6 +56,14 @@ export function collectRefs(p: Project, maps: Record<MapId, MapData>, resolveCom
   const { system, database: db } = p;
   add("system", t("map", system.startMap));
   for (const a of system.initialParty) add("system.initialParty", t("actor", a));
+  (system.speedRules ?? []).forEach((rule, i) => {
+    for (const cond of rule.when) {
+      if (cond.kind === "switch") add(`system.speedRules.${i}`, t("switch", cond.id));
+      else if (cond.kind === "variable") add(`system.speedRules.${i}`, t("variable", cond.id));
+      else if (cond.kind === "item") add(`system.speedRules.${i}`, t("item", cond.id));
+      else add(`system.speedRules.${i}`, t("actor", cond.id));
+    }
+  });
   for (const key of ["title", "battle"] as const) {
     const bgm = system.bgm[key];
     if (bgm) add(`system.bgm.${key}`, t("asset", bgm.asset));

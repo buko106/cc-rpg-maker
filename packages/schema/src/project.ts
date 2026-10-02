@@ -1,9 +1,9 @@
 import { z } from "zod";
 import { actorIdSchema, idRecord, mapIdSchema, tilesetIdSchema } from "./ids.js";
 import type { AssetId, MapId, SwitchId, TilesetId, VariableId } from "./ids.js";
-import { assetRefSchema, audioRefSchema, nonNegativeInt } from "./common.js";
+import { assetRefSchema, audioRefSchema, nonNegativeInt, speedEffectSchema, speedLevelSchema } from "./common.js";
 import { databaseSchema } from "./database.js";
-import { mapMetaSchema } from "./map.js";
+import { mapMetaSchema, stateConditionSchema } from "./map.js";
 
 /** 現在のフォーマットバージョン。`Project` / `MapData` の構造を変えるときは上げ、マイグレーションを追加する。 */
 export const CURRENT_FORMAT_VERSION = 2 as const;
@@ -22,8 +22,25 @@ export const tilesetSchema = z.strictObject({
    * どのレイヤにあっても滑る。省略 = 滑るタイルは無い。
    */
   ice: z.array(z.number().int().min(1)).optional(),
+  /**
+   * 足元のタイルによる歩く速さの変化（砂地・沼など）。キーはタイル ID（`1` 以上の整数を文字列にしたもの）。
+   * プレイヤーが歩き出すとき、いま立っているタイルがどのレイヤにあっても効く。複数のタイルが重なれば、`speed` は足し合わせ、`noDash` はどれか 1 つでも真なら走れない。
+   * 省略 = 変化なし。
+   */
+  terrain: z.record(z.string().regex(/^[1-9][0-9]*$/), speedEffectSchema).optional(),
 });
 export type Tileset = z.infer<typeof tilesetSchema>;
+
+/**
+ * ゲームの状態による歩く速さの変化（空腹だと遅い、など）。`when` がすべて成り立っているとき効く（空 = いつでも）。
+ * 条件は、イベントのページと同じ種類（スイッチ・変数・所持品・パーティ。セルフスイッチは除く）。
+ */
+export const speedRuleSchema = z.strictObject({
+  when: z.array(stateConditionSchema).meta({ title: "条件（すべて満たすとき。空ならいつでも）" }),
+  speed: speedEffectSchema.shape.speed,
+  noDash: speedEffectSchema.shape.noDash,
+});
+export type SpeedRule = z.infer<typeof speedRuleSchema>;
 
 export const pluginRefSchema = z.strictObject({
   /** `PluginModule.name`。コマンドの code の接頭辞（`plugin:<name>/`）になる。 */
@@ -53,6 +70,16 @@ export const systemSettingsSchema = z
      * `true` のとき、いま向いている方向と違う方向キーを**押した瞬間**は、移動せずその向きに変わるだけ（手数にも数えない）。そのまま押し続ける・もう一度押すと歩き出す。
      */
     turnInPlace: z.boolean().optional(),
+    /** 歩く速さ（1〜6。4 が標準）。省略 = 変えない（マップの `walkSpeed` があればそれに従う）。マップに入るたびに、マップの `walkSpeed`、無ければこの値になる。 */
+    walkSpeed: speedLevelSchema.optional(),
+    /**
+     * 走る機能。省略 = 走れない（操作パッドにも走るボタンは出ない）。
+     * 方向キーを押しながら Shift（ゲームパッドは X / RT、スマホは操作パッドの走るボタン）で、歩く速さを `bonus` 段階（既定 1）速くする。
+     * マップの `noDash`、足元のタイル（`Tileset.terrain`）、状態（`speedRules`）の `noDash` で、走れない場所・状態を決める。
+     */
+    dash: z.strictObject({ bonus: z.number().int().min(1).max(3).optional().meta({ title: "走ると速くなる段階（既定 1）" }) }).optional(),
+    /** ゲームの状態による歩く速さの変化。省略 = なし。 */
+    speedRules: z.array(speedRuleSchema).optional(),
     /** UI 文言 */
     terms: z.record(z.string(), z.string()),
     /** このプロジェクトが使うプラグイン（docs/14-plugin-api.md）。`params` は各プラグインが解釈する。 */

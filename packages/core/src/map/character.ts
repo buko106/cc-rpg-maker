@@ -20,10 +20,10 @@ export const stepDistance = (speed: Character["speed"]): number => 2 ** speed / 
 const approach = (from: number, to: number, dist: number): number =>
   from < to ? Math.min(from + dist, to) : Math.max(from - dist, to);
 
-/** `moving` の間、(x, y) に向かって 1 フレーム分だけ補間する。 */
-export function advanceCharacter<C extends Character>(ch: C): C {
+/** `moving` の間、(x, y) に向かって 1 フレーム分だけ補間する。`speed` を渡すと、`ch.speed` の代わりにその速さで進む（プレイヤーの 1 歩だけ速さが変わるとき）。 */
+export function advanceCharacter<C extends Character>(ch: C, speed: Character["speed"] = ch.speed): C {
   if (!ch.moving) return ch;
-  const dist = stepDistance(ch.speed);
+  const dist = stepDistance(speed);
   const realX = approach(ch.realX, ch.x, dist);
   const realY = approach(ch.realY, ch.y, dist);
   return { ...ch, realX, realY, moving: realX !== ch.x || realY !== ch.y };
