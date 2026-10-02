@@ -92,6 +92,7 @@ export async function exportGame(repo: ProjectRepository, projectId: string, opt
   - **設定**（`system.plugins[0].params`）：`tools/make-fishing-demo.mjs` が書く（竿・エサ・魚・大会。19）。魚・竿・エサ・トロフィーはデータベースのアイテム。イベント（釣り場・受付・進行役）はマップにある（釣り場は水のマスの上の `plugin:fishing/Cast`）。
   - マップ・`project.json`・アセット（港のタイルセット（水・桟橋・砂・建物・岩礁・杭・木箱・樽など）、旅人・受付・釣具屋・港のおじさん・ライバル 3 人の歩行シート、立て札）は `node tools/make-fishing-demo.mjs` が生成する。`plugins/fishing` のテスト（釣りの調整・通しプレイ・大会・結果発表・図鑑・セーブとロード・表示・ひな形と診断）と、`apps/player/src/fishing-fixture.test.ts`（デモの定義と、釣り場・人・店に歩いて行けること）、`e2e/fishing.spec.ts` が確かめる。
 - **デモを選ぶページ**：`tools/build-demos.mjs` の `DEMOS` から、一覧ページ（`index.html`）と、デモごとのフォルダ形式のプレイヤー（`village/`・`maze/`・`tower/`・`mansion/`・`haunted/`・`stealth/`・`hokora/`・`ice/`・`water/`・`dungeon/`・`fishing/`）を作る。サイトでは `demo/` の下に置き（`tools/build-site.mjs`）、`pnpm demo` は `apps/player/dist-demos/` に作って配信する。セーブはプロジェクトの `meta.id`（`demo` / `maze` / `tower` / `mansion` / `haunted` / `stealth` / `hokora` / `ice` / `water` / `dungeon` / `fishing`）ごとに分かれるので、同じオリジンでも混ざらない。
+  - **PR ごとのプレビュー**：PR を出すと、このサイト全体（ランディング + エディタ + 全デモ）が Cloudflare Pages にデプロイされ、PR に URL がコメントされる（`.github/workflows/preview.yml`。設定と確認は「実装メモ（PR ごとのプレビュー）」）。本番の公開は `main` に入ったときだけ。
 - **E2E**（`e2e/player.spec.ts`）：話しかけて戦闘 → 攻撃で勝利 → マップに戻って続きのイベント（画面のピクセル・報酬・Effect を確認）、逃走してもう一度戦う、戦闘中はメニューが開かずスキルで戦える。
 
 ## 実装メモ（M6 で確定した点）
@@ -121,3 +122,45 @@ export async function exportGame(repo: ProjectRepository, projectId: string, opt
 - 主入力が指の端末（`matchMedia("(pointer: coarse)")`）では、ゲーム画面の下に操作パッド（十字キー・決定・キャンセル・メニュー）を出す。`bootPlayer` の `touchPad`（`auto` / `on` / `off`）、`?touch=on|off` で上書きできる。仕組みは docs/08 を参照。
 - iOS 対策：矢印・☰ は記号文字だと絵文字に化けるので SVG で描く。ダブルタップ/ピンチでページが拡大されないよう、パッド上の `touchstart` / `touchmove` と `gesturestart` の既定動作を止め、viewport に `maximum-scale=1, user-scalable=no` も付ける（iOS の Safari は touch-action だけでは止めきれない）。実機での確認はまだ。
 - 画面の幅だけでなく高さにも収まるように拡大率を決める（横向きのスマホでも、ゲーム画面が切れない）。`index.html` は `viewport-fit=cover` と `overscroll-behavior: none`（引っ張って更新を防ぐ）。書き出しのテンプレートも同じ。
+
+## 実装メモ（PR ごとのプレビュー）
+`main` に入る前に、PR のデモ・エディタをブラウザで触れるようにする。本番（GitHub Pages。`pages.yml`）は変えず、**プレビューだけ** Cloudflare Pages に置く。
+
+- **仕組み**：`.github/workflows/preview.yml`。`pull_request`（opened / synchronize / reopened）で、`pnpm install --frozen-lockfile` → `pnpm build:site` → `npx wrangler pages deploy site-dist`。出た URL を、PR のコメント（1 つだけ。push のたびに同じコメントを書き換える。目印は先頭の `<!-- cc-rpg-maker-preview -->`）に書く。デプロイが失敗したときは、コメントを「失敗」に書き換える。
+  - **URL**：`https://pr-<PR 番号>.<プロジェクト名>.pages.dev/`（`/editor/`・`/demo/` も同じ）。ブランチ名は PR のブランチ名ではなく `pr-<PR 番号>` にしている（Pages の本番ブランチ `main` と同名の PR で本番を上書きしない／ブランチ名の記号をシェルに渡さない）。push のたびに同じ URL が最新を指す。コメントには、そのコミット固有の URL（`<ハッシュ>.<プロジェクト名>.pages.dev`）も載る。
+  - **ベースパスは要らない**：どのページも相対パスだけで参照するので（上の「サブパスで動く条件」）、`/cc-rpg-maker/` でも、`pages.dev` のルートでも動く。
+  - **権限**：`contents: read` と `pull-requests: write` だけ（コメント用）。Cloudflare の資格情報は、デプロイのステップの環境変数にだけ渡す。
+  - **古い実行は捨てる**：`concurrency`（PR ごと、`cancel-in-progress: true`）。
+  - **動かない PR**：fork からの PR（Secrets が渡らない）と、変数 `CLOUDFLARE_PAGES_PROJECT` が未設定のとき。どちらもジョブが「スキップ」になるだけで、失敗にはならない。
+  - **結果の取り出し**：`wrangler` の `WRANGLER_OUTPUT_FILE_PATH`（1 行 1 JSON）の `pages-deploy-detailed` から `url` と `alias` を読む。
+- **保存先**：エディタのプロジェクトとデモのセーブ（IndexedDB）はオリジン単位なので、プレビューは PR ごとに分かれ、本番とも混ざらない。コミット固有の URL は別のオリジンになる。同じ PR を続けて試すときは `pr-<番号>` の URL を使う。
+- **サイズの上限**：Cloudflare Pages は 1 デプロイ 20,000 ファイル・1 ファイル 25 MiB まで。`site-dist/` は約 340 ファイル・約 50 MB（最大のファイルは数 MB のソースマップ）で、収まっている。
+
+### 設定（リポジトリの管理者が 1 回だけ）
+画面の名前は変わることがある。迷ったら Cloudflare / GitHub のドキュメントを見る。
+
+1. **Pages プロジェクトを作る（Direct Upload の空のプロジェクト）**。名前は `cc-rpg-maker-preview` など（`<名前>.pages.dev` の一部になり、あとから変えられない）。ダッシュボードの Workers & Pages → Create → Pages → Direct Upload でもよいし、手元で次のとおり。Git 連携のプロジェクトには、wrangler からアップロードできない。
+   ```sh
+   CLOUDFLARE_API_TOKEN=<トークン> CLOUDFLARE_ACCOUNT_ID=<アカウント ID> \
+     npx wrangler@4 pages project create cc-rpg-maker-preview --production-branch=main
+   ```
+2. **API トークンとアカウント ID**。ダッシュボードの My Profile → API Tokens → Create Token → Create Custom Token（アカウント所有のトークンでもよい）で、権限は **Account → Cloudflare Pages → Edit** だけにし、対象は使うアカウントに絞る。作成直後にしか値が出ないので、その場で次の手順に使う。アカウント ID は、ダッシュボードのアカウントのホーム（または Workers & Pages の概要）の右側と、ダッシュボードの URL（`dash.cloudflare.com/<アカウント ID>/…`）にある。
+3. **GitHub に登録する**。リポジトリの Settings → Secrets and variables → Actions で、
+   - Secrets：`CLOUDFLARE_API_TOKEN`（手順 2 のトークン）、`CLOUDFLARE_ACCOUNT_ID`
+   - Variables：`CLOUDFLARE_PAGES_PROJECT`（手順 1 のプロジェクト名）
+
+   値は、リポジトリ・コミット・ワークフローのログに書かない（ワークフローには名前だけが書いてある）。
+4. **（任意）アクセス制限**。既定では、`*.pages.dev` のプレビューの URL を知っていれば誰でも開ける（`pr-<番号>` は推測できるし、PR が公開なら、コメントの URL も誰でも見える）。マージ前の変更を公開したくなければ、プロジェクトの Settings → General → Access policy で Cloudflare Access を有効にし、レビューする人だけを許可する（有効にすると、プレビューの URL の前にログインが入る）。デモは `main` に入れば公開されるものなので、公開されても構わないなら、そのままでよい。
+
+### 動作確認（設定したあとの最初の PR で）
+1. PR の Checks（または Actions タブ）に **Preview** ができ、ジョブ `deploy` が成功する。「Cloudflare Pages にデプロイ」のログの最後に `Deployment complete!` と URL が出る。
+2. PR に「プレビュー」のコメントが **1 つ**付く。もう一度 push しても増えず、コミット（短い SHA）が書き換わる。
+3. コメントの URL で、`/`（ランディング）・`/editor/`・`/demo/`・`/demo/village/` が開き、デモが遊べる。
+4. Cloudflare のダッシュボード → Workers & Pages → プロジェクト → Deployments に、環境 Preview・ブランチ `pr-<番号>` のデプロイが並ぶ。
+5. fork からの PR では、Preview のジョブが「スキップ」（赤にならない）。
+
+うまくいかないとき：ジョブが緑でもコメントが出ない → PR の権限（Settings → Actions → General → Workflow permissions）と、ワークフローの `permissions` を見る。`Project not found` → `CLOUDFLARE_PAGES_PROJECT` の名前と、プロジェクトが Direct Upload か。認証のエラー → トークンの権限（Account → Cloudflare Pages → Edit）とアカウント ID。
+
+### 未対応
+- **閉じた PR のプレビューは消さない**（Cloudflare 側に残る。要るなら Deployments から削除する）。
+- **Dependabot の PR**：Actions の Secrets が渡らないので、使うなら Dependabot 用の Secrets にも登録するか、ジョブを除外する。

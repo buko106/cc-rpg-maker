@@ -143,6 +143,8 @@ pnpm site           # 公開するサイト（ランディング + editor/ + dem
 pnpm lint:deps      # 依存ルール検査（dependency-cruiser + package.json 検査）
 ```
 
+PR を出すと、`pnpm site` と同じサイト（ランディング + editor/ + demo/）が Cloudflare Pages にデプロイされ、PR のコメントにプレビューの URL が付きます（[`.github/workflows/preview.yml`](./.github/workflows/preview.yml)。fork の PR は対象外。設定と確認の手順は [`15-player-export.md`](./docs/15-player-export.md) の「PR ごとのプレビュー」）。本番（GitHub Pages）は `main` に入ったときだけ更新されます。
+
 依存ルールの許可関係は [`tools/dependency-rules.cjs`](./tools/dependency-rules.cjs) が単一情報源です。
 [`00-principles.md`](./docs/00-principles.md) の依存ルールを変えるときは、このファイルも同時に更新してください。
 
