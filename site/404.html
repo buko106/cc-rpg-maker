@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>ページが見つかりません — cc-rpg-maker</title>
+    <!--
+      存在しない URL で返されるページ（どの階層の URL でも返る）。
+      そのため、href / src を一切持たない（相対パスで書くと、返された URL を基準にして壊れる）。
+      これが無いと、Cloudflare Pages は存在しない URL にも最上位の index.html を 200 で返し、
+      壊れたパス（デモのアセットなど）に気づけない。
+    -->
+    <style>
+      :root { --bg: #f6f4ee; --ink: #1c2033; --muted: #5b6178; --accent: #2f5fd0; --accent-ink: #ffffff; }
+      @media (prefers-color-scheme: dark) {
+        :root { --bg: #12151f; --ink: #e9e7df; --muted: #a4a9bd; --accent: #7ea2ff; --accent-ink: #0d1226; }
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100vh;
+        display: grid;
+        place-items: center;
+        padding: 16px;
+        background: var(--bg);
+        color: var(--ink);
+        font: 16px/1.75 system-ui, -apple-system, "Hiragino Sans", "Noto Sans JP", "Yu Gothic", sans-serif;
+      }
+      main { max-width: 32em; text-align: center; }
+      .code { margin: 0; font-size: clamp(3rem, 14vw, 5rem); font-weight: 800; line-height: 1.1; color: var(--accent); }
+      h1 { margin: 8px 0 12px; font-size: 1.4rem; }
+      p { margin: 0 0 24px; color: var(--muted); }
+      button {
+        padding: 10px 22px;
+        border: 0;
+        border-radius: 8px;
+        background: var(--accent);
+        color: var(--accent-ink);
+        font: inherit;
+        font-weight: 700;
+        cursor: pointer;
+      }
+      button:hover, button:focus-visible { filter: brightness(1.1); }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="code">404</p>
+      <h1>ページが見つかりません</h1>
+      <p>アドレスが間違っているか、このページはもうありません。トップページからたどり直してください。</p>
+      <button type="button" id="back" hidden>前のページに戻る</button>
+    </main>
+    <script>
+      var back = document.getElementById("back");
+      if (history.length > 1) {
+        back.hidden = false;
+        back.addEventListener("click", function () { history.back(); });
+      }
+    </script>
+  </body>
+</html>

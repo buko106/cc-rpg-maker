@@ -1,0 +1,131 @@
+name: Preview
+
+# PR ごとに、ランディング + エディタ + 全デモを Cloudflare Pages にデプロイして、PR にプレビューの URL をコメントする。
+# 本番（GitHub Pages。pages.yml）はそのまま。ここは PR のレビュー用だけ。
+#   https://pr-<PR 番号>.<プロジェクト名>.pages.dev/          ランディング
+#   https://pr-<PR 番号>.<プロジェクト名>.pages.dev/editor/   エディタ
+#   https://pr-<PR 番号>.<プロジェクト名>.pages.dev/demo/     デモ
+# 設定（Pages プロジェクト・API トークン・Secrets / Variables）は docs/15-player-export.md「PR ごとのプレビュー」。
+#   Secrets:   CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID
+#   Variables: CLOUDFLARE_PAGES_PROJECT（Pages のプロジェクト名。未設定のあいだは、このワークフローはスキップされる）
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+# 同じ PR の古い実行は捨てて、最新のコミットだけをデプロイする。
+concurrency:
+  group: preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    # fork からの PR には Secrets が渡らないので動かさない（スキップするだけで、失敗にはしない）。
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository
+      && vars.CLOUDFLARE_PAGES_PROJECT != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:site
+
+      # ブランチ名は PR 番号から作る（pr-<番号>）。PR のブランチ名をそのまま使うと、
+      #   ・Pages の本番ブランチ（既定は main）と同じ名前の PR で、本番にデプロイしてしまう
+      #   ・ブランチ名に含まれる記号がシェルで解釈される
+      # のを避けられない。pr-<番号> なら URL も短く、同じ PR の更新で同じ URL になる。
+      - name: Cloudflare Pages にデプロイ
+        id: deploy
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_PAGES_PROJECT: ${{ vars.CLOUDFLARE_PAGES_PROJECT }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          WRANGLER_OUTPUT_FILE_PATH: ${{ runner.temp }}/wrangler-output.ndjson
+        run: |
+          npx --yes wrangler@4 pages deploy site-dist \
+            --project-name="$CLOUDFLARE_PAGES_PROJECT" \
+            --branch="pr-$PR_NUMBER" \
+            --commit-hash="$HEAD_SHA" \
+            --commit-message="PR #$PR_NUMBER ($HEAD_SHA)"
+          # wrangler が書き出す結果（1 行 1 JSON）から、デプロイの URL（このコミット固有）と
+          # ブランチの別名（pr-<番号>.…。push のたびに最新を指す）を取り出す。
+          node --input-type=module -e '
+            import { readFileSync } from "node:fs";
+            const rows = readFileSync(process.env.WRANGLER_OUTPUT_FILE_PATH, "utf8")
+              .split("\n").filter(Boolean).map((line) => JSON.parse(line));
+            const deploy = rows.findLast((row) => row.type === "pages-deploy-detailed");
+            if (!deploy) throw new Error("wrangler の出力にデプロイの結果が無い");
+            console.log(`url=${deploy.url}`);
+            console.log(`alias=${deploy.alias ?? ""}`);
+          ' >> "$GITHUB_OUTPUT"
+
+      # PR のコメントは 1 つだけ。見つかれば書き換え、無ければ作る（目印は先頭の HTML コメント）。
+      # デプロイが失敗したときも、コメントを「失敗」に書き換える（古い URL を最新と勘違いさせない）。
+      - name: PR にコメント
+        if: ${{ !cancelled() }}
+        uses: actions/github-script@v7
+        env:
+          DEPLOY_OUTCOME: ${{ steps.deploy.outcome }}
+          DEPLOY_URL: ${{ steps.deploy.outputs.url }}
+          DEPLOY_ALIAS: ${{ steps.deploy.outputs.alias }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        with:
+          script: |
+            const marker = "<!-- cc-rpg-maker-preview -->";
+            const { DEPLOY_OUTCOME, DEPLOY_URL, DEPLOY_ALIAS, HEAD_SHA, RUN_URL } = process.env;
+            const sha = HEAD_SHA.slice(0, 7);
+
+            let body;
+            if (DEPLOY_OUTCOME === "success") {
+              const base = (DEPLOY_ALIAS || DEPLOY_URL).replace(/\/$/, "");
+              body = [
+                marker,
+                "## プレビュー",
+                "",
+                `| | |`,
+                `|---|---|`,
+                `| ランディング | ${base}/ |`,
+                `| エディタ | ${base}/editor/ |`,
+                `| デモ | ${base}/demo/ |`,
+                `| コミット | \`${sha}\` |`,
+                "",
+                `このコミットだけの URL: ${DEPLOY_URL}`,
+                "",
+                "push するたびに、この URL が最新のコミットに切り替わります。",
+                "セーブとエディタのデータ（IndexedDB）は、プレビューの URL ごとに分かれます。",
+              ].join("\n");
+            } else {
+              body = [
+                marker,
+                "## プレビュー",
+                "",
+                `\`${sha}\` のプレビューのデプロイに失敗しました（[実行ログ](${RUN_URL})）。`,
+                "このコメントより前の URL は、古いコミットのままです。",
+              ].join("\n");
+            }
+
+            const { owner, repo } = context.repo;
+            const issue_number = context.payload.pull_request.number;
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner, repo, issue_number, per_page: 100,
+            });
+            const mine = comments.find((c) => c.user?.type === "Bot" && c.body?.includes(marker));
+            if (mine) {
+              await github.rest.issues.updateComment({ owner, repo, comment_id: mine.id, body });
+            } else {
+              await github.rest.issues.createComment({ owner, repo, issue_number, body });
+            }

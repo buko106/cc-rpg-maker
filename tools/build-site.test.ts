@@ -17,7 +17,7 @@ describe("build-site", () => {
   afterAll(() => rmSync(out, { recursive: true, force: true }));
 
   it("ランディング・エディタ・デモを選ぶページ・各デモが出力される", () => {
-    for (const f of ["index.html", ".nojekyll", "editor/index.html", "editor/editor.js", "editor/player/player.js", "demo/index.html"]) {
+    for (const f of ["index.html", "404.html", ".nojekyll", "editor/index.html", "editor/editor.js", "editor/player/player.js", "demo/index.html"]) {
       expect(existsSync(join(out, f)), f).toBe(true);
     }
     expect(DEMOS.map((d: { slug: string }) => d.slug)).toEqual(["village", "maze", "tower", "mansion", "haunted", "stealth", "hokora", "ice", "water", "dungeon", "fishing"]);
@@ -37,6 +37,13 @@ describe("build-site", () => {
       const target = join(out, dirname(page), r.split(/[?#]/)[0]!);
       expect(existsSync(r.endsWith("/") ? join(target, "index.html") : target), r).toBe(true);
     }
+  });
+
+  // 存在しない URL で返すページ。どの階層の URL でも返るので、参照を持つと壊れる（無いと、Cloudflare Pages は存在しない URL にも index.html を 200 で返す）
+  it("404.html は、href / src を持たない自己完結のページ", () => {
+    const html = readFileSync(join(out, "404.html"), "utf8");
+    expect(html).toContain("404");
+    expect(html).not.toMatch(/\b(?:href|src)\s*=/);
   });
 
   it("エディタに、すべてのデモの編集データがサンプルとして入っている（samples/index.json と、そこに載ったファイル）", () => {

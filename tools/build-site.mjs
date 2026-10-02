@@ -6,6 +6,7 @@
  *
  * 出力（既定は site-dist/。https://<host>/cc-rpg-maker/ の直下に置く想定）:
  *   index.html       ランディングページ（site/ をそのままコピー）
+ *   404.html         存在しない URL で返すページ（site/ をそのままコピー。どの階層でも返るので、参照を持たない）
  *   editor/          エディタ（apps/editor-ui/scripts/build-web.mjs）
  *   demo/            デモを選ぶページと、デモごとのプレイヤー（tools/build-demos.mjs。demo/village/・demo/maze/・demo/tower/・demo/mansion/・demo/haunted/・demo/stealth/・demo/hokora/・demo/ice/・demo/water/・demo/dungeon/・demo/fishing/）
  *   .nojekyll        Jekyll の処理を止める
