@@ -1,8 +1,8 @@
 import type { Direction, EventId, MapData, Tileset } from "@rpg/schema";
 import type { Ctx } from "../ctx-types.js";
 import type { InputFrame } from "../input.js";
-import { startInterpreter } from "../interpreter/index.js";
-import { currentMap, DIRECTION_VECTOR, moveCharacter, pushableAt, REVERSE, startsOnPlayerTouch } from "../map/index.js";
+import { pacedRouteTarget, startInterpreter } from "../interpreter/index.js";
+import { currentMap, DIRECTION_VECTOR, hasPacedEvents, moveCharacter, pacedEventsMoving, pushableAt, REVERSE, startsOnPlayerTouch, withTurn } from "../map/index.js";
 import type { EventRuntime, GameState } from "../state.js";
 import type { StepResult } from "./actions.js";
 import { battleInput } from "../battle/index.js";
@@ -70,12 +70,21 @@ export function handleInput(state: GameState, input: InputFrame, ctx: Ctx): Step
 
   const map = currentMap(ctx.project, state);
   if (map === undefined) return idle;
+  // ターン制のイベント（`pace: "playerStep"`）が歩いている間は、次の手を打てない
+  // （`SetMoveRoute` のターン制のルートで動かされているイベントも含む）
+  const forced = state.interpreters.flatMap((i) => pacedRouteTarget(i) ?? []);
+  if (pacedEventsMoving(state, map, forced)) return idle;
+  // 手数を数えるのは、ターン制のイベントが居るマップだけ（居なければ、状態に何も足さない）
+  const paced = hasPacedEvents(state, map, forced);
+  const turn = (s: GameState): GameState => (paced ? withTurn(s) : s);
 
   if (input.triggered.has("menu") || input.triggered.has("cancel")) return openMenu(state);
 
   if (input.triggered.has("ok")) {
     const started = triggerAction(state, map);
     if (started) return { state: started, effects: [] };
+    // 何も起こらない決定ボタンは「足踏み」：ターン制のイベントが居るときだけ、1 手として数える（その場で待つ）
+    if (paced) return { state: withTurn(state), effects: [] };
   }
 
   const dir = directionOf(input);
@@ -86,6 +95,8 @@ export function handleInput(state: GameState, input: InputFrame, ctx: Ctx): Step
   const pass = { map, tileset, events: state.map.events };
   const moved = moveCharacter(player, dir, pass);
   let next: GameState = { ...state, map: { ...state.map, player: moved } };
+  // 歩き出したら 1 手（通れずに向きだけ変わったときは数えない）
+  if (moved.x !== player.x || moved.y !== player.y) next = turn(next);
   if (moved.x === player.x && moved.y === player.y) {
     // 押せる岩：その先が通れるなら、岩を 1 タイル押して、プレイヤーも同じ向きに 1 タイル進む（岩の向きは変えない）
     const rock = pushableAt(pass, player, dir, (ev) => ev.pageIndex !== null && map.events[ev.id]?.pages[ev.pageIndex]?.pushable === true);
@@ -93,7 +104,7 @@ export function handleInput(state: GameState, input: InputFrame, ctx: Ctx): Step
       const { dx, dy } = DIRECTION_VECTOR[dir];
       const pushed = { ...rock, x: rock.x + dx, y: rock.y + dy, moving: true };
       const stepped = { ...player, x: player.x + dx, y: player.y + dy, direction: dir, moving: true };
-      return { state: { ...state, map: { ...state.map, player: stepped, events: { ...state.map.events, [rock.id]: pushed } } }, effects: [] };
+      return { state: turn({ ...state, map: { ...state.map, player: stepped, events: { ...state.map.events, [rock.id]: pushed } } }), effects: [] };
     }
     // 突き当たり：目の前の通常プライオリティの接触イベント（プレイヤーから / イベントから）を起動
     const { dx, dy } = DIRECTION_VECTOR[dir];

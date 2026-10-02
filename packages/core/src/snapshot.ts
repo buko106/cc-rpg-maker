@@ -159,6 +159,7 @@ const serializedStateSchema = z.strictObject({
       .strictObject({ to: mapIdSchema, x: int, y: int, dir: directionSchema, fade: z.enum(["black", "white", "none"]), requested: z.boolean() })
       .optional(),
     encounterSteps: nonNegativeInt,
+    turns: nonNegativeInt.optional(),
   }),
   party: z.strictObject({ gold: nonNegativeInt, members: z.array(z.string()), items: z.record(z.string(), nonNegativeInt) }),
   actors: z.record(z.string(), z.strictObject({ id: z.string(), name: z.string(), level: int, exp: nonNegativeInt, hp: int, mp: int })),

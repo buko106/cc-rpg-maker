@@ -450,9 +450,9 @@ describe("commands-smoke（全コマンドを 1 回ずつ使うイベント）",
   const map = loaded.maps["map_start" as never]!;
   const eventCommands = (id: string) => map.events[id as never]!.pages[0]!.commands as EventCommand[];
 
-  it("every builtin command (except the internal MoveStep) appears in the smoke map's events", () => {
+  it("every builtin command (except the internal MoveStep / WaitPlayerStep) appears in the smoke map's events", () => {
     const used = new Set(Object.values(map.events).flatMap((e) => e.pages.flatMap((p) => p.commands.map((c2) => c2.code))));
-    const missing = BUILTIN_COMMANDS.map((h) => h.code).filter((code) => code !== "MoveStep" && !used.has(code));
+    const missing = BUILTIN_COMMANDS.map((h) => h.code).filter((code) => code !== "MoveStep" && code !== "WaitPlayerStep" && !used.has(code));
     expect(missing).toEqual([]);
   });
 

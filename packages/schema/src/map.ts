@@ -34,6 +34,11 @@ export const moveRouteSchema = z.strictObject({
   repeat: z.boolean(),
   skippable: z.boolean(),
   steps: z.array(moveStepSchema),
+  /**
+   * ルートの進み方。`frames`（既定）は時間で進む。`playerStep` は、プレイヤーが 1 手（歩く・押す・決定ボタンで足踏み）打つたびに進む
+   * ターン制：`move` は 1 手につき 1 歩、`wait` の `frames` は待つ手数、`turn` と `speed` は時間がかからない。通れないときはその手をあきらめる。
+   */
+  pace: z.enum(["frames", "playerStep"]).optional(),
 });
 export type MoveRoute = z.infer<typeof moveRouteSchema>;
 

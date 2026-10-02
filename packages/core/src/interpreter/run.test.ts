@@ -48,7 +48,7 @@ describe("registry", () => {
     const documented = [
       "ShowText", "ShowChoices", "ChoiceBranch", "InputNumber", "SelectItem", "ControlSwitches", "ControlVariables", "ControlSelfSwitch", "ControlTimer",
       "ConditionalBranch", "Else", "EndBranch", "Loop", "BreakLoop", "EndLoop", "ExitEventProcessing", "CallCommonEvent", "Label", "JumpToLabel", "Wait",
-      "TransferPlayer", "SetMoveRoute", "SetEventLocation", "ChangeMapTile", "MoveStep", "ChangeGold", "ChangeItems", "ChangeParty", "ChangeHp", "ChangeMp", "ChangeExp", "ChangeLevel",
+      "TransferPlayer", "SetMoveRoute", "SetEventLocation", "ChangeMapTile", "MoveStep", "WaitPlayerStep", "ChangeGold", "ChangeItems", "ChangeParty", "ChangeHp", "ChangeMp", "ChangeExp", "ChangeLevel",
       "ChangeBgm", "PlaySe", "FadeoutBgm", "ShakeScreen", "FlashScreen", "TintScreen", "Fadein", "Fadeout", "BattleProcessing", "ShopProcessing",
       "SaveGame", "LoadGame", "GameOver", "ReturnToTitle", "Script", "Comment",
     ].sort();

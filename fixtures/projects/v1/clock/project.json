@@ -1,0 +1,169 @@
+{
+  "formatVersion": 1,
+  "meta": {
+    "id": "clock",
+    "title": "デモ：時の番人の回廊",
+    "createdAt": "2026-10-02T00:00:00Z",
+    "updatedAt": "2026-10-02T00:00:00Z"
+  },
+  "system": {
+    "startMap": "map_hall",
+    "startX": 7,
+    "startY": 8,
+    "initialParty": [
+      "actor_hero"
+    ],
+    "tileSize": 32,
+    "screen": {
+      "width": 480,
+      "height": 352
+    },
+    "bgm": {},
+    "autosave": {
+      "onTransfer": true
+    },
+    "terms": {
+      "newGame": "ニューゲーム"
+    }
+  },
+  "maps": {
+    "map_hall": {
+      "id": "map_hall",
+      "name": "時計塔のロビー",
+      "order": 0
+    },
+    "map_r1": {
+      "id": "map_r1",
+      "name": "第一の間 ふりこの廊下",
+      "order": 1
+    },
+    "map_r2": {
+      "id": "map_r2",
+      "name": "第二の間 すれちがい",
+      "order": 2
+    },
+    "map_r3": {
+      "id": "map_r3",
+      "name": "第三の間 石かげの見張り",
+      "order": 3
+    },
+    "map_r4": {
+      "id": "map_r4",
+      "name": "第四の間 大時計の心臓",
+      "order": 4
+    }
+  },
+  "tilesets": {
+    "ts_clock": {
+      "id": "ts_clock",
+      "name": "時計塔",
+      "image": {
+        "asset": "44579bd36a978e31"
+      },
+      "passage": [15, 15, 15, 0, 0, 0, 0, 0, 15, 15]
+    }
+  },
+  "database": {
+    "actors": {
+      "actor_hero": {
+        "id": "actor_hero",
+        "name": "ミナ",
+        "classId": "class_hero",
+        "initialLevel": 1,
+        "walk": {
+          "asset": "bb2e23b45d1f4d4d"
+        },
+        "equips": {}
+      }
+    },
+    "classes": {
+      "class_hero": {
+        "id": "class_hero",
+        "name": "旅人",
+        "skills": [],
+        "params": {
+          "mhp": {
+            "base": 100,
+            "growth": 2
+          },
+          "mmp": {
+            "base": 20,
+            "growth": 2
+          },
+          "atk": {
+            "base": 10,
+            "growth": 2
+          },
+          "def": {
+            "base": 10,
+            "growth": 2
+          },
+          "mat": {
+            "base": 10,
+            "growth": 2
+          },
+          "mdf": {
+            "base": 10,
+            "growth": 2
+          },
+          "agi": {
+            "base": 10,
+            "growth": 2
+          },
+          "luk": {
+            "base": 10,
+            "growth": 2
+          }
+        }
+      }
+    },
+    "skills": {},
+    "items": {},
+    "enemies": {},
+    "troops": {},
+    "states": {},
+    "commonEvents": {}
+  },
+  "assets": {
+    "entries": {
+      "44579bd36a978e31": {
+        "name": "clock_tileset.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 1280,
+        "width": 320,
+        "height": 32
+      },
+      "bb2e23b45d1f4d4d": {
+        "name": "hero.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 660,
+        "width": 96,
+        "height": 128
+      },
+      "5d83bd9b74805e53": {
+        "name": "people.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 2598,
+        "width": 288,
+        "height": 128
+      },
+      "c9577b58a36be869": {
+        "name": "props.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 1176,
+        "width": 192,
+        "height": 128
+      }
+    }
+  },
+  "switches": {},
+  "variables": {
+    "var_caught": {
+      "name": "つかまった回数"
+    }
+  }
+}

@@ -8,7 +8,7 @@ import type { Character, EventRuntime, GameState } from "../../state.js";
 import { defineCommand } from "../handler.js";
 import type { CommandCtx, CommandResult } from "../handler.js";
 import { startInterpreter } from "../run.js";
-import type { InterpreterOrigin } from "../state.js";
+import type { InterpreterOrigin, InterpreterState } from "../state.js";
 
 /** 通れない相手に突き当たったまま待ち続けてよいフレーム数（超えたらその歩みをあきらめる）。 */
 export const MAX_BLOCKED_FRAMES = 60;
@@ -82,6 +82,8 @@ const stepParams = z.strictObject({
   skippable: z.boolean().default(false),
   /** ページの `moveRoute`（自律移動）の 1 歩。イベントの実行中・メッセージ表示中・`SetMoveRoute` の実行中は止まり、プレイヤーの居る所へは入らず、通れなくても警告しない。 */
   auto: z.boolean().default(false),
+  /** ターン制（`pace: "playerStep"`）のルートの 1 歩。通れなくても待たずに、その手をあきらめる（警告も出さない）。 */
+  paced: z.boolean().default(false),
 });
 
 const PAGE_ROUTE = "pageRoute:";
@@ -101,10 +103,28 @@ const FOREVER = 2 ** 31 - 1;
 export function pageRouteCommands(eventId: EventId, route: MoveRoute): EventCommand[] | undefined {
   if (route.steps.length === 0) return undefined;
   const indent = route.repeat ? 1 : 0;
-  const step = (s: MoveRoute["steps"][number]): EventCommand => ({ code: "MoveStep", params: { who: eventId, step: s, skippable: route.skippable, auto: true }, indent });
-  const steps = route.steps.map(step);
-  if (!route.repeat) return [...steps, step({ kind: "wait", frames: FOREVER })];
-  return [{ code: "Loop", params: {}, indent: 0 }, ...steps, step({ kind: "wait", frames: 1 }), { code: "EndLoop", params: {}, indent: 0 }];
+  const steps = routeSteps(eventId, route, indent, true);
+  const last = (s: MoveRoute["steps"][number]): EventCommand => ({ code: "MoveStep", params: { who: eventId, step: s, skippable: route.skippable, auto: true }, indent });
+  if (!route.repeat) return [...steps, last({ kind: "wait", frames: FOREVER })];
+  return [{ code: "Loop", params: {}, indent: 0 }, ...steps, last({ kind: "wait", frames: 1 }), { code: "EndLoop", params: {}, indent: 0 }];
+}
+
+/**
+ * ルートの歩みを `MoveStep` に展開する。ターン制（`pace: "playerStep"`）のルートは、`move` の前に 1 手待ち、
+ * `wait` は `frames` 手待つ（0 なら何もしない）。`turn` と `speed` は時間がかからない。
+ */
+function routeSteps(who: string, route: MoveRoute, indent: number, auto: boolean): EventCommand[] {
+  const paced = route.pace === "playerStep";
+  const out: EventCommand[] = [];
+  for (const step of route.steps) {
+    if (paced && step.kind === "wait") {
+      if (step.frames > 0) out.push({ code: "WaitPlayerStep", params: { turns: step.frames }, indent });
+      continue;
+    }
+    if (paced && step.kind === "move") out.push({ code: "WaitPlayerStep", params: { turns: 1 }, indent });
+    out.push({ code: "MoveStep", params: { who, step, skippable: route.skippable, ...(auto ? { auto } : {}), ...(paced ? { paced } : {}) }, indent });
+  }
+  return out;
 }
 
 /** 自律移動を止めておくべきときか：通常のイベントの実行中、メッセージ表示中、場所移動の予約中、`SetMoveRoute` でそのイベントを動かしている間。 */
@@ -151,6 +171,8 @@ export const moveStep = defineCommand({
         const turned = withCharacter(c.state, p.who, moved);
         const next = touching === undefined ? turned : startTouchedEvent(turned, touching, pass);
         if (!blocked) return { state: next, control: { kind: "wait", wait: { kind: "move", who: p.who } } };
+        // ターン制のルートは、通れなければその手をあきらめる（待っていると、プレイヤーの手とずれていく）
+        if (p.paced) return { state: next, setLocals: { retry: undefined, blocked: undefined } };
         // 自律移動で `skippable` でないルートは、通れるようになるまで待ち続ける（あきらめると、相対的な歩みの列がずれていく）
         if (p.auto && !p.skippable) return { state: next, control: { kind: "wait", wait: { kind: "frames", left: 1 } }, setLocals: { retry: true } };
         const waited = typeof c.interp.locals["blocked"] === "number" ? (c.interp.locals["blocked"] as number) : 0;
@@ -173,9 +195,37 @@ export const moveStep = defineCommand({
   },
 });
 
+/**
+ * 内部用：ターン制（`pace: "playerStep"`）のルートが、プレイヤーの手を `turns` 手ぶん待つ（`MapState.turns` が増えるのを待つ）。
+ * 数えはじめは、このコマンドが最初に動いた時点の手数。そのあとは、使った手を 1 手ずつ消費していく（まとめて進んだ手も取りこぼさない）。
+ */
+export const waitPlayerStep = defineCommand({
+  code: "WaitPlayerStep",
+  params: z.strictObject({ turns: z.number().int().min(1).default(1) }),
+  meta: { label: "プレイヤーの手を待つ", category: "移動", describe: (p) => `プレイヤーの ${p.turns} 手を待つ`, refs: () => [], internal: true },
+  run(p, c) {
+    const turns = c.state.map.turns ?? 0;
+    const consumed = typeof c.interp.locals["consumed"] === "number" ? (c.interp.locals["consumed"] as number) : turns;
+    const goal = consumed + p.turns;
+    if (turns >= goal) return { setLocals: { consumed: goal, retry: undefined } };
+    return { control: { kind: "wait", wait: { kind: "frames", left: 1 } }, setLocals: { consumed, retry: true } };
+  },
+  resume(_p, c) {
+    if (c.interp.wait.kind === "frames" && c.interp.locals["retry"] === true) return { control: { kind: "jump", pc: c.interp.pc }, setLocals: { retry: undefined } };
+    return {};
+  },
+});
+
+/** `SetMoveRoute` が動かしている、ターン制（`pace: "playerStep"`）のルートのインタプリタか。動かしている対象のイベント（プレイヤーなら `"player"`）を返す。 */
+export function pacedRouteTarget(i: InterpreterState): string | undefined {
+  if (i.origin.kind !== "plugin" || !i.origin.name.startsWith(FORCED_ROUTE)) return undefined;
+  return i.commands.some((c) => c.code === "WaitPlayerStep") ? i.origin.name.slice(FORCED_ROUTE.length) : undefined;
+}
+
 const params = z.strictObject({ target: target.default("this"), route: moveRouteSchema, wait: z.boolean().default(false) });
 
-const originName = (who: string): string => `moveRoute:${who}`;
+const FORCED_ROUTE = "moveRoute:";
+const originName = (who: string): string => `${FORCED_ROUTE}${who}`;
 
 /**
  * 移動ルートを実行させる。ルートは `MoveStep` に展開する。
@@ -194,8 +244,9 @@ export const setMoveRoute = defineCommand({
   run(p, c) {
     const who = resolveWho(p.target, c);
     if (who === undefined) return { effects: [warn(`SetMoveRoute: 対象 "${p.target}" がマップに居ない`)] };
-    const steps: EventCommand[] = p.route.steps.map((step) => ({ code: "MoveStep", params: { who, step, skippable: p.route.skippable }, indent: p.route.repeat ? 1 : 0 }));
-    if (p.wait && !p.route.repeat) return steps.length === 0 ? {} : { control: { kind: "call", commands: steps } };
+    const steps = routeSteps(who, p.route, p.route.repeat ? 1 : 0, false);
+    // ターン制のルートは、プレイヤーの手を待つので、このインタプリタの中では実行できない（プレイヤーは通常のイベントの間は動けず、デッドロックする）。常に並列で動かす
+    if (p.wait && !p.route.repeat && p.route.pace !== "playerStep") return steps.length === 0 ? {} : { control: { kind: "call", commands: steps } };
 
     const commands: EventCommand[] = p.route.repeat ? [{ code: "Loop", params: {}, indent: 0 }, ...steps, { code: "EndLoop", params: {}, indent: 0 }] : steps;
     const name = originName(who);
