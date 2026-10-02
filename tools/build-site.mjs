@@ -8,7 +8,7 @@
  *   index.html       ランディングページ（site/ をそのままコピー）
  *   404.html         存在しない URL で返すページ（site/ をそのままコピー。どの階層でも返るので、参照を持たない）
  *   editor/          エディタ（apps/editor-ui/scripts/build-web.mjs）
- *   demo/            デモを選ぶページと、デモごとのプレイヤー（tools/build-demos.mjs。demo/village/・demo/maze/・demo/tower/・demo/mansion/・demo/haunted/・demo/stealth/・demo/hokora/・demo/ice/・demo/water/・demo/clock/・demo/dungeon/・demo/fishing/）
+ *   demo/            デモを選ぶページと、デモごとのプレイヤー（tools/build-demos.mjs。demo/village/・demo/maze/・demo/tower/・demo/mansion/・demo/haunted/・demo/stealth/・demo/hokora/・demo/ice/・demo/water/・demo/clock/・demo/conveyor/・demo/dungeon/・demo/fishing/）
  *   .nojekyll        Jekyll の処理を止める
  * どのページも相対パスだけで参照し合うので、サブパス（/cc-rpg-maker/）でも動く。
  */

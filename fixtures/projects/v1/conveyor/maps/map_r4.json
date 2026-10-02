@@ -1,0 +1,928 @@
+{
+  "id": "map_r4",
+  "width": 15,
+  "height": 11,
+  "tileset": "ts_conveyor",
+  "layers": [
+    {
+      "name": "ground",
+      "tiles": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 11, 4, 4, 4, 4, 4, 4, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1, 1, 3, 3, 1, 9, 6, 6, 6, 6, 6, 6, 6, 5, 5, 9, 1, 3, 3, 1, 4, 4, 4, 4, 4, 4, 4, 8, 3, 4, 4, 1, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 4, 1, 1, 8, 5, 5, 5, 5, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 8, 1, 1, 1, 1, 3, 3, 1, 1, 1, 1, 1, 1, 10, 1, 1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+    }
+  ],
+  "events": {
+    "ev_exit": {
+      "id": "ev_exit",
+      "name": "出荷台",
+      "x": 7,
+      "y": 1,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_open_map_r4",
+              "value": false
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "74958c131fc3d219",
+            "index": 3,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "出荷口の シャッターが 閉じている。\n全部の 出荷口に 積み荷を 届けると、開くようだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_open_map_r4",
+              "value": true
+            }
+          ],
+          "trigger": "touch",
+          "through": true,
+          "priority": "below",
+          "graphic": {
+            "asset": "74958c131fc3d219",
+            "index": 4,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 255,
+                  "g": 224,
+                  "b": 130,
+                  "a": 0.7
+                },
+                "duration": 40
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 3,
+                "duration": 30,
+                "wait": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "出荷台の 上で 金のネジが 光っている。\n\\C[6]金のネジ\\C[0]を 出荷口へ のせた！",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ガタン、ゴトン……。止まっていた 出荷ラインが すべて 動きはじめた。\n工房に 活気が もどる。\\C[6]おめでとう！\\C[0]",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ReturnToTitle",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_stairs": {
+      "id": "ev_stairs",
+      "name": "入口の階段",
+      "x": 7,
+      "y": 9,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "下へ おりる 階段だ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "この 工区を はじめから やりなおす",
+                  "ヒントを 読む",
+                  "やめる"
+                ],
+                "cancel": 2
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_lever_map_r4_1"
+                ],
+                "value": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 9,
+                "y": 4,
+                "width": 1,
+                "height": 1,
+                "tile": 6
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_lever_map_r4_2"
+                ],
+                "value": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 10,
+                "y": 7,
+                "width": 4,
+                "height": 1,
+                "tile": 5
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_dock_map_r4_1"
+                ],
+                "value": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_dock_map_r4_2"
+                ],
+                "value": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_gone_map_r4_1"
+                ],
+                "value": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_gone_map_r4_2"
+                ],
+                "value": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_open_map_r4"
+                ],
+                "value": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_r4",
+                "x": 7,
+                "y": 8,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "レバーは 2つ。ひとつは 分かれ道、もうひとつは 右の ベルトの 向き。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "引く 順番を まちがえると、2つの箱が 同じ 出荷口に 入って 詰む。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 2
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_box_1": {
+      "id": "ev_box_1",
+      "name": "木箱",
+      "x": 7,
+      "y": 6,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_gone_map_r4_1",
+              "value": false
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "74958c131fc3d219",
+            "index": 0,
+            "direction": "down"
+          },
+          "pushable": true,
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "木箱だ。正面から 押せば 動かせそうだ。\nベルトの 上に のせると、勝手に 運ばれる。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_gone_map_r4_1",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "commands": []
+        }
+      ]
+    },
+    "ev_box_2": {
+      "id": "ev_box_2",
+      "name": "木箱",
+      "x": 12,
+      "y": 7,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_gone_map_r4_2",
+              "value": false
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "74958c131fc3d219",
+            "index": 0,
+            "direction": "down"
+          },
+          "pushable": true,
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "木箱だ。正面から 押せば 動かせそうだ。\nベルトの 上に のせると、勝手に 運ばれる。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_gone_map_r4_2",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "commands": []
+        }
+      ]
+    },
+    "ev_dock_1": {
+      "id": "ev_dock_1",
+      "name": "出荷口",
+      "x": 2,
+      "y": 4,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "parallel",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!s(\"sw_gone_map_r4_1\") && evx(\"ev_box_1\") == 2 && evy(\"ev_box_1\") == 4"
+              },
+              "indent": 0
+            },
+            {
+              "code": "Wait",
+              "params": {
+                "frames": 6
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_gone_map_r4_1"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_dock_map_r4_1"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!s(\"sw_gone_map_r4_2\") && evx(\"ev_box_2\") == 2 && evy(\"ev_box_2\") == 4"
+              },
+              "indent": 0
+            },
+            {
+              "code": "Wait",
+              "params": {
+                "frames": 6
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_gone_map_r4_2"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_dock_map_r4_1"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_dock_2": {
+      "id": "ev_dock_2",
+      "name": "出荷口",
+      "x": 12,
+      "y": 4,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "parallel",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!s(\"sw_gone_map_r4_1\") && evx(\"ev_box_1\") == 12 && evy(\"ev_box_1\") == 4"
+              },
+              "indent": 0
+            },
+            {
+              "code": "Wait",
+              "params": {
+                "frames": 6
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_gone_map_r4_1"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_dock_map_r4_2"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!s(\"sw_gone_map_r4_2\") && evx(\"ev_box_2\") == 12 && evy(\"ev_box_2\") == 4"
+              },
+              "indent": 0
+            },
+            {
+              "code": "Wait",
+              "params": {
+                "frames": 6
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_gone_map_r4_2"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_dock_map_r4_2"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_logic": {
+      "id": "ev_logic",
+      "name": "しかけ",
+      "x": 0,
+      "y": 0,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_open_map_r4",
+              "value": false
+            }
+          ],
+          "trigger": "parallel",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "s(\"sw_dock_map_r4_1\") && s(\"sw_dock_map_r4_2\")"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_open_map_r4"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 220,
+                  "b": 255,
+                  "a": 0.5
+                },
+                "duration": 18
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 3,
+                "duration": 24,
+                "wait": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_lever_1": {
+      "id": "ev_lever_1",
+      "name": "ベルトのレバー1",
+      "x": 1,
+      "y": 8,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_lever_map_r4_1",
+              "value": false
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "74958c131fc3d219",
+            "index": 1,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 9,
+                "y": 4,
+                "width": 1,
+                "height": 1,
+                "tile": 5
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_lever_map_r4_1"
+                ],
+                "value": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 220,
+                  "b": 255,
+                  "a": 0.5
+                },
+                "duration": 10
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ガコン！ レバーを 倒した。\nベルトの 向きが 入れかわった。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_lever_map_r4_1",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "74958c131fc3d219",
+            "index": 2,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 9,
+                "y": 4,
+                "width": 1,
+                "height": 1,
+                "tile": 6
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_lever_map_r4_1"
+                ],
+                "value": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 220,
+                  "b": 255,
+                  "a": 0.5
+                },
+                "duration": 10
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ガコン！ レバーを もどした。\nベルトの 向きが もとに もどった。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_lever_2": {
+      "id": "ev_lever_2",
+      "name": "ベルトのレバー2",
+      "x": 13,
+      "y": 6,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_lever_map_r4_2",
+              "value": false
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "74958c131fc3d219",
+            "index": 1,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 10,
+                "y": 7,
+                "width": 4,
+                "height": 1,
+                "tile": 6
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_lever_map_r4_2"
+                ],
+                "value": true
+              },
+              "indent": 0
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 220,
+                  "b": 255,
+                  "a": 0.5
+                },
+                "duration": 10
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ガコン！ レバーを 倒した。\nベルトの 向きが 入れかわった。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_lever_map_r4_2",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "74958c131fc3d219",
+            "index": 2,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ChangeMapTile",
+              "params": {
+                "map": "this",
+                "layer": 0,
+                "x": 10,
+                "y": 7,
+                "width": 4,
+                "height": 1,
+                "tile": 5
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_lever_map_r4_2"
+                ],
+                "value": false
+              },
+              "indent": 0
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 220,
+                  "b": 255,
+                  "a": 0.5
+                },
+                "duration": 10
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ガコン！ レバーを もどした。\nベルトの 向きが もとに もどった。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

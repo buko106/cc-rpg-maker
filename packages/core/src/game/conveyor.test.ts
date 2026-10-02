@@ -290,6 +290,17 @@ describe("ベルトコンベア（レバー）", () => {
   });
 });
 
+describe("ベルトコンベア（ターン制との関係）", () => {
+  it("運ばれた歩は、ターン制の手数（turns）に数えない。ベルトに乗る 1 歩だけが 1 手で、ターン制のイベントは 1 歩だけ動く", () => {
+    const walker = event("w", 4, 5, page({ graphic: { asset: "a" as never, index: 0, direction: "down" }, moveRoute: { repeat: true, skippable: false, pace: "playerStep", steps: [{ kind: "move", dir: "right" }] } }));
+    const l = setup(row(2, 3, 7, "right"), [walker]);
+    const s = walk(start(l), l.ctx, "right");
+    expect(at(s)).toEqual([8, 2]);
+    expect(s.map.turns).toBe(1);
+    expect(evAt(s, "w")).toEqual([5, 5]);
+  });
+});
+
 describe("ベルトコンベア（状態）", () => {
   it("ベルトの無いタイルセットでは、状態にも入力にも何も足さない", () => {
     const l = setup([], [box("b", 3, 2)], [], { conveyor: false });
