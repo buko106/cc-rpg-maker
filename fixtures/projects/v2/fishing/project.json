@@ -1,0 +1,507 @@
+{
+  "formatVersion": 2,
+  "meta": {
+    "id": "fishing",
+    "title": "デモ：港町の釣り大会",
+    "createdAt": "2026-10-02T00:00:00Z",
+    "updatedAt": "2026-10-02T00:00:00Z"
+  },
+  "system": {
+    "startMap": "map_harbor",
+    "startX": 12,
+    "startY": 10,
+    "initialParty": [
+      "actor_hero"
+    ],
+    "tileSize": 32,
+    "screen": {
+      "width": 480,
+      "height": 352
+    },
+    "bgm": {},
+    "terms": {
+      "newGame": "ニューゲーム"
+    },
+    "plugins": [
+      {
+        "name": "fishing",
+        "version": "1.0.0",
+        "params": {
+          "baseZone": 0.2,
+          "rods": [
+            {
+              "item": "item_rod1",
+              "name": "つりざお",
+              "zone": 0.28
+            },
+            {
+              "item": "item_rod2",
+              "name": "ぐんじょう竿",
+              "zone": 0.36
+            }
+          ],
+          "baits": [
+            {
+              "item": "item_worm",
+              "name": "ミミズ",
+              "bite": 0.85,
+              "rare": 1
+            },
+            {
+              "item": "item_shrimp",
+              "name": "エビ",
+              "bite": 0.65,
+              "rare": 1.6
+            },
+            {
+              "item": "item_lure",
+              "name": "ひかるルアー",
+              "bite": 0.5,
+              "rare": 2.6
+            }
+          ],
+          "fish": [
+            {
+              "key": "iwashi",
+              "item": "item_iwashi",
+              "name": "イワシ",
+              "size": [8, 20],
+              "points": 6,
+              "weight": 12,
+              "spots": [
+                "pier"
+              ],
+              "difficulty": 1
+            },
+            {
+              "key": "aji",
+              "item": "item_aji",
+              "name": "アジ",
+              "size": [10, 25],
+              "points": 10,
+              "weight": 10,
+              "spots": [
+                "pier",
+                "rocks"
+              ],
+              "difficulty": 1
+            },
+            {
+              "key": "mebaru",
+              "item": "item_mebaru",
+              "name": "メバル",
+              "size": [15, 30],
+              "points": 18,
+              "weight": 6,
+              "spots": [
+                "rocks"
+              ],
+              "difficulty": 2
+            },
+            {
+              "key": "kasago",
+              "item": "item_kasago",
+              "name": "カサゴ",
+              "size": [15, 35],
+              "points": 20,
+              "weight": 5,
+              "spots": [
+                "rocks"
+              ],
+              "difficulty": 2
+            },
+            {
+              "key": "kurodai",
+              "item": "item_kurodai",
+              "name": "クロダイ",
+              "size": [30, 55],
+              "points": 40,
+              "weight": 3,
+              "spots": [
+                "pier",
+                "rocks"
+              ],
+              "difficulty": 3
+            },
+            {
+              "key": "suzuki",
+              "item": "item_suzuki",
+              "name": "スズキ",
+              "size": [40, 80],
+              "points": 60,
+              "weight": 3,
+              "spots": [
+                "deep"
+              ],
+              "difficulty": 3
+            },
+            {
+              "key": "madai",
+              "item": "item_madai",
+              "name": "マダイ",
+              "size": [40, 90],
+              "points": 90,
+              "weight": 2,
+              "spots": [
+                "deep"
+              ],
+              "difficulty": 4
+            },
+            {
+              "key": "maguro",
+              "item": "item_maguro",
+              "name": "まぼろしのマグロ",
+              "size": [100, 180],
+              "points": 250,
+              "weight": 0.5,
+              "spots": [
+                "deep"
+              ],
+              "difficulty": 5
+            },
+            {
+              "key": "boots",
+              "item": "item_boots",
+              "name": "ながぐつ",
+              "size": [20, 30],
+              "points": 0,
+              "weight": 3,
+              "spots": [
+                "pier",
+                "rocks",
+                "deep"
+              ],
+              "difficulty": 1
+            }
+          ],
+          "tournament": {
+            "seconds": 120,
+            "rivals": [
+              {
+                "name": "ミナ",
+                "skill": 70
+              },
+              {
+                "name": "ゴンさん",
+                "skill": 150
+              },
+              {
+                "name": "トビさん",
+                "skill": 280
+              }
+            ],
+            "prizes": [1500, 700, 300],
+            "trophy": "item_trophy"
+          },
+          "vars": {
+            "event": "var_fishing_event",
+            "species": "var_fishing_species",
+            "rank": "var_fishing_rank",
+            "score": "var_fishing_score",
+            "wins": "var_fishing_wins"
+          }
+        }
+      }
+    ]
+  },
+  "maps": {
+    "map_harbor": {
+      "id": "map_harbor",
+      "name": "港町ナミマ",
+      "order": 0
+    }
+  },
+  "tilesets": {
+    "ts_harbor": {
+      "id": "ts_harbor",
+      "name": "港町",
+      "image": {
+        "asset": "38627ed127409f99"
+      },
+      "passage": [0, 0, 0, 0, 15, 15, 15, 15, 15, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 15]
+    }
+  },
+  "database": {
+    "actors": {
+      "actor_hero": {
+        "id": "actor_hero",
+        "name": "旅人",
+        "classId": "class_hero",
+        "initialLevel": 1,
+        "walk": {
+          "asset": "bb2e23b45d1f4d4d"
+        },
+        "equips": {}
+      }
+    },
+    "classes": {
+      "class_hero": {
+        "id": "class_hero",
+        "name": "旅人",
+        "skills": [],
+        "params": {
+          "mhp": {
+            "base": 30,
+            "growth": 5
+          },
+          "mmp": {
+            "base": 0,
+            "growth": 0
+          },
+          "atk": {
+            "base": 5,
+            "growth": 1
+          },
+          "def": {
+            "base": 3,
+            "growth": 1
+          },
+          "mat": {
+            "base": 0,
+            "growth": 0
+          },
+          "mdf": {
+            "base": 0,
+            "growth": 0
+          },
+          "agi": {
+            "base": 8,
+            "growth": 0
+          },
+          "luk": {
+            "base": 0,
+            "growth": 0
+          }
+        }
+      }
+    },
+    "skills": {},
+    "items": {
+      "item_iwashi": {
+        "id": "item_iwashi",
+        "name": "イワシ",
+        "kind": "consumable",
+        "price": 10,
+        "effects": [],
+        "description": "イワシ。釣具屋で 売れる。"
+      },
+      "item_aji": {
+        "id": "item_aji",
+        "name": "アジ",
+        "kind": "consumable",
+        "price": 20,
+        "effects": [],
+        "description": "アジ。釣具屋で 売れる。"
+      },
+      "item_mebaru": {
+        "id": "item_mebaru",
+        "name": "メバル",
+        "kind": "consumable",
+        "price": 50,
+        "effects": [],
+        "description": "メバル。釣具屋で 売れる。"
+      },
+      "item_kasago": {
+        "id": "item_kasago",
+        "name": "カサゴ",
+        "kind": "consumable",
+        "price": 60,
+        "effects": [],
+        "description": "カサゴ。釣具屋で 売れる。"
+      },
+      "item_kurodai": {
+        "id": "item_kurodai",
+        "name": "クロダイ",
+        "kind": "consumable",
+        "price": 160,
+        "effects": [],
+        "description": "クロダイ。釣具屋で 売れる。"
+      },
+      "item_suzuki": {
+        "id": "item_suzuki",
+        "name": "スズキ",
+        "kind": "consumable",
+        "price": 240,
+        "effects": [],
+        "description": "スズキ。釣具屋で 売れる。"
+      },
+      "item_madai": {
+        "id": "item_madai",
+        "name": "マダイ",
+        "kind": "consumable",
+        "price": 480,
+        "effects": [],
+        "description": "マダイ。釣具屋で 売れる。"
+      },
+      "item_maguro": {
+        "id": "item_maguro",
+        "name": "まぼろしのマグロ",
+        "kind": "consumable",
+        "price": 2000,
+        "effects": [],
+        "description": "まぼろしのマグロ。釣具屋で 売れる。"
+      },
+      "item_boots": {
+        "id": "item_boots",
+        "name": "ながぐつ",
+        "kind": "consumable",
+        "price": 2,
+        "effects": [],
+        "description": "ながぐつ。釣具屋で 売れる。"
+      },
+      "item_worm": {
+        "id": "item_worm",
+        "name": "ミミズ",
+        "kind": "consumable",
+        "price": 5,
+        "effects": [],
+        "description": "ふつうの エサ。1 回の釣りで 1 つ使う。"
+      },
+      "item_shrimp": {
+        "id": "item_shrimp",
+        "name": "エビ",
+        "kind": "consumable",
+        "price": 15,
+        "effects": [],
+        "description": "あたりが 早く、大物も 来やすい。"
+      },
+      "item_lure": {
+        "id": "item_lure",
+        "name": "ひかるルアー",
+        "kind": "consumable",
+        "price": 40,
+        "effects": [],
+        "description": "あたりが とても早く、大物が よく来る。"
+      },
+      "item_rod1": {
+        "id": "item_rod1",
+        "name": "つりざお",
+        "kind": "key",
+        "price": 300,
+        "effects": [],
+        "description": "ふつうの 釣りざお。バーの 当たり判定が 広がる。"
+      },
+      "item_rod2": {
+        "id": "item_rod2",
+        "name": "ぐんじょう竿",
+        "kind": "key",
+        "price": 1200,
+        "effects": [],
+        "description": "しなやかな 名竿。大物にも 負けにくい。"
+      },
+      "item_trophy": {
+        "id": "item_trophy",
+        "name": "金のトロフィー",
+        "kind": "key",
+        "price": 0,
+        "effects": [],
+        "description": "釣り大会で 優勝した 証。"
+      }
+    },
+    "enemies": {},
+    "troops": {},
+    "states": {},
+    "commonEvents": {}
+  },
+  "assets": {
+    "entries": {
+      "38627ed127409f99": {
+        "name": "harbor_tiles.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 4376,
+        "width": 640,
+        "height": 32
+      },
+      "bb2e23b45d1f4d4d": {
+        "name": "hero.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 660,
+        "width": 96,
+        "height": 128
+      },
+      "02809b84f1b29c00": {
+        "name": "clerk.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 656,
+        "width": 96,
+        "height": 128
+      },
+      "964b90f723ccaf12": {
+        "name": "merchant.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 658,
+        "width": 96,
+        "height": 128
+      },
+      "346da51910fd4e03": {
+        "name": "master.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 660,
+        "width": 96,
+        "height": 128
+      },
+      "04a331882d3297ad": {
+        "name": "gon.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 659,
+        "width": 96,
+        "height": 128
+      },
+      "d3dff4c9fd5694df": {
+        "name": "mina.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 661,
+        "width": 96,
+        "height": 128
+      },
+      "d9c4b9dc87b4fd9c": {
+        "name": "tobi.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 655,
+        "width": 96,
+        "height": 128
+      },
+      "61b7b2e9a0ba3848": {
+        "name": "sign.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 487,
+        "width": 96,
+        "height": 128
+      }
+    }
+  },
+  "switches": {
+    "sw_intro": {
+      "name": "はじまりの説明を聞いた"
+    },
+    "sw_tournament": {
+      "name": "釣り大会に出ている"
+    }
+  },
+  "variables": {
+    "var_fishing_event": {
+      "name": "釣り：イベント"
+    },
+    "var_fishing_species": {
+      "name": "釣り：釣った魚の種類"
+    },
+    "var_fishing_rank": {
+      "name": "釣り：最後の大会の順位"
+    },
+    "var_fishing_score": {
+      "name": "釣り：最後の大会の点数"
+    },
+    "var_fishing_wins": {
+      "name": "釣り：大会で優勝した回数"
+    }
+  }
+}

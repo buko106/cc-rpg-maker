@@ -43,13 +43,15 @@ editor-core   → schema, core（CommandRegistry のメタデータ参照のみ�
 plugin-api    → core, runtime, editor-core（公開型のみ）
 plugin-samples → plugin-api（サンプルプラグイン。第三者のプラグインと同じ立場）
 plugin-dungeon → plugin-api（不思議のダンジョン。同じく第三者のプラグインと同じ立場。docs/18）
-editor-ui     → editor-core, runtime, plugin-api, plugin-samples, plugin-dungeon, schema, core（CommandRegistry のメタデータ参照のみ）, exporter, 任意のアダプタ
-player        → runtime, plugin-api, plugin-samples, plugin-dungeon, schema（project.json の検証用）, 任意のアダプタ
+plugin-fishing → plugin-api（釣り大会。同じく第三者のプラグインと同じ立場。docs/19）
+editor-ui     → editor-core, runtime, plugin-api, plugin-samples, plugin-dungeon, plugin-fishing, schema, core（CommandRegistry のメタデータ参照のみ）, exporter, 任意のアダプタ
+player        → runtime, plugin-api, plugin-samples, plugin-dungeon, plugin-fishing, schema（project.json の検証用）, 任意のアダプタ
 test-utils    → 任意（テスト専用）
 ```
 
 - 各パッケージの**テストファイル（`*.test.ts`）と、テスト専用のヘルパ（`*.testkit.ts`。パッケージのビルドからは除く）だけは、上記に加えて `test-utils` を import できる**（契約テスト・ハーネスを使うため）。`package.json` では `devDependencies` にのみ宣言する。プロダクションコードは `test-utils` を import してはならない。
 
+- **置き場所**：ライブラリは `packages/`、プラグインの実装は `plugins/`（`plugin-api` は、プラグインの土台なので `packages/`）、アプリは `apps/`。置き場所は `tools/dependency-rules.cjs` の `LOCATIONS` / `ROOTS` が単一情報源で、依存ルールの検査・`package.json` の検査・テストの探索はそこから決まる。プラグイン `@rpg/plugin-<name>` は `plugins/<name>/` に置く（ディレクトリ名は `plugin-` を省く。`pathOf` / `nameAt` が対応を持つ）。足すときは `LOCATIONS` と `ALLOWED` に登録する。
 - 逆方向・横方向の import は `eslint-plugin-boundaries`（または `dependency-cruiser`）で禁止する。
 - `schema`, `core` の `tsconfig` は `lib: ["ES2022"]` のみ（`DOM` を含めない）。これにより DOM API への依存が型レベルで不可能になる。
 - ポート型は `packages/<name>/src/ports/*.ts` に置き、`index.ts` から re-export する。アダプタはこれのみを import する。

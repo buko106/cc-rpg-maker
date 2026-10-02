@@ -3,6 +3,23 @@ import type { AddressInfo } from "node:net";
 import { expect } from "@playwright/test";
 import type { Download, Page } from "@playwright/test";
 
+/**
+ * タイトルから「ニューゲーム」を選んで、ゲームがマップ画面に入るまで待つ。`handle` はページに生えているゲームの窓口（プレイヤー = `__rpg`、エディタのテストプレイ = `__rpgPlaytest`）。
+ *
+ * **タイトルのあいだ決定ボタンを押し続ける**：タイトルが出た直後は、マップなどを読み込み中で入力を受け付けないことがあり、1 回だけ押すと取りこぼす。
+ * また、タイトルの状態の `map.mapId` は、はじめから開始マップを指している。「`mapId` が開始マップ」を待っても、まだタイトルのことがある
+ * （その間に押した矢印キーは、ゲームではなくタイトルに届く）ので、`scene.kind === "map"` を待つ。
+ */
+export async function startNewGame(page: Page, handle: "__rpg" | "__rpgPlaytest" = "__rpg"): Promise<void> {
+  const scene = (): Promise<string | undefined> => page.evaluate((h) => (window as unknown as Record<string, { getState(): { scene: { kind: string } } } | undefined>)[h]?.getState().scene.kind, handle);
+  await page.waitForFunction((h) => (window as unknown as Record<string, { getState(): { scene: { kind: string } } } | undefined>)[h]?.getState().scene.kind === "title", handle);
+  for (let i = 0; i < 100 && (await scene()) === "title"; i++) {
+    await page.keyboard.press("Enter");
+    await page.waitForTimeout(100);
+  }
+  await page.waitForFunction((h) => (window as unknown as Record<string, { getState(): { scene: { kind: string } } }>)[h]!.getState().scene.kind === "map", handle);
+}
+
 /** 最小の ZIP 読み込み（無圧縮のエントリだけ）。エクスポータとは別の実装で、ZIP の構造を確かめる。 */
 export function unzip(buf: Buffer): Map<string, Buffer> {
   const end = buf.lastIndexOf(Buffer.from([0x50, 0x4b, 0x05, 0x06]));

@@ -50,10 +50,13 @@
       "path": "./packages/plugin-api"
     },
     {
-      "path": "./packages/plugin-samples"
+      "path": "./plugins/samples"
     },
     {
-      "path": "./packages/plugin-dungeon"
+      "path": "./plugins/dungeon"
+    },
+    {
+      "path": "./plugins/fishing"
     },
     {
       "path": "./packages/test-utils"

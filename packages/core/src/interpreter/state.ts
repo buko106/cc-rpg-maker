@@ -10,7 +10,12 @@ export type WaitState =
   | { readonly kind: "battle" }
   | { readonly kind: "shop" }
   | { readonly kind: "transfer" }
-  | { readonly kind: "child"; readonly id: string };
+  | { readonly kind: "child"; readonly id: string }
+  /**
+   * プラグインのコマンドが、毎フレーム自分の `resume` で解除を判定する待機（ミニゲームや独自の画面）。`name` はプラグイン名。
+   * `resume` を持たないコマンドが発行した場合（プラグインを外したセーブを読んだときなど）は、警告して解除する。
+   */
+  | { readonly kind: "plugin"; readonly name: string };
 
 export type InterpreterOrigin =
   | { readonly kind: "mapEvent"; readonly mapId: MapId; readonly eventId: EventId; readonly page: number }

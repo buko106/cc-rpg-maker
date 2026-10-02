@@ -118,6 +118,7 @@ const waitSchema = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("shop") }),
   z.strictObject({ kind: z.literal("transfer") }),
   z.strictObject({ kind: z.literal("child"), id: z.string() }),
+  z.strictObject({ kind: z.literal("plugin"), name: z.string() }),
 ]);
 const originSchema = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("mapEvent"), mapId: mapIdSchema, eventId: eventIdSchema, page: nonNegativeInt }),

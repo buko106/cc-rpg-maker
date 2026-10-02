@@ -29,10 +29,13 @@
       "path": "../../packages/plugin-api"
     },
     {
-      "path": "../../packages/plugin-dungeon"
+      "path": "../../plugins/dungeon"
     },
     {
-      "path": "../../packages/plugin-samples"
+      "path": "../../plugins/fishing"
+    },
+    {
+      "path": "../../plugins/samples"
     },
     {
       "path": "../../packages/render-canvas2d"

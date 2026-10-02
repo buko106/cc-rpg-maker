@@ -88,3 +88,8 @@ export function loadPlugins(mods: PluginModule[], host: PluginHost): Promise<{ l
 - **コマンドで状態を変える**：コマンドの `run` は、完全な `GameState` を返せる（`pluginState` のほか、`mapTiles`・`actors`・`party`・`map.player` など）。プラグインが触ってよいと決めてあるのは、そのプラグインの設計文書（18）に書いたものだけ。コマンドからほかのコマンドを呼ぶには、`control: { kind: "call", commands }` を返す（呼び出した列が終わると、続きから戻る）。**並列イベントの中から `TransferPlayer` を呼んではいけない**：場所移動は、元のマップの並列イベントのインタプリタをすべて終わらせるので、移動を待っている並列イベント自身も消え、明転が終わらない。移動する前提のコマンドは、通常のイベント（自動実行・話しかけ）から呼ぶ。
 - **`projection.after` は `Ctx`（データベース）を受け取らない**：描くのに必要な値（最大 HP・設定・絵の位置など）は、`host.params`（設定）と `pluginState`（コマンドが毎ターン書いておく）から取る。FrameSpec の `layers` を差し込むときは、タイルの層とキャラクターの層（`sprites`、`z` が 100・200・300）の間に、`z` の小さい順になるよう並べる。
 
+## 実装メモ（ミニゲーム・独自の画面：`wait: plugin`）
+- **コマンドが画面と入力をしばらく預かる**には、`run` で `control: { kind: "wait", wait: { kind: "plugin", name: host.name } }` を返し、`resume` で毎フレーム `c.input`（`pressed` = 押している間、`triggered` = 押した瞬間）を読む（03 の「実装メモ（プラグインの待機）」）。状態は `pluginState`（`resume` の結果の `state`）に持ち、表示は `projection.after` が `pluginState` を見て描く。`run` の入力は、そのコマンドを起動したボタンの押下と混ざるので、読まない。
+- **待機中はプレイヤーが動けず、メニューも開かない**（`normal` のインタプリタが待っているため）。ミニゲームは数十秒以内に終わらせる。終わらせる手段（キャンセルなど）を必ず用意する（`resume` が解除しないと、ゲームが先に進まない）。
+- **乱数**：`c.rng`（共有の乱数ストリーム）を使う。毎フレーム引かない（使ったときだけ進む）ように、乱数を使う場面だけで引くと、リプレイが短い列で再現しやすい。
+- **例**：`@rpg/plugin-fishing`（19）の `Cast`（釣りのミニゲーム）・`Album`（図鑑）・`Result`（結果発表）。

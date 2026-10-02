@@ -14,7 +14,7 @@
     "typecheck": "tsc -p tsconfig.typecheck.json",
     "test": "vitest run",
     "test:browser": "playwright test",
-    "lint:deps": "depcruise packages apps --config .dependency-cruiser.cjs && node tools/check-manifests.mjs",
+    "lint:deps": "depcruise packages plugins apps --config .dependency-cruiser.cjs && node tools/check-manifests.mjs",
     "clean": "tsc -b --clean",
     "test:coverage": "vitest run --coverage",
     "demo": "node tools/build-demos.mjs && node tools/serve-static.mjs apps/player/dist-demos 4173",

@@ -6,6 +6,12 @@
  * ドキュメントの依存ルールを変更するときは、このファイルを同時に更新すること。
  */
 
+/**
+ * パッケージを置くルートのディレクトリ（`<root>/<name>/`）。
+ * `packages/`：ライブラリ（プラグインの土台 `plugin-api` を含む）、`plugins/`：プラグインの実装、`apps/`：アプリ。
+ */
+const ROOTS = ["packages", "plugins", "apps"];
+
 /** パッケージ名 → 置き場所（ディレクトリ）。名前空間は `@rpg/<name>`。 */
 const LOCATIONS = {
   schema: "packages",
@@ -24,8 +30,9 @@ const LOCATIONS = {
   "save-store": "packages",
   "editor-core": "packages",
   "plugin-api": "packages",
-  "plugin-samples": "packages",
-  "plugin-dungeon": "packages",
+  "plugin-samples": "plugins",
+  "plugin-dungeon": "plugins",
+  "plugin-fishing": "plugins",
   "test-utils": "packages",
   "editor-ui": "apps",
   player: "apps",
@@ -68,12 +75,22 @@ const ALLOWED = {
   "plugin-api": ["core", "runtime", "editor-core"],
   "plugin-samples": ["plugin-api"],
   "plugin-dungeon": ["plugin-api"],
-  "editor-ui": ["editor-core", "runtime", "plugin-api", "plugin-samples", "plugin-dungeon", "schema", "core", "exporter", ...ADAPTERS],
-  player: ["runtime", "plugin-api", "plugin-samples", "plugin-dungeon", "schema", ...ADAPTERS],
+  "plugin-fishing": ["plugin-api"],
+  "editor-ui": ["editor-core", "runtime", "plugin-api", "plugin-samples", "plugin-dungeon", "plugin-fishing", "schema", "core", "exporter", ...ADAPTERS],
+  player: ["runtime", "plugin-api", "plugin-samples", "plugin-dungeon", "plugin-fishing", "schema", ...ADAPTERS],
   "test-utils": "*",
 };
 
 const NAMES = Object.keys(LOCATIONS);
+
+/** パッケージ名 → ディレクトリ名。`plugins/` の下では、接頭辞 `plugin-` を省く（`@rpg/plugin-dungeon` → `plugins/dungeon/`）。 */
+const dirName = (name) => (LOCATIONS[name] === "plugins" ? name.replace(/^plugin-/, "") : name);
+
+/** パッケージ名 → リポジトリルートからのパス（`packages/core`・`plugins/dungeon` など）。 */
+const pathOf = (name) => `${LOCATIONS[name]}/${dirName(name)}`;
+
+/** `pathOf` の逆引き。`root`（`packages` など）と `dir`（ディレクトリ名）から、パッケージ名を返す（無ければ `undefined`）。 */
+const nameAt = (root, dir) => NAMES.find((n) => LOCATIONS[n] === root && dirName(n) === dir);
 
 /** テストコード（`*.test.ts`）だけが、許可関係に加えて import してよいパッケージ。 */
 const TEST_SUPPORT = "test-utils";
@@ -95,4 +112,4 @@ function allowedOf(from) {
   return allowed === "*" ? NAMES.filter((n) => n !== from) : [...allowed];
 }
 
-module.exports = { LOCATIONS, ADAPTERS, ALLOWED, NAMES, TEST_SUPPORT, isAllowed, allowedOf };
+module.exports = { dirName, pathOf, nameAt, ROOTS, LOCATIONS, ADAPTERS, ALLOWED, NAMES, TEST_SUPPORT, isAllowed, allowedOf };

@@ -19,6 +19,7 @@
     "@rpg/input-script": "workspace:*",
     "@rpg/plugin-api": "workspace:*",
     "@rpg/plugin-dungeon": "workspace:*",
+    "@rpg/plugin-fishing": "workspace:*",
     "@rpg/plugin-samples": "workspace:*",
     "@rpg/project-store": "workspace:*",
     "@rpg/render-canvas2d": "workspace:*",

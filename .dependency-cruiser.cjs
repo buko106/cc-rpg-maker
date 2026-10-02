@@ -2,9 +2,12 @@
  * 依存ルール検査の設定（docs/00-principles.md §2）。
  * パッケージ間の許可関係は tools/dependency-rules.cjs から生成する。
  */
-const { LOCATIONS, NAMES, TEST_SUPPORT, allowedOf } = require("./tools/dependency-rules.cjs");
+const { ROOTS, NAMES, TEST_SUPPORT, allowedOf, pathOf } = require("./tools/dependency-rules.cjs");
 
-const dir = (name) => `${LOCATIONS[name]}/${name}`;
+/** `packages|plugins|apps` のように、パッケージを置くルートの選択肢（正規表現）。 */
+const ROOT = ROOTS.join("|");
+
+const dir = pathOf;
 
 /** テストファイル：`*.test.ts` と、テスト専用のヘルパ `*.testkit.ts`（tsconfig のビルドからは除く）。 */
 const TEST_FILE = "\\.(test|testkit)\\.tsx?$";
@@ -21,14 +24,14 @@ const packageRules = NAMES.filter((name) => allowedOf(name).length < NAMES.lengt
       comment: `@rpg/${name} は docs/00-principles.md の依存ルールで許可されたパッケージ以外を import してはならない。`,
       severity: "error",
       from: { path: `^${dir(name)}/`, pathNot: TEST_FILE },
-      to: { path: `^(packages|apps)/`, pathNot: `^(${permitted([])})` },
+      to: { path: `^(${ROOT})/`, pathNot: `^(${permitted([])})` },
     },
     {
       name: `package-deps-${name}-tests`,
       comment: `@rpg/${name} のテストは、許可されたパッケージと ${TEST_SUPPORT} 以外を import してはならない。`,
       severity: "error",
       from: { path: `^${dir(name)}/.*${TEST_FILE}` },
-      to: { path: `^(packages|apps)/`, pathNot: `^(${permitted([TEST_SUPPORT])})` },
+      to: { path: `^(${ROOT})/`, pathNot: `^(${permitted([TEST_SUPPORT])})` },
     },
   ];
 });
@@ -40,10 +43,10 @@ module.exports = {
       name: "only-public-entry",
       comment: "他パッケージは公開エントリ（src/index.ts）経由でのみ import する。内部実装に依存してはならない。",
       severity: "error",
-      from: { path: "^(?:packages|apps)/([^/]+)/" },
+      from: { path: `^(?:${ROOT})/([^/]+)/` },
       to: {
-        path: "^(?:packages|apps)/[^/]+/",
-        pathNot: ["^(?:packages|apps)/$1/", "^(?:packages|apps)/[^/]+/src/index\\.ts$"],
+        path: `^(?:${ROOT})/[^/]+/`,
+        pathNot: [`^(?:${ROOT})/$1/`, `^(?:${ROOT})/[^/]+/src/index\\.ts$`],
       },
     },
     {

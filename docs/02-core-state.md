@@ -237,5 +237,5 @@ export const snapshotMigrations: readonly { from: number; to: number; migrate(s:
 ## 実装メモ（プラグインの保存領域 `pluginState`）
 - **`GameState.pluginState?: Readonly<Record<string, JsonValue>>`**（`state.ts`）：プラグインが自分の状態を置く領域。キーはプラグインの名前、値は JSON にできる値（`JsonValue`。`undefined` は含めない）。書き込むまで無いので、プラグインを使わないゲームの状態・リプレイのハッシュは変わらない。読み書きは `pluginStateOf(state, name)` / `withPluginState(state, name, value)`（どちらも `@rpg/plugin-api` から再エクスポート。後者は自分以外のプラグインのキーに触れない）。`null` を書けば「持っていない」ことを表せる（キーは残る）。
 - **セーブ**：`snapshot` の検証スキーマに `pluginState`（キーごとに JSON の値）を足した。JSON でない値（関数・`undefined` など）の入ったセーブは弾く。`pluginState` の無いセーブはそのまま読める。**`SNAPSHOT_VERSION` は上げていない**：足したのは省略できる項目だけで、これまでのセーブは変換なしで読めるから（バージョンを上げると、`pluginState` を使わないゲームのセーブまで古いビルドで読めなくなる）。古いビルドが `pluginState` の入ったセーブを読むと、検証で「不正」として弾かれる。
-- **使い道**：デモ「風鳴りの洞窟」（`@rpg/plugin-dungeon`。18）が、何階か・敵の位置と HP・落ちている物・歩いた場所・満腹度・ログを持つ。ほかに、クエストの記録・図鑑・クラフトなど、数値の変数に収まらない状態をプラグインが持てる。
+- **使い道**：デモ「風鳴りの洞窟」（`@rpg/plugin-dungeon`。18）が、何階か・敵の位置と HP・落ちている物・歩いた場所・満腹度・ログを持つ。デモ「港町の釣り大会」（`@rpg/plugin-fishing`。19）は、図鑑（魚ごとの数と最大の大きさ）・大会の点数・釣りの 1 回分（待つ・あたり・巻き上げ）・図鑑や結果発表の画面を持つ。ほかに、クエストの記録・クラフトなど、数値の変数に収まらない状態をプラグインが持てる。
 

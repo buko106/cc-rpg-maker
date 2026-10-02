@@ -10,10 +10,10 @@
 > セーブしてリロード後に続きから再開でき、イベントから始まる戦闘（攻撃・スキル・アイテム・防御・逃走、状態異常、敵AI、経験値とドロップ）を BGM 付きで遊べます（`pnpm demo`）。
 > エディタ（`apps/editor-ui`）で新しいゲームを作り、マップにタイルを描き、イベントやデータベースを編集し、保存して、そのままテストプレイできます（`pnpm editor`）。
 > 全ての組み込みコマンド（選択肢・移動ルート・画面効果・購入と売却ができるショップ画面など）が使え、エディタの「配布物を書き出す…」から、フォルダ形式（ZIP）と単一 HTML の配布物を作れます（別のオリジンの静的サーバでも `file://` でも遊べます）。
-> プラグイン（`@rpg/plugin-api`。独自コマンド・式関数・戦闘ルール・HUD など。サンプルは `@rpg/plugin-samples`。不思議のダンジョンは `@rpg/plugin-dungeon`）がプレイヤーとエディタの両方で動き、
+> プラグイン（`@rpg/plugin-api`。独自コマンド・式関数・戦闘ルール・HUD など。サンプルは `@rpg/plugin-samples`。不思議のダンジョンは `@rpg/plugin-dungeon`、釣り大会は `@rpg/plugin-fishing`）がプレイヤーとエディタの両方で動き、
 > 描画は WebGL（`@rpg/render-webgl`）と Canvas2D を選べ（`auto` は WebGL が使えなければ Canvas2D）、フォルダ形式の配布物は Service Worker でオフラインでも遊べます。
 > プロジェクトの保存先は IndexedDB のほか、OPFS / 利用者が選んだフォルダ（File System Access API。一覧の「フォルダを選ぶ…」）も使えます。
-> エディタのプロジェクト一覧の「サンプルから作る」で、デモ（はじまりの村・地下迷宮・バトルタワー・謎解きの館・おばけ屋敷の追いかけっこ・忍び込み・ほこらの冒険・氷の神殿・水門の遺跡・風鳴りの洞窟）の編集データを新しいプロジェクトとして取り込んで、中身を見たり作り変えたりできます。
+> エディタのプロジェクト一覧の「サンプルから作る」で、デモ（はじまりの村・地下迷宮・バトルタワー・謎解きの館・おばけ屋敷の追いかけっこ・忍び込み・ほこらの冒険・氷の神殿・水門の遺跡・風鳴りの洞窟・港町の釣り大会）の編集データを新しいプロジェクトとして取り込んで、中身を見たり作り変えたりできます。
 > 編集データは一覧の「ZIP」で書き出し、「ZIP から読み込む…」で取り込めます（バックアップや、別のブラウザへの持ち運び）。
 > 設計は [`docs/`](./docs/) にあります。
 
@@ -75,7 +75,8 @@
 ```
 /
 ├── docs/           設計ドキュメント
-├── packages/       schema, core, runtime, 各アダプタ, editor-core, plugin-api, test-utils
+├── packages/       schema, core, runtime, 各アダプタ, editor-core, plugin-api（プラグインの土台）, test-utils
+├── plugins/        プラグインの実装（samples, dungeon, fishing。パッケージ名は @rpg/plugin-*）
 ├── apps/           editor-ui, player
 └── fixtures/       サンプルプロジェクト、リプレイ、マイグレーション用データ
 ```
@@ -108,7 +109,7 @@
 | データ・ゲームロジック | [01 schema](./docs/01-schema.md) · [02 core 状態](./docs/02-core-state.md) · [03 インタプリタ](./docs/03-interpreter.md) · [04 戦闘](./docs/04-battle.md) · [05 式言語](./docs/05-expression.md) |
 | 実行環境 | [06 runtime](./docs/06-runtime.md) · [07 描画](./docs/07-render.md) · [08 音声・入力](./docs/08-audio-input.md) · [09 アセット](./docs/09-assets.md) |
 | 永続化 | [10 project-store](./docs/10-project-store.md) · [11 save-store](./docs/11-save-store.md) |
-| エディタ・配布 | [12 editor-core](./docs/12-editor-core.md) · [13 editor-ui](./docs/13-editor-ui.md) · [14 プラグイン](./docs/14-plugin-api.md) · [15 プレイヤー・エクスポート](./docs/15-player-export.md) · [18 不思議のダンジョン（プラグイン）](./docs/18-dungeon-plugin.md) |
+| エディタ・配布 | [12 editor-core](./docs/12-editor-core.md) · [13 editor-ui](./docs/13-editor-ui.md) · [14 プラグイン](./docs/14-plugin-api.md) · [15 プレイヤー・エクスポート](./docs/15-player-export.md) · [18 不思議のダンジョン（プラグイン）](./docs/18-dungeon-plugin.md) · [19 釣り大会（プラグイン）](./docs/19-fishing-plugin.md) |
 
 ## ロードマップ
 
@@ -136,7 +137,7 @@ pnpm typecheck      # テストを含む全体の型検査
 pnpm test           # 単体・プロパティ・契約・リプレイ・スナップショット（Node）
 pnpm test:coverage  # 上記 + カバレッジ閾値（schema / core 90%、他の実装済みパッケージ 70%）
 pnpm test:browser   # Playwright（Chromium。E2E）。プレイヤー（demo 付き）とエディタをビルドして配信する
-pnpm demo           # デモ（はじまりの村・地下迷宮・バトルタワー・謎解きの館・おばけ屋敷の追いかけっこ・忍び込み・ほこらの冒険・氷の神殿・水門の遺跡・風鳴りの洞窟）と選ぶページをビルドして http://127.0.0.1:4173/ で配信（矢印/WASD で移動、Z/Enter/Space で決定）
+pnpm demo           # デモ（はじまりの村・地下迷宮・バトルタワー・謎解きの館・おばけ屋敷の追いかけっこ・忍び込み・ほこらの冒険・氷の神殿・水門の遺跡・風鳴りの洞窟・港町の釣り大会）と選ぶページをビルドして http://127.0.0.1:4173/ で配信（矢印/WASD で移動、Z/Enter/Space で決定）
 pnpm editor         # エディタをビルドして http://127.0.0.1:4174/ で配信（プロジェクトはブラウザの IndexedDB に保存）
 pnpm site           # 公開するサイト（ランディング + editor/ + demo/）をビルドして http://127.0.0.1:4175/ で配信
 pnpm lint:deps      # 依存ルール検査（dependency-cruiser + package.json 検査）

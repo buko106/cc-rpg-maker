@@ -5,7 +5,7 @@ import { z } from "zod";
 import { describe, expect, it } from "vitest";
 import { createCtx } from "../ctx.js";
 import { initialState } from "../game/index.js";
-import { emptyInput } from "../input.js";
+import { emptyInput, inputFrame } from "../input.js";
 import type { GameState } from "../state.js";
 import { defineCommand } from "./handler.js";
 import type { CommandHandler } from "./handler.js";
@@ -319,6 +319,29 @@ describe("runInterpreters: default wait resolution", () => {
 
   it.each(["move", "battle"] as const)("%s: no source exists in M1, so it is released with a warning instead of hanging", (kind) => {
     const { ctx, s } = start(kind === "move" ? { kind, who: "player" } : { kind });
+    const waiting = tick(s, ctx).state;
+    const released = tick(waiting, ctx);
+    expect(count(released.state)).toBe(1);
+    expect(warnings(released.effects)).toHaveLength(1);
+  });
+
+  it("plugin: resume() で毎フレーム入力を読み、決定ボタンが押されたら解除する（ミニゲーム・独自の画面）", () => {
+    const minigame = defineCommand({
+      code: "Minigame", params: empty, meta: noMeta,
+      run: () => ({ control: { kind: "wait", wait: { kind: "plugin", name: "t" } } }),
+      resume: (_p, c) => (c.input.triggered.has("ok") ? { control: { kind: "next" } } : { control: { kind: "wait", wait: c.interp.wait } }),
+    });
+    const ctx = ctxWith(minigame, inc);
+    let s = startInterpreter(initialState(ctx, "s"), { kind: "plugin", name: "t" }, [cmd("Minigame"), cmd("Inc")], "normal");
+    s = runInterpreters(s, emptyInput(), ctx).state; // Minigame 実行 → plugin 待ち
+    expect(s.interpreters[0]!.wait).toEqual({ kind: "plugin", name: "t" });
+    for (let i = 0; i < 5; i++) s = runInterpreters(s, emptyInput(), ctx).state;
+    expect(count(s)).toBe(0); // 押すまで進まない
+    expect(count(runInterpreters(s, inputFrame([], ["ok"]), ctx).state)).toBe(1);
+  });
+
+  it("plugin: resume を持たないコマンドが発行した待機は、警告して解除する（プラグインを外したセーブで詰まらない）", () => {
+    const { ctx, s } = start({ kind: "plugin", name: "gone" });
     const waiting = tick(s, ctx).state;
     const released = tick(waiting, ctx);
     expect(count(released.state)).toBe(1);

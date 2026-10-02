@@ -67,10 +67,13 @@ importers:
         version: link:../../packages/plugin-api
       '@rpg/plugin-dungeon':
         specifier: workspace:*
-        version: link:../../packages/plugin-dungeon
+        version: link:../../plugins/dungeon
+      '@rpg/plugin-fishing':
+        specifier: workspace:*
+        version: link:../../plugins/fishing
       '@rpg/plugin-samples':
         specifier: workspace:*
-        version: link:../../packages/plugin-samples
+        version: link:../../plugins/samples
       '@rpg/project-store':
         specifier: workspace:*
         version: link:../../packages/project-store
@@ -143,10 +146,13 @@ importers:
         version: link:../../packages/plugin-api
       '@rpg/plugin-dungeon':
         specifier: workspace:*
-        version: link:../../packages/plugin-dungeon
+        version: link:../../plugins/dungeon
+      '@rpg/plugin-fishing':
+        specifier: workspace:*
+        version: link:../../plugins/fishing
       '@rpg/plugin-samples':
         specifier: workspace:*
-        version: link:../../packages/plugin-samples
+        version: link:../../plugins/samples
       '@rpg/project-store':
         specifier: workspace:*
         version: link:../../packages/project-store
@@ -287,26 +293,6 @@ importers:
         specifier: workspace:*
         version: link:../test-utils
 
-  packages/plugin-dungeon:
-    dependencies:
-      '@rpg/plugin-api':
-        specifier: workspace:*
-        version: link:../plugin-api
-    devDependencies:
-      '@rpg/test-utils':
-        specifier: workspace:*
-        version: link:../test-utils
-
-  packages/plugin-samples:
-    dependencies:
-      '@rpg/plugin-api':
-        specifier: workspace:*
-        version: link:../plugin-api
-    devDependencies:
-      '@rpg/test-utils':
-        specifier: workspace:*
-        version: link:../test-utils
-
   packages/project-store:
     dependencies:
       '@rpg/schema':
@@ -415,6 +401,36 @@ importers:
       '@rpg/schema':
         specifier: workspace:*
         version: link:../schema
+
+  plugins/dungeon:
+    dependencies:
+      '@rpg/plugin-api':
+        specifier: workspace:*
+        version: link:../../packages/plugin-api
+    devDependencies:
+      '@rpg/test-utils':
+        specifier: workspace:*
+        version: link:../../packages/test-utils
+
+  plugins/fishing:
+    dependencies:
+      '@rpg/plugin-api':
+        specifier: workspace:*
+        version: link:../../packages/plugin-api
+    devDependencies:
+      '@rpg/test-utils':
+        specifier: workspace:*
+        version: link:../../packages/test-utils
+
+  plugins/samples:
+    dependencies:
+      '@rpg/plugin-api':
+        specifier: workspace:*
+        version: link:../../packages/plugin-api
+    devDependencies:
+      '@rpg/test-utils':
+        specifier: workspace:*
+        version: link:../../packages/test-utils
 
 packages:
 
