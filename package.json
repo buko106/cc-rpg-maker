@@ -7,7 +7,7 @@
   "type": "module",
   "packageManager": "pnpm@10.33.0",
   "engines": {
-    "node": ">=22"
+    "node": ">=24"
   },
   "scripts": {
     "build": "tsc -b",
@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@playwright/test": "1.63.0",
-    "@types/node": "22.20.4",
+    "@types/node": "24.19.1",
     "@vitest/coverage-v8": "4.1.11",
     "dependency-cruiser": "18.4.0",
     "esbuild": "0.28.2",

@@ -6,6 +6,10 @@ updates:
       interval: weekly
     versioning-strategy: increase
     open-pull-requests-limit: 10
+    ignore:
+      # Node.js は v24 に統一しているので、@types/node のメジャー更新は追わない
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
     groups:
       minor-and-patch:
         update-types: [minor, patch]

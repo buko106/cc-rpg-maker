@@ -129,7 +129,7 @@
 
 ## 開発
 
-必要なもの：Node.js 22 以上、pnpm 10（`corepack enable` で `packageManager` の版が使えます）。
+必要なもの：Node.js 24 以上、pnpm 10（`corepack enable` で `packageManager` の版が使えます）。
 
 ```sh
 pnpm install
