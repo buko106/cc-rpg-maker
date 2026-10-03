@@ -324,3 +324,37 @@ test("イベントのコピー＆ペースト：Ctrl+C / Ctrl+V で別のセル�
   await page.keyboard.press("Control+z");
   expect(await events()).toHaveLength(1);
 });
+
+test.describe("スマホ（指が主入力）", () => {
+  test.use({ hasTouch: true, isMobile: true, viewport: { width: 390, height: 780 } });
+
+  test("テストプレイに操作パッドが出て、タッチでニューゲームを始め、十字キーで歩ける。閉じると外れる", async ({ page }) => {
+    await createProject(page, "スマホのゲーム");
+    await page.getByRole("button", { name: "テストプレイ", exact: true }).click();
+    const pad = page.locator("[data-touch-pad]");
+    await expect(pad).toBeVisible();
+    await page.waitForFunction(() => window.__rpgPlaytest !== undefined && window.__rpgPlaytest.getState().scene.kind === "title");
+    const center = async (control: string): Promise<{ x: number; y: number }> => {
+      const box = await page.locator(`[data-touch-pad] [data-control="${control}"]`).boundingBox();
+      if (box === null) throw new Error(`${control} が無い`);
+      return { x: box.x + box.width / 2, y: box.y + box.height / 2 };
+    };
+    // タイトルのあいだ A をタップし続ける（読み込み中の取りこぼし対策。startNewGame と同じ）
+    const a = await center("ok");
+    for (let i = 0; i < 100 && (await page.evaluate(() => window.__rpgPlaytest.getState().scene.kind)) === "title"; i++) {
+      await page.touchscreen.tap(a.x, a.y);
+      await page.waitForTimeout(100);
+    }
+    await page.waitForFunction(() => window.__rpgPlaytest.getState().scene.kind === "map");
+    // 十字キーの右を押している間、右へ歩く
+    const before = await page.evaluate(() => window.__rpgPlaytest.getState().map.player.x);
+    const dpad = await center("dpad");
+    const cdp = await page.context().newCDPSession(page);
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [{ x: dpad.x + 50, y: dpad.y }] });
+    await page.waitForFunction((x) => window.__rpgPlaytest.getState().map.player.x > x, before);
+    await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+    // 閉じると操作パッドも消える
+    await page.getByRole("button", { name: "テストプレイを閉じる" }).click();
+    await expect(pad).toHaveCount(0);
+  });
+});

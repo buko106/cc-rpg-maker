@@ -2,7 +2,7 @@ import { createAssetSource } from "@rpg/assets";
 import { createNullAudioOut } from "@rpg/audio-null";
 import { createCommandRegistry, registerBuiltins } from "@rpg/core";
 import type { EditorSession } from "@rpg/editor-core";
-import { createBrowserInput } from "@rpg/input-browser";
+import { createBrowserInput, createTouchInput, isCoarsePointer, mergeInputSources, mountTouchPad } from "@rpg/input-browser";
 import { createCanvas2dRenderer } from "@rpg/render-canvas2d";
 import type { PluginModule } from "@rpg/plugin-api";
 import { dungeonPlugin } from "@rpg/plugin-dungeon";
@@ -103,20 +103,40 @@ export async function createBrowserEnv(options: { playerUrl?: string; samplesUrl
     },
     createRenderer: (canvas) => createCanvas2dRenderer(canvas, { pixelated: true }),
     createAssets,
-    startPlaytest: async (session, canvas, start) =>
-      startPlaytest(
-        session,
-        {
-          extensions: await pluginEnv.createExtensions(session.doc.project.system.plugins, { debug() {}, info() {}, warn: (m) => console.warn(`[playtest] ${m}`), error: (m) => console.error(`[playtest] ${m}`) }),
-          scheduler: createRafScheduler(),
-          renderer: createCanvas2dRenderer(canvas, { pixelated: true }),
-          audio: createNullAudioOut(),
-          input: createBrowserInput(window),
-          assets: createAssets(session),
-          logger: { debug() {}, info() {}, warn: (m) => console.warn(`[playtest] ${m}`), error: (m) => console.error(`[playtest] ${m}`) },
-          onError: (e) => console.error("[playtest]", e),
-        },
-        start,
-      ),
+    startPlaytest: async (session, canvas, start, padRoot) => {
+      // 指が主入力の端末（スマホ・タブレット）では、キーボードに加えて操作パッドを出す。判定は @rpg/input-browser、ここは結線だけ
+      const keyboard = createBrowserInput(window);
+      const touch = padRoot !== undefined && isCoarsePointer() ? createTouchInput() : undefined;
+      const pad = touch === undefined || padRoot === undefined ? undefined : mountTouchPad(padRoot, touch, { dash: session.doc.project.system.dash !== undefined });
+      const input = touch === undefined ? keyboard : mergeInputSources(keyboard, touch);
+      const stopPad = (): void => pad?.dispose();
+      try {
+        const playtest = await startPlaytest(
+          session,
+          {
+            extensions: await pluginEnv.createExtensions(session.doc.project.system.plugins, { debug() {}, info() {}, warn: (m) => console.warn(`[playtest] ${m}`), error: (m) => console.error(`[playtest] ${m}`) }),
+            scheduler: createRafScheduler(),
+            renderer: createCanvas2dRenderer(canvas, { pixelated: true }),
+            audio: createNullAudioOut(),
+            input,
+            assets: createAssets(session),
+            logger: { debug() {}, info() {}, warn: (m) => console.warn(`[playtest] ${m}`), error: (m) => console.error(`[playtest] ${m}`) },
+            onError: (e) => console.error("[playtest]", e),
+          },
+          start,
+        );
+        return {
+          runtime: playtest.runtime,
+          stop() {
+            playtest.stop();
+            stopPad();
+          },
+        };
+      } catch (e) {
+        stopPad();
+        input.dispose();
+        throw e;
+      }
+    },
   };
 }

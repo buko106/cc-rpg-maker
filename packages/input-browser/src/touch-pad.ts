@@ -1,4 +1,4 @@
-import type { TouchControl, TouchInput } from "@rpg/input-browser";
+import type { TouchControl, TouchInput } from "./touch.js";
 import type { Button } from "@rpg/runtime";
 
 /** 操作パッドを出すか。`auto` は主入力が指（`pointer: coarse`）のときだけ。 */

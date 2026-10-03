@@ -29,7 +29,8 @@ export interface EditorEnv extends PluginEnv {
   formOverrides: Readonly<Record<string, ComponentType<CommandFormOverrideProps>>>; // プラグインのフォーム（`pluginForms`）を含む
   createRenderer(canvas: HTMLCanvasElement): Renderer;
   createAssets(session: EditorSession): AssetSource;
-  startPlaytest(session: EditorSession, canvas: HTMLCanvasElement, start?: PlaytestStart): Promise<Playtest>;
+  /** `padRoot` があり、指が主入力の端末なら、そこにタッチの操作パッドを出す（`stop` で外す）。 */
+  startPlaytest(session: EditorSession, canvas: HTMLCanvasElement, start?: PlaytestStart, padRoot?: HTMLElement): Promise<Playtest>;
   /** プレイヤー本体（`player.js`）を取る。配布物に同梱する。 */
   loadPlayerBundle(): Promise<PlayerBundle>;
   /** 書き出したファイルを利用者に渡す（ブラウザではダウンロードさせる）。 */

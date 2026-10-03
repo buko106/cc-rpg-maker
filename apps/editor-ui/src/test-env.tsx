@@ -48,7 +48,7 @@ export interface TestEnv {
   env: EditorEnv;
   repo: ProjectRepository;
   session: EditorSession;
-  playtests: { canvas: HTMLCanvasElement; start: unknown }[];
+  playtests: { canvas: HTMLCanvasElement; start: unknown; padRoot: HTMLElement | undefined }[];
   /** `saveFile` に渡されたファイル。 */
   saved: { name: string; bytes: Uint8Array<ArrayBuffer>; mime: string }[];
   /** `session` と `env` を渡した状態で描く。 */
@@ -82,8 +82,8 @@ export async function createTestEnv(
       loadJson: () => Promise.reject(new Error("JSON は使わない")),
       has: () => Promise.resolve(true),
     }),
-    startPlaytest: (_session, canvas, start) => {
-      playtests.push({ canvas, start });
+    startPlaytest: (_session, canvas, start, padRoot) => {
+      playtests.push({ canvas, start, padRoot });
       return Promise.resolve({ runtime: { getState: () => ({}) } as never, stop: () => {} });
     },
   };

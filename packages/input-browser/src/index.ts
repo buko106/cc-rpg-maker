@@ -2,7 +2,7 @@
  * @rpg/input-browser — ブラウザ InputSource アダプタ。キーボードとゲームパッドを抽象ボタンに変換する。
  *
  * 設計: docs/08-audio-input.md
- * タッチ（仮想十字キー・ボタン）は `createTouchInput`（判定ロジックだけ。見た目の DOM は利用側のアプリが作る）。
+ * タッチ（仮想十字キー・ボタン）は `createTouchInput`（判定ロジック）と `mountTouchPad`（操作パッドの DOM。player とエディタのテストプレイが共有）。
  * 未実装（後続）：ポインタ座標（`InputFrame.pointer`）。
  */
 import { emptyInput } from "@rpg/runtime";
@@ -12,6 +12,8 @@ import { createButtonLatch } from "./button-latch.js";
 export { createTouchInput, dpadButtons } from "./touch.js";
 export type { Point, TouchControl, TouchInput } from "./touch.js";
 export { mergeInputSources } from "./merge.js";
+export { isCoarsePointer, mountTouchPad, shouldShowTouchPad } from "./touch-pad.js";
+export type { TouchPadMode, TouchPadOptions, TouchPadView } from "./touch-pad.js";
 
 /** `KeyboardEvent.code` → ボタン */
 export interface KeyMap {
