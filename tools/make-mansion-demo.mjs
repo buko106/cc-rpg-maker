@@ -19,6 +19,7 @@
 import { readFileSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { canvas, character, HERO, image, lcg, shade, sheet, TILE, writeAssets } from "./pixel-art.mjs";
+import { cmd, endBranch, ifVar, page, params, setVar, text, toJson } from "./demo-lib.mjs";
 
 const ROOT = join(import.meta.dirname, "..", "fixtures", "projects", "v1", "mansion");
 /** ネコの歩行グラフィックは「はじまりの村」のネコ（tools/make-demo-assets.mjs が作った PNG）と同じものを使う。 */
@@ -555,14 +556,8 @@ function buildLayers(room) {
 }
 
 // ── イベント ──────────────────────────────────────────────────────────
-const cmd = (code, params, indent = 0) => ({ code, params, indent });
-const text = (t, indent = 0) => cmd("ShowText", { text: t, position: "bottom", background: "window" }, indent);
 const transfer = (room, x, y, dir, indent = 0) => cmd("TransferPlayer", { mapId: ROOMS[room], x, y, dir, fade: "black" }, indent);
-const page = (p) => ({ conditions: [], trigger: "action", through: false, priority: "same", ...p });
 const event = (id, name, [x, y], pages) => ({ id, name, x, y, pages });
-const ifVar = (id, op, value, indent = 0) => cmd("ConditionalBranch", { condition: { kind: "variable", id, op, value } }, indent);
-const setVar = (id, value, indent = 0) => cmd("ControlVariables", { ids: [id], op: "set", operand: { kind: "constant", value } }, indent);
-const endBranch = (indent = 0) => cmd("EndBranch", {}, indent);
 /** 進み具合（var_stage）を `stage` まで進める（戻さない）。 */
 const advance = (stage, indent = 0) => [ifVar("var_stage", "<=", stage - 1, indent), setVar("var_stage", stage, indent + 1), endBranch(indent)];
 const gain = (item, indent = 0) => cmd("ChangeItems", { item, op: "gain", amount: { kind: "constant", value: 1 } }, indent);
@@ -789,7 +784,6 @@ function bedroomEvents() {
 }
 
 // ── 書き出し ──────────────────────────────────────────────────────────
-const toJson = (value) => `${JSON.stringify(value, null, 2).replace(/\[\s+([-\d.,\s]+?)\s+\]/g, (_, body) => `[${body.split(/,\s*/).join(", ")}]`)}\n`;
 
 rmSync(ROOT, { recursive: true, force: true });
 const catBytes = readFileSync(CAT_PNG);
@@ -816,7 +810,6 @@ Object.entries(ROOMS).forEach(([room, id], order) => {
 });
 
 const entry = (name, a) => ({ name, kind: "image", mime: "image/png", size: a.size, width: a.width ?? catBytes.readUInt32BE(16), height: a.height ?? catBytes.readUInt32BE(20) });
-const params = Object.fromEntries(["mhp", "mmp", "atk", "def", "mat", "mdf", "agi", "luk"].map((p) => [p, { base: p === "mhp" ? 100 : p === "mmp" ? 20 : 10, growth: 2 }]));
 const project = {
   formatVersion: 1,
   meta: { id: "mansion", title: "デモ：謎解きの館", createdAt: "2026-10-01T00:00:00Z", updatedAt: "2026-10-01T00:00:00Z" },

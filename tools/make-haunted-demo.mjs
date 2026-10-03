@@ -20,6 +20,7 @@
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { blit, canvas, character, HERO, image, lcg, shade, sheet, TILE, writeAssets } from "./pixel-art.mjs";
+import { addVar, cmd, endBranch, entry, event, flash, hidden, ifVar, otherwise, page, params, setVar, text, toJson } from "./demo-lib.mjs";
 
 const ROOT = join(import.meta.dirname, "..", "fixtures", "projects", "v1", "haunted");
 
@@ -685,20 +686,9 @@ function buildLayers(rows, theme) {
 }
 
 // ── イベント ──────────────────────────────────────────────────────────
-const cmd = (code, params, indent = 0) => ({ code, params, indent });
-const text = (t, indent = 0) => cmd("ShowText", { text: t, position: "bottom", background: "window" }, indent);
-const page = (p) => ({ conditions: [], trigger: "action", through: false, priority: "same", ...p });
-const event = (id, name, { x, y }, pages) => ({ id, name, x, y, pages });
-const ifVar = (id, op, value, indent = 0) => cmd("ConditionalBranch", { condition: { kind: "variable", id, op, value } }, indent);
-const otherwise = (indent = 0) => cmd("Else", {}, indent);
-const endBranch = (indent = 0) => cmd("EndBranch", {}, indent);
-const setVar = (id, value, indent = 0) => cmd("ControlVariables", { ids: [id], op: "set", operand: { kind: "constant", value } }, indent);
 const setVarExpr = (id, expr, indent = 0) => cmd("ControlVariables", { ids: [id], op: "set", operand: { kind: "expr", expr } }, indent);
-const addVar = (id, value, indent = 0) => cmd("ControlVariables", { ids: [id], op: "add", operand: { kind: "constant", value } }, indent);
 const transfer = (mapId, { x, y }, dir, indent = 0) => cmd("TransferPlayer", { mapId, x, y, dir, fade: "black" }, indent);
-const flash = (color, duration, indent = 0) => cmd("FlashScreen", { color, duration }, indent);
 const tint = (color, duration = 0, indent = 0) => cmd("TintScreen", { color, duration, wait: false }, indent);
-const hidden = (p) => page({ trigger: "parallel", through: true, priority: "below", ...p });
 
 /** 暗い色調（階）と、ろうそくの灯った玄関ホール。全部の階を終えると明るくなる。 */
 const DARK = { r: 8, g: 6, b: 36, a: 0.44 };
@@ -898,7 +888,6 @@ function hallEvents(assets) {
 }
 
 // ── 書き出し ──────────────────────────────────────────────────────────
-const toJson = (value) => `${JSON.stringify(value, null, 2).replace(/\[\s+([-\d.,\s]+?)\s+\]/g, (_, body) => `[${body.split(/,\s*/).join(", ")}]`)}\n`;
 
 rmSync(ROOT, { recursive: true, force: true });
 const assets = writeAssets(join(ROOT, "assets"), {
@@ -920,8 +909,6 @@ FLOORS.forEach((floor, i) => {
   writeMap(floor.id, `${floor.n}の扉：${floor.name}`, i + 1, layout.tiles, floor.theme, floorEvents(floor, layout, assets));
 });
 
-const entry = (name, a) => ({ name, kind: "image", mime: "image/png", size: a.size, width: a.width, height: a.height });
-const params = Object.fromEntries(["mhp", "mmp", "atk", "def", "mat", "mdf", "agi", "luk"].map((p) => [p, { base: p === "mhp" ? 100 : p === "mmp" ? 20 : 10, growth: 2 }]));
 const project = {
   formatVersion: 1,
   meta: { id: "haunted", title: "デモ：おばけ屋敷の追いかけっこ", createdAt: "2026-10-01T00:00:00Z", updatedAt: "2026-10-01T00:00:00Z" },

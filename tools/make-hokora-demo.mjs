@@ -19,6 +19,7 @@
 import { readFileSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { blit, canvas, character, HERO, image, lcg, monsterWalk, scale, shade, sheet, TILE, writeAssets } from "./pixel-art.mjs";
+import { cmd, curve, endBranch, event, flash, ifExpr, otherwise, page, sw, text, toJson } from "./demo-lib.mjs";
 
 const ROOT = join(import.meta.dirname, "..", "fixtures", "projects", "v1", "hokora");
 /** 戦闘 BGM は「はじまりの村」と同じもの（tools/make-demo-assets.mjs が作った WAV）を使う。 */
@@ -621,19 +622,10 @@ const sealedDoor = () =>
 const PROPS = { chestClosed: 0, chestOpen: 1, sign: 2, sealedDoor: 3 };
 
 // ── イベント ──────────────────────────────────────────────────────────
-const cmd = (code, params, indent = 0) => ({ code, params, indent });
-const text = (t, indent = 0) => cmd("ShowText", { text: t, position: "bottom", background: "window" }, indent);
-const page = (p) => ({ conditions: [], trigger: "action", through: false, priority: "same", ...p });
-const event = (id, name, { x, y }, pages) => ({ id, name, x, y, pages });
-const sw = (id, value = true) => ({ kind: "switch", id, value });
 const self = (key = "A") => ({ kind: "selfSwitch", key, value: true });
 const setSwitch = (id, value, indent = 0) => cmd("ControlSwitches", { ids: [id], value }, indent);
-const ifExpr = (expr, indent = 0) => cmd("ConditionalBranch", { condition: expr }, indent);
-const otherwise = (indent = 0) => cmd("Else", {}, indent);
-const endBranch = (indent = 0) => cmd("EndBranch", {}, indent);
 const gold = (op, value, indent = 0) => cmd("ChangeGold", { op, amount: { kind: "constant", value } }, indent);
 const gainItem = (item, n, indent = 0) => cmd("ChangeItems", { item, op: "gain", amount: { kind: "constant", value: n } }, indent);
-const flash = (color, duration, indent = 0) => cmd("FlashScreen", { color, duration }, indent);
 const transfer = (mapId, { x, y }, dir, indent = 0, fade = "black") => cmd("TransferPlayer", { mapId, x, y, dir, fade }, indent);
 const choices = (labels, cancel) => cmd("ShowChoices", { choices: labels, cancel });
 const branch = (index, indent = 0) => cmd("ChoiceBranch", { index }, indent);
@@ -887,7 +879,6 @@ function shrineEvents(assets) {
 }
 
 // ── データベース ──────────────────────────────────────────────────────
-const curve = (base, growth) => ({ base, growth });
 const skill = (id, name, mpCost, scope, formula, effects = []) => ({ id, name, mpCost, scope, formula, effects });
 const item = (id, name, kind, price, effects, extra = {}) => ({ id, name, kind, price, effects, ...extra });
 const stats = (mhp, mmp, atk, def, mat, mdf, agi, luk) => ({ mhp, mmp, atk, def, mat, mdf, agi, luk });
@@ -990,7 +981,6 @@ function database(assets) {
 }
 
 // ── 書き出し ──────────────────────────────────────────────────────────
-const toJson = (value) => `${JSON.stringify(value, null, 2).replace(/\[\s+([-\d.,\s]+?)\s+\]/g, (_, body) => `[${body.split(/,\s*/).join(", ")}]`)}\n`;
 
 const monsterSprites = Object.fromEntries(Object.keys(MONSTERS).map((name) => [name, MONSTERS[name]()]));
 const battlerImages = Object.fromEntries(Object.entries(monsterSprites).map(([name, sprite]) => [`${name}.png`, scale(sprite, name === "gargoyle" ? 3 : 2)]));

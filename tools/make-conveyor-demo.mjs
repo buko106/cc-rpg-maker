@@ -23,6 +23,7 @@
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { blit, canvas, character, HERO, image, lcg, shade, sheet, TILE, writeAssets } from "./pixel-art.mjs";
+import { cmd, endBranch, entry, event, flash, hidden, ifExpr, page, params, setSwitch, sw, text, toJson } from "./demo-lib.mjs";
 
 const ROOT = join(import.meta.dirname, "..", "fixtures", "projects", "v1", "conveyor");
 
@@ -443,16 +444,6 @@ const goldScrew = () =>
 const PROPS = { crate: 0, leverOff: 1, leverOn: 2, shutter: 3, screw: 4 };
 
 // ── イベント ──────────────────────────────────────────────────────────
-const cmd = (code, params, indent = 0) => ({ code, params, indent });
-const text = (t, indent = 0) => cmd("ShowText", { text: t, position: "bottom", background: "window" }, indent);
-const page = (p) => ({ conditions: [], trigger: "action", through: false, priority: "same", ...p });
-const hidden = (p) => page({ trigger: "parallel", through: true, priority: "below", ...p });
-const event = (id, name, { x, y }, pages) => ({ id, name, x, y, pages });
-const sw = (id, value = true) => ({ kind: "switch", id, value });
-const setSwitch = (ids, value, indent = 0) => cmd("ControlSwitches", { ids: [].concat(ids), value }, indent);
-const ifExpr = (expr, indent = 0) => cmd("ConditionalBranch", { condition: expr }, indent);
-const endBranch = (indent = 0) => cmd("EndBranch", {}, indent);
-const flash = (color, duration, indent = 0) => cmd("FlashScreen", { color, duration }, indent);
 const shake = (power, duration, indent = 0) => cmd("ShakeScreen", { power, duration, wait: false }, indent);
 const transfer = (mapId, x, y, dir, indent = 0) => cmd("TransferPlayer", { mapId, x, y, dir, fade: "black" }, indent);
 const FLASH_STEEL = { r: 200, g: 220, b: 255, a: 0.5 };
@@ -649,7 +640,6 @@ function events(room, layout, assets) {
 }
 
 // ── 書き出し ──────────────────────────────────────────────────────────
-const toJson = (value) => `${JSON.stringify(value, null, 2).replace(/\[\s+([-\d.,\s]+?)\s+\]/g, (_, body) => `[${body.split(/,\s*/).join(", ")}]`)}\n`;
 
 const layouts = ROOMS.map((room) => ({ room, layout: readPlan(room) }));
 
@@ -674,8 +664,6 @@ for (const { room, layout } of layouts) {
   writeFileSync(join(ROOT, "maps", `${room.id}.json`), toJson(map));
 }
 
-const entry = (name, a) => ({ name, kind: "image", mime: "image/png", size: a.size, width: a.width, height: a.height });
-const params = Object.fromEntries(["mhp", "mmp", "atk", "def", "mat", "mdf", "agi", "luk"].map((p) => [p, { base: p === "mhp" ? 100 : p === "mmp" ? 20 : 10, growth: 2 }]));
 const switches = {};
 for (const { room, layout } of layouts) {
   for (const k of layout.leverKeys) switches[LEVER(room, k)] = { name: `${room.name}のレバー${k}を倒した` };
