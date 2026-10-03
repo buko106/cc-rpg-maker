@@ -19,6 +19,7 @@
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { character, HERO, image, lcg, shade, TILE, writeAssets } from "./pixel-art.mjs";
+import { cmd, curve, endBranch, entry, ifExpr, ifVar, otherwise, sw, text, toJson } from "./demo-lib.mjs";
 
 const ROOT = join(import.meta.dirname, "..", "fixtures", "projects", "v2", "fishing");
 
@@ -229,17 +230,10 @@ function signboard() {
 }
 
 // ── イベントの書き方 ──────────────────────────────────────────────────
-const cmd = (code, params, indent = 0) => ({ code, params, indent });
-const text = (t, indent = 0) => cmd("ShowText", { text: t, position: "bottom", background: "window" }, indent);
 const page = (extra) => ({ conditions: [], trigger: "action", through: false, priority: "same", commands: [], ...extra });
 const when = (id, value, op = ">=") => ({ kind: "variable", id, op, value });
-const sw = (id, value = true) => ({ kind: "switch", id, value });
 const self = (value = true) => ({ kind: "selfSwitch", key: "A", value });
 const setSwitch = (id, value, indent = 0) => cmd("ControlSwitches", { ids: [id], value }, indent);
-const ifExpr = (expr, indent = 0) => cmd("ConditionalBranch", { condition: expr }, indent);
-const ifVar = (id, op, value, indent = 0) => cmd("ConditionalBranch", { condition: { kind: "variable", id, op, value } }, indent);
-const otherwise = (indent = 0) => cmd("Else", {}, indent);
-const endBranch = (indent = 0) => cmd("EndBranch", {}, indent);
 const gold = (op, value, indent = 0) => cmd("ChangeGold", { op, amount: { kind: "constant", value } }, indent);
 const gain = (item, n, indent = 0) => cmd("ChangeItems", { item, op: "gain", amount: { kind: "constant", value: n } }, indent);
 const choices = (labels, cancel) => cmd("ShowChoices", { choices: labels, cancel });
@@ -579,9 +573,6 @@ function townMap(assets) {
 }
 
 // ── 書き出し ──────────────────────────────────────────────────────────
-/** JSON を 2 スペースで整形し、数値だけの配列は 1 行にまとめる（既存のフィクスチャと同じ体裁）。 */
-const toJson = (value) => `${JSON.stringify(value, null, 2).replace(/\[\s+([-\d.,\s]+?)\s+\]/g, (_, body) => `[${body.split(/,\s*/).join(", ")}]`)}\n`;
-
 rmSync(ROOT, { recursive: true, force: true });
 const assets = writeAssets(join(ROOT, "assets"), {
   "harbor_tiles.png": tileset(),
@@ -600,8 +591,6 @@ const harbor = townMap(assets);
 writeFileSync(join(ROOT, "maps", `${harbor.id}.json`), toJson(harbor));
 
 const noStats = { mhp: 30, mmp: 0, atk: 5, def: 3, mat: 0, mdf: 0, agi: 8, luk: 0 };
-const curve = (base, growth) => ({ base, growth });
-const entry = (name, a) => ({ name, kind: "image", mime: "image/png", size: a.size, width: a.width, height: a.height });
 const items = {};
 for (const f of FISH) items[`item_${f.key}`] = { id: `item_${f.key}`, name: f.name, kind: "consumable", price: f.price, effects: [], description: `${f.name}。釣具屋で 売れる。` };
 for (const b of BAITS) items[b.item] = { id: b.item, name: b.name, kind: "consumable", price: b.price, effects: [], description: b.description };

@@ -18,6 +18,7 @@
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { character, HERO, image, lcg, shade, TILE, writeAssets } from "./pixel-art.mjs";
+import { cmd, params, toJson } from "./demo-lib.mjs";
 
 const ROOT = join(import.meta.dirname, "..", "fixtures", "projects", "v1", "maze");
 
@@ -417,7 +418,6 @@ function buildRoom(k, plan) {
 }
 
 // ── イベント ──────────────────────────────────────────────────────────
-const cmd = (code, params, indent = 0) => ({ code, params, indent });
 const text = (t) => cmd("ShowText", { text: t, position: "bottom", background: "window" });
 /** 部屋を移るときは暗転する（`TransferPlayer` の `fade: "black"`。暗転 → 場所移動 → 明転、終わるまで歩けない）。 */
 const transfer = (to, x, y, dir) => cmd("TransferPlayer", { mapId: mapId(to), x, y, dir, fade: "black" });
@@ -484,9 +484,6 @@ function goalEvent() {
 }
 
 // ── 書き出し ──────────────────────────────────────────────────────────
-/** JSON を 2 スペースで整形し、数値だけの配列は 1 行にまとめる（既存のフィクスチャと同じ体裁）。 */
-const toJson = (value) => `${JSON.stringify(value, null, 2).replace(/\[\s+([-\d.,\s]+?)\s+\]/g, (_, body) => `[${body.split(/,\s*/).join(", ")}]`)}\n`;
-
 const plan = planMaze(20260930);
 
 rmSync(ROOT, { recursive: true, force: true });
@@ -515,7 +512,6 @@ for (let k = 1; k <= GOAL; k++) {
   mapsMeta[id] = { id, name: k === GOAL ? `第${k}の間（出口）` : `第${k}の間`, order: k - 1 };
 }
 
-const params = Object.fromEntries(["mhp", "mmp", "atk", "def", "mat", "mdf", "agi", "luk"].map((p) => [p, { base: p === "mhp" ? 100 : p === "mmp" ? 20 : 10, growth: 2 }]));
 const entry = (name, a, mime) => ({ name, kind: "image", mime, size: a.size, width: a.width, height: a.height });
 const project = {
   formatVersion: 1,

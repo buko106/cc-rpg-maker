@@ -18,6 +18,7 @@
 import { readFileSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { blit, canvas, character, HERO, image, lcg, monsterWalk, scale, shade, sheet, TILE, writeAssets } from "./pixel-art.mjs";
+import { cmd, curve, page, text, toJson } from "./demo-lib.mjs";
 
 const ROOT = join(import.meta.dirname, "..", "fixtures", "projects", "v1", "tower");
 /** 戦闘 BGM は「はじまりの村」と同じもの（tools/make-demo-assets.mjs が作った WAV）を使う。 */
@@ -739,14 +740,11 @@ function buildLayers(floorNo) {
 }
 
 // ── イベント ──────────────────────────────────────────────────────────
-const cmd = (code, params, indent = 0) => ({ code, params, indent });
-const text = (t, indent = 0) => cmd("ShowText", { text: t, position: "bottom", background: "window" }, indent);
 const transfer = (to, { x, y, dir }, indent = 0) => cmd("TransferPlayer", { mapId: mapId(to), x, y, dir, fade: "black" }, indent);
 const healAll = (indent = 0) => [
   cmd("ChangeHp", { target: "party", op: "gain", amount: { kind: "constant", value: 9999 }, allowDeath: false }, indent),
   cmd("ChangeMp", { target: "party", op: "gain", amount: { kind: "constant", value: 9999 } }, indent),
 ];
-const page = (p) => ({ conditions: [], trigger: "action", through: false, priority: "same", ...p });
 const event = (id, name, [x, y], pages) => ({ id, name, x, y, pages });
 
 function stairsEvents(floorNo) {
@@ -935,7 +933,6 @@ function clericEvent(assets) {
 }
 
 // ── データベース ──────────────────────────────────────────────────────
-const curve = (base, growth) => ({ base, growth });
 const skill = (id, name, mpCost, scope, formula, effects = []) => ({ id, name, mpCost, scope, formula, effects });
 const item = (id, name, kind, price, effects, extra = {}) => ({ id, name, kind, price, effects, ...extra });
 const stats = (mhp, mmp, atk, def, mat, mdf, agi, luk) => ({ mhp, mmp, atk, def, mat, mdf, agi, luk });
@@ -1085,7 +1082,6 @@ function database(assets) {
 }
 
 // ── 書き出し ──────────────────────────────────────────────────────────
-const toJson = (value) => `${JSON.stringify(value, null, 2).replace(/\[\s+([-\d.,\s]+?)\s+\]/g, (_, body) => `[${body.split(/,\s*/).join(", ")}]`)}\n`;
 
 const monsterSprites = Object.fromEntries(Object.keys(MONSTER_INDEX).map((name) => [name, MONSTERS[name]()]));
 const battlerImages = Object.fromEntries(

@@ -19,6 +19,7 @@
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { blit, canvas, character, HERO, image, lcg, shade, sheet, TILE, writeAssets } from "./pixel-art.mjs";
+import { addVar, cmd, entry, event, flash, page, params, text, toJson } from "./demo-lib.mjs";
 
 const ROOT = join(import.meta.dirname, "..", "fixtures", "projects", "v1", "clock");
 
@@ -452,12 +453,6 @@ const gearPedestal = () =>
 const PROPS = { block: 0, gear: 1 };
 
 // ── イベント ──────────────────────────────────────────────────────────
-const cmd = (code, params, indent = 0) => ({ code, params, indent });
-const text = (t, indent = 0) => cmd("ShowText", { text: t, position: "bottom", background: "window" }, indent);
-const page = (p) => ({ conditions: [], trigger: "action", through: false, priority: "same", ...p });
-const event = (id, name, { x, y }, pages) => ({ id, name, x, y, pages });
-const addVar = (id, value, indent = 0) => cmd("ControlVariables", { ids: [id], op: "add", operand: { kind: "constant", value } }, indent);
-const flash = (color, duration, indent = 0) => cmd("FlashScreen", { color, duration }, indent);
 const transfer = (mapId, x, y, dir, indent = 0) => cmd("TransferPlayer", { mapId, x, y, dir, fade: "black" }, indent);
 
 function events(room, layout, assets, rooms) {
@@ -603,7 +598,6 @@ function events(room, layout, assets, rooms) {
 }
 
 // ── 書き出し ──────────────────────────────────────────────────────────
-const toJson = (value) => `${JSON.stringify(value, null, 2).replace(/\[\s+([-\d.,\s]+?)\s+\]/g, (_, body) => `[${body.split(/,\s*/).join(", ")}]`)}\n`;
 
 const layouts = ROOMS.map((room) => ({ room, layout: readPlan(room) }));
 // 部屋の出口の位置（次の部屋の階段から戻るときに使う）
@@ -634,8 +628,6 @@ for (const { room, layout } of layouts) {
   writeFileSync(join(ROOT, "maps", `${room.id}.json`), toJson(map));
 }
 
-const entry = (name, a) => ({ name, kind: "image", mime: "image/png", size: a.size, width: a.width, height: a.height });
-const params = Object.fromEntries(["mhp", "mmp", "atk", "def", "mat", "mdf", "agi", "luk"].map((p) => [p, { base: p === "mhp" ? 100 : p === "mmp" ? 20 : 10, growth: 2 }]));
 const project = {
   formatVersion: 1,
   meta: { id: "clock", title: "デモ：時の番人の回廊", createdAt: "2026-10-02T00:00:00Z", updatedAt: "2026-10-02T00:00:00Z" },

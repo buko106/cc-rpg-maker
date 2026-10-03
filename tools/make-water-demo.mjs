@@ -23,6 +23,7 @@
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { blit, canvas, character, HERO, image, lcg, shade, sheet, TILE, writeAssets } from "./pixel-art.mjs";
+import { cmd, entry, event, flash, page, params, setSwitch, sw, text, toJson } from "./demo-lib.mjs";
 
 const ROOT = join(import.meta.dirname, "..", "fixtures", "projects", "v1", "water");
 
@@ -465,13 +466,6 @@ const PROPS = {
 };
 
 // ── イベント ──────────────────────────────────────────────────────────
-const cmd = (code, params, indent = 0) => ({ code, params, indent });
-const text = (t, indent = 0) => cmd("ShowText", { text: t, position: "bottom", background: "window" }, indent);
-const page = (p) => ({ conditions: [], trigger: "action", through: false, priority: "same", ...p });
-const event = (id, name, { x, y }, pages) => ({ id, name, x, y, pages });
-const sw = (id, value = true) => ({ kind: "switch", id, value });
-const setSwitch = (ids, value, indent = 0) => cmd("ControlSwitches", { ids: [].concat(ids), value }, indent);
-const flash = (color, duration, indent = 0) => cmd("FlashScreen", { color, duration }, indent);
 const shake = (power, duration, indent = 0) => cmd("ShakeScreen", { power, duration, wait: false }, indent);
 const FLASH_WATER = { r: 120, g: 190, b: 255, a: 0.5 };
 const FLASH_GOLD = { r: 255, g: 230, b: 150, a: 0.7 };
@@ -781,7 +775,6 @@ function events(room, layout, assets) {
 }
 
 // ── 書き出し ──────────────────────────────────────────────────────────
-const toJson = (value) => `${JSON.stringify(value, null, 2).replace(/\[\s+([-\d.,\s]+?)\s+\]/g, (_, body) => `[${body.split(/,\s*/).join(", ")}]`)}\n`;
 
 const layouts = Object.fromEntries(ROOMS.map((r) => [r.id, readRoom(r)]));
 rmSync(ROOT, { recursive: true, force: true });
@@ -813,8 +806,6 @@ for (const room of ROOMS) {
   writeFileSync(join(ROOT, "maps", `${room.id}.json`), toJson(map));
 }
 
-const entry = (name, a) => ({ name, kind: "image", mime: "image/png", size: a.size, width: a.width, height: a.height });
-const params = Object.fromEntries(["mhp", "mmp", "atk", "def", "mat", "mdf", "agi", "luk"].map((p) => [p, { base: p === "mhp" ? 100 : p === "mmp" ? 20 : 10, growth: 2 }]));
 const cratesRoom = ROOMS.find((r) => r.id === "map_crates");
 const gatesRoom = ROOMS.find((r) => r.id === "map_gates");
 const cratesLayout = layouts.map_crates;

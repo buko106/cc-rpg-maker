@@ -19,6 +19,7 @@
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { canvas, character, HERO, image, lcg, shade, TILE, writeAssets } from "./pixel-art.mjs";
+import { cmd, curve, entry, toJson } from "./demo-lib.mjs";
 
 const ROOT = join(import.meta.dirname, "..", "fixtures", "projects", "v2", "dungeon");
 
@@ -346,7 +347,6 @@ function sprites() {
 }
 
 // ── 町 ────────────────────────────────────────────────────────────────
-const cmd = (code, params, indent = 0) => ({ code, params, indent });
 const text = (t) => cmd("ShowText", { text: t, position: "bottom", background: "window" });
 const page = (extra) => ({ conditions: [], trigger: "action", through: false, priority: "same", commands: [], ...extra });
 const VARS = { event: "var_dungeon_event", best: "var_dungeon_best", result: "var_dungeon_result", clears: "var_dungeon_clears" };
@@ -486,9 +486,6 @@ function floorMap() {
 }
 
 // ── 書き出し ──────────────────────────────────────────────────────────
-/** JSON を 2 スペースで整形し、数値だけの配列は 1 行にまとめる（既存のフィクスチャと同じ体裁）。 */
-const toJson = (value) => `${JSON.stringify(value, null, 2).replace(/\[\s+([-\d.,\s]+?)\s+\]/g, (_, body) => `[${body.split(/,\s*/).join(", ")}]`)}\n`;
-
 function signboard() {
   const img = image(TILE * 3, TILE * 4);
   for (let row = 0; row < 4; row++) {
@@ -523,8 +520,6 @@ for (const map of [townData, floorMap()]) writeFileSync(join(ROOT, "maps", `${ma
 
 const statsOf = (mhp, atk, def, agi = 8) => ({ mhp, mmp: 0, atk, def, mat: 0, mdf: 0, agi, luk: 0 });
 const enemy = (id, name, params, exp, gold, drops = []) => ({ id, name, params, actions: [], drops, exp, gold });
-const curve = (base, growth) => ({ base, growth });
-const entry = (name, a) => ({ name, kind: "image", mime: "image/png", size: a.size, width: a.width, height: a.height });
 
 /** プラグインの設定。敵・物の `sprite` は `sprites.png` の中のコマ（左上のピクセル）。 */
 const dungeonParams = {

@@ -19,6 +19,7 @@
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { blit, canvas, character, HERO, image, lcg, shade, sheet, TILE, writeAssets } from "./pixel-art.mjs";
+import { addVar, cmd, endBranch, entry, event, flash, hidden, ifVar, otherwise, page, params, setSwitch, setVar, sw, text, toJson } from "./demo-lib.mjs";
 
 const ROOT = join(import.meta.dirname, "..", "fixtures", "projects", "v1", "stealth");
 
@@ -433,22 +434,9 @@ const PROPS = { chestClosed: 0, chestOpen: 1, vaultDoor: 2 };
 const SHEET = { soldier: 0, sentry: 1, captain: 2, hound: 3, partner: 4 };
 
 // ── イベント ──────────────────────────────────────────────────────────
-const cmd = (code, params, indent = 0) => ({ code, params, indent });
-const text = (t, indent = 0) => cmd("ShowText", { text: t, position: "bottom", background: "window" }, indent);
-const page = (p) => ({ conditions: [], trigger: "action", through: false, priority: "same", ...p });
-const event = (id, name, { x, y }, pages) => ({ id, name, x, y, pages });
-const sw = (id, value = true) => ({ kind: "switch", id, value });
-const setSwitch = (ids, value, indent = 0) => cmd("ControlSwitches", { ids: [].concat(ids), value }, indent);
-const ifVar = (id, op, value, indent = 0) => cmd("ConditionalBranch", { condition: { kind: "variable", id, op, value } }, indent);
 const ifSwitch = (id, value, indent = 0) => cmd("ConditionalBranch", { condition: { kind: "switch", id, value } }, indent);
-const otherwise = (indent = 0) => cmd("Else", {}, indent);
-const endBranch = (indent = 0) => cmd("EndBranch", {}, indent);
-const setVar = (id, value, indent = 0) => cmd("ControlVariables", { ids: [id], op: "set", operand: { kind: "constant", value } }, indent);
 const setVarExpr = (id, expr, indent = 0) => cmd("ControlVariables", { ids: [id], op: "set", operand: { kind: "expr", expr } }, indent);
-const addVar = (id, value, indent = 0) => cmd("ControlVariables", { ids: [id], op: "add", operand: { kind: "constant", value } }, indent);
-const flash = (color, duration, indent = 0) => cmd("FlashScreen", { color, duration }, indent);
 const tint = (color, duration = 0, indent = 0) => cmd("TintScreen", { color, duration, wait: false }, indent);
-const hidden = (p) => page({ trigger: "parallel", through: true, priority: "below", ...p });
 const NIGHT = { r: 6, g: 12, b: 44, a: 0.4 };
 const ALARM = { r: 90, g: 0, b: 10, a: 0.3 };
 const CLEAR = { r: 0, g: 0, b: 0, a: 0 };
@@ -639,7 +627,6 @@ function events(layout, assets) {
 }
 
 // ── 書き出し ──────────────────────────────────────────────────────────
-const toJson = (value) => `${JSON.stringify(value, null, 2).replace(/\[\s+([-\d.,\s]+?)\s+\]/g, (_, body) => `[${body.split(/,\s*/).join(", ")}]`)}\n`;
 
 const layout = readPlan();
 rmSync(ROOT, { recursive: true, force: true });
@@ -660,8 +647,6 @@ mkdirSync(join(ROOT, "maps"), { recursive: true });
 const manor = { id: MAP, width: W, height: H, tileset: "ts_stealth", layers: buildLayers(layout.rows), events: Object.fromEntries(events(layout, assets).map((e) => [e.id, e])) };
 writeFileSync(join(ROOT, "maps", `${MAP}.json`), toJson(manor));
 
-const entry = (name, a) => ({ name, kind: "image", mime: "image/png", size: a.size, width: a.width, height: a.height });
-const params = Object.fromEntries(["mhp", "mmp", "atk", "def", "mat", "mdf", "agi", "luk"].map((p) => [p, { base: p === "mhp" ? 100 : p === "mmp" ? 20 : 10, growth: 2 }]));
 const project = {
   formatVersion: 1,
   meta: { id: "stealth", title: "デモ：忍び込み！月影の宝物庫", createdAt: "2026-10-01T00:00:00Z", updatedAt: "2026-10-01T00:00:00Z" },
