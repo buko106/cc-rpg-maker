@@ -23,7 +23,7 @@ export type {
 } from "./types.js";
 
 // プラグインの作者が使うもの（コマンドの定義、Effect の作り方、型）
-export { defineCommand, pluginStateOf, warn, withPluginState } from "@rpg/core";
+export { defineCommand, paramAt, pluginStateOf, warn, withPluginState } from "@rpg/core";
 export type { Action, BattleRules, CommandBlock, CommandCtx, CommandHandler, CommandResult, Effect, FormulaFn, GameState, JsonValue, ProjectView } from "./types.js";
 export type { Diagnostic, EffectApi, EventDraft, EventTemplate, FrameSpec, Logger, SceneKind } from "./types.js";
 export { defineEventTemplate } from "@rpg/editor-core";

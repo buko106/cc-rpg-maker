@@ -1,4 +1,4 @@
-import { defineCommand, z } from "@rpg/plugin-api";
+import { defineCommand, paramAt, z } from "@rpg/plugin-api";
 import type { CommandCtx, CommandHandler, CommandResult, Effect, GameState } from "@rpg/plugin-api";
 import type { Config } from "./config.js";
 import { buildFloor } from "./floor.js";
@@ -29,14 +29,10 @@ export function makeEnv(cfg: Config, c: Pick<CommandCtx, "state" | "project" | "
   const hero = heroOf(c.state);
   if (hero === undefined) return undefined;
   const cls = c.project.class(c.project.actor(hero.actor.id)?.classId ?? ("" as never));
-  const stat = (name: "mhp" | "atk" | "def", level: number): number => {
-    const curve = cls?.params[name];
-    return curve === undefined ? 1 : Math.round(curve.base + curve.growth * (level - 1));
-  };
   return {
     cfg,
     heroName: hero.actor.name,
-    heroStats: (level) => ({ mhp: Math.max(1, stat("mhp", level)), atk: Math.max(1, stat("atk", level)), def: Math.max(0, stat("def", level)) }),
+    heroStats: (level) => ({ mhp: Math.max(1, paramAt(cls, "mhp", level)), atk: Math.max(1, paramAt(cls, "atk", level)), def: Math.max(0, paramAt(cls, "def", level)) }),
     enemy: (id) => {
       const e = c.project.enemy(id as never);
       return e === undefined ? undefined : { name: e.name, mhp: e.params.mhp, atk: e.params.atk, def: e.params.def, exp: e.exp, gold: e.gold, drops: e.drops.map((d) => ({ item: d.item, rate: d.rate })) };
