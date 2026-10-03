@@ -1,12 +1,15 @@
 import type { MapData } from "@rpg/schema";
 import { drive, driveUntil, idleFrames, loadFixtureProject, press, runReplay } from "@rpg/test-utils";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { analyze, initial, play as modelPlay, reach, replay, roomOf, solve, variant } from "./conveyor-model.testkit.js";
 import type { Dir, Move, Room, State as ModelState } from "./conveyor-model.testkit.js";
 
 // 工場のベルトコンベアのデモ（fixtures/projects/v1/conveyor。tools/make-conveyor-demo.mjs が生成する）の約束ごと。
 // 部屋の手順は、conveyor-model.testkit.ts の「規則のモデル」で最短を探して、実際のエンジンで 1 手ずつ再生して確かめる
 // （モデルの位置とエンジンの位置・箱の位置・レバーと出荷口のスイッチが、毎手そろうこと）。
+// 規則のモデルの全探索（ソルバ・詰みの解析）は重いので、既定の 5 秒では足りない（CI の遅い環境でも収まる余裕を持たせる）
+vi.setConfig({ testTimeout: 120_000 });
+
 const { project, maps, ctx } = loadFixtureProject("conveyor");
 type State = ReturnType<typeof runReplay>["state"];
 
