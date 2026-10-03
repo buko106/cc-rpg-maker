@@ -7,7 +7,7 @@
 export * from "./battle/index.js";
 export * from "./expression/index.js";
 export * from "./interpreter/index.js";
-export { computeCamera, activePage, activePageIndex, canPass, currentMap, eventsToTrigger, moveCharacter, newCharacter, refreshEventPages, tileKey, withTileChanges } from "./map/index.js";
+export { computeCamera, activePage, activePageIndex, canPass, currentMap, eventsToTrigger, moveCharacter, newCharacter, refreshEventPages, stateConditionHolds, tileKey, withTileChanges } from "./map/index.js";
 export type { MapTileChanges, PassabilityCtx } from "./map/index.js";
 export {
   AUTOSAVE_SLOT, autosaveOnTransfer, dispatch, fieldItemUsable, fieldScope, fieldSkills, fieldSkillUsable, initialState, isSellable, loadSlotNumbers, MENU_ITEMS, maxBuyQuantity, menuItemIds, menuItems, needsFieldTarget, openShop, paramAt, SAVE_SLOT_COUNT, SAVE_SLOT_FIRST, saveSlotNumbers, sellableItemIds, sellPrice, SHOP_ITEM_LIMIT, shopCommands,

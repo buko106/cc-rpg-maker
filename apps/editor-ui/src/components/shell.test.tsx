@@ -264,7 +264,7 @@ describe("Shell", () => {
     expect(screen.queryByRole("dialog")).toBeNull();
   });
 
-  it("テストプレイ：タイトルから／選択位置から。閉じるとダイアログが消える", async () => {
+  it("テストプレイ：タイトルから／選択イベントから。閉じるとダイアログが消える", async () => {
     doAct(() => t.session.execute(cmd.createEvent(M1, 2, 3, "ev_a" as EventId)));
     doAct(() => t.session.setUi({ selection: { kind: "event", eventId: "ev_a" as EventId } }));
     render(t.wrap(<Shell onExit={() => {}} />));
@@ -273,9 +273,10 @@ describe("Shell", () => {
     expect(t.playtests[0]!.start).toBeUndefined();
     fireEvent.keyDown(screen.getByRole("dialog"), { key: "Escape" });
 
-    fireEvent.click(screen.getByRole("button", { name: "選択位置からテストプレイ" }));
+    fireEvent.click(screen.getByRole("button", { name: "選択イベントからテストプレイ" }));
     await waitFor(() => expect(t.playtests).toHaveLength(2));
-    expect(t.playtests[1]!.start).toEqual({ mapId: M1, x: 2, y: 3 });
+    // イベント（2, 3）の下に立って、上（イベントの方）を向く。条件の無いページなので状態は変えない
+    expect(t.playtests[1]!.start).toEqual({ mapId: M1, x: 2, y: 4, direction: "up" });
     // テストプレイ中は Ctrl+Z をゲームに任せる
     doAct(() => t.session.execute(cmd.paintTiles(M1, 0, [{ x: 0, y: 0, tile: 4 }])));
     fireEvent.keyDown(window, { key: "z", ctrlKey: true });

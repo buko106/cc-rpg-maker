@@ -36,7 +36,7 @@
 
 ## テストプレイ
 - `createRuntime` に `projectSource: session.projectSource()`, `saves: createMemorySaveRepository(...)`, `assets: session.assetSource()` を渡す。**本番セーブは汚さない**。
-- 「現在位置からテストプレイ」は `runtime.dispatch({ type: "startGame", ... })` の直後に `TransferPlayer` を dispatch する。
+- 「選択イベントからテストプレイ」は、選んだイベントのページの条件（スイッチ・変数・セルフスイッチ・所持品・アクター）を満たす状態で、そのイベントの隣から始める（下の実装メモ）。
 - ランタイムは別 `<iframe>` または同一ページ内 canvas。初期実装は同一ページ。`Web Worker` 化はマイルストーン後半。
 
 ## 不変条件
@@ -60,7 +60,7 @@
 - **フォームの差し替え**：`EditorEnv.formOverrides: Record<code, Component>`（プラグインも同じ口を使う）。M5 では空。
 - **画面**：マップツリー（追加・設定・削除）、タイルパレット（タイルごとのボタン。選んだタイルの通行方向（「通行」）と、「床の効果」＝「床の動き」（通常・滑る（氷）＝`Tileset.ice`・ベルト 4 方向＝`Tileset.conveyor` のどれか 1 つ。選び直すともう一方からは外れ、空になれば `ice` / `conveyor` ごと消す）・「足元の速さ」・「走れない」（`Tileset.terrain`。何も変えない設定は持たず、空になれば `terrain` ごと消す）も編集、ツールバー（鉛筆・消しゴム・塗りつぶし・イベント・選択、レイヤ、×1/×2、グリッド）、マップキャンバス、イベントダイアログ（名前・ページのタブ・ページ設定・コマンドリスト）、データベース（8 テーブルの一覧とフォーム）、システム（設定・スイッチ・変数。歩く速さ `walkSpeed`・走る機能 `dash`・状態による速さの変化 `speedRules` もスキーマからのフォームで編集する）、アセット、診断、テストプレイ。コマンドの追加は分岐の部品を一緒に入れる（条件分岐 = ConditionalBranch / Else / EndBranch、戦闘の処理 = BattleProcessing / ChoiceBranch×3 / EndBranch）。分岐は開始行を消すと丸ごと消え、部品だけは消せない（下の「実装メモ（コマンドの並べ替え・コピー・複数選択）」）。
 - **マップキャンバス**：下のキャンバスにゲームと同じ `Renderer`（`projectMapForEditor` の `FrameSpec`：タイルレイヤとイベントのスプライト）、上のキャンバスにグリッド・イベント枠・選択・ホバー（`drawOverlay`。`FrameSpec` の UI ノードにはしなかった）。ポインタとキーボード（矢印・Enter・O・Delete / Backspace）から `paintTiles` / `fillTiles` / `createEvent` / `moveEvent` / `deleteEvent` を発行する。速いドラッグでも途切れないよう、前のセルとの間を補間する。
-- **テストプレイ**：`startPlaytest(session, deps, start?)`。編集中の文書のスナップショット（`session.projectSource()`）で `createRuntime` を起動し、セーブはメモリ（`createMemorySaveRepository`）。「選択位置から」は開始マップ・位置を差し替えてタイトルを飛ばす（`TransferPlayer` の dispatch はしない）。音は出さない（`audio-null`）。指が主入力の端末（`pointer: coarse`）では、キーボードに加えて `@rpg/input-browser` の操作パッド（`mountTouchPad`）を出し、ダイアログを全画面にする（`padRoot` を `startPlaytest` に渡す）。rAF の `Scheduler` は player のものと同じ実装を持っている（共有は M7 で検討）。
+- **テストプレイ**：`startPlaytest(session, deps, start?)`。編集中の文書のスナップショット（`session.projectSource()`）で `createRuntime` を起動し、セーブはメモリ（`createMemorySaveRepository`）。「選択イベントから」は開始マップ・位置を差し替えてタイトルを飛ばし（`TransferPlayer` の dispatch はしない）、開始直後に `StatePatch`（スイッチ・変数・セルフスイッチ・所持品・パーティ）と向きを重ねたセーブを `loadSnapshot` で読み込ませる（ページは次の tick で更新される）。計画は `planEventStart(project, map, event, pageIndex)`：ページの条件から `StatePatch` を作り、プレイヤーはイベントの下・左・右・上の順に、通れてほかのイベントがいない隣のマスに、イベントの方を向いて立つ（立てなければイベントの上）。後ろのページの条件も満たしてしまうとき（そのページが優先される）は、パネルに知らせる。複数ページのイベントは、ツールバーの「ページ」で動かすページを選ぶ。音は出さない（`audio-null`）。指が主入力の端末（`pointer: coarse`）では、キーボードに加えて `@rpg/input-browser` の操作パッド（`mountTouchPad`）を出し、ダイアログを全画面にする（`padRoot` を `startPlaytest` に渡す）。rAF の `Scheduler` は player のものと同じ実装を持っている（共有は M7 で検討）。
 - **キーボード・確認**：Ctrl+Z / Ctrl+Shift+Z（Ctrl+Y）/ Ctrl+S はどの画面でも `session` に届く（テストプレイ中はゲームに任せる）。未保存のまま閉じようとすると `beforeunload` で確認。ダイアログは Esc で閉じ、開いたら中の最初の操作部品にフォーカスして、閉じたら戻す。削除で参照が残るときは影響範囲つきの確認を出す。
 - **テスト**：フォーム生成（組み込みコマンド全部で描画でき、既定値が `params` の zod を通る）、各画面のコンポーネントテスト（jsdom + Testing Library。`EditorSession` はモックせず、メモリのリポジトリの本物を使う）、`projectMapForEditor` / ヒットテスト / オーバーレイ、`startPlaytest`、E2E（`e2e/editor.spec.ts`：作成 → ドラッグで描画 → Undo/Redo → イベント作成と ShowText → 保存 → リロード → テストプレイでメッセージ、自動保存、データベースと削除の確認）。jsdom に無い `PointerEvent` / `Blob.arrayBuffer` / Canvas の `getContext` は `test-env.tsx` で補う。テストで `session` を直接操作するときは `act()` で包む。
 - **未対応**：移動ルートの編集（対応するコマンドが M6）、テストプレイの音、タイルセットの追加・画像差し替え、アセットの一括インポート（ZIP は M6）、矩形選択ツール、キャンバスのスクロール位置を保った拡大、`doc` への代入を禁じる lint ルール（UI は `session.execute` 以外で文書を書き換えない — テストで確認）。

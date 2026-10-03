@@ -4,12 +4,12 @@ import { cmd } from "@rpg/editor-core";
 import { createScriptInput } from "@rpg/input-script";
 import { createNullRenderer } from "@rpg/render-null";
 import type { AssetSource, ImageHandle } from "@rpg/runtime";
-import type { EventId, MapId } from "@rpg/schema";
+import type { ActorId, EventId, EventPage, ItemId, MapId, SwitchId, VariableId } from "@rpg/schema";
 import { createManualScheduler } from "@rpg/test-utils";
 import { act, cleanup, render, screen, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PlaytestPanel } from "./components/PlaytestPanel.js";
-import { startPlaytest } from "./playtest.js";
+import { planEventStart, startPlaytest } from "./playtest.js";
 import type { PlaytestDeps } from "./playtest.js";
 import { createTestEnv } from "./test-env.js";
 import type { TestEnv } from "./test-env.js";
@@ -73,6 +73,92 @@ describe("startPlaytest", () => {
 
   it("起動に失敗したら reject する（存在しない開始マップ）", async () => {
     await expect(startPlaytest(t.session, deps(), { mapId: "nope" as MapId, x: 0, y: 0 })).rejects.toThrow("プロジェクトに無い");
+  });
+});
+
+const SW = "sw_boss" as SwitchId;
+const VAR = "var_day" as VariableId;
+const EV = "ev_npc" as EventId;
+const page = (over: Partial<EventPage>): EventPage => ({ conditions: [], trigger: "action", through: false, priority: "same", commands: [], ...over });
+
+describe("planEventStart（選択イベントから）", () => {
+  const setup = (pages: EventPage[], x = 3, y = 3): { project: typeof t.session.doc.project; map: (typeof t.session.doc.maps)[MapId]; event: NonNullable<(typeof t.session.doc.maps)[MapId]>["events"][EventId] } => {
+    act(() => void t.session.execute(cmd.createEvent(M1, x, y, EV)));
+    pages.forEach((p, i) => act(() => void t.session.execute(cmd.setEventPage(M1, EV, i, p))));
+    const map = t.session.doc.maps[M1]!;
+    return { project: t.session.doc.project, map, event: map.events[EV]! };
+  };
+
+  it("ページの条件を満たす状態の上書きを作り、イベントの下に立って上を向く", () => {
+    const { project, map, event } = setup([
+      page({
+        conditions: [
+          { kind: "switch", id: SW, value: true },
+          { kind: "variable", id: VAR, op: ">=", value: 5 },
+          { kind: "selfSwitch", key: "A", value: true },
+          { kind: "item", id: "item_key" as ItemId },
+          { kind: "actor", id: "actor_b" as ActorId },
+        ],
+      }),
+    ]);
+    const plan = planEventStart(project, map, event, 0);
+    expect(plan.start).toEqual({
+      mapId: M1,
+      x: 3,
+      y: 4,
+      direction: "up",
+      state: { switches: { [SW]: true }, variables: { [VAR]: 5 }, selfSwitches: { [`${M1}:${EV}:A`]: true }, items: { item_key: 1 }, members: ["actor_b"] },
+    });
+    expect(plan.shadowedBy).toBeUndefined();
+  });
+
+  it("条件の無いページは状態を変えない", () => {
+    const { project, map, event } = setup([page({})]);
+    expect(planEventStart(project, map, event, 0).start).toEqual({ mapId: M1, x: 3, y: 4, direction: "up" });
+  });
+
+  it("下がマップの外なら、左に立ってイベントの方（右）を向く", () => {
+    const m = t.session.doc.maps[M1]!;
+    const bottom = m.height - 1;
+    const { project, map, event } = setup([page({})], 3, bottom);
+    expect(planEventStart(project, map, event, 0).start).toMatchObject({ x: 2, y: bottom, direction: "right" });
+  });
+
+  it("ほかのイベントがいる隣には立たない", () => {
+    act(() => void t.session.execute(cmd.createEvent(M1, 3, 4, "ev_other" as EventId)));
+    const { project, map, event } = setup([page({})]);
+    expect(planEventStart(project, map, event, 0).start).toMatchObject({ x: 2, y: 3, direction: "right" });
+  });
+
+  it("後ろのページの条件も満たされてしまうときは、そのページの番号を知らせる", () => {
+    const { project, map, event } = setup([page({ conditions: [{ kind: "switch", id: SW, value: true }] }), page({ conditions: [{ kind: "switch", id: SW, value: true }] })]);
+    expect(planEventStart(project, map, event, 0).shadowedBy).toBe(1);
+    expect(planEventStart(project, map, event, 1).shadowedBy).toBeUndefined();
+  });
+});
+
+describe("startPlaytest（状態の上書き）", () => {
+  it("上書きした状態でページが有効になり、プレイヤーはイベントの方を向いて立つ", async () => {
+    act(() => void t.session.execute(cmd.createEvent(M1, 3, 3, EV)));
+    act(() => void t.session.execute(cmd.setEventPage(M1, EV, 0, page({ conditions: [{ kind: "switch", id: SW, value: true }, { kind: "variable", id: VAR, op: "==", value: 2 }] }))));
+    const { project, map, event } = { project: t.session.doc.project, map: t.session.doc.maps[M1]!, event: t.session.doc.maps[M1]!.events[EV]! };
+    const d = deps();
+    // 条件を満たさないままなら、ページは無効
+    const plain = await startPlaytest(t.session, d, { mapId: M1, x: 3, y: 4 });
+    d.scheduler.advance(100);
+    expect(plain.runtime.getState().map.events[EV]!.pageIndex).toBeNull();
+    plain.stop();
+
+    const d2 = deps();
+    const pt = await startPlaytest(t.session, d2, planEventStart(project, map, event, 0).start);
+    d2.scheduler.advance(100);
+    const state = pt.runtime.getState();
+    expect(state.scene.kind).toBe("map");
+    expect(state.switches[SW]).toBe(true);
+    expect(state.variables[VAR]).toBe(2);
+    expect(state.map.events[EV]!.pageIndex).toBe(0);
+    expect(state.map.player).toMatchObject({ x: 3, y: 4, direction: "up" });
+    pt.stop();
   });
 });
 
