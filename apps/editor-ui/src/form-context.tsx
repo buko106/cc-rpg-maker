@@ -1,5 +1,5 @@
 import { parse } from "@rpg/core";
-import { cmd } from "@rpg/editor-core";
+import { cmd, withRecentRef } from "@rpg/editor-core";
 import type { EditorSession } from "@rpg/editor-core";
 import type { SwitchId, VariableId } from "@rpg/schema";
 import { useMemo } from "react";
@@ -73,6 +73,8 @@ export function useFormContext(renderCommands?: FormContext["renderCommands"]): 
       refOptions: refOptionsOf(session),
       checkFormula,
       newRef: newRefOf(session),
+      recentRefs: (ref) => session.ui.recentRefs[ref] ?? [],
+      onPickRef: (ref, id) => session.setUi({ recentRefs: withRecentRef(session.ui.recentRefs, ref, id) }),
       renderLocation: (props) => <MapPicker {...props} />,
       ...(renderCommands === undefined ? {} : { renderCommands }),
     }),
