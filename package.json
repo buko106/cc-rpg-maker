@@ -23,7 +23,7 @@
     "editor": "node apps/editor-ui/scripts/build-web.mjs && node tools/serve-static.mjs apps/editor-ui/dist-web 4174"
   },
   "devDependencies": {
-    "@playwright/test": "1.56.1",
+    "@playwright/test": "1.63.0",
     "@types/node": "22.20.4",
     "@vitest/coverage-v8": "4.1.11",
     "dependency-cruiser": "18.4.0",
