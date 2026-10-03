@@ -162,7 +162,7 @@
             {
               "code": "ShowText",
               "params": {
-                "text": "箱は 押して ベルトに のせる。歩くたびに、ベルトの上の 箱が 1タイル 進む。",
+                "text": "箱は 押して ベルトに のせると、あとは 勝手に 運ばれる。ベルトが 角を 曲がっていれば、そのまま 曲がる。",
                 "position": "bottom",
                 "background": "window"
               },
@@ -171,7 +171,7 @@
             {
               "code": "ShowText",
               "params": {
-                "text": "出荷口は 奥の 壁ぎわ。箱が 着くと、シャッターが 開く。",
+                "text": "箱が 壁や 別の物に ぶつかると、ベルトの 上でも 止まる。出荷口は 奥の 壁ぎわ。",
                 "position": "bottom",
                 "background": "window"
               },

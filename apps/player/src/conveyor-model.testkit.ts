@@ -7,13 +7,13 @@ import type { MapData, MapEvent, Tileset } from "@rpg/schema";
  *
  * 規則（docs/02-core-state.md「実装メモ（ベルトコンベア）」）：
  * - プレイヤーの 1 手＝方向キーで 1 歩あるいは箱を 1 つ押す（通れなかった手は数えない）か、隣のレバーを引く（決定ボタン）。
- * - 歩き出した 1 歩に合わせて、ベルトの上の箱が、1 タイルずつ（その上のベルトの向きに）いっせいに運ばれる。いま押した箱は運ばれない。
- *   同じタイルを目指したら、イベントの定義順で先のものだけが動く。行き先が壁・通れないイベント・プレイヤー・触れると何かが起こるイベントのタイル・
- *   止まっている箱なら、その場に残る（行き先の箱も運ばれて行き先をあけるなら動ける。入れかわりはしない）。
- * - 歩き終えた足元がベルトなら、プレイヤーと箱が、いっせいにもう 1 タイル運ばれる（プレイヤーが動けなければ、箱も動かない）。ベルトに着き続ける限り続く。
+ * - 動くものがすべて止まったとき、ベルトの上にあるプレイヤーと箱は、いっせいに 1 タイル（その上のベルトの向きに）運ばれる（1 ラウンド）。
+ *   運ばれた先もベルトなら、次のラウンドが続く。誰も動けなくなるまで続く（この間、プレイヤーは操作できない）。手のあと、レバーのあと、部屋に入った直後に起きる。
+ *   同じタイルを目指したら、プレイヤー → イベントの定義順で先のものだけが動く。行き先が壁・通れないイベント・止まっているプレイヤー / 箱・
+ *   触れると何かが起こるイベントのタイル（箱だけ）なら、その場に残る（行き先のものも運ばれて行き先をあけるなら動ける。入れかわりはしない）。
  * - 出荷口（`ev_dock_*`）の上に箱が載ると、箱は出荷されて（消えて）その出荷口は済み。すべて済むと出口の扉（`ev_exit` に 2 ページあるとき）が開く。
  *   出荷口はただの床（ベルトではない）で、プレイヤーも上に立てる（出荷口に運ばれても、そこから歩き出せる）。
- * - レバー（`ev_lever_*`）を引くたびに、そのレバーの `ChangeMapTile` が（0 番目のページ = 引く前の、1 番目のページ = 引いたあとの）タイルを入れ替える。時間はかからない。
+ * - レバー（`ev_lever_*`）を引くたびに、そのレバーの `ChangeMapTile` が（0 番目のページ = 引く前の、1 番目のページ = 引いたあとの）タイルを入れ替える。
  * - 出口のタイルに着いたら、その部屋は抜けた。
  */
 export type Dir = "up" | "down" | "left" | "right";
@@ -182,8 +182,12 @@ function connect(r: Room, mask: number, cell: number, dir: Dir): boolean {
   return true;
 }
 
+/** 部屋に入った直後の状態（ベルトの上の箱は、入った直後から運ばれて、止まっている）。 */
 export function initial(r: Room): State {
-  return { player: r.start.y * r.w + r.start.x, boxes: r.boxes.map((b) => b.y * r.w + b.x), mask: 0, latch: 0 };
+  const first: State = { player: r.start.y * r.w + r.start.x, boxes: r.boxes.map((b) => b.y * r.w + b.x), mask: 0, latch: 0 };
+  const settled = settle(r, ship(r, first));
+  if (settled === undefined) throw new Error(`${r.id}: 入った直後に運ばれ続けて止まらない`);
+  return settled.state;
 }
 
 /** 出口の扉が開いているか（扉が無い部屋は、いつでも開いている）。 */
@@ -200,11 +204,11 @@ interface Plan {
 }
 
 /**
- * ベルトの上にあるものをいっせいに 1 タイル運ぶ計画。`carryPlayer` ならプレイヤーも、`skip` の箱は運ばない。
+ * ベルトの上にあるものをいっせいに 1 タイル運ぶ計画。`carryPlayer` ならプレイヤーも運ぶ。
  * 候補（ベルトの上のもの）を、(1) 通行・触れるイベントのあるタイル・同じタイルを目指す先約で外し、(2) 行き先に居るものが動かない・入れかわる、
  * を、変わらなくなるまで外していく。
  */
-function plan(r: Room, s: State, carryPlayer: boolean, skip: number): Plan {
+function plan(r: Room, s: State, carryPlayer: boolean): Plan {
   type Mover = { who: number; from: number; dir: Dir }; // who: -1 = プレイヤー、0.. = 箱
   const movers: Mover[] = [];
   if (carryPlayer && r.carryPlayer) {
@@ -213,7 +217,7 @@ function plan(r: Room, s: State, carryPlayer: boolean, skip: number): Plan {
   }
   if (r.carryBoxes) {
     s.boxes.forEach((k, i) => {
-      if (i === skip || k < 0) return;
+      if (k < 0) return;
       const d = beltOf(r, s.mask, k);
       if (d !== undefined) movers.push({ who: i, from: k, dir: d });
     });
@@ -278,12 +282,26 @@ export interface Outcome {
   state: State;
   /** 出口に着いた。 */
   done: boolean;
-  /** この手で、プレイヤーが運ばれた歩数（ベルトに着いてからの追加の歩数）。 */
+  /** この手のあとに起きたラウンドの数。 */
   rides: number;
 }
 
 /** 運ばれ続けて止まらない（輪になったベルトに乗った）ときの、歩数の上限。 */
 const RIDE_LIMIT = 200;
+
+/** 動くものが止まるまで、ラウンドを繰り返す（`done` は出口に着いた）。止まらなければ `undefined`。 */
+function settle(r: Room, start: State): { state: State; done: boolean; rides: number } | undefined {
+  let cur = start;
+  let rides = 0;
+  for (;;) {
+    if (cur.player === r.exit) return { state: cur, done: true, rides };
+    const p = plan(r, cur, true);
+    if (p.player === undefined && p.boxes.every((d) => d === undefined)) return { state: cur, done: false, rides };
+    cur = applyPlan(r, cur, p);
+    rides++;
+    if (rides > RIDE_LIMIT) return undefined;
+  }
+}
 
 /** プレイヤーの 1 手。打てない手は `undefined`。 */
 export function play(r: Room, s: State, move: Move): Outcome | undefined {
@@ -294,14 +312,13 @@ export function play(r: Room, s: State, move: Move): Outcome | undefined {
     const px = s.player % r.w;
     const py = Math.floor(s.player / r.w);
     if (Math.abs(px - lv.x) + Math.abs(py - lv.y) !== 1) return undefined;
-    return { state: { ...s, mask: s.mask ^ (1 << i) }, done: false, rides: 0 };
+    return settle(r, { ...s, mask: s.mask ^ (1 << i) });
   }
   const dir = move as Dir;
   if (!connect(r, s.mask, s.player, dir)) return undefined;
   const to = step(r, s.player, dir);
   const fixed = (k: number): boolean => r.statics.has(k) || (r.locked && k === r.exit && !exitOpen(r, s.latch));
   if (fixed(to)) return undefined;
-  let pushed = -1;
   let boxes = s.boxes;
   const at = boxes.indexOf(to);
   if (at >= 0) {
@@ -309,23 +326,9 @@ export function play(r: Room, s: State, move: Move): Outcome | undefined {
     const beyond = step(r, to, dir);
     if (!connect(r, s.mask, to, dir) || fixed(beyond) || boxes.includes(beyond) || r.interactive.has(beyond)) return undefined;
     boxes = boxes.map((k, i) => (i === at ? beyond : k));
-    pushed = at;
   }
-  let cur: State = { ...s, player: to, boxes };
-  cur = ship(r, cur);
-  // 歩き出した 1 歩に合わせて、ベルトの上の箱が運ばれる（プレイヤーは自分で歩いたので運ばれない）
-  cur = applyPlan(r, cur, plan(r, cur, false, pushed));
-  let rides = 0;
-  for (;;) {
-    if (cur.player === r.exit) return { state: cur, done: true, rides };
-    if (!isBeltTile(r, cur.mask, cur.player) || !r.carryPlayer) break;
-    const p = plan(r, cur, true, -1);
-    if (p.player === undefined) break;
-    cur = applyPlan(r, cur, p);
-    rides++;
-    if (rides > RIDE_LIMIT) return undefined;
-  }
-  return { state: cur, done: false, rides };
+  // 歩く（押す）。そのあと、ベルトの上のものが運ばれる
+  return settle(r, ship(r, { ...s, player: to, boxes }));
 }
 
 export const key = (s: State): string => `${s.player}|${s.boxes.join(",")}|${s.mask}|${s.latch}`;

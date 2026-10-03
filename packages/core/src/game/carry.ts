@@ -1,5 +1,5 @@
 import type { EventId, MapData, Tileset } from "@rpg/schema";
-import { carryPlan, DIRECTION_VECTOR, hasConveyor } from "../map/index.js";
+import { carryPlan, DIRECTION_VECTOR, hasConveyor, startsOnPlayerTouch } from "../map/index.js";
 import type { CarryPlan } from "../map/index.js";
 import type { Character, EventRuntime, GameState } from "../state.js";
 
@@ -10,7 +10,6 @@ const boxOf = (map: MapData) => (ev: EventRuntime): boolean => ev.pageIndex !== 
 
 /**
  * 運ばれている箱が動いている間は、プレイヤーは次の手を打てない（ベルトのあるタイルセットだけ。ほかでは、押した箱は押した手と一緒に止まる）。
- * 箱がプレイヤーより先に止まって、動いている箱の上にまた箱を運ぶ、といったずれを作らないため。
  */
 export function boxesMoving(state: GameState, map: MapData, tileset: Tileset): boolean {
   if (!hasConveyor(tileset)) return false;
@@ -30,28 +29,26 @@ function withBoxes(state: GameState, plan: CarryPlan, speed: Speed): GameState {
   return { ...state, map: { ...state.map, events } };
 }
 
-/**
- * プレイヤーが方向キーで 1 歩を歩き出した（箱を押した）のに合わせて、ベルトの上の箱を 1 タイルずつ運ぶ（`skip` は、いま押した箱）。
- * 箱の速さは、その 1 歩の速さ（`speed`）にそろえるので、箱とプレイヤーは同じフレームに着く。ベルトが無いタイルセットでは何もしない。
- */
-export function carryBoxes(state: GameState, map: MapData, tileset: Tileset, speed: Speed, skip?: ReadonlySet<EventId>): GameState {
-  if (!hasConveyor(tileset)) return state;
-  const plan = carryPlan({ ctx: { map, tileset, events: state.map.events }, player: state.map.player, carryPlayer: false, isBox: boxOf(map), ...(skip === undefined ? {} : { skip }) });
-  return withBoxes(state, plan, speed);
-}
+/** 足元に、乗ると始まるイベント（階段・出口など。通常より下/上のプライオリティの接触）があるか。ある間は、プレイヤーは運ばれない。 */
+const touchHere = (state: GameState): boolean => {
+  const { player } = state.map;
+  return Object.values(state.map.events).some((ev) => ev.pageIndex !== null && startsOnPlayerTouch(ev.trigger) && ev.priority !== "same" && ev.x === player.x && ev.y === player.y);
+};
 
 /**
- * プレイヤーが 1 歩を歩き終えた直後：足元がベルトなら、プレイヤーと、ベルトの上の箱を、いっせいに 1 タイル運ぶ。
- * プレイヤーが動けなければ（行き先が壁・通れないイベントなど）、箱も動かさずに `undefined`（その場に止まる）。
- * プレイヤーの向きは変えない。`slidSpeed` は、いまの 1 歩の速さ（変わっていなければ `undefined`＝基準の速さ）で、運ばれる間も同じ速さで進む。
+ * 動くものがすべて止まったとき：ベルトの上にあるプレイヤーと箱を、いっせいに 1 タイル運ぶ「ラウンド」を始める。誰も動けなければ `undefined`。
+ * 運ばれた先もベルトなら、その歩を歩き終えたときに、また次のラウンドが始まる（`tickPhase.ts`）。止まる（誰も動けない）まで続く。
+ * プレイヤーの向きは変えない。`slidSpeed` は、プレイヤーがいま歩き終えた 1 歩の速さ（変わっていなければ `undefined`＝基準の速さ）で、運ばれる間も、箱も、同じ速さで進む。
  */
-export function carryPlayerAndBoxes(state: GameState, map: MapData, tileset: Tileset, slidSpeed: Speed | undefined): GameState | undefined {
+export function startCarryRound(state: GameState, map: MapData, tileset: Tileset, slidSpeed: Speed | undefined): GameState | undefined {
   if (!hasConveyor(tileset)) return undefined;
   const { player } = state.map;
-  const plan = carryPlan({ ctx: { map, tileset, events: state.map.events }, player, carryPlayer: true, isBox: boxOf(map) });
-  if (plan.player === undefined) return undefined;
-  const { dx, dy } = DIRECTION_VECTOR[plan.player];
+  if (player.moving || boxesMoving(state, map, tileset)) return undefined;
+  const plan = carryPlan({ ctx: { map, tileset, events: state.map.events }, player, carryPlayer: !touchHere(state), isBox: boxOf(map) });
+  if (plan.player === undefined && plan.boxes.length === 0) return undefined;
   const carried = withBoxes(state, plan, slidSpeed ?? player.speed);
+  if (plan.player === undefined) return carried;
+  const { dx, dy } = DIRECTION_VECTOR[plan.player];
   const moved = { ...player, x: player.x + dx, y: player.y + dy, moving: true };
   return { ...carried, map: { ...carried.map, player: moved, ...(slidSpeed === undefined ? {} : { moveSpeed: slidSpeed }) } };
 }

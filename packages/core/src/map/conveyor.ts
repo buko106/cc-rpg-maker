@@ -31,12 +31,10 @@ export interface CarryPlan {
 export interface CarryInput {
   readonly ctx: PassabilityCtx;
   readonly player: Character;
-  /** プレイヤーも運ぶか。歩き終えた直後は運ぶ。方向キーで歩き出した 1 歩では、プレイヤー自身が歩いているので運ばない（箱だけ運ぶ）。 */
+  /** プレイヤーも運ぶか（足元に触れると起こるイベントが無いとき）。 */
   readonly carryPlayer: boolean;
   /** 運ぶ箱か（有効なページが `pushable`）。 */
   readonly isBox: (ev: EventRuntime) => boolean;
-  /** この回では運ばないイベント（いま押された箱など）。 */
-  readonly skip?: ReadonlySet<EventId>;
 }
 
 interface Entry {
@@ -55,7 +53,7 @@ interface Entry {
  * - 行き先に居るものが動かない（通れないイベント・止まっている箱・箱から見てプレイヤー）なら、その場に残る。行き先に居るものも運ばれて
  *   行き先をあけるなら動ける（ベルトに並んだ列は、そろって動く。輪になったベルトの上の列も回る）。互いの場所を入れかわる動きはしない。
  */
-export function carryPlan({ ctx, player, carryPlayer, isBox, skip }: CarryInput): CarryPlan {
+export function carryPlan({ ctx, player, carryPlayer, isBox }: CarryInput): CarryPlan {
   const { map, tileset } = ctx;
   const events = Object.values(ctx.events) as EventRuntime[];
   const entries: Entry[] = [];
@@ -64,7 +62,7 @@ export function carryPlan({ ctx, player, carryPlayer, isBox, skip }: CarryInput)
     if (dir !== undefined) entries.push({ body: "player", x: player.x, y: player.y, dir });
   }
   for (const ev of events) {
-    if (ev.pageIndex === null || ev.through || ev.priority !== "same" || ev.moving || skip?.has(ev.id) === true || !isBox(ev)) continue;
+    if (ev.pageIndex === null || ev.through || ev.priority !== "same" || ev.moving || !isBox(ev)) continue;
     const dir = conveyorAt(map, tileset, ev.x, ev.y);
     if (dir !== undefined) entries.push({ body: ev, x: ev.x, y: ev.y, dir });
   }
