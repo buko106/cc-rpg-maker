@@ -1,5 +1,6 @@
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
+import { startNewGame } from "./helpers.js";
 
 // M5 の完了条件（docs/13-editor-ui.md）：
 // 新規プロジェクト → タイル描画 → イベント作成（ShowText）→ 保存 → リロード → テストプレイでメッセージが出る。
@@ -356,5 +357,33 @@ test.describe("スマホ（指が主入力）", () => {
     // 閉じると操作パッドも消える
     await page.getByRole("button", { name: "テストプレイを閉じる" }).click();
     await expect(pad).toHaveCount(0);
+  });
+});
+
+test("テストプレイのデバッグパネル：所持金を増やして、別の位置へ移動できる。入力中の矢印キーでは歩かない", async ({ page }) => {
+  await createProject(page, "デバッグのゲーム");
+  await page.getByRole("button", { name: "テストプレイ", exact: true }).click();
+  await page.waitForFunction(() => window.__rpgPlaytest !== undefined && window.__rpgPlaytest.getState().scene.kind === "title");
+  await startNewGame(page, "__rpgPlaytest");
+  const state = <T>(f: string): Promise<T> => page.evaluate(`(${f})(window.__rpgPlaytest.getState())`) as Promise<T>;
+
+  await page.getByText("デバッグ", { exact: true }).click();
+  await page.getByRole("button", { name: "所持金を増やす" }).click();
+  await page.waitForFunction(() => (window.__rpgPlaytest.getState() as unknown as { party: { gold: number } }).party.gold === 100);
+
+  // 数値の入力中の矢印キーは、ゲームに届かない（プレイヤーは動かない）
+  const before = await state<{ x: number; y: number }>("(s) => ({ x: s.map.player.x, y: s.map.player.y })");
+  await page.getByLabel("移動先の X").focus();
+  await page.keyboard.press("ArrowRight");
+  await page.keyboard.press("ArrowDown");
+  await page.waitForTimeout(300);
+  expect(await state("(s) => ({ x: s.map.player.x, y: s.map.player.y })")).toEqual(before);
+
+  await page.getByLabel("移動先の X").fill("3");
+  await page.getByLabel("移動先の Y").fill("2");
+  await page.getByRole("button", { name: "移動" }).click();
+  await page.waitForFunction(() => {
+    const p = window.__rpgPlaytest.getState().map.player;
+    return p.x === 3 && p.y === 2;
   });
 });

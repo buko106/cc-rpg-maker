@@ -11,7 +11,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { PlaytestPanel } from "./components/PlaytestPanel.js";
 import { planEventStart, startPlaytest } from "./playtest.js";
 import type { PlaytestDeps } from "./playtest.js";
-import { createTestEnv } from "./test-env.js";
+import { createTestEnv, fakePlaytestRuntime } from "./test-env.js";
 import type { TestEnv } from "./test-env.js";
 
 const M1 = "map_001" as MapId;
@@ -167,7 +167,7 @@ describe("PlaytestPanel", () => {
     let stopped = 0;
     t.env.startPlaytest = (_s, canvas, start, padRoot) => {
       t.playtests.push({ canvas, start, padRoot });
-      return Promise.resolve({ runtime: { getState: () => ({}) } as never, stop: () => void stopped++ });
+      return Promise.resolve({ runtime: fakePlaytestRuntime(), stop: () => void stopped++ });
     };
     const { unmount } = render(t.wrap(<PlaytestPanel start={{ mapId: M1, x: 2, y: 3 }} onClose={() => {}} />));
     await waitFor(() => expect(t.playtests).toHaveLength(1));
