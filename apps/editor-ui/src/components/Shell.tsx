@@ -2,7 +2,9 @@ import type { EventId, MapId } from "@rpg/schema";
 import { useEffect, useState } from "react";
 import type { ReactElement } from "react";
 import { useSession } from "../hooks.js";
+import { planEventStart } from "../playtest.js";
 import type { PlaytestStart } from "../playtest.js";
+import type { PlaytestEventInfo } from "./PlaytestPanel.js";
 import { AssetBrowser } from "./AssetBrowser.js";
 import { DatabaseDialog } from "./DatabaseDialog.js";
 import { DiagnosticsPanel } from "./DiagnosticsPanel.js";
@@ -15,7 +17,7 @@ import { SystemDialog } from "./SystemDialog.js";
 import { TilePalette } from "./TilePalette.js";
 import { ToolBar } from "./ToolBar.js";
 
-type Dialog = { kind: "database" | "system" | "assets" | "diagnostics" | "export" } | { kind: "event"; mapId: MapId; eventId: EventId } | { kind: "playtest"; start?: PlaytestStart };
+type Dialog = { kind: "database" | "system" | "assets" | "diagnostics" | "export" } | { kind: "event"; mapId: MapId; eventId: EventId } | { kind: "playtest"; start?: PlaytestStart; event?: PlaytestEventInfo };
 
 function saveText(session: ReturnType<typeof useSession>): string {
   const s = session.saveStatus;
@@ -30,6 +32,8 @@ export function Shell({ onExit }: { onExit: () => void }): ReactElement {
   const session = useSession();
   const [dialog, setDialog] = useState<Dialog | undefined>();
   const [grid, setGrid] = useState(true);
+  /** 複数ページのイベントで、テストプレイに使うページ（0 始まり）。 */
+  const [pageChoice, setPageChoice] = useState(0);
 
   // どの画面からでも Ctrl+Z / Ctrl+Shift+Z（Ctrl+Y）/ Ctrl+S が session に届く。テストプレイ中はゲームに任せる。
   useEffect(() => {
@@ -89,16 +93,30 @@ export function Shell({ onExit }: { onExit: () => void }): ReactElement {
           </button>
         )}
         <button type="button" onClick={() => setDialog({ kind: "playtest" })}>テストプレイ</button>
+        {selectedEvent !== undefined && selectedEvent.pages.length > 1 && (
+          <label className="page-pick">
+            ページ
+            <select value={pageChoice} onChange={(e) => setPageChoice(Number(e.target.value))} aria-label="テストプレイで動かすページ">
+              {selectedEvent.pages.map((_, i) => (
+                <option key={i} value={i}>
+                  {i + 1}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
         <button
           type="button"
-          disabled={map === undefined}
+          disabled={map === undefined || selectedEvent === undefined}
+          title="選択中のイベントのページの条件を満たして、そのイベントの隣から始めます"
           onClick={() => {
-            if (map === undefined) return;
-            // 選択中のイベントの位置。無ければマップの左上
-            setDialog({ kind: "playtest", start: { mapId: map.id, x: selectedEvent?.x ?? 0, y: selectedEvent?.y ?? 0 } });
+            if (map === undefined || selectedEvent === undefined) return;
+            const pageIndex = Math.min(pageChoice, selectedEvent.pages.length - 1);
+            const plan = planEventStart(doc.project, map, selectedEvent, pageIndex);
+            setDialog({ kind: "playtest", start: plan.start, event: { name: selectedEvent.name, page: pageIndex, ...(plan.shadowedBy === undefined ? {} : { shadowedBy: plan.shadowedBy }) } });
           }}
         >
-          選択位置からテストプレイ
+          選択イベントからテストプレイ
         </button>
       </header>
 
@@ -126,7 +144,7 @@ export function Shell({ onExit }: { onExit: () => void }): ReactElement {
       {dialog?.kind === "assets" && <AssetBrowser onClose={() => setDialog(undefined)} />}
       {dialog?.kind === "diagnostics" && <DiagnosticsPanel onClose={() => setDialog(undefined)} onOpenEvent={(mapId, eventId) => setDialog({ kind: "event", mapId, eventId })} />}
       {dialog?.kind === "event" && <EventDialog mapId={dialog.mapId} eventId={dialog.eventId} onClose={() => setDialog(undefined)} />}
-      {dialog?.kind === "playtest" && <PlaytestPanel {...(dialog.start === undefined ? {} : { start: dialog.start })} onClose={() => setDialog(undefined)} />}
+      {dialog?.kind === "playtest" && <PlaytestPanel {...(dialog.start === undefined ? {} : { start: dialog.start })} {...(dialog.event === undefined ? {} : { event: dialog.event })} onClose={() => setDialog(undefined)} />}
     </div>
   );
 }

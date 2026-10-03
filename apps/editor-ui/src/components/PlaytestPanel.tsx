@@ -9,7 +9,16 @@ import { Dialog } from "./Dialog.js";
  * テストプレイ。編集中の文書（`session.projectSource()`）でゲームを起動し、閉じたら止める。
  * セーブはメモリ上に置かれ、本番のセーブデータには触れない。
  */
-export function PlaytestPanel({ start, onClose }: { start?: PlaytestStart; onClose: () => void }): ReactElement {
+/** 「選択イベントから」で始めたときの案内用の情報。 */
+export interface PlaytestEventInfo {
+  name: string;
+  /** 0 始まり。 */
+  page: number;
+  /** 後ろのページが優先されて、このページが有効にならないとき、そのページの番号（0 始まり）。 */
+  shadowedBy?: number;
+}
+
+export function PlaytestPanel({ start, event, onClose }: { start?: PlaytestStart; event?: PlaytestEventInfo; onClose: () => void }): ReactElement {
   const session = useSession();
   const env = useEnv();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -53,7 +62,11 @@ export function PlaytestPanel({ start, onClose }: { start?: PlaytestStart; onClo
       <p className="muted" aria-live="polite">
         {error !== undefined ? "" : status === "starting" ? "起動しています…" : touch ? "操作：画面下の十字キーで移動、A で決定、B でキャンセル、☰ でメニュー。" : "操作：矢印キーで移動、Enter／Z で決定、Esc／X でメニュー・キャンセル。"}
         {start !== undefined && ` 開始位置：${session.doc.project.maps[start.mapId]?.name ?? start.mapId} (${start.x}, ${start.y})`}
+        {event !== undefined && ` イベント「${event.name}」のページ ${event.page + 1} を動かせる状態で始めています。`}
       </p>
+      {event?.shadowedBy !== undefined && (
+        <p className="notice">ページ {event.shadowedBy + 1} の条件も満たされるため、そちらが優先されます（このページは動きません）。</p>
+      )}
       {error !== undefined && <p role="alert" className="notice error">テストプレイを起動できませんでした：{error}</p>}
       <canvas
         ref={canvasRef}
