@@ -1,0 +1,368 @@
+{
+  "id": "map_r2",
+  "width": 15,
+  "height": 11,
+  "tileset": "ts_conveyor",
+  "layers": [
+    {
+      "name": "ground",
+      "tiles": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 11, 4, 4, 4, 4, 4, 4, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 1, 1, 4, 4, 1, 9, 6, 6, 6, 6, 6, 6, 3, 3, 3, 1, 1, 1, 1, 1, 4, 4, 4, 4, 4, 3, 8, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 8, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3, 8, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 4, 8, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 8, 3, 3, 3, 1, 1, 1, 1, 1, 1, 10, 1, 1, 1, 1, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+    }
+  ],
+  "events": {
+    "ev_exit": {
+      "id": "ev_exit",
+      "name": "出口",
+      "x": 7,
+      "y": 1,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_open_map_r2",
+              "value": false
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "74958c131fc3d219",
+            "index": 3,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "出荷口の シャッターが 閉じている。\n全部の 出荷口に 積み荷を 届けると、開くようだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_open_map_r2",
+              "value": true
+            }
+          ],
+          "trigger": "touch",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_r3",
+                "x": 7,
+                "y": 8,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_stairs": {
+      "id": "ev_stairs",
+      "name": "入口の階段",
+      "x": 7,
+      "y": 9,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": false,
+          "priority": "same",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "下へ おりる 階段だ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "この 工区を はじめから やりなおす",
+                  "ヒントを 読む",
+                  "やめる"
+                ],
+                "cancel": 2
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_dock_map_r2_1"
+                ],
+                "value": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_gone_map_r2_1"
+                ],
+                "value": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_open_map_r2"
+                ],
+                "value": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_r2",
+                "x": 7,
+                "y": 8,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "箱は 押して ベルトに のせると、あとは 勝手に 運ばれる。ベルトが 角を 曲がっていれば、そのまま 曲がる。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "箱が 壁や 別の物に ぶつかると、ベルトの 上でも 止まる。出荷口は 奥の 壁ぎわ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 2
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_box_1": {
+      "id": "ev_box_1",
+      "name": "木箱",
+      "x": 3,
+      "y": 7,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_gone_map_r2_1",
+              "value": false
+            }
+          ],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "74958c131fc3d219",
+            "index": 0,
+            "direction": "down"
+          },
+          "pushable": true,
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "木箱だ。正面から 押せば 動かせそうだ。\nベルトの 上に のせると、勝手に 運ばれる。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_gone_map_r2_1",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "commands": []
+        }
+      ]
+    },
+    "ev_dock_1": {
+      "id": "ev_dock_1",
+      "name": "出荷口",
+      "x": 6,
+      "y": 3,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "parallel",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "!s(\"sw_gone_map_r2_1\") && evx(\"ev_box_1\") == 6 && evy(\"ev_box_1\") == 3"
+              },
+              "indent": 0
+            },
+            {
+              "code": "Wait",
+              "params": {
+                "frames": 6
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_gone_map_r2_1"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_dock_map_r2_1"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_logic": {
+      "id": "ev_logic",
+      "name": "しかけ",
+      "x": 0,
+      "y": 0,
+      "pages": [
+        {
+          "conditions": [
+            {
+              "kind": "switch",
+              "id": "sw_open_map_r2",
+              "value": false
+            }
+          ],
+          "trigger": "parallel",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": "s(\"sw_dock_map_r2_1\")"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSwitches",
+              "params": {
+                "ids": [
+                  "sw_open_map_r2"
+                ],
+                "value": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "FlashScreen",
+              "params": {
+                "color": {
+                  "r": 200,
+                  "g": 220,
+                  "b": 255,
+                  "a": 0.5
+                },
+                "duration": 18
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShakeScreen",
+              "params": {
+                "power": 3,
+                "duration": 24,
+                "wait": false
+              },
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

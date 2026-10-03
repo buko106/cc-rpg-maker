@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { actorIdSchema, idRecord, mapIdSchema, tilesetIdSchema } from "./ids.js";
 import type { AssetId, MapId, SwitchId, TilesetId, VariableId } from "./ids.js";
-import { assetRefSchema, audioRefSchema, nonNegativeInt, speedEffectSchema, speedLevelSchema } from "./common.js";
+import { assetRefSchema, audioRefSchema, directionSchema, nonNegativeInt, speedEffectSchema, speedLevelSchema } from "./common.js";
 import { databaseSchema } from "./database.js";
 import { mapMetaSchema, stateConditionSchema } from "./map.js";
 
@@ -22,6 +22,12 @@ export const tilesetSchema = z.strictObject({
    * どのレイヤにあっても滑る。省略 = 滑るタイルは無い。
    */
   ice: z.array(z.number().int().min(1)).optional(),
+  /**
+   * ベルトコンベア（矢印の床）。キーはタイル ID（`1` 以上の整数を文字列にしたもの）、値は運ぶ向き。
+   * どのレイヤにあっても効く（複数のレイヤに重なれば、上のレイヤのタイルの向きが勝つ）。
+   * 歩いてこのタイルに着いたプレイヤーと、その上にある押せるイベント（`pushable`）が、向きに 1 タイルずつ運ばれる（02）。省略 = ベルトは無い。
+   */
+  conveyor: z.record(z.string().regex(/^[1-9][0-9]*$/), directionSchema).optional(),
   /**
    * 足元のタイルによる歩く速さの変化（砂地・沼など）。キーはタイル ID（`1` 以上の整数を文字列にしたもの）。
    * プレイヤーが歩き出すとき、いま立っているタイルがどのレイヤにあっても効く。複数のタイルが重なれば、`speed` は足し合わせ、`noDash` はどれか 1 つでも真なら走れない。

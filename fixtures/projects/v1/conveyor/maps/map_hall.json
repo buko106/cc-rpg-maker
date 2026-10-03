@@ -1,0 +1,287 @@
+{
+  "id": "map_hall",
+  "width": 15,
+  "height": 11,
+  "tileset": "ts_conveyor",
+  "layers": [
+    {
+      "name": "ground",
+      "tiles": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 4, 4, 4, 4, 4, 11, 4, 4, 4, 4, 4, 4, 3, 3, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 3, 3, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 3, 3, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 3, 3, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 3, 3, 1, 2, 5, 5, 5, 2, 1, 2, 1, 2, 1, 2, 1, 3, 3, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 3, 3, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 3, 3, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+    }
+  ],
+  "events": {
+    "ev_exit": {
+      "id": "ev_exit",
+      "name": "出口",
+      "x": 7,
+      "y": 1,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_r1",
+                "x": 7,
+                "y": 8,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_intro": {
+      "id": "ev_intro",
+      "name": "はじまり",
+      "x": 7,
+      "y": 8,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "autorun",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "からくり工房の 出荷ラインが 止まってしまった。\n最後の 注文品、\\C[6]金のネジ\\C[0]を 出荷台まで 届けよう。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "工房は ベルトコンベアだらけ。まずは 整備士に 話しかけてみよう。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSelfSwitch",
+              "params": {
+                "key": "A",
+                "value": true
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "selfSwitch",
+              "key": "A",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "commands": []
+        }
+      ]
+    },
+    "ev_guide": {
+      "id": "ev_guide",
+      "name": "整備士マリ",
+      "x": 7,
+      "y": 4,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "4be9b05e63498450",
+            "index": 0,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "おお、来てくれたか。止まった ラインを 動かしておくれ。\n奥の 扉から、4つの 工区を 抜けて 出荷台まで じゃ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "ベルトの 床",
+                  "木箱",
+                  "出荷口",
+                  "レバー",
+                  "つまったら",
+                  "やめる"
+                ],
+                "cancel": 5
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "矢印の 床が ベルトコンベアじゃ。歩いて ベルトに 着くと、\n矢印の 向きに 勝手に 運ばれる。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "運ばれている 間は 動けん。ベルトを 出た 最初の 床か、\n壁の 手前で 止まる。そこから また 歩ける。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]木箱\\C[0]は 押して 動かせる。ベルトの 上に のせれば、\n矢印の 向きに 勝手に 運ばれて いくぞ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "あんたと 木箱は、いっせいに 動く。止まるまで 操作は\nできんから、行き先を 考えておくんじゃ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 2
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "奥の 壁ぎわの \\C[6]出荷口\\C[0]に 木箱が 着くと、出荷されて 消える。\n出荷口を 全部 埋めれば、出口の シャッターが 開く。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "出荷口は ただの 床じゃ。箱を のせられない 所に 入れて しまったら、詰みじゃな。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 3
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]レバー\\C[0]を 引くと、ベルトの 向きが 入れかわる。\n分かれ道を 切り替えて、箱を 別の 出荷口へ 送るんじゃ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "引く 順番は 大事じゃぞ。2つの 箱が 同じ 出荷口に 入ったら、もう 片方は 空いたままじゃ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 4
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "詰んだら、各工区の 入口の 階段に ぶつかるんじゃ。\n\\C[6]やりなおす\\C[0]で 箱も レバーも 最初に もどる。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ベルトは 輪に ならんよう 作ってある。\n安心して 乗るがよい。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 5
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "きばって いっておいで。ベルトに 乗る ときは、\n降りる 場所を よく 考えるんじゃぞ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    }
+  }
+}

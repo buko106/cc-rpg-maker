@@ -19,7 +19,7 @@
 - 07：`render-null`, `render-canvas2d`。08：`input-script`, `input-browser`, `audio-null`。09：`memory`, `http`。
 - 15：`bootPlayer` の最小形（フォルダ形式、手作り `project/`）。
 - **完了条件**：ブラウザでマップを歩き、イベントに話しかけてメッセージが出る。FrameSpec スナップショットあり。
-- **状況**：完了。氷の床（滑る）・押せる岩・式の `evx` / `evy`・`SetEventLocation` は、あとから足した（02・03 の実装メモ。デモ「氷の神殿」）。マップのタイルの書き換え（`ChangeMapTile`）も、あとから足した（デモ「水門の遺跡」）。ターン制の移動ルート（`moveRoute.pace: "playerStep"`・`WaitPlayerStep`・`MapState.turns`）も、あとから足した（02・03 の実装メモ。デモ「時の番人の回廊」）。
+- **状況**：完了。氷の床（滑る）・押せる岩・式の `evx` / `evy`・`SetEventLocation` は、あとから足した（02・03 の実装メモ。デモ「氷の神殿」）。マップのタイルの書き換え（`ChangeMapTile`）も、あとから足した（デモ「水門の遺跡」）。ターン制の移動ルート（`moveRoute.pace: "playerStep"`・`WaitPlayerStep`・`MapState.turns`）も、あとから足した（02・03 の実装メモ。デモ「時の番人の回廊」）。ベルトコンベア（`Tileset.conveyor`。プレイヤーと押せる箱が、矢印の向きに運ばれる）も、あとから足した（02 の実装メモ。デモ「工場のベルトコンベア」）。
 
 ## M3: セーブ + メニュー（1〜2週）
 - 11：`memory`, `idb`, `localStorage` + 契約テスト。

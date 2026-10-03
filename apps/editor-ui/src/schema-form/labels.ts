@@ -129,6 +129,7 @@ const FIELD_LABELS: Readonly<Record<string, string>> = {
   walkSpeed: "歩く速さ（1〜6。4 が標準。マップの設定が優先）",
   dash: "走る機能（Shift・走るボタン。空のままで有効）",
   speedRules: "状態による歩く速さの変化",
+  conveyor: "ベルトコンベア（タイルごとの運ぶ向き）",
   noDash: "走れなくする",
   autosave: "オートセーブ",
   onTransfer: "場所移動のとき",

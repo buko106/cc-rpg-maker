@@ -163,6 +163,10 @@ export function upsertTileset(tileset: Tileset): EditorCommand {
     apply(doc) {
       if (tileset.passage.some((v) => !Number.isInteger(v) || v < 0 || v > 15)) return err(invalid("通行設定は 0〜15 の整数"));
       if (tileset.ice?.some((v) => !Number.isInteger(v) || v < 1)) return err(invalid("氷のタイルは 1 以上の整数"));
+      for (const [tile, dir] of Object.entries(tileset.conveyor ?? {})) {
+        if (!/^[1-9][0-9]*$/.test(tile)) return err(invalid(`ベルトのタイル ${tile} は 1 以上の整数`));
+        if (!(["up", "down", "left", "right"] as readonly string[]).includes(dir)) return err(invalid("ベルトの向きは 上・下・左・右"));
+      }
       for (const [tile, effect] of Object.entries(tileset.terrain ?? {})) {
         if (!/^[1-9][0-9]*$/.test(tile)) return err(invalid(`足元の設定のタイル ${tile} は 1 以上の整数`));
         if (effect.speed !== undefined && (!Number.isInteger(effect.speed) || effect.speed < -5 || effect.speed > 5)) return err(invalid("歩く速さの増減は −5〜5 の整数"));

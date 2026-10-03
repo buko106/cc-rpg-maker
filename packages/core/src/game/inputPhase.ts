@@ -6,6 +6,7 @@ import { currentMap, DIRECTION_VECTOR, hasPacedEvents, moveCharacter, pacedEvent
 import type { EventRuntime, GameState } from "../state.js";
 import type { StepResult } from "./actions.js";
 import { battleInput } from "../battle/index.js";
+import { boxesMoving } from "./carry.js";
 import { handleMessageInput } from "./messageInput.js";
 import { handleShopInput } from "./shop.js";
 import { handleGameoverInput, handleMenuInput, handleTitleInput, openMenu } from "./uiPhase.js";
@@ -78,6 +79,9 @@ export function handleInput(state: GameState, input: InputFrame, ctx: Ctx): Step
   // （`SetMoveRoute` のターン制のルートで動かされているイベントも含む）
   const forced = state.interpreters.flatMap((i) => pacedRouteTarget(i) ?? []);
   if (pacedEventsMoving(state, map, forced)) return idle;
+  // ベルトで運ばれている箱が動いている間も、次の手は打てない
+  const tileset = ctx.project.tileset(map.tileset) ?? OPEN_TILESET;
+  if (boxesMoving(state, map, tileset)) return idle;
   // 手数を数えるのは、ターン制のイベントが居るマップだけ（居なければ、状態に何も足さない）
   const paced = hasPacedEvents(state, map, forced);
   const turn = (s: GameState): GameState => (paced ? withTurn(s) : s);
@@ -109,7 +113,6 @@ export function handleInput(state: GameState, input: InputFrame, ctx: Ctx): Step
   }
   if (dir === undefined) return idle;
 
-  const tileset = ctx.project.tileset(map.tileset) ?? OPEN_TILESET;
   const { player } = state.map;
   const pass = { map, tileset, events: state.map.events };
   // この 1 歩の速さ：足元のタイル・状態・走る操作（Shift）で、基準の速さ（`player.speed`）から変わる。変わらなければ状態に何も足さない

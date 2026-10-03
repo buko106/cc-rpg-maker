@@ -101,6 +101,14 @@ export const DEMOS = [
     tags: ["ターン制の移動ルート", "視界", "押せる箱", "パズル", "戦闘なし"],
   },
   {
+    slug: "conveyor",
+    project: "fixtures/projects/v1/conveyor",
+    title: "工場のベルトコンベア",
+    image: "site/img/conveyor.png",
+    description: "止まった工房の出荷ラインを動かして、最後の注文品「金のネジ」を出荷台まで届ける。矢印の床に乗ると勝手に運ばれ、ベルトにのせた木箱も勝手に運ばれていく。レバーでベルトの向きを切り替えて、箱を出荷口へ。詰んでも入口の階段でやり直せます。",
+    tags: ["ベルトコンベア", "押せる箱", "レバー", "パズル", "戦闘なし"],
+  },
+  {
     slug: "dungeon",
     project: "fixtures/projects/v2/dungeon",
     title: "風鳴りの洞窟（不思議のダンジョン）",

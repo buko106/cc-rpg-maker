@@ -41,6 +41,15 @@ export function pushableAt(
   const rock = (Object.values(ctx.events) as EventRuntime[]).find((ev) => ev.pageIndex !== null && ev.priority === "same" && !ev.through && ev.x === x && ev.y === y && isPushable(ev));
   if (rock === undefined) return undefined;
   if (!canPass(ctx.map, ctx.tileset, ctx.events as Readonly<Record<EventId, EventRuntime>>, rock, dir)) return undefined;
-  const interactive = (Object.values(ctx.events) as EventRuntime[]).some((ev) => ev.pageIndex !== null && ev.x === x + dx && ev.y === y + dy && (ev.trigger === "action" || startsOnPlayerTouch(ev.trigger)));
-  return interactive ? undefined : rock;
+  return hasInteractiveEvent(ctx.events, x + dx, y + dy) ? undefined : rock;
+}
+
+/**
+ * タイル (x, y) に、触れる・話しかけると何かが起こるイベント（有効なページのトリガが `action` / `touch` / `eventTouch` / `eventSight`）があるか。箱を載せない目印。
+ * `ignore` が真を返すイベント（ほかの箱など）は数えない。
+ */
+export function hasInteractiveEvent(events: Readonly<Record<EventId, EventRuntime>>, x: number, y: number, ignore?: (ev: EventRuntime) => boolean): boolean {
+  return (Object.values(events) as EventRuntime[]).some(
+    (ev) => ev.pageIndex !== null && ev.x === x && ev.y === y && (ev.trigger === "action" || startsOnPlayerTouch(ev.trigger)) && ignore?.(ev) !== true,
+  );
 }

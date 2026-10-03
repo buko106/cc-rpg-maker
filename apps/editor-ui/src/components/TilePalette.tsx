@@ -1,4 +1,5 @@
 import { cmd } from "@rpg/editor-core";
+import type { Direction } from "@rpg/schema";
 import type { ReactElement } from "react";
 import { useSession } from "../hooks.js";
 import { useAssetUrl } from "./useAssetUrl.js";
@@ -6,6 +7,15 @@ import { useExecute } from "./useExecute.js";
 
 /** 通行可能方向のビット（docs/01-schema.md：下=1, 左=2, 右=4, 上=8）。範囲外のタイルは全方向通行可（15）。 */
 const PASSAGE: readonly [number, string][] = [[1, "下"], [2, "左"], [4, "右"], [8, "上"]];
+
+/** ベルトコンベアの運ぶ向き。 */
+const BELT_DIRECTIONS: readonly [Direction | "", string][] = [
+  ["", "なし"],
+  ["up", "上へ運ぶ"],
+  ["down", "下へ運ぶ"],
+  ["left", "左へ運ぶ"],
+  ["right", "右へ運ぶ"],
+];
 
 /** 足元のタイルによる歩く速さの増減（段階。1 段階ごとに 2 倍）。 */
 const FOOTING_SPEEDS: readonly [number, string][] = [
@@ -52,6 +62,16 @@ export function TilePalette(): ReactElement {
     const ice = on ? [...rest, selected].sort((a, b) => a - b) : rest;
     const { ice: _old, ...base } = tileset;
     run(cmd.upsertTileset(ice.length === 0 ? base : { ...base, ice }));
+  };
+
+  // ベルトコンベア：向きを選ぶと、そのタイルが運ぶ床になる。「なし」で外す（空になれば conveyor ごと消す）
+  const belt = tileset?.conveyor?.[String(selected)];
+  const setBelt = (dir: Direction | ""): void => {
+    if (tileset === undefined) return;
+    const rest = Object.fromEntries(Object.entries(tileset.conveyor ?? {}).filter(([tile]) => tile !== String(selected)));
+    const conveyor = dir === "" ? rest : { ...rest, [String(selected)]: dir };
+    const { conveyor: _old, ...base } = tileset;
+    run(cmd.upsertTileset(Object.keys(conveyor).length === 0 ? base : { ...base, conveyor }));
   };
 
   // 足元の速さ（砂地・沼など）。何も変えない設定（ふつう・走れる）は持たない
@@ -101,6 +121,16 @@ export function TilePalette(): ReactElement {
           <label className="check">
             <input type="checkbox" checked={slippery} onChange={(e) => setSlippery(e.target.checked)} />
             滑る（氷）
+          </label>
+          <label>
+            ベルト（運ぶ向き）
+            <select value={belt ?? ""} onChange={(e) => setBelt(e.target.value as Direction | "")}>
+              {BELT_DIRECTIONS.map(([dir, label]) => (
+                <option key={dir} value={dir}>
+                  {label}
+                </option>
+              ))}
+            </select>
           </label>
           <label>
             足元の速さ

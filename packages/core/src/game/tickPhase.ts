@@ -11,6 +11,7 @@ import type { GameState, MapState } from "../state.js";
 import type { StepResult } from "./actions.js";
 import { enterMap } from "./initial.js";
 import { AUTOSAVE_SLOT, autosaveOnTransfer } from "./scenes.js";
+import { boxesMoving, startCarryRound } from "./carry.js";
 import { hasNormalInterpreter, startMapEvent } from "./inputPhase.js";
 
 /** 自動実行・並列処理イベントのインタプリタを、現在の有効ページに合わせて起動・停止する。 */
@@ -95,6 +96,8 @@ function advanceMovement(state: GameState, map: MapData, ctx: Ctx): StepResult {
     eventsChanged = true;
   }
   const wasMoving = s.map.player.moving;
+  const tileset = ctx.project.tileset(map.tileset);
+  const boxesWereMoving = tileset !== undefined && boxesMoving(s, map, tileset);
   const player = advanceCharacter(s.map.player, s.map.moveSpeed);
   if (!eventsChanged && player === s.map.player) return { state: s, effects: [] };
   s = { ...s, map: { ...s.map, player, ...(eventsChanged ? { events } : {}) } };
@@ -104,6 +107,11 @@ function advanceMovement(state: GameState, map: MapData, ctx: Ctx): StepResult {
     const { moveSpeed, ...rest } = s.map;
     if (moveSpeed !== undefined) s = { ...s, map: rest };
     return arrive(s, map, ctx, moveSpeed);
+  }
+  // 運ばれていた箱だけが止まったとき（プレイヤーは動いていない）も、まだ続けて運べる箱があれば、すぐ次のラウンドを始める
+  if (boxesWereMoving && tileset !== undefined && !hasNormalInterpreter(s) && s.map.transfer === undefined) {
+    const next = startCarryRound(s, map, tileset, undefined);
+    if (next !== undefined) return { state: next, effects: [] };
   }
   return { state: s, effects: [] };
 }
@@ -116,8 +124,11 @@ function arrive(s: GameState, map: MapData, ctx: Ctx, slidSpeed: GameState["map"
       (ev) => ev.pageIndex !== null && startsOnPlayerTouch(ev.trigger) && ev.priority !== "same" && ev.x === player.x && ev.y === player.y,
     )?.id;
     if (here !== undefined) return { state: startMapEvent(s, map, here), effects: [] };
-    // 氷の上なら、同じ向きに滑り続ける（滑っている間は歩数を数えず、遭遇もしない。止まった所で判定する）
+    // ベルトの上のものが動けるなら、いっせいに 1 タイル運ばれる（プレイヤーが運ばれる間は歩数を数えず、遭遇もしない。氷より先に効く）
     const tileset = ctx.project.tileset(map.tileset);
+    const carried = tileset === undefined ? undefined : startCarryRound(s, map, tileset, slidSpeed);
+    if (carried !== undefined) return { state: carried, effects: [] };
+    // 氷の上なら、同じ向きに滑り続ける（滑っている間は歩数を数えず、遭遇もしない。止まった所で判定する）
     const slid = tileset === undefined ? undefined : slide(s.map.player, { map, tileset, events: s.map.events });
     if (slid !== undefined) return { state: { ...s, map: { ...s.map, player: slid, ...(slidSpeed === undefined ? {} : { moveSpeed: slidSpeed }) } }, effects: [] };
     return startEncounter(s, map, ctx);
@@ -197,6 +208,9 @@ export function handleTick(state: GameState, input: InputFrame, ctx: Ctx): StepR
       const advanced = advanceMovement(s, map, ctx);
       s = advanced.state;
       effects.push(...advanced.effects);
+      // 動くものがすべて止まっていて、ベルトの上に動けるものがあれば（レバーでベルトの向きが変わった・マップに入った、など）、運びはじめる
+      const belt = ctx.project.tileset(map.tileset);
+      if (s.scene.kind === "map" && belt !== undefined && !hasNormalInterpreter(s) && !s.message.open && s.map.transfer === undefined) s = startCarryRound(s, map, belt, undefined) ?? s;
       if (s.scene.kind === "map") s = startSightEvent(s, map, ctx);
       const camera = computeCamera(s.map.player, map, ctx.project.project.system);
       if (camera.x !== s.map.camera.x || camera.y !== s.map.camera.y) s = { ...s, map: { ...s.map, camera } };

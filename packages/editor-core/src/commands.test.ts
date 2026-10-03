@@ -307,6 +307,12 @@ describe("database / system commands", () => {
     for (const terrain of [{ "0": { speed: -1 } }, { a: {} }, { "1": { speed: 6 } }, { "1": { speed: 0.5 } }]) {
       expect(failure(cmd.upsertTileset({ id: "ts5", name: "x", passage: [], terrain } as never)).kind).toBe("invalid");
     }
+    // ベルトコンベア：タイル番号は 1 以上の整数、向きは 4 方向
+    const belt = { id: "ts6", name: "工場", passage: [15, 15], conveyor: { "1": "right", "2": "up" } } as never;
+    expect(applied(cmd.upsertTileset(belt)).project.tilesets["ts6" as TilesetId]).toMatchObject({ conveyor: { "1": "right", "2": "up" } });
+    for (const conveyor of [{ "0": "right" }, { a: "up" }, { "1": "sideways" }]) {
+      expect(failure(cmd.upsertTileset({ id: "ts7", name: "x", passage: [], conveyor } as never)).kind).toBe("invalid");
+    }
     expect(applied(cmd.deleteTileset("ts2" as TilesetId), doc).project.tilesets["ts2" as TilesetId]).toBeUndefined();
     expect(failure(cmd.deleteTileset("nope" as TilesetId)).kind).toBe("notFound");
     expect(cmd.deleteTileset("ts2" as TilesetId).removes()).toEqual([{ kind: "tileset", id: "ts2" }]);

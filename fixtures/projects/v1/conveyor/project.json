@@ -1,0 +1,220 @@
+{
+  "formatVersion": 1,
+  "meta": {
+    "id": "conveyor",
+    "title": "デモ：工場のベルトコンベア",
+    "createdAt": "2026-10-03T00:00:00Z",
+    "updatedAt": "2026-10-03T00:00:00Z"
+  },
+  "system": {
+    "startMap": "map_hall",
+    "startX": 7,
+    "startY": 8,
+    "initialParty": [
+      "actor_hero"
+    ],
+    "tileSize": 32,
+    "screen": {
+      "width": 480,
+      "height": 352
+    },
+    "bgm": {},
+    "autosave": {
+      "onTransfer": true
+    },
+    "terms": {
+      "newGame": "ニューゲーム"
+    }
+  },
+  "maps": {
+    "map_hall": {
+      "id": "map_hall",
+      "name": "工房のロビー",
+      "order": 0
+    },
+    "map_r1": {
+      "id": "map_r1",
+      "name": "第一工区 乗りつぎ",
+      "order": 1
+    },
+    "map_r2": {
+      "id": "map_r2",
+      "name": "第二工区 積み出し",
+      "order": 2
+    },
+    "map_r3": {
+      "id": "map_r3",
+      "name": "第三工区 仕分けのレバー",
+      "order": 3
+    },
+    "map_r4": {
+      "id": "map_r4",
+      "name": "第四工区 最終ライン",
+      "order": 4
+    }
+  },
+  "tilesets": {
+    "ts_conveyor": {
+      "id": "ts_conveyor",
+      "name": "からくり工房",
+      "image": {
+        "asset": "31a3eae8678eda10"
+      },
+      "passage": [15, 15, 15, 0, 0, 15, 15, 15, 15, 15, 15, 15, 0],
+      "conveyor": {
+        "5": "right",
+        "6": "left",
+        "7": "down",
+        "8": "up"
+      }
+    }
+  },
+  "database": {
+    "actors": {
+      "actor_hero": {
+        "id": "actor_hero",
+        "name": "コウ",
+        "classId": "class_hero",
+        "initialLevel": 1,
+        "walk": {
+          "asset": "bb2e23b45d1f4d4d"
+        },
+        "equips": {}
+      }
+    },
+    "classes": {
+      "class_hero": {
+        "id": "class_hero",
+        "name": "運び屋",
+        "skills": [],
+        "params": {
+          "mhp": {
+            "base": 100,
+            "growth": 2
+          },
+          "mmp": {
+            "base": 20,
+            "growth": 2
+          },
+          "atk": {
+            "base": 10,
+            "growth": 2
+          },
+          "def": {
+            "base": 10,
+            "growth": 2
+          },
+          "mat": {
+            "base": 10,
+            "growth": 2
+          },
+          "mdf": {
+            "base": 10,
+            "growth": 2
+          },
+          "agi": {
+            "base": 10,
+            "growth": 2
+          },
+          "luk": {
+            "base": 10,
+            "growth": 2
+          }
+        }
+      }
+    },
+    "skills": {},
+    "items": {},
+    "enemies": {},
+    "troops": {},
+    "states": {},
+    "commonEvents": {}
+  },
+  "assets": {
+    "entries": {
+      "31a3eae8678eda10": {
+        "name": "conveyor_tileset.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 1590,
+        "width": 416,
+        "height": 32
+      },
+      "bb2e23b45d1f4d4d": {
+        "name": "hero.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 660,
+        "width": 96,
+        "height": 128
+      },
+      "4be9b05e63498450": {
+        "name": "people.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 660,
+        "width": 96,
+        "height": 128
+      },
+      "74958c131fc3d219": {
+        "name": "props.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 3832,
+        "width": 480,
+        "height": 128
+      }
+    }
+  },
+  "switches": {
+    "sw_dock_map_r2_1": {
+      "name": "第二工区 積み出しの出荷口1が埋まった"
+    },
+    "sw_gone_map_r2_1": {
+      "name": "第二工区 積み出しの木箱1を出荷した"
+    },
+    "sw_open_map_r2": {
+      "name": "第二工区 積み出しのシャッターが開いた"
+    },
+    "sw_lever_map_r3_1": {
+      "name": "第三工区 仕分けのレバーのレバー1を倒した"
+    },
+    "sw_dock_map_r3_1": {
+      "name": "第三工区 仕分けのレバーの出荷口1が埋まった"
+    },
+    "sw_dock_map_r3_2": {
+      "name": "第三工区 仕分けのレバーの出荷口2が埋まった"
+    },
+    "sw_gone_map_r3_1": {
+      "name": "第三工区 仕分けのレバーの木箱1を出荷した"
+    },
+    "sw_gone_map_r3_2": {
+      "name": "第三工区 仕分けのレバーの木箱2を出荷した"
+    },
+    "sw_open_map_r3": {
+      "name": "第三工区 仕分けのレバーのシャッターが開いた"
+    },
+    "sw_lever_map_r4_1": {
+      "name": "第四工区 最終ラインのレバー1を倒した"
+    },
+    "sw_lever_map_r4_2": {
+      "name": "第四工区 最終ラインのレバー2を倒した"
+    },
+    "sw_dock_map_r4_1": {
+      "name": "第四工区 最終ラインの出荷口1が埋まった"
+    },
+    "sw_dock_map_r4_2": {
+      "name": "第四工区 最終ラインの出荷口2が埋まった"
+    },
+    "sw_gone_map_r4_1": {
+      "name": "第四工区 最終ラインの木箱1を出荷した"
+    },
+    "sw_gone_map_r4_2": {
+      "name": "第四工区 最終ラインの木箱2を出荷した"
+    },
+    "sw_open_map_r4": {
+      "name": "第四工区 最終ラインのシャッターが開いた"
+    }
+  },
+  "variables": {}
+}

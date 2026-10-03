@@ -18,9 +18,9 @@ test.beforeEach(async ({ page }) => {
   await page.reload();
 });
 
-test("サンプル（はじまりの村・地下迷宮・バトルタワー・謎解きの館・おばけ屋敷の追いかけっこ・忍び込み・ほこらの冒険・氷の神殿・水門の遺跡・時の番人の回廊・風鳴りの洞窟・港町の釣り大会）が画面写真つきで並び、地下迷宮から作るとテストプレイで遊べる", async ({ page }) => {
+test("サンプル（はじまりの村・地下迷宮・バトルタワー・謎解きの館・おばけ屋敷の追いかけっこ・忍び込み・ほこらの冒険・氷の神殿・水門の遺跡・時の番人の回廊・工場のベルトコンベア・風鳴りの洞窟・港町の釣り大会）が画面写真つきで並び、地下迷宮から作るとテストプレイで遊べる", async ({ page }) => {
   const samples = page.getByRole("list", { name: "サンプル" });
-  await expect(samples.getByRole("listitem")).toHaveCount(12);
+  await expect(samples.getByRole("listitem")).toHaveCount(13);
   await expect(samples.getByText("はじまりの村", { exact: true })).toBeVisible();
   await expect(samples.getByText("地下迷宮", { exact: true })).toBeVisible();
   await expect(samples.getByText("バトルタワー", { exact: true })).toBeVisible();
@@ -31,10 +31,11 @@ test("サンプル（はじまりの村・地下迷宮・バトルタワー・�
   await expect(samples.getByText("氷の神殿", { exact: true })).toBeVisible();
   await expect(samples.getByText("水門の遺跡", { exact: true })).toBeVisible();
   await expect(samples.getByText("時の番人の回廊", { exact: true })).toBeVisible();
+  await expect(samples.getByText("工場のベルトコンベア", { exact: true })).toBeVisible();
   await expect(samples.getByText("風鳴りの洞窟（不思議のダンジョン）", { exact: true })).toBeVisible();
   await expect(samples.getByText("港町の釣り大会", { exact: true })).toBeVisible();
   // 画面写真が読み込めている
-  await expect.poll(() => samples.locator("img").evaluateAll((imgs) => imgs.map((i) => (i as HTMLImageElement).naturalWidth > 0))).toEqual(Array.from({ length: 12 }, () => true));
+  await expect.poll(() => samples.locator("img").evaluateAll((imgs) => imgs.map((i) => (i as HTMLImageElement).naturalWidth > 0))).toEqual(Array.from({ length: 13 }, () => true));
 
   await page.getByRole("button", { name: "地下迷宮 のサンプルから作る" }).click();
   await expect(page.getByRole("application")).toBeVisible();
