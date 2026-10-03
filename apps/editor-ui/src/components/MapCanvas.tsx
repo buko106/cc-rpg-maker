@@ -1,4 +1,4 @@
-import { cmd } from "@rpg/editor-core";
+import { cmd, withRecentTile } from "@rpg/editor-core";
 import { newId } from "@rpg/schema";
 import type { EventId } from "@rpg/schema";
 import type { EventTemplate } from "@rpg/editor-core";
@@ -76,10 +76,16 @@ export function MapCanvas({ grid, onOpenEvent }: { grid: boolean; onOpenEvent: (
     return cellAt(map, e.clientX - r.left, e.clientY - r.top, r.width, r.height);
   };
 
+  /** 置いたタイルを「最近使ったタイル」の先頭にする（消しゴムの空は含めない）。 */
+  const rememberTile = (tile: number): void => {
+    if (tile === 0 || session.ui.recentTiles[0] === tile) return;
+    session.setUi({ recentTiles: withRecentTile(session.ui.recentTiles, tile) });
+  };
+
   const paintCells = (cells: Cell[]): void => {
     if (ui.currentMap === undefined) return;
     const tile = ui.tool === "eraser" ? 0 : ui.tile;
-    run(cmd.paintTiles(ui.currentMap, ui.currentLayer, cells.map((c) => ({ ...c, tile }))));
+    if (run(cmd.paintTiles(ui.currentMap, ui.currentLayer, cells.map((c) => ({ ...c, tile }))))) rememberTile(tile);
   };
 
   /** セル 1 つにツールを適用する（ポインタの押下・キーボードの Enter 共通）。ドラッグ／塗りの続きを返す。 */
@@ -92,7 +98,7 @@ export function MapCanvas({ grid, onOpenEvent }: { grid: boolean; onOpenEvent: (
         paintCells([cell]);
         return { kind: "paint", last: cell };
       case "fill":
-        run(cmd.fillTiles(ui.currentMap, ui.currentLayer, cell.x, cell.y, ui.tile));
+        if (run(cmd.fillTiles(ui.currentMap, ui.currentLayer, cell.x, cell.y, ui.tile))) rememberTile(ui.tile);
         return undefined;
       case "event":
       case "select": {

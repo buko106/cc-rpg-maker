@@ -22,6 +22,8 @@ export interface EditorUiState {
   eventTemplate: string | undefined;
   /** 最近追加したイベントコマンドの code（新しい順、重複なし。コマンドの追加画面の「最近使ったもの」） */
   recentCommands: readonly string[];
+  /** 最近マップに置いたタイルの番号（新しい順、重複なし。タイルパレットの「最近使った」） */
+  recentTiles: readonly number[];
 }
 
 /** `recentCommands` に残す数。 */
@@ -30,9 +32,15 @@ export const RECENT_COMMANDS_LIMIT = 6;
 /** `code` を先頭にした最近使ったコマンドの一覧。 */
 export const withRecentCommand = (recent: readonly string[], code: string): string[] => [code, ...recent.filter((c) => c !== code)].slice(0, RECENT_COMMANDS_LIMIT);
 
+/** `recentTiles` に残す数。 */
+export const RECENT_TILES_LIMIT = 8;
+
+/** `tile` を先頭にした最近使ったタイルの一覧。 */
+export const withRecentTile = (recent: readonly number[], tile: number): number[] => [tile, ...recent.filter((t) => t !== tile)].slice(0, RECENT_TILES_LIMIT);
+
 /** 文書を開いたときの表示状態：開始マップ、下層、鉛筆。 */
 export function initialUiState(doc: ProjectDocument): EditorUiState {
   const first = Object.keys(doc.project.maps)[0] as MapId | undefined;
   const start = Object.hasOwn(doc.project.maps, doc.project.system.startMap) ? doc.project.system.startMap : first;
-  return { currentMap: start, currentLayer: 0, tool: "pencil", tile: 1, selection: { kind: "none" }, zoom: 1, clipboard: undefined, commandClipboard: undefined, eventTemplate: undefined, recentCommands: [] };
+  return { currentMap: start, currentLayer: 0, tool: "pencil", tile: 1, selection: { kind: "none" }, zoom: 1, clipboard: undefined, commandClipboard: undefined, eventTemplate: undefined, recentCommands: [], recentTiles: [] };
 }

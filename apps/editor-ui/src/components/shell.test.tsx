@@ -104,6 +104,17 @@ describe("TilePalette / ToolBar", () => {
     expect(t.session.ui.tool).toBe("fill");
   });
 
+  it("「最近使った」のタイルが並び、押すとそのタイルを選べる（選んだだけでは並ばない）", () => {
+    render(t.wrap(<TilePalette />));
+    expect(screen.queryByRole("group", { name: "最近使ったタイル" })).toBeNull();
+    fireEvent.click(screen.getByRole("button", { name: "タイル 3" }));
+    expect(t.session.ui.recentTiles).toEqual([]);
+    doAct(() => t.session.setUi({ recentTiles: [4, 3] }));
+    expect(screen.getByText("最近使った")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "最近使ったタイル 4" }));
+    expect(t.session.ui.tile).toBe(4);
+  });
+
   it("選んだタイルの通行方向を切り替えると、タイルセットの passage が更新される（足りない分は全方向通行可）", () => {
     render(t.wrap(<TilePalette />));
     fireEvent.click(screen.getByRole("button", { name: "タイル 2" }));
