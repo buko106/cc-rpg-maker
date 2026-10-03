@@ -2,3 +2,9 @@ packages:
   - "packages/*"
   - "plugins/*"
   - "apps/*"
+
+# dependency-cruiser は TS7 未対応（compiler API 待ち）なので、専用に TS5 を持たせる。
+packageExtensions:
+  dependency-cruiser@18.4.0:
+    dependencies:
+      typescript: 5.9.3
