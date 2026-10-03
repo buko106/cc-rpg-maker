@@ -102,6 +102,7 @@ textarea { width: 100%; resize: vertical; }
 .map-tree li button { width: 100%; text-align: left; border-color: transparent; background: transparent; }
 .map-tree li button.selected { background: var(--accent); }
 .palette-grid { display: grid; gap: 2px; }
+.palette-recent-label { flex-basis: 100%; font-size: 0.85em; color: var(--muted, inherit); }
 .palette-recent { display: flex; flex-wrap: wrap; gap: 2px; padding-bottom: 6px; margin-bottom: 6px; border-bottom: 1px solid var(--border); }
 .tile { padding: 0; border: 2px solid transparent; background-color: var(--panel-2); background-repeat: no-repeat; image-rendering: pixelated; }
 .tile.selected { border-color: var(--focus); }

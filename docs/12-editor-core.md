@@ -124,7 +124,7 @@ export interface Diagnostic { severity: "error" | "warning"; code: string; messa
 ## 実装メモ（イベント入力の手間を減らす）
 - **`execute(c, { groupWithNext: true })`**：「次の編集の下準備」。直後（`COALESCE_MS` 以内、間に Undo / Redo をはさまない）に実行した編集と 1 回の Undo にまとめる（履歴のエントリは `batch([下準備, 次の編集])`、元に戻すは逆順）。続く編集が無ければ単独の Undo のまま。まとめるのは 1 回だけで、`coalesce` よりも優先する。エディタは、フォームの中でスイッチ・変数をその場で作ってそのまま選ぶときに使う（13）。
 - **`EditorUiState.recentCommands`**：最近追加したイベントコマンドの code（新しい順・重複なし・`RECENT_COMMANDS_LIMIT` = 6 件。`withRecentCommand`）。文書には保存しない。
-- **`EditorUiState.recentTiles`**：最近選んだタイルの番号（新しい順・重複なし・`RECENT_TILES_LIMIT` = 8 件。`withRecentTile`）。文書には保存しない。
+- **`EditorUiState.recentTiles`**：最近マップに置いたタイルの番号（新しい順・重複なし・`RECENT_TILES_LIMIT` = 8 件。`withRecentTile`）。文書には保存しない。
 
 ## 実装メモ（イベントのひな形）
 - **`EventTemplate`**（`templates.ts`）：`{ id, label, description, input: zod, build(input, project) → { name, pages }, initial?(project) }`。`input` はエディタが入力フォームを作るスキーマで、見出し・補足・初期値はメタデータ（`.meta({ title, description, initial })`）に持たせる（13）。`build` は検証を通った入力（既定値の適用後）を受け取る。`initial(project)` はプロジェクトの中身で決めたい初期値（見た目の画像など）。`defineEventTemplate` は入力の型を推論させるだけの関数。

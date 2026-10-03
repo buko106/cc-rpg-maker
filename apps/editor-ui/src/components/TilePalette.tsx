@@ -1,4 +1,4 @@
-import { cmd, withRecentTile } from "@rpg/editor-core";
+import { cmd } from "@rpg/editor-core";
 import type { Direction } from "@rpg/schema";
 import type { ReactElement } from "react";
 import { useSession } from "../hooks.js";
@@ -46,7 +46,7 @@ export function TilePalette(): ReactElement {
 
   const recent = session.ui.recentTiles.filter((t) => t > 0 && t < cols * rows);
   const pick = (t: number): void =>
-    session.setUi({ tile: t, tool: session.ui.tool === "eraser" ? "pencil" : session.ui.tool, recentTiles: withRecentTile(session.ui.recentTiles, t) });
+    session.setUi({ tile: t, tool: session.ui.tool === "eraser" ? "pencil" : session.ui.tool });
 
   const { run, error } = useExecute();
   const selected = session.ui.tile;
@@ -113,6 +113,7 @@ export function TilePalette(): ReactElement {
       <h2>タイル</h2>
       {recent.length > 0 && (
         <div className="palette-recent" role="group" aria-label="最近使ったタイル">
+          <span className="palette-recent-label">最近使った</span>
           {recent.map((t) => tileButton(t, `最近使ったタイル ${t}`))}
         </div>
       )}

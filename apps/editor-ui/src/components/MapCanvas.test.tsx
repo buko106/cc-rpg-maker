@@ -44,6 +44,23 @@ describe("MapCanvas：ツール", () => {
     expect(t.session.canUndo).toBe(false);
   });
 
+  it("置いたタイルが最近使ったタイルに入る（選んだだけでは入らない・消しゴムの空は入らない・塗りつぶしも入る）", () => {
+    act(() => void t.session.setUi({ tile: 3 }));
+    expect(t.session.ui.recentTiles).toEqual([]);
+    fireEvent.pointerDown(canvas(), at(0, 0));
+    act(() => void t.session.setUi({ tile: 4 }));
+    fireEvent.pointerDown(canvas(), at(1, 0));
+    act(() => void t.session.setUi({ tile: 3 }));
+    fireEvent.pointerDown(canvas(), at(2, 0));
+    expect(t.session.ui.recentTiles).toEqual([3, 4]);
+    act(() => void t.session.setUi({ tool: "eraser" }));
+    fireEvent.pointerDown(canvas(), at(3, 0));
+    expect(t.session.ui.recentTiles).toEqual([3, 4]);
+    act(() => void t.session.setUi({ tool: "fill", tile: 2 }));
+    fireEvent.pointerDown(canvas(), at(5, 5));
+    expect(t.session.ui.recentTiles).toEqual([2, 3, 4]);
+  });
+
   it("消しゴム：現在のレイヤのタイルを 0 にする", () => {
     act(() => void t.session.setUi({ tool: "eraser" }));
     fireEvent.pointerDown(canvas(), at(1, 0));

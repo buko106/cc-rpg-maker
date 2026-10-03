@@ -22,7 +22,7 @@ export interface EditorUiState {
   eventTemplate: string | undefined;
   /** 最近追加したイベントコマンドの code（新しい順、重複なし。コマンドの追加画面の「最近使ったもの」） */
   recentCommands: readonly string[];
-  /** 最近選んだタイルの番号（新しい順、重複なし。タイルパレットの「最近使ったもの」） */
+  /** 最近マップに置いたタイルの番号（新しい順、重複なし。タイルパレットの「最近使った」） */
   recentTiles: readonly number[];
 }
 
