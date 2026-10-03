@@ -28,7 +28,7 @@ jobs:
       - run: pnpm test:coverage
       # カバレッジを Codecov に送る。リポジトリの Secrets に CODECOV_TOKEN が必要。
       # 送信の失敗（トークン未設定・Codecov 側の障害）で CI を落とさない。
-      - uses: codecov/codecov-action@v5
+      - uses: codecov/codecov-action@v7
         if: ${{ !cancelled() }}
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
