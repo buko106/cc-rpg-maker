@@ -119,7 +119,7 @@ describe("TilePalette / ToolBar", () => {
     render(t.wrap(<TilePalette />));
     fireEvent.click(screen.getByRole("button", { name: "タイル 2" }));
     const boxes = (): HTMLInputElement[] => screen.getAllByRole("checkbox") as HTMLInputElement[];
-    expect(boxes().map((b) => b.checked)).toEqual([false, false, false, false, false, false]); // 石壁（0）。最後の 2 つは「滑る（氷）」「走れない」
+    expect(boxes().map((b) => b.checked)).toEqual([false, false, false, false, false]); // 石壁（0）。最後の 1 つは「走れない」
     fireEvent.click(screen.getByLabelText("下から入れる"));
     expect(t.session.doc.project.tilesets["ts_default" as never]!.passage[2]).toBe(1);
     fireEvent.click(screen.getByRole("button", { name: "タイル 1" }));
@@ -134,41 +134,33 @@ describe("TilePalette / ToolBar", () => {
     expect(passage[8]).toBe(15);
   });
 
-  it("選んだタイルの「滑る（氷）」を切り替えると、タイルセットの ice が更新される（外すと空の ice は消える）", () => {
+  it("選んだタイルの「床の動き」を氷・ベルトに切り替えると、ice / conveyor が更新される（排他。通常に戻すと空の ice / conveyor は消える）", () => {
     render(t.wrap(<TilePalette />));
-    const ice = (): readonly number[] | undefined => t.session.doc.project.tilesets["ts_default" as never]!.ice;
+    const ts = (): { ice?: readonly number[] | undefined; conveyor?: unknown } => t.session.doc.project.tilesets["ts_default" as never]!;
+    const select = (): HTMLSelectElement => screen.getByLabelText("床の動き") as HTMLSelectElement;
     fireEvent.click(screen.getByRole("button", { name: "タイル 2" }));
-    fireEvent.click(screen.getByLabelText("滑る（氷）"));
-    expect(ice()).toEqual([2]);
-    fireEvent.click(screen.getByRole("button", { name: "タイル 1" }));
-    fireEvent.click(screen.getByLabelText("滑る（氷）"));
-    expect(ice()).toEqual([1, 2]);
-    fireEvent.click(screen.getByLabelText("滑る（氷）"));
-    fireEvent.click(screen.getByRole("button", { name: "タイル 2" }));
-    fireEvent.click(screen.getByLabelText("滑る（氷）"));
-    expect(ice()).toBeUndefined();
-  });
-
-  it("選んだタイルの「ベルト（運ぶ向き）」を切り替えると、タイルセットの conveyor が更新される（なしに戻すと、空の conveyor は消える）", () => {
-    render(t.wrap(<TilePalette />));
-    const conveyor = (): unknown => t.session.doc.project.tilesets["ts_default" as never]!.conveyor;
-    const select = (): HTMLSelectElement => screen.getByLabelText("ベルト（運ぶ向き）") as HTMLSelectElement;
-    fireEvent.click(screen.getByRole("button", { name: "タイル 3" }));
     expect(select().value).toBe("");
-    fireEvent.change(select(), { target: { value: "right" } });
-    expect(conveyor()).toEqual({ "3": "right" });
-    // 別のタイルは別の向き。選んだタイルの向きを選び直せる
+    fireEvent.change(select(), { target: { value: "ice" } });
+    expect(ts().ice).toEqual([2]);
     fireEvent.click(screen.getByRole("button", { name: "タイル 1" }));
-    expect(select().value).toBe("");
+    fireEvent.change(select(), { target: { value: "ice" } });
+    expect(ts().ice).toEqual([1, 2]);
+    // 氷からベルトへ：氷からは外れる
     fireEvent.change(select(), { target: { value: "up" } });
-    expect(conveyor()).toEqual({ "1": "up", "3": "right" });
+    expect(ts().ice).toEqual([2]);
+    expect(ts().conveyor).toEqual({ "1": "up" });
     fireEvent.change(select(), { target: { value: "left" } });
-    expect(conveyor()).toEqual({ "1": "left", "3": "right" });
+    expect(ts().conveyor).toEqual({ "1": "left" });
+    // ベルトから氷へ：ベルトからは外れ、空の conveyor は消える
+    fireEvent.change(select(), { target: { value: "ice" } });
+    expect(ts().conveyor).toBeUndefined();
+    expect(ts().ice).toEqual([1, 2]);
     fireEvent.change(select(), { target: { value: "" } });
-    fireEvent.click(screen.getByRole("button", { name: "タイル 3" }));
-    expect(select().value).toBe("right");
+    fireEvent.click(screen.getByRole("button", { name: "タイル 2" }));
+    expect(select().value).toBe("ice");
     fireEvent.change(select(), { target: { value: "" } });
-    expect(conveyor()).toBeUndefined();
+    expect(ts().ice).toBeUndefined();
+    expect(ts().conveyor).toBeUndefined();
   });
 
   it("選んだタイルの「足元の速さ」と「走れない」を切り替えると、タイルセットの terrain が更新される（何も変えない設定は持たず、空になれば消える）", () => {

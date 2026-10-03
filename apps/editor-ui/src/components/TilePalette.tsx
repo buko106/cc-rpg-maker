@@ -8,13 +8,15 @@ import { useExecute } from "./useExecute.js";
 /** 通行可能方向のビット（docs/01-schema.md：下=1, 左=2, 右=4, 上=8）。範囲外のタイルは全方向通行可（15）。 */
 const PASSAGE: readonly [number, string][] = [[1, "下"], [2, "左"], [4, "右"], [8, "上"]];
 
-/** ベルトコンベアの運ぶ向き。 */
-const BELT_DIRECTIONS: readonly [Direction | "", string][] = [
-  ["", "なし"],
-  ["up", "上へ運ぶ"],
-  ["down", "下へ運ぶ"],
-  ["left", "左へ運ぶ"],
-  ["right", "右へ運ぶ"],
+/** 床の動き（氷・ベルト）。どれか 1 つだけ選べる。`""` は通常の床。 */
+type FloorMotion = "" | "ice" | Direction;
+const FLOOR_MOTIONS: readonly [FloorMotion, string][] = [
+  ["", "通常"],
+  ["ice", "滑る（氷）"],
+  ["up", "ベルト：上へ運ぶ"],
+  ["down", "ベルト：下へ運ぶ"],
+  ["left", "ベルト：左へ運ぶ"],
+  ["right", "ベルト：右へ運ぶ"],
 ];
 
 /** 足元のタイルによる歩く速さの増減（段階。1 段階ごとに 2 倍）。 */
@@ -59,23 +61,20 @@ export function TilePalette(): ReactElement {
     run(cmd.upsertTileset({ ...tileset, passage: next }));
   };
 
-  const slippery = tileset?.ice?.includes(selected) === true;
-  const setSlippery = (on: boolean): void => {
-    if (tileset === undefined) return;
-    const rest = (tileset.ice ?? []).filter((t) => t !== selected);
-    const ice = on ? [...rest, selected].sort((a, b) => a - b) : rest;
-    const { ice: _old, ...base } = tileset;
-    run(cmd.upsertTileset(ice.length === 0 ? base : { ...base, ice }));
-  };
-
-  // ベルトコンベア：向きを選ぶと、そのタイルが運ぶ床になる。「なし」で外す（空になれば conveyor ごと消す）
+  // 床の動き：通常・氷・ベルト（4 方向）のどれか 1 つ（排他）。氷は `Tileset.ice`、ベルトは `Tileset.conveyor` に持つ。
+  // 選び直すと、もう一方からは外す（空になった ice / conveyor は丸ごと消す）。古いデータで両方に載っているタイルは、ベルトとして見せる。
   const belt = tileset?.conveyor?.[String(selected)];
-  const setBelt = (dir: Direction | ""): void => {
+  const slippery = tileset?.ice?.includes(selected) === true;
+  const floorMotion: FloorMotion = belt ?? (slippery ? "ice" : "");
+  const setFloorMotion = (motion: FloorMotion): void => {
     if (tileset === undefined) return;
-    const rest = Object.fromEntries(Object.entries(tileset.conveyor ?? {}).filter(([tile]) => tile !== String(selected)));
-    const conveyor = dir === "" ? rest : { ...rest, [String(selected)]: dir };
-    const { conveyor: _old, ...base } = tileset;
-    run(cmd.upsertTileset(Object.keys(conveyor).length === 0 ? base : { ...base, conveyor }));
+    const { ice: _ice, conveyor: _conveyor, ...base } = tileset;
+    const ice = (tileset.ice ?? []).filter((t) => t !== selected);
+    const conveyor = Object.fromEntries(Object.entries(tileset.conveyor ?? {}).filter(([tile]) => tile !== String(selected)));
+    if (motion === "ice") ice.push(selected);
+    else if (motion !== "") conveyor[String(selected)] = motion;
+    ice.sort((x, y) => x - y);
+    run(cmd.upsertTileset({ ...base, ...(ice.length === 0 ? {} : { ice }), ...(Object.keys(conveyor).length === 0 ? {} : { conveyor }) }));
   };
 
   // 足元の速さ（砂地・沼など）。何も変えない設定（ふつう・走れる）は持たない
@@ -122,43 +121,44 @@ export function TilePalette(): ReactElement {
         {tiles.map((t) => tileButton(t))}
       </div>
       {tileset !== undefined && tiles.length > 0 && (
-        <fieldset className="passage">
-          <legend>タイル {selected} の通行</legend>
-          {PASSAGE.map(([bit, label]) => (
-            <label key={bit} className="check">
-              <input type="checkbox" checked={(passage & bit) !== 0} onChange={(e) => setPassage(bit, e.target.checked)} />
-              {label}から入れる
+        <>
+          <fieldset className="passage">
+            <legend>タイル {selected} の通行</legend>
+            {PASSAGE.map(([bit, label]) => (
+              <label key={bit} className="check">
+                <input type="checkbox" checked={(passage & bit) !== 0} onChange={(e) => setPassage(bit, e.target.checked)} />
+                {label}から入れる
+              </label>
+            ))}
+          </fieldset>
+          <fieldset className="passage">
+            <legend>タイル {selected} の床の効果</legend>
+            <label>
+              床の動き
+              <select value={floorMotion} onChange={(e) => setFloorMotion(e.target.value as FloorMotion)}>
+                {FLOOR_MOTIONS.map(([motion, label]) => (
+                  <option key={motion} value={motion}>
+                    {label}
+                  </option>
+                ))}
+              </select>
             </label>
-          ))}
-          <label className="check">
-            <input type="checkbox" checked={slippery} onChange={(e) => setSlippery(e.target.checked)} />
-            滑る（氷）
-          </label>
-          <label>
-            ベルト（運ぶ向き）
-            <select value={belt ?? ""} onChange={(e) => setBelt(e.target.value as Direction | "")}>
-              {BELT_DIRECTIONS.map(([dir, label]) => (
-                <option key={dir} value={dir}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            足元の速さ
-            <select value={footing?.speed ?? 0} onChange={(e) => setFooting({ speed: Number(e.target.value) })}>
-              {FOOTING_SPEEDS.map(([speed, label]) => (
-                <option key={speed} value={speed}>
-                  {label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label className="check">
-            <input type="checkbox" checked={footing?.noDash === true} onChange={(e) => setFooting({ noDash: e.target.checked })} />
-            走れない
-          </label>
-        </fieldset>
+            <label>
+              足元の速さ
+              <select value={footing?.speed ?? 0} onChange={(e) => setFooting({ speed: Number(e.target.value) })}>
+                {FOOTING_SPEEDS.map(([speed, label]) => (
+                  <option key={speed} value={speed}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label className="check">
+              <input type="checkbox" checked={footing?.noDash === true} onChange={(e) => setFooting({ noDash: e.target.checked })} />
+              走れない
+            </label>
+          </fieldset>
+        </>
       )}
       {error !== undefined && <p role="alert" className="notice error">{error}</p>}
     </section>
