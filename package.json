@@ -23,14 +23,14 @@
     "editor": "node apps/editor-ui/scripts/build-web.mjs && node tools/serve-static.mjs apps/editor-ui/dist-web 4174"
   },
   "devDependencies": {
-    "@playwright/test": "~1.56.1",
-    "@types/node": "^22.0.0",
-    "@vitest/coverage-v8": "^4.1.11",
-    "dependency-cruiser": "^17.0.0",
-    "esbuild": "^0.28.2",
-    "fake-indexeddb": "^6.2.5",
-    "fast-check": "^4.0.0",
-    "typescript": "~5.9.0",
-    "vitest": "^4.0.0"
+    "@playwright/test": "1.56.1",
+    "@types/node": "22.20.4",
+    "@vitest/coverage-v8": "4.1.11",
+    "dependency-cruiser": "17.4.3",
+    "esbuild": "0.28.2",
+    "fake-indexeddb": "6.2.5",
+    "fast-check": "4.10.2",
+    "typescript": "5.9.3",
+    "vitest": "4.1.11"
   }
 }
