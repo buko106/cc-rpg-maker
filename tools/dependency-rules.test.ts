@@ -112,8 +112,8 @@ describe("dependency rules (docs/00-principles.md §2)", () => {
 });
 
 describe("package manifests", () => {
-  const manifest = (name: string, deps: Record<string, string> = {}) =>
-    JSON.stringify({ name: `@rpg/${name}`, dependencies: deps });
+  const manifest = (name: string, deps: Record<string, string> = {}, external: Record<string, string> = {}) =>
+    JSON.stringify({ name: `@rpg/${name}`, dependencies: { ...deps, ...external } });
 
   function scaffold(overrides: Record<string, string> = {}): string {
     const dir = mkdtempSync(join(tmpdir(), "rpg-manifests-"));
@@ -139,6 +139,21 @@ describe("package manifests", () => {
     } finally {
       rmSync(dev, { recursive: true, force: true });
       rmSync(prod, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects range versions and version drift between workspaces", () => {
+    const dir = scaffold({
+      "packages/schema/package.json": manifest("schema", {}, { zod: "4.6.5", vitest: "^4.0.0" }),
+      "packages/core/package.json": manifest("core", {}, { zod: "4.6.4" }),
+    });
+    try {
+      const errors = checkManifests(dir);
+      expect(errors).toHaveLength(2);
+      expect(errors.join("\n")).toContain("vitest");
+      expect(errors.join("\n")).toContain("zod");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
     }
   });
 
