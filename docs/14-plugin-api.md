@@ -97,3 +97,8 @@ export function loadPlugins(mods: PluginModule[], host: PluginHost): Promise<{ l
 ## 実装メモ（UI ノードの組み立て部品）
 - **`ui`**（`@rpg/plugin-api` から公開）：`projection.after` で `FrameSpec.ui` に足す `UiNode` を作る純関数 `ui.text` / `ui.gauge` / `ui.rect` / `ui.panel` / `ui.font`（と型 `RGBA`）。`text` は `(x, y, 文字, 色, サイズ = 13, 寄せ = "left", 太字 = false)`、`rect` は座標と大きさを整数に丸めた `ratio: 1` のゲージ、`panel` の子の座標は画面の座標のまま。色の定数は作品ごとに違うので、ここには置かない。
 - 置き場所が `core` でなく `plugin-api` なのは、`core` が「ピクセル」を知らないため（00 §1.4）。`plugin-samples`・`plugin-dungeon`・`plugin-fishing` の HUD が同じ定義を3か所に持っていたので、ここに寄せた（挙動は変えていない）。
+
+### 実装メモ（`paramAt` の公開）
+
+- `@rpg/plugin-api` は `@rpg/core` の `paramAt(cls, param, level)`（職業のパラメータ曲線のレベル値。切り捨て）も再エクスポートする。プラグインが主人公の能力を職業から引くとき、本体と同じ計算を使うため。
+- `plugin-dungeon` は同じ式を `Math.round`（四捨五入）で持っていて、本体の戦闘（切り捨て）と値がずれうる状態だった。`paramAt` に寄せて切り捨てに揃えた。曲線が無いパラメータは `paramAt` が 0 を返す（`def` は 1 → 0。`mhp`/`atk` は従来どおり下限 1）。
