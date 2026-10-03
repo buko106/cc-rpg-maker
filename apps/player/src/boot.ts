@@ -1,5 +1,6 @@
 import { createAssetSource, createEmbeddedBytesSource, createHttpBytesSource } from "@rpg/assets";
-import { createBrowserInput, createTouchInput, mergeInputSources } from "@rpg/input-browser";
+import { createBrowserInput, createTouchInput, isCoarsePointer, mergeInputSources, mountTouchPad, shouldShowTouchPad } from "@rpg/input-browser";
+import type { TouchPadMode } from "@rpg/input-browser";
 import { createPluginRegistry, loadPlugins, selectPlugins, toRuntimeExtensions } from "@rpg/plugin-api";
 import type { PluginModule } from "@rpg/plugin-api";
 import { createCanvas2dRenderer } from "@rpg/render-canvas2d";
@@ -14,8 +15,6 @@ import { createHttpProjectSource } from "./http-project-source.js";
 import { collectStartAssets } from "./preload.js";
 import { createRafScheduler } from "./raf-scheduler.js";
 import { createScreens } from "./screens.js";
-import { isCoarsePointer, mountTouchPad, shouldShowTouchPad } from "./touch-pad.js";
-import type { TouchPadMode } from "./touch-pad.js";
 
 /**
  * プレイヤーの設定。フォルダ形式（`projectUrl`：`project/` + `assets/`）か、単一 HTML（`embedded`）のどちらか。

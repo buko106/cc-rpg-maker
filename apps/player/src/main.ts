@@ -1,10 +1,10 @@
+import type { TouchPadMode } from "@rpg/input-browser";
 import { dungeonPlugin } from "@rpg/plugin-dungeon";
 import { fishingPlugin } from "@rpg/plugin-fishing";
 import { samplePlugins } from "@rpg/plugin-samples";
 import { bootPlayer } from "./boot.js";
 import type { PlayerConfig, RendererKind } from "./boot.js";
 import type { EmbeddedData } from "./embedded-project-source.js";
-import type { TouchPadMode } from "./touch-pad.js";
 
 /**
  * ブラウザのエントリポイント（`player.js`）。

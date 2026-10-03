@@ -79,8 +79,8 @@ describe("startPlaytest", () => {
 describe("PlaytestPanel", () => {
   it("開くと起動し、閉じると止める。開始位置を表示する", async () => {
     let stopped = 0;
-    t.env.startPlaytest = (_s, canvas, start) => {
-      t.playtests.push({ canvas, start });
+    t.env.startPlaytest = (_s, canvas, start, padRoot) => {
+      t.playtests.push({ canvas, start, padRoot });
       return Promise.resolve({ runtime: { getState: () => ({}) } as never, stop: () => void stopped++ });
     };
     const { unmount } = render(t.wrap(<PlaytestPanel start={{ mapId: M1, x: 2, y: 3 }} onClose={() => {}} />));
@@ -88,6 +88,9 @@ describe("PlaytestPanel", () => {
     expect(screen.getByText(/開始位置：MAP001 \(2, 3\)/)).toBeTruthy();
     await waitFor(() => expect(screen.getByText(/操作：矢印キー/)).toBeTruthy());
     expect((window as unknown as { __rpgPlaytest?: unknown }).__rpgPlaytest).toBeDefined();
+    // 操作パッドを載せる場所（ダイアログの中）を渡す
+    expect(t.playtests[0]!.padRoot).toBeInstanceOf(HTMLElement);
+    expect(screen.getByRole("dialog").contains(t.playtests[0]!.padRoot!)).toBe(true);
     unmount();
     expect(stopped).toBe(1);
     expect((window as unknown as { __rpgPlaytest?: unknown }).__rpgPlaytest).toBeUndefined();
@@ -107,5 +110,16 @@ describe("PlaytestPanel", () => {
     unmount();
     resolve({ runtime: {} as never, stop: () => void stopped++ });
     await waitFor(() => expect(stopped).toBe(1));
+  });
+
+  it("指が主入力の端末では、タッチ操作の案内を出す", async () => {
+    const original = window.matchMedia;
+    window.matchMedia = ((q: string) => ({ matches: q === "(pointer: coarse)", media: q }) as MediaQueryList) as typeof window.matchMedia;
+    try {
+      render(t.wrap(<PlaytestPanel onClose={() => {}} />));
+      await waitFor(() => expect(screen.getByText(/操作：画面下の十字キー/)).toBeTruthy());
+    } finally {
+      window.matchMedia = original;
+    }
   });
 });

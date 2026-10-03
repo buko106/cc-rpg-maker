@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { ReactElement } from "react";
+import { isCoarsePointer } from "@rpg/input-browser";
 import { useEnv, useSession } from "../hooks.js";
 import type { Playtest, PlaytestStart } from "../playtest.js";
 import { Dialog } from "./Dialog.js";
@@ -12,6 +13,8 @@ export function PlaytestPanel({ start, onClose }: { start?: PlaytestStart; onClo
   const session = useSession();
   const env = useEnv();
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const padRootRef = useRef<HTMLDivElement>(null);
+  const touch = isCoarsePointer();
   const [error, setError] = useState<string | undefined>();
   const [status, setStatus] = useState<"starting" | "running">("starting");
   const { width, height } = session.doc.project.system.screen;
@@ -21,7 +24,7 @@ export function PlaytestPanel({ start, onClose }: { start?: PlaytestStart; onClo
     if (canvas === null) return;
     let cancelled = false;
     let playtest: Playtest | undefined;
-    env.startPlaytest(session, canvas, start).then(
+    env.startPlaytest(session, canvas, start, padRootRef.current ?? undefined).then(
       (pt) => {
         if (cancelled) {
           pt.stop();
@@ -48,7 +51,7 @@ export function PlaytestPanel({ start, onClose }: { start?: PlaytestStart; onClo
   return (
     <Dialog title="テストプレイ" onClose={onClose} wide>
       <p className="muted" aria-live="polite">
-        {error !== undefined ? "" : status === "starting" ? "起動しています…" : "操作：矢印キーで移動、Enter／Z で決定、Esc／X でメニュー・キャンセル。"}
+        {error !== undefined ? "" : status === "starting" ? "起動しています…" : touch ? "操作：画面下の十字キーで移動、A で決定、B でキャンセル、☰ でメニュー。" : "操作：矢印キーで移動、Enter／Z で決定、Esc／X でメニュー・キャンセル。"}
         {start !== undefined && ` 開始位置：${session.doc.project.maps[start.mapId]?.name ?? start.mapId} (${start.x}, ${start.y})`}
       </p>
       {error !== undefined && <p role="alert" className="notice error">テストプレイを起動できませんでした：{error}</p>}
@@ -61,6 +64,7 @@ export function PlaytestPanel({ start, onClose }: { start?: PlaytestStart; onClo
         height={height}
         style={{ width: width * 2, maxWidth: "100%", aspectRatio: `${width}/${height}` }}
       />
+      <div ref={padRootRef} />
     </Dialog>
   );
 }
