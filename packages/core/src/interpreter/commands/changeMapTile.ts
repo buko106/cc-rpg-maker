@@ -1,5 +1,5 @@
 import { mapIdSchema, nonNegativeInt } from "@rpg/schema";
-import { z } from "zod";
+import * as z from "zod";
 import { warn } from "../../effects.js";
 import { tileKey } from "../../map/tiles.js";
 import { defineCommand } from "../handler.js";

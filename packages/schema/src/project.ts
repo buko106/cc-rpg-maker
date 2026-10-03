@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod";
 import { actorIdSchema, idRecord, mapIdSchema, tilesetIdSchema } from "./ids.js";
 import type { AssetId, MapId, SwitchId, TilesetId, VariableId } from "./ids.js";
 import { assetRefSchema, audioRefSchema, directionSchema, nonNegativeInt, speedEffectSchema, speedLevelSchema } from "./common.js";

@@ -1,5 +1,5 @@
 import { assetRefSchema } from "@rpg/schema";
-import { z } from "zod";
+import * as z from "zod";
 import { defineCommand } from "../handler.js";
 
 const params = z.strictObject({

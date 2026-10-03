@@ -1,6 +1,6 @@
 import { switchIdSchema, variableIdSchema } from "@rpg/schema";
 import type { VariableId } from "@rpg/schema";
-import { z } from "zod";
+import * as z from "zod";
 import type { ProjectView } from "../../project-view.js";
 
 /** 複数のコマンドで共通の params 部品。 */

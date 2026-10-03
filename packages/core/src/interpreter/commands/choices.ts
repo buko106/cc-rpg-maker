@@ -1,6 +1,6 @@
 import { itemIdSchema, nonNegativeInt, variableIdSchema } from "@rpg/schema";
 import type { ItemId } from "@rpg/schema";
-import { z } from "zod";
+import * as z from "zod";
 import { warn } from "../../effects.js";
 import { openShop } from "../../game/shop.js";
 import type { GameState, MessageState } from "../../state.js";

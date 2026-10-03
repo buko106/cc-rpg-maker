@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod";
 import { defineCommand } from "../handler.js";
 import { switchIds, switchName } from "./params.js";
 

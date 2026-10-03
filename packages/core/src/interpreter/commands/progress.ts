@@ -1,6 +1,6 @@
 import { actorIdSchema, itemIdSchema, nonNegativeInt } from "@rpg/schema";
 import type { ActorId, RefTarget } from "@rpg/schema";
-import { z } from "zod";
+import * as z from "zod";
 import { expToReach, gainExp } from "../../battle/rewards.js";
 import { LEVEL_MAX } from "../../battle/battlers.js";
 import { warn } from "../../effects.js";

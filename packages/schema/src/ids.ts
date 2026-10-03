@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod";
 
 declare const brandSymbol: unique symbol;
 /** 名前的型付け。ID を取り違えるとコンパイルエラーになる。 */

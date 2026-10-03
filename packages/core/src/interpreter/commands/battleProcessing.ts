@@ -1,5 +1,5 @@
 import { troopIdSchema } from "@rpg/schema";
-import { z } from "zod";
+import * as z from "zod";
 import { startBattle } from "../../battle/index.js";
 import { warn } from "../../effects.js";
 import type { Effect } from "../../effects.js";
