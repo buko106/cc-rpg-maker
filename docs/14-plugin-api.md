@@ -93,3 +93,7 @@ export function loadPlugins(mods: PluginModule[], host: PluginHost): Promise<{ l
 - **待機中はプレイヤーが動けず、メニューも開かない**（`normal` のインタプリタが待っているため）。ミニゲームは数十秒以内に終わらせる。終わらせる手段（キャンセルなど）を必ず用意する（`resume` が解除しないと、ゲームが先に進まない）。
 - **乱数**：`c.rng`（共有の乱数ストリーム）を使う。毎フレーム引かない（使ったときだけ進む）ように、乱数を使う場面だけで引くと、リプレイが短い列で再現しやすい。
 - **例**：`@rpg/plugin-fishing`（19）の `Cast`（釣りのミニゲーム）・`Album`（図鑑）・`Result`（結果発表）。
+
+## 実装メモ（UI ノードの組み立て部品）
+- **`ui`**（`@rpg/plugin-api` から公開）：`projection.after` で `FrameSpec.ui` に足す `UiNode` を作る純関数 `ui.text` / `ui.gauge` / `ui.rect` / `ui.panel` / `ui.font`（と型 `RGBA`）。`text` は `(x, y, 文字, 色, サイズ = 13, 寄せ = "left", 太字 = false)`、`rect` は座標と大きさを整数に丸めた `ratio: 1` のゲージ、`panel` の子の座標は画面の座標のまま。色の定数は作品ごとに違うので、ここには置かない。
+- 置き場所が `core` でなく `plugin-api` なのは、`core` が「ピクセル」を知らないため（00 §1.4）。`plugin-samples`・`plugin-dungeon`・`plugin-fishing` の HUD が同じ定義を3か所に持っていたので、ここに寄せた（挙動は変えていない）。

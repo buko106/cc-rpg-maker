@@ -27,5 +27,6 @@ export { defineCommand, pluginStateOf, warn, withPluginState } from "@rpg/core";
 export type { Action, BattleRules, CommandBlock, CommandCtx, CommandHandler, CommandResult, Effect, FormulaFn, GameState, JsonValue, ProjectView } from "./types.js";
 export type { Diagnostic, EffectApi, EventDraft, EventTemplate, FrameSpec, Logger, SceneKind } from "./types.js";
 export { defineEventTemplate } from "@rpg/editor-core";
-export type { UiNode } from "@rpg/runtime";
+export type { RGBA, UiNode } from "@rpg/runtime";
+export { ui } from "./ui.js";
 export { z } from "zod";
