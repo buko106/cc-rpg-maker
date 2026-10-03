@@ -23,9 +23,11 @@ concurrency:
 
 jobs:
   deploy:
-    # fork からの PR には Secrets が渡らないので動かさない（スキップするだけで、失敗にはしない）。
+    # fork からの PR と Dependabot の PR には（Actions の）Secrets が渡らないので動かさない
+    # （スキップするだけで、失敗にはしない）。
     if: >-
       github.event.pull_request.head.repo.full_name == github.repository
+      && github.event.pull_request.user.login != 'dependabot[bot]'
       && vars.CLOUDFLARE_PAGES_PROJECT != ''
     runs-on: ubuntu-latest
     timeout-minutes: 15
