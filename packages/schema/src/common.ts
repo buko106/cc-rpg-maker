@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod";
 import { assetIdSchema } from "./ids.js";
 
 export const DIRECTIONS = ["up", "down", "left", "right"] as const;

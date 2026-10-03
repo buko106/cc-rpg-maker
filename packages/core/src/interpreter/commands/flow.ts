@@ -1,6 +1,6 @@
 import type { EventCommand } from "@rpg/schema";
 import { commonEventIdSchema } from "@rpg/schema";
-import { z } from "zod";
+import * as z from "zod";
 import { warn } from "../../effects.js";
 import { defineCommand } from "../handler.js";
 

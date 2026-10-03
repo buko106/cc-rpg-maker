@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod";
 import { assetRefSchema, nonNegativeInt, paramSchema } from "./common.js";
 import type { Param } from "./common.js";
 import { eventCommandSchema } from "./command.js";

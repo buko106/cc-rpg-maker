@@ -1,5 +1,5 @@
 import { audioRefSchema, nonNegativeInt } from "@rpg/schema";
-import { z } from "zod";
+import * as z from "zod";
 import { defineCommand } from "../handler.js";
 
 const audioRefs = (a: z.output<typeof audioRefSchema>) => [{ kind: "asset" as const, id: a.asset }];

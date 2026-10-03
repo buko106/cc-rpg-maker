@@ -1,6 +1,6 @@
 import { assetIdSchema, assetRefSchema, directionSchema, eventCommandSchema, eventIdSchema, err, mapIdSchema, nonNegativeInt, ok } from "@rpg/schema";
 import type { Result, SchemaIssue } from "@rpg/schema";
-import { z } from "zod";
+import * as z from "zod";
 import type { Ctx } from "./ctx-types.js";
 import type { Character, EventRuntime, GameState } from "./state.js";
 

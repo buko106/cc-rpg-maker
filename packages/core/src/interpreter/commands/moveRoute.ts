@@ -1,6 +1,6 @@
 import { eventIdSchema, moveRouteSchema, moveStepSchema } from "@rpg/schema";
 import type { Direction, EventCommand, EventId, MoveRoute } from "@rpg/schema";
-import { z } from "zod";
+import * as z from "zod";
 import { warn } from "../../effects.js";
 import { canPass, chaseDirection, currentMap, DIRECTION_VECTOR, moveCharacter, startsOnEventTouch } from "../../map/index.js";
 import type { PassabilityCtx } from "../../map/index.js";

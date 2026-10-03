@@ -1,6 +1,6 @@
 import { assetIdSchema, directionSchema, eventPageSchema, itemIdSchema, mapIdSchema, nonNegativeInt, troopIdSchema } from "@rpg/schema";
 import type { AssetId, EventCommand, EventPage, MoveRoute, PageCondition, Project } from "@rpg/schema";
-import { z } from "zod";
+import * as z from "zod";
 
 /** ひな形が作るもの：イベントの名前とページ（位置と ID は置くときに決まる）。 */
 export interface EventDraft {

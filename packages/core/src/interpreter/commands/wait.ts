@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod";
 import { defineCommand } from "../handler.js";
 
 const params = z.strictObject({ frames: z.number().int().min(0) });

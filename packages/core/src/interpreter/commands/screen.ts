@@ -1,5 +1,5 @@
 import { nonNegativeInt } from "@rpg/schema";
-import { z } from "zod";
+import * as z from "zod";
 import type { Effect } from "../../effects.js";
 import { defineCommand } from "../handler.js";
 import type { CommandResult } from "../handler.js";

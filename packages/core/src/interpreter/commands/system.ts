@@ -1,4 +1,4 @@
-import { z } from "zod";
+import * as z from "zod";
 import { titleState } from "../../game/initial.js";
 import { warn } from "../../effects.js";
 import type { GameState } from "../../state.js";
