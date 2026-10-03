@@ -40,6 +40,12 @@ if (typeof Blob !== "undefined" && typeof Blob.prototype.arrayBuffer !== "functi
   };
 }
 
+// jsdom 30 では Vitest の URL.createObjectURL 互換処理（jsdom の内部実装を参照する）が動かない。Blob URL は固定の文字列で代用する。
+if (typeof URL !== "undefined" && typeof Blob !== "undefined") {
+  URL.createObjectURL = () => "blob:test";
+  URL.revokeObjectURL = () => {};
+}
+
 /**
  * コンポーネントのテスト用の環境：メモリ上のリポジトリ、null のレンダラ、組み込みコマンド入りのレジストリ。
  * `startPlaytest` は呼ばれた内容を記録するだけ。
