@@ -44,6 +44,12 @@ if (typeof Blob !== "undefined" && typeof Blob.prototype.arrayBuffer !== "functi
  * コンポーネントのテスト用の環境：メモリ上のリポジトリ、null のレンダラ、組み込みコマンド入りのレジストリ。
  * `startPlaytest` は呼ばれた内容を記録するだけ。
  */
+/** `startPlaytest` が返す、見た目だけの Runtime。デバッグパネルが読む最小の状態を持ち、`dispatch` されたものを `dispatched` に記録する。 */
+export function fakePlaytestRuntime(dispatched: unknown[] = []): never {
+  const state = { switches: {}, variables: {}, party: { gold: 0, items: {}, members: [] }, map: { mapId: "map_001", name: "テスト", player: { x: 0, y: 0 } } };
+  return { getState: () => state, dispatch: (a: unknown) => void dispatched.push(a) } as never;
+}
+
 export interface TestEnv {
   env: EditorEnv;
   repo: ProjectRepository;
@@ -84,7 +90,7 @@ export async function createTestEnv(
     }),
     startPlaytest: (_session, canvas, start, padRoot) => {
       playtests.push({ canvas, start, padRoot });
-      return Promise.resolve({ runtime: { getState: () => ({}) } as never, stop: () => {} });
+      return Promise.resolve({ runtime: fakePlaytestRuntime(), stop: () => {} });
     },
   };
   const doc = await repo.create("テスト");

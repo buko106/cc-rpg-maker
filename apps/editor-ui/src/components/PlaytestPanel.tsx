@@ -3,6 +3,7 @@ import type { ReactElement } from "react";
 import { isCoarsePointer } from "@rpg/input-browser";
 import { useEnv, useSession } from "../hooks.js";
 import type { Playtest, PlaytestStart } from "../playtest.js";
+import { DebugPanel } from "./DebugPanel.js";
 import { Dialog } from "./Dialog.js";
 
 /**
@@ -26,6 +27,7 @@ export function PlaytestPanel({ start, event, onClose }: { start?: PlaytestStart
   const touch = isCoarsePointer();
   const [error, setError] = useState<string | undefined>();
   const [status, setStatus] = useState<"starting" | "running">("starting");
+  const [runtime, setRuntime] = useState<Playtest["runtime"] | undefined>();
   const { width, height } = session.doc.project.system.screen;
 
   useEffect(() => {
@@ -41,6 +43,7 @@ export function PlaytestPanel({ start, event, onClose }: { start?: PlaytestStart
         }
         playtest = pt;
         (window as unknown as { __rpgPlaytest?: unknown }).__rpgPlaytest = pt.runtime;
+        setRuntime(pt.runtime);
         setStatus("running");
         canvas.focus();
       },
@@ -77,6 +80,7 @@ export function PlaytestPanel({ start, event, onClose }: { start?: PlaytestStart
         height={height}
         style={{ width: width * 2, maxWidth: "100%", aspectRatio: `${width}/${height}` }}
       />
+      {runtime !== undefined && <DebugPanel runtime={runtime} />}
       <div ref={padRootRef} />
     </Dialog>
   );

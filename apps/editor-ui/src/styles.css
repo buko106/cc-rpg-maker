@@ -191,11 +191,18 @@ textarea { width: 100%; resize: vertical; }
 .form-grid input, .form-grid select { color: var(--text); }
 
 .playtest-canvas { display: block; margin: 0 auto; background: #000; image-rendering: pixelated; touch-action: none; }
+.playtest-debug { margin-top: 10px; border: 1px solid var(--border); border-radius: var(--radius); padding: 6px 10px; }
+.playtest-debug summary { cursor: pointer; font-weight: 600; }
+.playtest-debug h3 { font-size: 13px; margin: 10px 0 4px; }
+.debug-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 2px 0; }
+.debug-row input[type="number"] { width: 90px; }
 /* 指が主入力の端末：テストプレイは全画面にして、下に操作パッドを出す余白を取る */
 @media (pointer: coarse) {
   .dialog-backdrop:has(.playtest-canvas) { padding: 0; }
   .dialog:has(.playtest-canvas) { width: 100%; height: 100%; max-height: none; border-radius: 0; }
   .dialog:has(.playtest-canvas) .dialog-header button { min-width: 44px; min-height: 44px; }
+  /* 操作パッド（画面の下に固定）に隠れないよう、デバッグパネルの下に余白を足す */
+  .playtest-debug { margin-bottom: 200px; }
 }
 
 @media (max-width: 800px) {
