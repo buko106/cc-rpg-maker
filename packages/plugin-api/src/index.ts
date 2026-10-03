@@ -28,5 +28,6 @@ export type { Action, BattleRules, CommandBlock, CommandCtx, CommandHandler, Com
 export type { Diagnostic, EffectApi, EventDraft, EventTemplate, FrameSpec, Logger, SceneKind } from "./types.js";
 export { defineEventTemplate } from "@rpg/editor-core";
 export type { RGBA, UiNode } from "@rpg/runtime";
+export { getVar, heroOf, setVar } from "./state.js";
 export { ui } from "./ui.js";
 export { z } from "zod";

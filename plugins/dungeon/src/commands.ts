@@ -1,4 +1,4 @@
-import { defineCommand, paramAt, z } from "@rpg/plugin-api";
+import { defineCommand, getVar, heroOf, paramAt, setVar, z } from "@rpg/plugin-api";
 import type { CommandCtx, CommandHandler, CommandResult, Effect, GameState } from "@rpg/plugin-api";
 import type { Config } from "./config.js";
 import { buildFloor } from "./floor.js";
@@ -16,13 +16,6 @@ const warnLog = (message: string): Effect => ({ kind: "log", level: "warn", mess
 
 /** 設定を読めなかったとき（プロジェクトの `system.plugins` の `params` の誤り）。コマンドは何もせず、警告だけ出す。 */
 export type ConfigResult = { ok: true; config: Config } | { ok: false; message: string };
-
-type ActorId = GameState["party"]["members"][number];
-const heroOf = (s: GameState): { id: ActorId; actor: GameState["actors"][ActorId] } | undefined => {
-  const id = s.party.members[0];
-  const actor = id === undefined ? undefined : s.actors[id];
-  return id === undefined || actor === undefined ? undefined : { id, actor };
-};
 
 /** データベースと乱数への窓口を作る（主人公の能力は、職業のパラメータ曲線から）。 */
 export function makeEnv(cfg: Config, c: Pick<CommandCtx, "state" | "project" | "rng">): Env | undefined {
@@ -79,9 +72,6 @@ const withHero = (s: GameState, hero: Work["hero"]): GameState => {
   const h = heroOf(s);
   return h === undefined ? s : { ...s, actors: { ...s.actors, [h.id]: { ...h.actor, level: hero.level, exp: hero.exp, hp: Math.max(0, hero.hp) } } };
 };
-
-const setVar = (s: GameState, name: string, value: number): GameState => ({ ...s, variables: { ...s.variables, [name]: value } });
-const getVar = (s: GameState, name: string): number => ((s.variables as Record<string, number>)[name] ?? 0);
 
 const transfer = (cfg: Config) => ({
   kind: "call" as const,

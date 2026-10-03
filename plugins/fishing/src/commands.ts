@@ -1,4 +1,4 @@
-import { defineCommand, warn, z } from "@rpg/plugin-api";
+import { defineCommand, getVar, setVar, warn, z } from "@rpg/plugin-api";
 import type { CommandCtx, CommandResult, GameState, PluginCommand } from "@rpg/plugin-api";
 import type { Config } from "./config.js";
 import { pickGear, pointsOf, rank, rivalScore, startCast, stepCast } from "./fish.js";
@@ -12,8 +12,6 @@ export type ConfigResult = { ok: true; config: Config } | { ok: false; message: 
 export const PLAYER_NAME = "あなた";
 
 const WAIT = { kind: "wait", wait: { kind: "plugin", name: "fishing" } } as const;
-const getVar = (s: GameState, name: string): number => (s.variables as Record<string, number>)[name] ?? 0;
-const setVar = (s: GameState, name: string, value: number): GameState => ({ ...s, variables: { ...s.variables, [name]: value } });
 type Items = GameState["party"]["items"];
 const addItem = (s: GameState, item: string, n: number): GameState => {
   const items: Record<string, number> = { ...s.party.items };

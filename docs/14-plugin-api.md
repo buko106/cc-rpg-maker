@@ -102,3 +102,8 @@ export function loadPlugins(mods: PluginModule[], host: PluginHost): Promise<{ l
 
 - `@rpg/plugin-api` は `@rpg/core` の `paramAt(cls, param, level)`（職業のパラメータ曲線のレベル値。切り捨て）も再エクスポートする。プラグインが主人公の能力を職業から引くとき、本体と同じ計算を使うため。
 - `plugin-dungeon` は同じ式を `Math.round`（四捨五入）で持っていて、本体の戦闘（切り捨て）と値がずれうる状態だった。`paramAt` に寄せて切り捨てに揃えた。曲線が無いパラメータは `paramAt` が 0 を返す（`def` は 1 → 0。`mhp`/`atk` は従来どおり下限 1）。
+
+### 実装メモ（状態の読み書きの部品）
+
+- `@rpg/plugin-api` は `getVar(state, name)`（未設定は 0）、`setVar(state, name, value)`（新しい状態を返す）、`heroOf(state)`（パーティの先頭とそのアクター）を公開する。`plugin-dungeon` と `plugin-fishing` が同じ定義を持っていたので寄せた（挙動は変えていない）。
+- ゲーム変数はイベントとの受け渡し（`cfg.vars.*`）に使う。プラグイン自身の状態は従来どおり `pluginState`（`withPluginState` / `pluginStateOf`）に置く。
