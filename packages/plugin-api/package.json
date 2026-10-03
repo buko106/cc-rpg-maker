@@ -12,7 +12,7 @@
     "@rpg/core": "workspace:*",
     "@rpg/editor-core": "workspace:*",
     "@rpg/runtime": "workspace:*",
-    "zod": "^4"
+    "zod": "4.6.5"
   },
   "devDependencies": {
     "@rpg/test-utils": "workspace:*"
