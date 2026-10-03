@@ -1,4 +1,4 @@
-import { cmd } from "@rpg/editor-core";
+import { cmd, withRecentTile } from "@rpg/editor-core";
 import type { Direction } from "@rpg/schema";
 import type { ReactElement } from "react";
 import { useSession } from "../hooks.js";
@@ -44,6 +44,10 @@ export function TilePalette(): ReactElement {
   const rows = entry?.height === undefined ? 0 : Math.floor(entry.height / size);
   const tiles = Array.from({ length: cols * rows }, (_, i) => i).filter((i) => i > 0);
 
+  const recent = session.ui.recentTiles.filter((t) => t > 0 && t < cols * rows);
+  const pick = (t: number): void =>
+    session.setUi({ tile: t, tool: session.ui.tool === "eraser" ? "pencil" : session.ui.tool, recentTiles: withRecentTile(session.ui.recentTiles, t) });
+
   const { run, error } = useExecute();
   const selected = session.ui.tile;
   const passage = tileset?.passage[selected] ?? 15;
@@ -87,27 +91,34 @@ export function TilePalette(): ReactElement {
     run(cmd.upsertTileset(Object.keys(terrain).length === 0 ? base : { ...base, terrain }));
   };
 
+  const tileButton = (t: number, label = `タイル ${t}`): ReactElement => (
+    <button
+      key={t}
+      type="button"
+      className={session.ui.tile === t ? "tile selected" : "tile"}
+      aria-label={label}
+      aria-pressed={session.ui.tile === t}
+      style={{
+        width: size,
+        height: size,
+        backgroundImage: url === undefined ? undefined : `url(${url})`,
+        backgroundPosition: `-${(t % cols) * size}px -${Math.floor(t / cols) * size}px`,
+      }}
+      onClick={() => pick(t)}
+    />
+  );
+
   return (
     <section className="tile-palette" aria-label="タイルパレット">
       <h2>タイル</h2>
+      {recent.length > 0 && (
+        <div className="palette-recent" role="group" aria-label="最近使ったタイル">
+          {recent.map((t) => tileButton(t, `最近使ったタイル ${t}`))}
+        </div>
+      )}
       {tiles.length === 0 && <p className="muted">（このマップのタイルセットには画像がありません）</p>}
       <div className="palette-grid" role="group" aria-label="タイル" style={{ gridTemplateColumns: `repeat(${Math.max(1, Math.min(cols, 6))}, ${size}px)` }}>
-        {tiles.map((t) => (
-          <button
-            key={t}
-            type="button"
-            className={session.ui.tile === t ? "tile selected" : "tile"}
-            aria-label={`タイル ${t}`}
-            aria-pressed={session.ui.tile === t}
-            style={{
-              width: size,
-              height: size,
-              backgroundImage: url === undefined ? undefined : `url(${url})`,
-              backgroundPosition: `-${(t % cols) * size}px -${Math.floor(t / cols) * size}px`,
-            }}
-            onClick={() => session.setUi({ tile: t, tool: session.ui.tool === "eraser" ? "pencil" : session.ui.tool })}
-          />
-        ))}
+        {tiles.map((t) => tileButton(t))}
       </div>
       {tileset !== undefined && tiles.length > 0 && (
         <fieldset className="passage">
