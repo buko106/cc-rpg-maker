@@ -265,6 +265,9 @@ importers:
       '@rpg/test-utils':
         specifier: workspace:*
         version: link:../test-utils
+      jsdom:
+        specifier: 30.1.1
+        version: 30.1.1
 
   packages/input-script:
     dependencies:

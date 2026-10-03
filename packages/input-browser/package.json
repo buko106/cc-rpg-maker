@@ -12,6 +12,7 @@
     "@rpg/runtime": "workspace:*"
   },
   "devDependencies": {
-    "@rpg/test-utils": "workspace:*"
+    "@rpg/test-utils": "workspace:*",
+    "jsdom": "30.1.1"
   }
 }
