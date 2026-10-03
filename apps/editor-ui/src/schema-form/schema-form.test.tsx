@@ -342,6 +342,19 @@ describe("ウィジェット", () => {
     expect([...kinds.options].map((o) => o.text)).toEqual(["パーティ全員", "アクター", "直接入力", "数値"]);
   });
 
+  it("ID 欄は、最近選んだ ID を「最近使った」の見出しで先頭に出し、選んだときに記録を頼む（今は無い ID は出さない）", () => {
+    const picked: [string, string][] = [];
+    const withRecent: FormContext = { ...ctx, recentRefs: () => ["v_b", "gone", "v_a"], onPickRef: (ref, id) => picked.push([ref, id]) };
+    const options: FormContext["refOptions"] = (ref) => (ref === "variable" ? [{ value: "v_a", label: "A" }, { value: "v_b", label: "B" }, { value: "v_c", label: "C" }] : []);
+    render(<Harness schema={z.strictObject({ id: z.string().meta({ ref: "variable" }) })} initial={{ id: "v_c" }} context={{ ...withRecent, refOptions: options }} />);
+    const select = screen.getByLabelText("ID") as HTMLSelectElement;
+    const group = select.querySelector("optgroup");
+    expect(group?.label).toBe("最近使った");
+    expect([...group!.querySelectorAll("option")].map((o) => o.text)).toEqual(["B", "A"]);
+    fireEvent.change(select, { target: { value: "v_a" } });
+    expect(picked).toEqual([["variable", "v_a"]]);
+  });
+
   describe("ID 欄でその場で作る（newRef）", () => {
     const created: string[] = [];
     const withNewRef: FormContext = {

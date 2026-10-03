@@ -19,6 +19,10 @@ export interface FormContext {
    * ID 欄の選択肢の最後に「＋ 新しい{noun}…」が出る。
    */
   newRef?: (ref: string) => { noun: string; create: (name: string) => string | undefined } | undefined;
+  /** `ref` の種類の最近選んだ ID（新しい順。無ければ出さない）。ID 欄の選択肢の上に「最近使った」として出る。 */
+  recentRefs?: (ref: string) => readonly string[];
+  /** ID 欄で `id` が選ばれた（「最近使った」に記録する）。 */
+  onPickRef?: (ref: string, id: string) => void;
   /** マップと位置の欄（`.meta({ location })`）に付ける、マップをクリックして位置を選ぶウィジェット（無ければ数値の欄だけ）。 */
   renderLocation?: (props: LocationPickerProps) => ReactNode;
 }
@@ -88,10 +92,25 @@ function StringField({ spec, value, onChange, ctx, label }: FieldProps & { spec:
     const options = ctx.refOptions(spec.ref, spec.assetKind);
     const known = options.some((o) => o.value === text);
     const creator = ctx.newRef?.(spec.ref);
+    const ref = spec.ref;
+    const recent = (ctx.recentRefs?.(ref) ?? []).flatMap((id) => options.find((o) => o.value === id) ?? []);
+    const pick = (id: string): void => {
+      ctx.onPickRef?.(ref, id);
+      onChange(id);
+    };
     return (
       <>
-        <select aria-label={label} value={text} onChange={(e) => (e.target.value === NEW_REF ? setCreating(true) : onChange(e.target.value))}>
+        <select aria-label={label} value={text} onChange={(e) => (e.target.value === NEW_REF ? setCreating(true) : pick(e.target.value))}>
           {!known && <option value={text}>{text === "" ? "（選択してください）" : `${text}（存在しない）`}</option>}
+          {recent.length > 0 && (
+            <optgroup label="最近使った">
+              {recent.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </optgroup>
+          )}
           {options.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}
@@ -108,7 +127,7 @@ function StringField({ spec, value, onChange, ctx, label }: FieldProps & { spec:
               const created = creator.create(name);
               if (created === undefined) return;
               setCreating(false);
-              onChange(created);
+              pick(created);
             }}
           />
         )}
