@@ -1,21 +1,18 @@
-import type { FrameSpec, GameState, UiNode } from "@rpg/plugin-api";
+import { ui as u } from "@rpg/plugin-api";
+import type { FrameSpec, GameState, RGBA, UiNode } from "@rpg/plugin-api";
 import type { Config, FishEntry } from "./config.js";
 import { BITE_FRAMES } from "./fish.js";
 import { readFishing } from "./model.js";
 import type { CastState, FishingState } from "./model.js";
 
-type Color = { r: number; g: number; b: number; a: number };
+type Color = RGBA;
 
 const WHITE: Color = { r: 255, g: 255, b: 255, a: 1 };
 const GRAY: Color = { r: 200, g: 200, b: 210, a: 1 };
 const YELLOW: Color = { r: 255, g: 235, b: 130, a: 1 };
 const RED: Color = { r: 255, g: 110, b: 110, a: 1 };
 const GREEN: Color = { r: 140, g: 255, b: 160, a: 1 };
-const font = (size: number, bold = false) => ({ family: "sans-serif", size, ...(bold ? { bold: true } : {}) });
-const text = (x: number, y: number, t: string, color: Color, size = 13, align: "left" | "center" | "right" = "left", bold = false): UiNode => ({ kind: "text", x, y, text: t, font: font(size, bold), color, align });
-const rect = (x: number, y: number, w: number, h: number, color: Color): UiNode => ({ kind: "gauge", x: Math.round(x), y: Math.round(y), w: Math.round(w), h: Math.round(h), ratio: 1, color });
-const gauge = (x: number, y: number, w: number, h: number, ratio: number, color: Color): UiNode => ({ kind: "gauge", x, y, w, h, ratio, color });
-const panel = (x: number, y: number, w: number, h: number, children: UiNode[], variant: "normal" | "dim" = "normal"): UiNode => ({ kind: "window", x, y, w, h, variant, children });
+const { text, rect, gauge, panel } = u;
 
 /** 巻き上げのバーの長さ（ピクセル）。 */
 export const BAR_W = 300;

@@ -1,3 +1,4 @@
+import { ui } from "@rpg/plugin-api";
 import type { PluginModule, UiNode } from "@rpg/plugin-api";
 
 /**
@@ -14,15 +15,7 @@ export const hudPlugin: PluginModule = {
     host.projection.after("map", (frame, state) => {
       const w = 76;
       const x = right ? frame.size.width - w - 8 : 8;
-      const hud: UiNode = {
-        kind: "window",
-        x,
-        y: 8,
-        w,
-        h: 28,
-        variant: "normal",
-        children: [{ kind: "text", x: x + w - 8, y: 12, text: `${state.party.gold} ${label}`, font: { family: "sans-serif", size: 14 }, color: { r: 255, g: 255, b: 160, a: 1 }, align: "right" }],
-      };
+      const hud: UiNode = ui.panel(x, 8, w, 28, [ui.text(x + w - 8, 12, `${state.party.gold} ${label}`, { r: 255, g: 255, b: 160, a: 1 }, 14, "right")]);
       // 先頭に足す：メッセージウィンドウなど、ゲーム本来の UI が上に描かれる
       return { ...frame, ui: [hud, ...frame.ui] };
     });
