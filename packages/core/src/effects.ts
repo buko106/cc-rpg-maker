@@ -1,4 +1,4 @@
-import type { AudioRef, MapId } from "@rpg/schema";
+import type { AssetId, AudioRef, MapId } from "@rpg/schema";
 
 export interface RGBA {
   readonly r: number;
@@ -21,6 +21,21 @@ export type Effect =
   | { readonly kind: "screenTint"; readonly color: RGBA; readonly durationTicks: number }
   /** 画面を `durationTicks` かけて暗転（`to` = 1）/明転（`to` = 0）する。暗転は明転を指示するまで続く。`color` は暗転の色（省略は黒）。 */
   | { readonly kind: "screenFade"; readonly to: 0 | 1; readonly durationTicks: number; readonly color?: "black" | "white" }
+  /** ピクチャ（一枚絵）を出す。`opacity` 0〜1・`scale` は倍率（1 = 原寸）。`durationTicks` かけて透明から現れる。見た目だけの状態で、セーブされない。 */
+  | {
+      readonly kind: "showPicture";
+      readonly id: number;
+      readonly asset: AssetId;
+      readonly x: number;
+      readonly y: number;
+      readonly origin: "topLeft" | "center";
+      readonly opacity: number;
+      readonly scale: number;
+      readonly durationTicks: number;
+    }
+  /** 出ているピクチャを `durationTicks` かけて動かす（位置・不透明度・倍率）。出ていなければ何もしない。 */
+  | { readonly kind: "movePicture"; readonly id: number; readonly x: number; readonly y: number; readonly opacity: number; readonly scale: number; readonly durationTicks: number }
+  | { readonly kind: "erasePicture"; readonly id: number }
   /** `confirmed` は確認ダイアログで「はい」を選んだ後の要求（runtime は再確認しない）。 */
   | { readonly kind: "requestSave"; readonly slot?: number; readonly confirmed?: boolean }
   | { readonly kind: "requestLoad"; readonly slot?: number; readonly confirmed?: boolean }

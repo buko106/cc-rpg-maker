@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { applyFxEffect, fxOverlay, NO_FX, tickFx } from "./visual-fx.js";
+import { applyFxEffect, clearPictures, fxOverlay, NO_FX, pictureNow, tickFx } from "./visual-fx.js";
 
 const white = { r: 255, g: 255, b: 255, a: 1 };
 
@@ -95,5 +95,49 @@ describe("VisualFx: 色調と暗転", () => {
   it("長さ 0 なら即座に切り替わる", () => {
     expect(fxOverlay(applyFxEffect(NO_FX, { kind: "screenFade", to: 1, durationTicks: 0 })).fade).toBe(1);
     expect(fxOverlay(applyFxEffect(NO_FX, { kind: "screenTint", color: blue, durationTicks: 0 })).tint).toEqual(blue);
+  });
+});
+
+describe("VisualFx: ピクチャ", () => {
+  const asset = "0123456789abcdef" as never;
+  const show = (over: Partial<Extract<Parameters<typeof applyFxEffect>[1], { kind: "showPicture" }>> = {}) =>
+    applyFxEffect(NO_FX, { kind: "showPicture", id: 1, asset, x: 10, y: 20, origin: "topLeft", opacity: 1, scale: 1, durationTicks: 0, ...over });
+
+  it("長さ 0 なら即座に出て、消去されるまで保たれる", () => {
+    let fx = show();
+    expect(pictureNow(fx.pictures![1]!)).toEqual({ x: 10, y: 20, opacity: 1, scale: 1 });
+    for (let i = 0; i < 100; i++) fx = tickFx(fx);
+    expect(fx.pictures![1]).toBeDefined();
+    fx = applyFxEffect(fx, { kind: "erasePicture", id: 1 });
+    expect(fx.pictures).toBeUndefined();
+  });
+
+  it("長さがあれば透明から現れる", () => {
+    let fx = show({ durationTicks: 4 });
+    const opacities: number[] = [];
+    for (let i = 0; i < 5; i++) {
+      opacities.push(pictureNow(fx.pictures![1]!).opacity);
+      fx = tickFx(fx);
+    }
+    expect(opacities).toEqual([0, 0.25, 0.5, 0.75, 1]);
+  });
+
+  it("移動は今の見た目から目標へ補間する。出ていない番号は無視し、移動中の再移動は途中から始める", () => {
+    expect(applyFxEffect(NO_FX, { kind: "movePicture", id: 3, x: 0, y: 0, opacity: 1, scale: 1, durationTicks: 5 })).toBe(NO_FX);
+    let fx = applyFxEffect(show(), { kind: "movePicture", id: 1, x: 110, y: 20, opacity: 0, scale: 2, durationTicks: 10 });
+    fx = tickFx(tickFx(tickFx(tickFx(tickFx(fx)))));
+    expect(pictureNow(fx.pictures![1]!)).toEqual({ x: 60, y: 20, opacity: 0.5, scale: 1.5 });
+    fx = applyFxEffect(fx, { kind: "movePicture", id: 1, x: 0, y: 0, opacity: 1, scale: 1, durationTicks: 4 });
+    expect(pictureNow(fx.pictures![1]!)).toEqual({ x: 60, y: 20, opacity: 0.5, scale: 1.5 });
+    fx = tickFx(tickFx(tickFx(tickFx(fx))));
+    expect(pictureNow(fx.pictures![1]!)).toEqual({ x: 0, y: 0, opacity: 1, scale: 1 });
+  });
+
+  it("同じ番号で出し直すと置き換わり、存在しない番号の消去は何もしない。clearPictures ですべて消える", () => {
+    const fx = applyFxEffect(show(), { kind: "showPicture", id: 1, asset, x: 99, y: 0, origin: "center", opacity: 1, scale: 1, durationTicks: 0 });
+    expect(fx.pictures![1]).toMatchObject({ origin: "center", to: { x: 99 } });
+    expect(applyFxEffect(fx, { kind: "erasePicture", id: 7 })).toBe(fx);
+    expect(clearPictures(fx).pictures).toBeUndefined();
+    expect(clearPictures(NO_FX)).toBe(NO_FX);
   });
 });

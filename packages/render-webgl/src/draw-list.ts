@@ -187,7 +187,13 @@ function ui(out: Quad[], node: UiNode, env: DrawEnv): void {
       const sy = node.sy ?? 0;
       const sw = node.sw ?? img.width;
       const sh = node.sh ?? img.height;
-      out.push({ tex: { kind: "asset", id: node.asset }, x: node.x, y: node.y, w: sw, h: sh, u0: sx / img.width, v0: sy / img.height, u1: (sx + sw) / img.width, v1: (sy + sh) / img.height, r: 1, g: 1, b: 1, a: 1 });
+      const dw = sw * (node.scale ?? 1);
+      const dh = sh * (node.scale ?? 1);
+      const dx = node.origin === "center" ? node.x - dw / 2 : node.x;
+      const dy = node.origin === "center" ? node.y - dh / 2 : node.y;
+      const a = clamp(node.alpha ?? 1, 0, 1);
+      if (a <= 0) break;
+      out.push({ tex: { kind: "asset", id: node.asset }, x: dx, y: dy, w: dw, h: dh, u0: sx / img.width, v0: sy / img.height, u1: (sx + sw) / img.width, v1: (sy + sh) / img.height, r: 1, g: 1, b: 1, a });
       break;
     }
   }

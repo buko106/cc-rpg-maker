@@ -105,4 +105,10 @@ export type UiNode =
       readonly sy?: number;
       readonly sw?: number;
       readonly sh?: number;
+      /** 不透明度（0〜1）。省略は 1。 */
+      readonly alpha?: number;
+      /** 倍率（1 = 原寸）。省略は 1。 */
+      readonly scale?: number;
+      /** `center` なら `x` `y` は画像の中心。省略は左上。 */
+      readonly origin?: "topLeft" | "center";
     };

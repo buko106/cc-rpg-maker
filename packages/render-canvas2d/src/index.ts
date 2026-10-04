@@ -167,7 +167,17 @@ export function createCanvas2dRenderer(canvas: HTMLCanvasElement, options: Canva
         if (img === undefined) break;
         const sw = node.sw ?? img.width;
         const sh = node.sh ?? img.height;
-        c.drawImage(img, node.sx ?? 0, node.sy ?? 0, sw, sh, node.x, node.y, sw, sh);
+        const dw = sw * (node.scale ?? 1);
+        const dh = sh * (node.scale ?? 1);
+        const dx = node.origin === "center" ? node.x - dw / 2 : node.x;
+        const dy = node.origin === "center" ? node.y - dh / 2 : node.y;
+        const alpha = node.alpha ?? 1;
+        if (alpha >= 1) c.drawImage(img, node.sx ?? 0, node.sy ?? 0, sw, sh, dx, dy, dw, dh);
+        else if (alpha > 0) {
+          c.globalAlpha = alpha;
+          c.drawImage(img, node.sx ?? 0, node.sy ?? 0, sw, sh, dx, dy, dw, dh);
+          c.globalAlpha = 1;
+        }
         break;
       }
     }
