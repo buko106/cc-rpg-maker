@@ -1,10 +1,10 @@
-import { actorIdSchema, itemIdSchema, nonNegativeInt } from "@rpg/schema";
+import { actorIdSchema, equipSlotSchema, itemIdSchema, nonNegativeInt } from "@rpg/schema";
 import type { ActorId, RefTarget } from "@rpg/schema";
 import * as z from "zod";
 import { expToReach, gainExp } from "../../battle/rewards.js";
-import { LEVEL_MAX } from "../../battle/battlers.js";
+import { actorParams, LEVEL_MAX } from "../../battle/battlers.js";
 import { warn } from "../../effects.js";
-import { paramAt } from "../../params.js";
+import { changeEquip, equipSlotOf } from "../../game/equip.js";
 import { selfSwitchKey } from "../../state.js";
 import type { ActorState, GameState } from "../../state.js";
 import { defineCommand } from "../handler.js";
@@ -99,6 +99,36 @@ export const changeParty = defineCommand({
   },
 });
 
+const slotLabel = { weapon: "武器", armor: "防具", accessory: "装飾品" } as const;
+
+/**
+ * アクターの装備を付け替える。`item` を省略すると、その欄を外す。付けるものはパーティの持ち物から 1 つ減り、外したものは持ち物に戻る
+ * （持っていないものは付けられない。先に「アイテムの増減」で渡す）。付けられないときは警告してスキップ。
+ */
+export const changeEquipment = defineCommand({
+  code: "ChangeEquipment",
+  params: z.strictObject({ actor: actorIdSchema, slot: equipSlotSchema, item: itemIdSchema.optional() }),
+  meta: {
+    label: "装備の変更",
+    category: "ゲーム進行",
+    describe: (p, view) => {
+      const who = view.project.database.actors[p.actor]?.name ?? p.actor;
+      const what = p.item === undefined ? "外す" : ` ${view.project.database.items[p.item]?.name ?? p.item} にする`;
+      return `装備：${who} の${slotLabel[p.slot]}を${what}`;
+    },
+    refs: (p): RefTarget[] => [{ kind: "actor", id: p.actor }, ...(p.item === undefined ? [] : [{ kind: "item" as const, id: p.item }])],
+  },
+  run(p, c) {
+    if (c.state.actors[p.actor] === undefined) return { effects: [warn(`ChangeEquipment: アクター ${p.actor} が存在しない`)] };
+    if (p.item !== undefined && equipSlotOf(c.project.item(p.item)) !== p.slot) {
+      return { effects: [warn(`ChangeEquipment: ${p.item} は ${p.slot} の欄に付けられない`)] };
+    }
+    const next = changeEquip(c.state, c, p.actor, p.slot, p.item);
+    if (next === undefined) return { effects: [warn(`ChangeEquipment: ${p.item ?? ""} をパーティが持っていない`)] };
+    return { state: next };
+  },
+});
+
 const actorTarget = z.union([z.literal("party"), actorIdSchema]);
 type ActorTarget = z.output<typeof actorTarget>;
 
@@ -116,10 +146,8 @@ function withActors(state: GameState, updated: ActorState[]): GameState {
 const targetRefs = (t: ActorTarget): RefTarget[] => (t === "party" ? [] : [{ kind: "actor", id: t }]);
 const describeTarget = (t: ActorTarget): string => (t === "party" ? "パーティ全員" : t);
 
-const maxOf = (c: CommandCtx, a: ActorState, param: "mhp" | "mmp"): number => {
-  const def = c.project.actor(a.id);
-  return Math.max(1, paramAt(def === undefined ? undefined : c.project.class(def.classId), param, a.level));
-};
+/** `a` のレベルと装備（`equips`。付け替えていなければ初期装備）での最大 HP/MP。 */
+const maxOf = (c: CommandCtx, a: ActorState, param: "mhp" | "mmp"): number => Math.max(1, actorParams(c, a.id, a.level, a.equips)[param]);
 
 /** HP の増減。`allowDeath` が偽なら 1 で止まる（戦闘不能のアクターは変わらない）。 */
 export const changeHp = defineCommand({

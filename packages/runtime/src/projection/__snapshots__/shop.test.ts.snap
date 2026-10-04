@@ -88,6 +88,22 @@ exports[`projectFrame（ショップ） > [snapshot] コマンド画面：購入
           "color": {
             "a": 1,
             "b": 255,
+            "g": 204,
+            "r": 153,
+          },
+          "font": {
+            "family": "sans-serif",
+            "size": 12,
+          },
+          "kind": "text",
+          "text": "アイテム",
+          "x": 16,
+          "y": 70,
+        },
+        {
+          "color": {
+            "a": 1,
+            "b": 255,
             "g": 255,
             "r": 255,
           },
@@ -98,7 +114,7 @@ exports[`projectFrame（ショップ） > [snapshot] コマンド画面：購入
           "kind": "text",
           "text": "ポーション",
           "x": 16,
-          "y": 66,
+          "y": 90,
         },
         {
           "align": "right",
@@ -115,7 +131,7 @@ exports[`projectFrame（ショップ） > [snapshot] コマンド画面：購入
           "kind": "text",
           "text": "所持 3",
           "x": 228,
-          "y": 66,
+          "y": 90,
         },
         {
           "align": "right",
@@ -132,7 +148,23 @@ exports[`projectFrame（ショップ） > [snapshot] コマンド画面：購入
           "kind": "text",
           "text": "10G",
           "x": 304,
-          "y": 66,
+          "y": 90,
+        },
+        {
+          "color": {
+            "a": 1,
+            "b": 255,
+            "g": 204,
+            "r": 153,
+          },
+          "font": {
+            "family": "sans-serif",
+            "size": 12,
+          },
+          "kind": "text",
+          "text": "大事なもの",
+          "x": 16,
+          "y": 118,
         },
         {
           "color": {
@@ -148,7 +180,7 @@ exports[`projectFrame（ショップ） > [snapshot] コマンド画面：購入
           "kind": "text",
           "text": "古い鍵",
           "x": 16,
-          "y": 90,
+          "y": 138,
         },
         {
           "align": "right",
@@ -165,7 +197,7 @@ exports[`projectFrame（ショップ） > [snapshot] コマンド画面：購入
           "kind": "text",
           "text": "所持 0",
           "x": 228,
-          "y": 90,
+          "y": 138,
         },
         {
           "align": "right",
@@ -182,7 +214,7 @@ exports[`projectFrame（ショップ） > [snapshot] コマンド画面：購入
           "kind": "text",
           "text": "0G",
           "x": 304,
-          "y": 90,
+          "y": 138,
         },
       ],
       "h": 136,

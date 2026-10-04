@@ -10,7 +10,7 @@ import { breakLoop, callCommonEvent, comment, endLoop, exitEventProcessing, jump
 import { moveStep, setMoveRoute, waitPlayerStep } from "./commands/moveRoute.js";
 import { changeMapTile } from "./commands/changeMapTile.js";
 import { setEventLocation } from "./commands/setEventLocation.js";
-import { changeExp, changeGold, changeHp, changeItems, changeLevel, changeMp, changeParty, controlSelfSwitch, controlTimer } from "./commands/progress.js";
+import { changeEquipment, changeExp, changeGold, changeHp, changeItems, changeLevel, changeMp, changeParty, controlSelfSwitch, controlTimer } from "./commands/progress.js";
 import { fadein, fadeout, flashScreen, shakeScreen, tintScreen } from "./commands/screen.js";
 import { showText } from "./commands/showText.js";
 import { gameOver, loadGame, returnToTitle, saveGame, script } from "./commands/system.js";
@@ -26,7 +26,7 @@ export const BUILTIN_COMMANDS = [
   // メッセージ
   showText, showChoices, inputNumber, selectItem,
   // ゲーム進行
-  controlSwitches, controlVariables, controlSelfSwitch, controlTimer, changeGold, changeItems, changeParty, changeHp, changeMp, changeExp, changeLevel,
+  controlSwitches, controlVariables, controlSelfSwitch, controlTimer, changeGold, changeItems, changeParty, changeEquipment, changeHp, changeMp, changeExp, changeLevel,
   transferPlayer, battleProcessing, shopProcessing,
   // フロー制御
   conditionalBranch, elseCommand, endBranch, choiceBranch, loop, breakLoop, endLoop, exitEventProcessing, callCommonEvent, label, jumpToLabel, wait, comment,

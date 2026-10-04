@@ -28,6 +28,7 @@
       }
     },
     "menuSkill": true,
+    "menuEquip": true,
     "dash": {},
     "terms": {
       "newGame": "ニューゲーム",
@@ -406,6 +407,59 @@
           "def": 2,
           "mdf": 2
         }
+      },
+      "wp_iron": {
+        "id": "wp_iron",
+        "name": "鉄の剣",
+        "kind": "weapon",
+        "price": 180,
+        "effects": [],
+        "params": {
+          "atk": 8
+        }
+      },
+      "wp_rod": {
+        "id": "wp_rod",
+        "name": "魔導の杖",
+        "kind": "weapon",
+        "price": 160,
+        "effects": [],
+        "params": {
+          "mat": 6
+        }
+      },
+      "ar_iron": {
+        "id": "ar_iron",
+        "name": "鉄の鎧",
+        "kind": "armor",
+        "price": 150,
+        "effects": [],
+        "params": {
+          "def": 6
+        }
+      },
+      "ar_mage": {
+        "id": "ar_mage",
+        "name": "魔法のローブ",
+        "kind": "armor",
+        "price": 120,
+        "effects": [],
+        "params": {
+          "def": 3,
+          "mdf": 4
+        }
+      },
+      "ac_ring": {
+        "id": "ac_ring",
+        "name": "守りの指輪",
+        "kind": "armor",
+        "price": 100,
+        "effects": [],
+        "params": {
+          "def": 2,
+          "mdf": 2
+        },
+        "equipSlot": "accessory"
       }
     },
     "enemies": {

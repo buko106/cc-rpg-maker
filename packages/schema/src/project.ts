@@ -69,6 +69,8 @@ export const systemSettingsSchema = z
     menuSave: z.boolean().optional(),
     /** メインメニューに「スキル」（回復スキルのフィールド使用）を出すか。省略 = 出さない。 */
     menuSkill: z.boolean().optional(),
+    /** メインメニューに「装備」（武器・防具・装飾品の付け替え）を出すか。省略 = 出さない。 */
+    menuEquip: z.boolean().optional(),
     /** オートセーブ（スロット 0）。省略 = しない。`onTransfer` は場所移動のたびに保存する（docs/06-runtime.md）。 */
     autosave: z.strictObject({ onTransfer: z.boolean() }).optional(),
     /**

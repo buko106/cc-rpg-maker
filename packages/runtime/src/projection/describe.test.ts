@@ -80,10 +80,10 @@ describe("説明の窓", () => {
     const v = patched({ item_potion: { ...view.item("item_potion" as never)! } });
     const base = stateWith(v, {});
     const state = { ...base, party: { ...base.party, items: { item_potion: 1, item_key: 1 } }, scene: { kind: "menu", screen: "item", cursor: 0 } } as unknown as GameState;
-    // ids は昇順：item_key（説明なし）→ item_potion
-    expect(textsOf(projectFrame(state, v).ui)).not.toContain("味方1人：HPを30回復");
+    // 消耗品 → 大事なもの の順：item_potion → item_key（説明なし）
+    expect(textsOf(projectFrame(state, v).ui)).toContain("味方1人：HPを30回復");
     const second = { ...state, scene: { kind: "menu", screen: "item", cursor: 1 } } as GameState;
-    expect(textsOf(projectFrame(second, v).ui)).toContain("味方1人：HPを30回復");
+    expect(textsOf(projectFrame(second, v).ui)).not.toContain("味方1人：HPを30回復");
   });
 
   it("アイテム画面：description で秘密にできる（自動の説明は出ない）", () => {

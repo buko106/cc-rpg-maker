@@ -1,18 +1,22 @@
+import type { ProjectCtx } from "../battle/battlers.js";
 import type { ProjectView } from "../project-view.js";
 import type { GameState } from "../state.js";
+import { sortByCategory } from "./item-order.js";
 
 /** タイトルのコマンド（順序が `scene.cursor` の意味）。表示文言は runtime が `system.terms[key]` から引く。 */
 export const TITLE_ITEMS = ["newGame", "continue"] as const;
 /** メニューのコマンド（すべて）。 */
-export const MENU_ITEMS = ["item", "skill", "status", "save", "load"] as const;
+export const MENU_ITEMS = ["item", "skill", "equip", "status", "save", "load"] as const;
 export type MenuItem = (typeof MENU_ITEMS)[number];
 
 /**
  * このプロジェクトのメインメニューに並ぶコマンド（順序が `scene.cursor` の意味）。
- * `system.menuSave: false` なら「セーブ」が無く、`system.menuSkill` が `true` でなければ「スキル」が無い。
+ * `system.menuSave: false` なら「セーブ」が無く、`system.menuSkill` / `system.menuEquip` が `true` でなければ「スキル」/「装備」が無い。
  */
-export const menuItems = (project: ProjectView): readonly MenuItem[] =>
-  MENU_ITEMS.filter((i) => (i === "save" ? project.project.system.menuSave !== false : i === "skill" ? project.project.system.menuSkill === true : true));
+export const menuItems = (project: ProjectView): readonly MenuItem[] => {
+  const system = project.project.system;
+  return MENU_ITEMS.filter((i) => (i === "save" ? system.menuSave !== false : i === "skill" ? system.menuSkill === true : i === "equip" ? system.menuEquip === true : true));
+};
 
 /** セーブ/ロード画面に並べるスロット番号は `SAVE_SLOT_FIRST` から `SAVE_SLOT_COUNT` 個（スロット 0 はオートセーブ用で別扱い）。 */
 export const SAVE_SLOT_FIRST = 1;
@@ -29,10 +33,11 @@ export const saveSlotNumbers = (): number[] => Array.from({ length: SAVE_SLOT_CO
 /** ロード画面・コンティニューに並ぶスロット番号。オートセーブが有効なら先頭にスロット 0 が付く。 */
 export const loadSlotNumbers = (project: ProjectView): number[] => (autosaveOnTransfer(project) ? [AUTOSAVE_SLOT, ...saveSlotNumbers()] : saveSlotNumbers());
 
-/** メニューのアイテム画面に並ぶアイテム ID（所持数 1 以上、ID 順）。 */
-export function menuItemIds(state: GameState): string[] {
-  return Object.entries(state.party.items)
+/** メニューのアイテム画面に並ぶアイテム ID（所持数 1 以上）。分類の順（消耗品 → 武器 → 防具 → 装飾品 → 大事なもの。`sortByCategory`）、同じ分類の中は ID 順。 */
+export function menuItemIds(state: GameState, ctx: ProjectCtx): string[] {
+  const ids = Object.entries(state.party.items)
     .filter(([, count]) => count > 0)
     .map(([id]) => id)
     .sort();
+  return sortByCategory(ids, ctx);
 }

@@ -166,6 +166,83 @@ describe("projectFrame（メニュー）", () => {
     });
   });
 
+  describe("装備", () => {
+    /** minimal に、鉄の剣（atk +10。勇者の初期装備）・銅の剣（atk +4）・指輪（装飾品）を足し、メニューに「装備」を出す。 */
+    const equipState = async (scene: unknown) => {
+      const h = await boot();
+      const p = h.loaded.project;
+      const patched = {
+        ...p,
+        system: { ...p.system, menuEquip: true },
+        database: {
+          ...p.database,
+          actors: { ...p.database.actors, actor_hero: { ...p.database.actors["actor_hero" as never]!, equips: { weapon: "sword" } } },
+          items: {
+            sword: { id: "sword", name: "鉄の剣", kind: "weapon", price: 1, effects: [], params: { atk: 10 } },
+            copper: { id: "copper", name: "銅の剣", kind: "weapon", price: 1, effects: [], params: { atk: 4 } },
+            ring: { id: "ring", name: "指輪", kind: "armor", price: 1, effects: [], params: { mdf: 3 }, equipSlot: "accessory" },
+          },
+        },
+      } as unknown as Project;
+      const view = createProjectView(patched, h.loaded.maps);
+      const base = h.runtime.getState();
+      const state = { ...base, party: { ...base.party, items: { copper: 1, ring: 1 } }, scene } as GameState;
+      return { view, state };
+    };
+    const find = (nodes: readonly UiNode[], text: string) => flatten(nodes).find((n) => n.kind === "text" && n.text === text);
+
+    it("メインメニューに「装備」が並ぶ（system.menuEquip）。最初は装備を替える人の一覧", async () => {
+      const { view, state } = await equipState({ kind: "menu", screen: "main", cursor: 0 });
+      expect(textsOf(projectFrame(state, view).ui)).toEqual(expect.arrayContaining(["アイテム", "装備", "ステータス"]));
+      const who = textsOf(projectFrame({ ...state, scene: { kind: "menu", screen: "equip", cursor: 0 } } as GameState, view).ui);
+      expect(who[0]).toBe("装備");
+      expect(who.some((t) => t.startsWith("勇者") && t.includes("Lv"))).toBe(true);
+    });
+
+    it("人を選ぶと、装備欄（いまの装備。空きは「（なし）」）と能力値が出る。能力値は装備を含む", async () => {
+      const { view, state } = await equipState({ kind: "menu", screen: "equip", cursor: 0, actor: 0 });
+      const ui = projectFrame(state, view).ui;
+      expect(textsOf(ui)).toEqual(expect.arrayContaining(["装備  勇者", "武器", "鉄の剣", "防具", "装飾品", "（なし）", "攻撃力"]));
+      expect(textsOf(ui).some((t) => t.startsWith("→"))).toBe(false);
+      const status = await equipState({ kind: "menu", screen: "status", cursor: 0 });
+      const atkLine = textsOf(projectFrame(status.state, status.view).ui).find((t) => t.startsWith("攻撃力 "))!;
+      const bareAtk = Number(atkLine.slice("攻撃力 ".length)) - 10;
+      expect(find(ui, String(bareAtk + 10))).toBeDefined();
+    });
+
+    it("アイテム画面は 消耗品 → 武器 → 装飾品 の順に、分類の見出しを挟んで並ぶ。カーソルは見出しを飛ばす", async () => {
+      const { view, state } = await equipState({ kind: "menu", screen: "item", cursor: 0 });
+      const withPotion = { ...state, party: { ...state.party, items: { ring: 1, copper: 1, potion: 2 } } } as GameState;
+      const patched = createProjectView(
+        { ...view.project, database: { ...view.project.database, items: { ...view.project.database.items, potion: { id: "potion", name: "ポーション", kind: "consumable", price: 1, effects: [{ kind: "recoverHp", value: 10 }] } } } } as unknown as Project,
+        {},
+      );
+      const ui = projectFrame(withPotion, patched).ui;
+      const texts = textsOf(ui);
+      const order = ["アイテム", "ポーション", "武器", "銅の剣", "装飾品", "指輪"].map((t) => texts.indexOf(t));
+      expect(order.every((i) => i >= 0)).toBe(true);
+      expect([...order].sort((a, b) => a - b)).toEqual(order);
+      const cursorY = (cursor: number) => flatten(projectFrame({ ...withPotion, scene: { kind: "menu", screen: "item", cursor } } as GameState, patched).ui).find((n) => n.kind === "cursor")!.y;
+      expect(cursorY(1) - cursorY(0)).toBe(48); // ポーション → （武器の見出し）→ 銅の剣
+      // 消耗品だけなら見出しは付けない（これまでどおり）
+      const only = { ...withPotion, party: { ...withPotion.party, items: { potion: 2 } } } as GameState;
+      expect(textsOf(projectFrame(only, patched).ui).filter((t) => t === "アイテム")).toHaveLength(1); // 窓の題だけ
+    });
+
+    it("欄を選ぶと、付けられる持ち物と末尾に「（外す）」が並び、付け替えたあとの能力値を色で示す（下がれば赤、上がれば緑）", async () => {
+      const { view, state } = await equipState({ kind: "menu", screen: "equip", cursor: 0, actor: 0, slot: 0 });
+      const ui = projectFrame(state, view).ui;
+      expect(textsOf(ui)).toEqual(expect.arrayContaining(["銅の剣", "× 1", "（外す）"]));
+      expect(textsOf(ui)).not.toContain("指輪");
+      const down = flatten(ui).find((n) => n.kind === "text" && n.text.startsWith("→") && n.color.r === 255 && n.color.g === 120);
+      expect(down).toBeDefined(); // 攻撃力 +10 → +4
+      const ring = { ...state, scene: { kind: "menu", screen: "equip", cursor: 0, actor: 0, slot: 2 } } as GameState;
+      const up = flatten(projectFrame(ring, view).ui).find((n) => n.kind === "text" && n.text.startsWith("→") && n.color.g === 204);
+      expect(up).toBeDefined(); // 魔法防御 +3
+      expect(flatten(ui).filter((n) => n.kind === "window")).toHaveLength(5); // 暗幕・装備欄・候補・能力値・説明
+    });
+  });
+
   it("[snapshot] ステータス：名前・クラス・レベル・HP/MP・能力値", async () => {
     const { h, state } = await menuState("status");
     expect(projectFrame(state, h.loaded.view).ui).toMatchSnapshot();

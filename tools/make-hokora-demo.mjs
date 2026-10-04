@@ -13,6 +13,7 @@
  * 2. メニューでのアイテム・スキルの使用（`system.menuSkill`）：ポーション、ミナのヒール・ヒールオールをメニューから味方に使える。
  * 3. 式の `gold`（所持金）：宿屋の「おかねが足りるか」を ConditionalBranch の式 `gold >= 15` で判定する。
  * 4. 走る機能（`system.dash`）：方向キーを押しながら Shift（スマホは操作パッドの走るボタン）で、歩く速さが 1 段階速くなる。広い草原を渡るのに使える。
+ * 5. 装備（`system.menuEquip`）：よろず屋で 鉄の剣・魔導の杖・鉄の鎧・魔法のローブ・守りの指輪（装飾品）を買い、メニューの「装備」で付け替えられる。
  * 宿屋（やすらぎ亭）で休む・記録する、よろず屋（ShopProcessing）、洞窟のかぎ → 封印の扉 → ほこらの泉 → ほこらの主（逃走不可・敗北可）の順。
  * ほこらの主を倒すとエンディング（タイトルへ戻る）。全滅（敗北）は、ランダムエンカウントではゲームオーバー、ほこらの主では村の宿屋へ戻される。
  */
@@ -720,7 +721,7 @@ function villageEvents(assets) {
         graphic: npc("kid"),
         commands: [
           text("ぼく 見たよ！ 歩いてると 急に 魔物が とびだすんだ。\n村の中なら 安全だけどね！"),
-          text("お金は 魔物を 倒すと もらえるよ。\n貯めて よろず屋で 薬を 買おう。"),
+          text("お金は 魔物を 倒すと もらえるよ。\n貯めて よろず屋で 薬や 武器を 買おう。\n買った 武器は メニューの 装備で 持たせるんだ。"),
         ],
       }),
     ]),
@@ -766,8 +767,8 @@ function villageEvents(assets) {
     event("ev_shop", "よろず屋", VILLAGE.shop, [
       page({
         commands: [
-          text("いらっしゃい！ 旅の 薬なら おまかせだ。"),
-          cmd("ShopProcessing", { goods: ["item_potion", "item_hipotion", "item_ether"], canSell: true }),
+          text("いらっしゃい！ 旅の 薬から 武器・防具まで そろってるよ。"),
+          cmd("ShopProcessing", { goods: ["item_potion", "item_hipotion", "item_ether", "wp_iron", "wp_rod", "ar_iron", "ar_mage", "ac_ring"], canSell: true }),
           text("気をつけてな！"),
         ],
       }),
@@ -937,6 +938,12 @@ function database(assets) {
         item("wp_staff", "樫の杖", "weapon", 80, [], { params: { mat: 3 } }),
         item("ar_leather", "革の鎧", "armor", 60, [], { params: { def: 3 } }),
         item("ar_robe", "旅のローブ", "armor", 50, [], { params: { def: 2, mdf: 2 } }),
+        // よろず屋で買える装備（メニューの「装備」で付け替える）
+        item("wp_iron", "鉄の剣", "weapon", 180, [], { params: { atk: 8 } }),
+        item("wp_rod", "魔導の杖", "weapon", 160, [], { params: { mat: 6 } }),
+        item("ar_iron", "鉄の鎧", "armor", 150, [], { params: { def: 6 } }),
+        item("ar_mage", "魔法のローブ", "armor", 120, [], { params: { def: 3, mdf: 4 } }),
+        item("ac_ring", "守りの指輪", "armor", 100, [], { params: { def: 2, mdf: 2 }, equipSlot: "accessory" }),
       ].map((i) => [i.id, i]),
     ),
     enemies: {
@@ -1046,6 +1053,8 @@ const project = {
     bgm: { battle: { asset: assets["battle.wav"].id, volume: 0.6, pitch: 1, loop: true } },
     // メニューに「スキル」を出す（ミナのヒール・ヒールオールをフィールドで使える）
     menuSkill: true,
+    // メニューに「装備」を出す（よろず屋で買った武器・防具を付け替える）
+    menuEquip: true,
     // Shift（スマホは操作パッドの走るボタン）で走れる
     dash: {},
     terms: { newGame: "ニューゲーム", attack: "攻撃", skill: "スキル", guard: "防御", escape: "逃げる" },

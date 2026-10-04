@@ -95,8 +95,8 @@ describe("menu", () => {
     expect(press(status, "menu").state.scene).toEqual({ kind: "map" });
   });
 
-  it("item screen lists owned items only, in id order", () => {
-    expect(menuItemIds(withItems)).toEqual(["antidote", "potion"]);
+  it("item screen lists owned items only, in id order (within the same category)", () => {
+    expect(menuItemIds(withItems, ctx)).toEqual(["antidote", "potion"]);
     const item = inMenu(withItems, "item");
     expect(item.scene).toEqual({ kind: "menu", screen: "item", cursor: 0 });
     expect(pressAll(item, "down", "down").scene).toEqual({ kind: "menu", screen: "item", cursor: 0 });

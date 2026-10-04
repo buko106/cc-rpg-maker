@@ -114,6 +114,8 @@ export const itemSchema = z.strictObject({
   formula: z.string().optional(),
   effects: z.array(skillEffectSchema),
   params: z.partialRecord(paramSchema, z.number()).optional(),
+  /** 防具（`kind: "armor"`）を付ける装備欄。省略 = `armor`（防具の欄）。`accessory` なら装飾品の欄に付く。武器はいつも `weapon` の欄。 */
+  equipSlot: z.enum(["armor", "accessory"]).optional(),
   /** 一覧に出す説明文。省略すると効果と能力値から自動で作る。書いた場合はそのまま出す（`""` なら何も出さない。効果を秘密にしたい・ランダムなとき、コモンイベントで効果を作るときなどに使う）。 */
   description: z.string().meta({ multiline: true }).optional(),
 });

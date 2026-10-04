@@ -3,6 +3,7 @@ import type { Ctx } from "../ctx-types.js";
 import type { InputFrame } from "../input.js";
 import type { GameState, ShopScene } from "../state.js";
 import type { StepResult } from "./actions.js";
+import { sortByCategory } from "./item-order.js";
 
 /** 1 種類のアイテムを持てる上限（買うときの数量の上限になる）。 */
 export const SHOP_ITEM_LIMIT = 99;
@@ -18,9 +19,9 @@ const owned = (state: GameState, id: ItemId): number => state.party.items[id] ??
 /** 売れるアイテムか（大事なものと、値段のないものは売れない）。 */
 export const isSellable = (item: Item | undefined): item is Item => item !== undefined && item.kind !== "key" && item.price > 0;
 
-/** 売却の一覧に並ぶアイテム ID（持っていて売れるもの。ID の昇順）。 */
+/** 売却の一覧に並ぶアイテム ID（持っていて売れるもの。分類の順、同じ分類の中は ID の昇順）。 */
 export function sellableItemIds(state: GameState, ctx: Pick<Ctx, "project">): ItemId[] {
-  return (Object.keys(state.party.items) as ItemId[]).filter((id) => owned(state, id) > 0 && isSellable(ctx.project.item(id))).sort();
+  return sortByCategory((Object.keys(state.party.items) as ItemId[]).filter((id) => owned(state, id) > 0 && isSellable(ctx.project.item(id))).sort(), ctx);
 }
 
 /** 一度に買える最大数：所持金で買える数と、持てる上限の残りの小さい方（0 なら買えない）。 */
@@ -29,9 +30,9 @@ export function maxBuyQuantity(state: GameState, item: Item): number {
   return item.price === 0 ? room : Math.min(room, Math.floor(state.party.gold / item.price));
 }
 
-/** 今の画面に並ぶアイテム ID（コマンド画面では商品を見せるだけ）。 */
+/** 今の画面に並ぶアイテム ID（コマンド画面では商品を見せるだけ）。商品は分類の順に並べ、同じ分類の中は `goods` の順のまま。 */
 export const shopListIds = (state: GameState, scene: ShopScene, ctx: Pick<Ctx, "project">): readonly ItemId[] =>
-  scene.screen === "sell" ? sellableItemIds(state, ctx) : scene.goods;
+  scene.screen === "sell" ? sellableItemIds(state, ctx) : sortByCategory(scene.goods, ctx);
 
 /** ショップを開く。`owner` は呼び出したインタプリタの id。 */
 export const openShop = (state: GameState, goods: readonly ItemId[], canSell: boolean, owner: string): GameState => ({
