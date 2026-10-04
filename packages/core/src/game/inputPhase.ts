@@ -6,6 +6,7 @@ import { currentMap, DIRECTION_VECTOR, hasPacedEvents, moveCharacter, pacedEvent
 import type { EventRuntime, GameState } from "../state.js";
 import type { StepResult } from "./actions.js";
 import { battleInput } from "../battle/index.js";
+import { battleEventRunning } from "./battleEvents.js";
 import { boxesMoving } from "./carry.js";
 import { handleMessageInput } from "./messageInput.js";
 import { handleShopInput } from "./shop.js";
@@ -65,7 +66,8 @@ export function handleInput(state: GameState, input: InputFrame, ctx: Ctx): Step
   const idle: StepResult = { state, effects: [] };
   if (state.scene.kind === "title") return handleTitleInput(state, input, ctx);
   if (state.scene.kind === "menu") return handleMenuInput(state, input, ctx);
-  if (state.scene.kind === "battle") return battleInput(state, input, ctx);
+  // バトルイベントが動いている間は、入力はメッセージにだけ届く
+  if (state.scene.kind === "battle") return battleEventRunning(state) ? (state.message.open ? handleMessageInput(state, input) : { state, effects: [] }) : battleInput(state, input, ctx);
   if (state.scene.kind === "gameover") return handleGameoverInput(state, input, ctx);
   if (state.scene.kind === "shop") return handleShopInput(state, input, ctx);
   if (state.scene.kind !== "map") return idle;

@@ -123,6 +123,8 @@ export interface BattleState {
   readonly wait: number;
   /** 終了フェーズ（victory / defeat / escape / aborted）に入ったときの結果。 */
   readonly result: BattleResult | null;
+  /** もう動いた、敵グループのバトルイベントのページ（`Troop.pages` の番号）。どのページも 1 回の戦闘で 1 回だけ動く。 */
+  readonly eventPagesRun?: readonly number[];
 }
 
 export interface DamageResult {

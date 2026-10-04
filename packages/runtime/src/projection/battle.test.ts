@@ -9,6 +9,12 @@ const kit = battleKit({
   mutate: (p) => {
     p.assets.entries["1111111111111111" as never] = { name: "slime.png", kind: "image", mime: "image/png", size: 1, width: 64, height: 48 };
     (p.database.enemies["slime" as never] as { graphic?: unknown }).graphic = { asset: "1111111111111111" };
+    p.database.troops["tr_ambush" as never] = {
+      id: "tr_ambush",
+      name: "待ち伏せ",
+      members: [{ enemy: "golem", x: 100, y: 100 }, { enemy: "spider", x: 200, y: 100, hidden: true }],
+      pages: [{ condition: { kind: "turn", turn: 1 }, commands: [{ code: "ShowText", params: { text: "ゴゴゴ……", position: "top" }, indent: 0 }] }],
+    } as never;
   },
 });
 const { ctx } = kit;
@@ -148,6 +154,16 @@ describe("projectFrame（戦闘）", () => {
     expect(f.layers).toEqual([]);
     expect(f.ui).toMatchSnapshot();
     expect(textsOf(f.ui)).toEqual(["ゲームオーバー"]);
+  });
+
+  it("バトルイベントのメッセージは戦闘の画面の上に重ねる。隠れている敵は描かず、遭遇のログにも名前を出さない", () => {
+    const s = beginBattle(kit, "tr_ambush");
+    const texts = textsOf(frame(s).ui);
+    expect(texts).toContain("ゴゴゴ……");
+    expect(texts).toContain("ゴーレム が あらわれた！");
+    expect(texts.join("\n")).not.toContain("毒蜘蛛");
+    const closed = feed(s, "ok");
+    expect(textsOf(frame(closed).ui)).not.toContain("ゴゴゴ……");
   });
 
   it("純粋：同じ状態からは同じ FrameSpec、状態は変更しない", () => {

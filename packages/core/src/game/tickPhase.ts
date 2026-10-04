@@ -6,7 +6,8 @@ import type { InputFrame } from "../input.js";
 import { isPageRouteOrigin, pageRouteCommands, pageRouteName, runInterpreters, startInterpreter } from "../interpreter/index.js";
 import { advanceCharacter, computeCamera, currentMap, DEFAULT_SIGHT_RANGE, eventsToTrigger, hasSight, mapWalkSpeed, refreshEventPages, rollEncounter, seesPlayer, slide, startsOnPlayerTouch } from "../map/index.js";
 import type { PassabilityCtx } from "../map/index.js";
-import { battleTick, startBattle } from "../battle/index.js";
+import { startBattle } from "../battle/index.js";
+import { battleSceneTick } from "./battleEvents.js";
 import type { GameState, MapState } from "../state.js";
 import type { StepResult } from "./actions.js";
 import { enterMap } from "./initial.js";
@@ -181,7 +182,8 @@ export function handleTick(state: GameState, input: InputFrame, ctx: Ctx): StepR
   if (state.scene.kind === "menu" || state.scene.kind === "shop") return { state: { ...state, tick: state.tick + 1, playtimeTicks: state.playtimeTicks + 1 }, effects };
   if (state.scene.kind === "gameover") return { state: { ...state, tick: state.tick + 1 }, effects };
   // 戦闘中はマップの世界（イベント・移動・並列処理）が止まる。BattleProcessing を待つインタプリタも戦闘が終わるまで動かない。
-  if (state.scene.kind === "battle") return battleTick({ ...state, tick: state.tick + 1, playtimeTicks: state.playtimeTicks + 1 }, ctx);
+  // 敵グループのバトルイベントは、戦闘の間に動く（`battleEvents.ts`）
+  if (state.scene.kind === "battle") return battleSceneTick({ ...state, tick: state.tick + 1, playtimeTicks: state.playtimeTicks + 1 }, input, ctx);
   let s: GameState = { ...state, tick: state.tick + 1, playtimeTicks: state.playtimeTicks + 1 };
   // タイマー（`ControlTimer`）：残りフレームを数え、0 になったら止まる
   if (s.timers.active) s = { ...s, timers: s.timers.ticks <= 1 ? { active: false, ticks: 0 } : { active: true, ticks: s.timers.ticks - 1 } };

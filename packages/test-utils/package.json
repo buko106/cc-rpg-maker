@@ -11,6 +11,7 @@
   "dependencies": {
     "@rpg/assets": "workspace:*",
     "@rpg/audio-null": "workspace:*",
+    "@rpg/bot": "workspace:*",
     "@rpg/core": "workspace:*",
     "@rpg/editor-core": "workspace:*",
     "@rpg/input-script": "workspace:*",

@@ -50,6 +50,9 @@ const cases: [EventCommand, string, unknown[]][] = [
   [cmd("ChangeParty", { actor: "ac_x", op: "remove" }), "パーティ：ac_x を外す", [{ kind: "actor", id: "ac_x" }]],
   [cmd("ChangeEquipment", { actor: "ac_x", slot: "weapon", item: "it_x" }), "装備：ac_x の武器を it_x にする", [{ kind: "actor", id: "ac_x" }, { kind: "item", id: "it_x" }]],
   [cmd("ChangeEquipment", { actor: "ac_x", slot: "accessory" }), "装備：ac_x の装飾品を外す", [{ kind: "actor", id: "ac_x" }]],
+  [cmd("EnemyAppear", { member: 1 }), "敵の出現：2 番目の敵", []],
+  [cmd("EnemyTransform", { member: 0, enemy: "en_x" }), "敵の変身：1 番目の敵 → en_x", [{ kind: "enemy", id: "en_x" }]],
+  [cmd("AbortBattle", {}), "戦闘の中断", []],
   [cmd("ChangeHp", { op: "lose", amount: { kind: "constant", value: 5 } }), "パーティ全員 の HP を5減らす", []],
   [cmd("ChangeMp", { target: "ac_x", op: "gain", amount: { kind: "constant", value: 5 } }), "ac_x の MP を5増やす", [{ kind: "actor", id: "ac_x" }]],
   [cmd("ChangeExp", { amount: { kind: "constant", value: 30 } }), "パーティ全員 の経験値を30増やす", []],
@@ -119,6 +122,7 @@ describe("builtin command metadata", () => {
       TransferPlayer: { mapId: "map_a", x: 0, y: 0 },
       ChoiceBranch: { index: 0 },
       BattleProcessing: { troop: "tr_x" },
+      EnemyAppear: { member: 0 }, EnemyTransform: { member: 1, enemy: "en_x" }, AbortBattle: {},
       Comment: {}, Loop: {}, BreakLoop: {}, EndLoop: {}, ExitEventProcessing: {},
       CallCommonEvent: { id: "ce_x" }, Label: { name: "a" }, JumpToLabel: { name: "a" },
       ControlSelfSwitch: { key: "A", value: true }, ControlTimer: { op: "stop" },
@@ -171,6 +175,7 @@ describe("ブロックの構造（meta.block / meta.internal）", () => {
       ConditionalBranch: { condition: "true" },
       ShowChoices: { choices: ["a", "b", "c"] },
       BattleProcessing: { troop: "tr_x" },
+      EnemyAppear: { member: 0 }, EnemyTransform: { member: 1, enemy: "en_x" }, AbortBattle: {},
       Loop: {},
     };
     for (const h of ctx.commands.list()) {

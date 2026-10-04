@@ -1,6 +1,7 @@
 import { assetIdSchema, assetRefSchema, directionSchema, equipSlotSchema, eventCommandSchema, eventIdSchema, err, mapIdSchema, nonNegativeInt, ok } from "@rpg/schema";
 import type { Result, SchemaIssue } from "@rpg/schema";
 import * as z from "zod";
+import { withoutTroopEvents } from "./troop-events.js";
 import type { Ctx } from "./ctx-types.js";
 import type { Character, EventRuntime, GameState } from "./state.js";
 
@@ -38,7 +39,8 @@ const snapCharacter = <C extends Character>(ch: C): C => (ch.moving || ch.realX 
  * `fromSnapshot(toSnapshot(s))` は `stripTransient(s)` と一致する。
  */
 export function stripTransient(s: GameState): SerializedGameState {
-  const { battle: _battle, ...rest } = s;
+  // 戦闘は保存しないので、敵グループのバトルイベント（とそのメッセージ）も落とす
+  const { battle: _battle, ...rest } = withoutTroopEvents(s);
   const events: Record<string, EventRuntime> = {};
   for (const [id, ev] of Object.entries(s.map.events)) events[id] = snapCharacter(ev);
   const scene: SerializedGameState["scene"] = { kind: "map" };

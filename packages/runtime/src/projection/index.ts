@@ -49,7 +49,9 @@ export function projectFrame(state: GameState, view: ProjectView, fx: VisualFx =
   if (state.scene.kind === "battle") {
     // 戦闘はマップの地形を背景にして（キャラクターは描かず、暗くして）重ねる
     const under = projectFrame({ ...state, scene: { kind: "map" } }, view, fx);
-    return { ...under, layers: under.layers.filter((l) => l.kind === "tiles"), ui: projectBattle(state, view, size) };
+    // 敵グループのバトルイベントのメッセージは、戦闘の画面の上に重ねる
+    const message = state.message.open ? projectMessage(state, (id) => (Object.hasOwn(state.actors, id) ? state.actors[id as keyof typeof state.actors]?.name : undefined), screen) : [];
+    return { ...under, layers: under.layers.filter((l) => l.kind === "tiles"), ui: [...projectBattle(state, view, size), ...message] };
   }
   if (state.scene.kind === "gameover") return { size, camera: { x: 0, y: 0 }, layers: [], overlay, ui: projectGameOver(view, size) };
 

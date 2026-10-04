@@ -49,10 +49,16 @@ export type SkillEffect = z.infer<typeof skillEffectSchema>;
 export const dropSchema = z.strictObject({ item: itemIdSchema, rate: z.number().min(0).max(1) });
 export type Drop = z.infer<typeof dropSchema>;
 
+/**
+ * 敵グループのバトルイベントのページが動く条件。どのページも 1 回の戦闘で 1 回だけ動く。
+ * `always`：戦闘の始め。`turn`：そのターンになったとき（0 と 1 はどちらも最初のターン）。`switch`：スイッチが ON のとき。
+ * `enemyHp`：`member` 番目（`members` の 0 始まりの番号）の敵が出ていて生きていて、HP が最大 HP の `percent`% 以下のとき。
+ */
 export const troopConditionSchema = z.discriminatedUnion("kind", [
   z.strictObject({ kind: z.literal("always") }),
   z.strictObject({ kind: z.literal("turn"), turn: nonNegativeInt }),
   z.strictObject({ kind: z.literal("switch"), id: switchIdSchema }),
+  z.strictObject({ kind: z.literal("enemyHp"), member: nonNegativeInt, percent: z.number().int().min(0).max(100) }),
 ]);
 export type TroopCondition = z.infer<typeof troopConditionSchema>;
 
@@ -137,7 +143,8 @@ export type Enemy = z.infer<typeof enemySchema>;
 export const troopSchema = z.strictObject({
   id: troopIdSchema,
   name: z.string(),
-  members: z.array(z.strictObject({ enemy: enemyIdSchema, x: z.number(), y: z.number() })),
+  /** `hidden` の敵は、バトルイベントの「敵の出現」で現れるまで出てこない（増援）。 */
+  members: z.array(z.strictObject({ enemy: enemyIdSchema, x: z.number(), y: z.number(), hidden: z.boolean().optional() })),
   pages: z.array(z.strictObject({ condition: troopConditionSchema, commands: z.array(eventCommandSchema) })),
 });
 export type Troop = z.infer<typeof troopSchema>;

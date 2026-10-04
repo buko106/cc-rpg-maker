@@ -41,6 +41,7 @@ exporter      → schema, project-store（ポート型・ZIP）
 save-store    → core（Snapshot 型・マイグレーション）, runtime（ポート型のみ）
 editor-core   → schema, core（CommandRegistry のメタデータ参照のみ）, project-store（ポート型のみ）
 plugin-api    → core, runtime, editor-core（公開型のみ）
+bot           → core, schema（難易度調整の bot。docs/20）
 plugin-samples → plugin-api（サンプルプラグイン。第三者のプラグインと同じ立場）
 plugin-dungeon → plugin-api（不思議のダンジョン。同じく第三者のプラグインと同じ立場。docs/18）
 plugin-fishing → plugin-api（釣り大会。同じく第三者のプラグインと同じ立場。docs/19）

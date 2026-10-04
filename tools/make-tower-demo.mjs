@@ -11,6 +11,8 @@
  * - 2F〜5F と屋上には番人がいて、上り階段の前をふさいでいる。話しかけて「挑む」と戦闘。勝つと番人が消えて上へ進める。
  *   2F ゴブリン兄弟、3F 大グモ（毒）、4F ストーンゴーレム（守りが固い）、5F 闇の魔術師と骸骨兵（眠り・全体魔法）、屋上 炎の竜。
  * - 3F の大グモを倒すと、捕らわれていた僧侶が仲間になる（回復・蘇生の魔法）。
+ * - どの番人の戦いにも、敵グループのバトルイベントで演出がある（名乗り・増援・変身）。中身は `troops()` の各ページ。
+ * - 敵の強さは bot（`pnpm bot tower --troop all …`。docs/20-bot.md）で、ふつうに登ったときのレベルで試して決めた。目安は packages/bot/src/demos.test.ts。
  * - 各階の下り階段のそばに回復の魔法陣がある。負けても（敗北可の戦闘）入口に戻されて HP/MP が戻るだけで、何度でも挑める。
  * - 屋上の炎の竜を倒すとクリア（タイトルへ戻る）。
  * - 画面は 13×12 タイル（416×384）で、どの階も 1 画面に収まる。
@@ -932,10 +934,73 @@ function clericEvent(assets) {
   ]);
 }
 
+// ── 敵グループとバトルイベント ────────────────────────────────────────
+/** 戦闘中のメッセージは上に出す（下はパーティの状態とコマンド）。 */
+const battleText = (t) => cmd("ShowText", { text: t, position: "top", background: "window" });
+const flash = (color, duration) => cmd("FlashScreen", { color, duration });
+const at = (enemy, x, y, hidden = false) => ({ enemy, x, y, ...(hidden ? { hidden } : {}) });
+const turn = (n, ...commands) => ({ condition: { kind: "turn", turn: n }, commands });
+const hpBelow = (member, percent, ...commands) => ({ condition: { kind: "enemyHp", member, percent }, commands });
+
+/**
+ * 番人ごとの戦闘の演出（バトルイベント。04）。どのページも 1 回の戦闘で 1 回だけ動く。
+ * - かかし：はじめに ひとこと。
+ * - 2F ゴブリン兄弟：名乗り → 2 ターン目に末っ子のちびゴブリンが加勢（増援）。
+ * - 3F 大グモ：名乗り → HP 半分で子グモが 2 匹かえる（増援）。
+ * - 4F ストーンゴーレム：名乗り → HP 半分で岩の鎧がはがれ、暴走ゴーレムに（変身。守りが下がり、攻めが上がる）。
+ * - 5F 闇の魔術師：名乗り → 魔術師の HP 4 割で骸骨兵を 2 体呼び出す（増援）。
+ * - 屋上 炎の竜：咆哮 → HP 半分で怒れる炎の竜に（変身。業火を吐く）→ HP 2 割で最後のあがき。
+ */
+function troops() {
+  const troop = (id, name, members, pages = []) => [id, { id, name, members, pages }];
+  return Object.fromEntries([
+    troop("tr_dummy", "かかし", [at("en_scarecrow", 208, 150)], [turn(1, battleText("かかしは だまって 立っている……\n（遠慮なく 打ちこもう！）"))]),
+    troop("tr_goblins", "ゴブリン兄弟", [at("en_goblin", 150, 150), at("en_goblin", 266, 150), at("en_goblin_kid", 208, 184, true)], [
+      turn(1, battleText("ゴブリン兄「行くぞ、弟よ！」\nゴブリン弟「おうよ、兄者！」")),
+      turn(2, battleText("ゴブリン弟「おーい、末っ子！ 出番だぞ！」"), cmd("EnemyAppear", { member: 2 }), battleText("ちびゴブリンが 加勢に 来た！")),
+    ]),
+    troop("tr_spider", "大グモ", [at("en_spider", 208, 150), at("en_spiderling", 96, 176, true), at("en_spiderling", 320, 176, true)], [
+      turn(1, battleText("大グモが 天井から 糸を つたって 降りてきた！")),
+      hpBelow(0, 50, battleText("大グモは 巣の 卵を 破った！"), cmd("EnemyAppear", { member: 1 }), cmd("EnemyAppear", { member: 2 }), battleText("子グモが 2匹 かえった！")),
+    ]),
+    troop("tr_golem", "ストーンゴーレム", [at("en_golem", 208, 146)], [
+      turn(1, battleText("ストーンゴーレムの 目に 赤い 光が ともった。")),
+      hpBelow(
+        0,
+        50,
+        flash({ r: 255, g: 140, b: 60, a: 0.6 }, 20),
+        cmd("EnemyTransform", { member: 0, enemy: "en_golem_core" }),
+        battleText("ゴーレムの 岩の鎧が はがれ落ちた！\n「……ボウソウ…… モード……」"),
+        battleText("（守りは 弱くなったが、攻撃が 激しくなった！）"),
+      ),
+    ]),
+    troop(
+      "tr_sorcerer",
+      "闇の魔術師と骸骨兵",
+      [at("en_skeleton", 100, 156), at("en_sorcerer", 208, 146), at("en_skeleton", 316, 156), at("en_skeleton", 40, 120, true), at("en_skeleton", 376, 120, true)],
+      [
+        turn(1, battleText("闇の魔術師が 杖を 掲げると、\n骸骨兵たちが いっせいに 剣を 抜いた！")),
+        hpBelow(1, 40, battleText("闇の魔術師「おのれ……！\n地の底より 来たれ、骸骨兵！」"), cmd("EnemyAppear", { member: 3 }), cmd("EnemyAppear", { member: 4 }), battleText("骸骨兵が 2体 よみがえった！")),
+      ],
+    ),
+    troop("tr_dragon", "炎の竜", [at("en_dragon", 208, 144)], [
+      turn(1, flash({ r: 255, g: 200, b: 120, a: 0.5 }, 16), battleText("炎の竜は 天に 向かって 吠えた！\n「グオオオオオ……！」")),
+      hpBelow(0, 50, flash({ r: 255, g: 60, b: 40, a: 0.7 }, 24), cmd("EnemyTransform", { member: 0, enemy: "en_dragon_rage" }), battleText("竜の 鱗が 真っ赤に 燃えあがった！\n（\\C[2]業火\\C[0]に 気をつけよう）")),
+      hpBelow(0, 20, battleText("炎の竜は ふらついている……！\nあと 少しだ！")),
+    ]),
+  ]);
+}
+
 // ── データベース ──────────────────────────────────────────────────────
 const skill = (id, name, mpCost, scope, formula, effects = []) => ({ id, name, mpCost, scope, formula, effects });
 const item = (id, name, kind, price, effects, extra = {}) => ({ id, name, kind, price, effects, ...extra });
 const stats = (mhp, mmp, atk, def, mat, mdf, agi, luk) => ({ mhp, mmp, atk, def, mat, mdf, agi, luk });
+/** 番人の強さ（変身の前と後）。bot で試して決めた（packages/bot/src/demos.test.ts）。 */
+const GOLEM = stats(500, 0, 18, 34, 0, 8, 4, 4);
+const GOLEM_CORE = stats(500, 0, 24, 14, 0, 6, 8, 4);
+const SKELETON = stats(120, 0, 16, 14, 0, 6, 10, 4);
+const DRAGON = stats(1100, 0, 26, 24, 26, 18, 16, 10);
+const DRAGON_RAGE = stats(1100, 0, 26, 20, 22, 14, 18, 10);
 
 function database(assets) {
   const battler = (name) => ({ asset: assets[`${name}.png`].id });
@@ -1013,6 +1078,8 @@ function database(assets) {
     enemies: {
       en_scarecrow: { id: "en_scarecrow", name: "かかし", graphic: battler("scarecrow"), params: stats(40, 0, 1, 4, 0, 2, 1, 0), actions: [{ skill: "sk_sway", rating: 5 }], drops: [], exp: 8, gold: 3 },
       en_goblin: { id: "en_goblin", name: "ゴブリン", graphic: battler("goblin"), params: stats(110, 0, 11, 8, 0, 4, 8, 5), actions: [{ skill: "sk_club", rating: 5 }], drops: [{ item: "item_potion", rate: 0.5 }], exp: 20, gold: 15 },
+      // ゴブリン兄弟の戦いの 2 ターン目に加勢する（バトルイベントの「敵の出現」）
+      en_goblin_kid: { id: "en_goblin_kid", name: "ちびゴブリン", graphic: battler("goblin_kid"), params: stats(60, 0, 9, 6, 0, 3, 12, 4), actions: [{ skill: "sk_club", rating: 5 }], drops: [], exp: 6, gold: 5 },
       en_spider: {
         id: "en_spider",
         name: "大グモ",
@@ -1023,12 +1090,34 @@ function database(assets) {
         exp: 80,
         gold: 60,
       },
+      // 大グモの HP が半分を切るとかえる
+      en_spiderling: {
+        id: "en_spiderling",
+        name: "子グモ",
+        graphic: battler("spiderling"),
+        params: stats(60, 0, 10, 6, 0, 4, 14, 4),
+        actions: [{ skill: "sk_bite", rating: 5 }, { skill: "sk_fang", rating: 3 }],
+        drops: [],
+        exp: 8,
+        gold: 4,
+      },
       en_golem: {
         id: "en_golem",
         name: "ストーンゴーレム",
         graphic: battler("golem"),
-        params: stats(500, 0, 18, 34, 0, 8, 4, 4),
+        params: GOLEM,
         actions: [{ skill: "sk_punch", rating: 5 }, { skill: "sk_rocks", rating: 4, condition: "turn % 3 == 2" }, { skill: "sk_harden", rating: 3 }],
+        drops: [{ item: "item_hipotion", rate: 1 }],
+        exp: 150,
+        gold: 120,
+      },
+      // HP が半分を切ると、バトルイベントの「敵の変身」でこの姿になる（HP の割合はそのまま）。守りが下がり、攻めが上がる
+      en_golem_core: {
+        id: "en_golem_core",
+        name: "暴走ゴーレム",
+        graphic: battler("golem_core"),
+        params: GOLEM_CORE,
+        actions: [{ skill: "sk_punch", rating: 5 }, { skill: "sk_rocks", rating: 5, condition: "turn % 2 == 0" }],
         drops: [{ item: "item_hipotion", rate: 1 }],
         exp: 150,
         gold: 120,
@@ -1037,42 +1126,44 @@ function database(assets) {
         id: "en_sorcerer",
         name: "闇の魔術師",
         graphic: battler("sorcerer"),
-        params: stats(280, 120, 10, 14, 24, 20, 14, 10),
+        params: stats(250, 120, 10, 14, 24, 20, 14, 10),
         actions: [{ skill: "sk_darkfire", rating: 5 }, { skill: "sk_sleep", rating: 4 }, { skill: "sk_darkflame", rating: 4, condition: "turn >= 2" }],
         drops: [{ item: "item_ether", rate: 1 }],
         exp: 170,
         gold: 150,
       },
-      en_skeleton: { id: "en_skeleton", name: "骸骨兵", graphic: battler("skeleton"), params: stats(120, 0, 18, 14, 0, 6, 10, 4), actions: [{ skill: "sk_slash", rating: 5 }], drops: [], exp: 30, gold: 20 },
+      en_skeleton: { id: "en_skeleton", name: "骸骨兵", graphic: battler("skeleton"), params: SKELETON, actions: [{ skill: "sk_slash", rating: 5 }], drops: [], exp: 30, gold: 20 },
       en_dragon: {
         id: "en_dragon",
         name: "炎の竜",
         graphic: battler("dragon"),
-        params: stats(1100, 0, 26, 24, 26, 18, 16, 10),
+        params: DRAGON,
         actions: [
           { skill: "sk_bite", rating: 5 },
           { skill: "sk_breath", rating: 4, condition: "turn >= 2" },
           { skill: "sk_roar", rating: 3 },
-          { skill: "sk_inferno", rating: 8, condition: "a.hp * 2 < a.mhp && turn % 3 == 0" },
+        ],
+        drops: [],
+        exp: 500,
+        gold: 500,
+      },
+      // HP が半分を切ると、バトルイベントの「敵の変身」でこの姿になる。業火を吐く
+      en_dragon_rage: {
+        id: "en_dragon_rage",
+        name: "怒れる炎の竜",
+        graphic: battler("dragon_rage"),
+        params: DRAGON_RAGE,
+        actions: [
+          { skill: "sk_bite", rating: 5 },
+          { skill: "sk_breath", rating: 4 },
+          { skill: "sk_inferno", rating: 8, condition: "turn % 3 == 0" },
         ],
         drops: [],
         exp: 500,
         gold: 500,
       },
     },
-    troops: {
-      tr_dummy: { id: "tr_dummy", name: "かかし", members: [{ enemy: "en_scarecrow", x: 208, y: 150 }], pages: [] },
-      tr_goblins: { id: "tr_goblins", name: "ゴブリン兄弟", members: [{ enemy: "en_goblin", x: 150, y: 150 }, { enemy: "en_goblin", x: 266, y: 150 }], pages: [] },
-      tr_spider: { id: "tr_spider", name: "大グモ", members: [{ enemy: "en_spider", x: 208, y: 150 }], pages: [] },
-      tr_golem: { id: "tr_golem", name: "ストーンゴーレム", members: [{ enemy: "en_golem", x: 208, y: 146 }], pages: [] },
-      tr_sorcerer: {
-        id: "tr_sorcerer",
-        name: "闇の魔術師と骸骨兵",
-        members: [{ enemy: "en_skeleton", x: 100, y: 156 }, { enemy: "en_sorcerer", x: 208, y: 146 }, { enemy: "en_skeleton", x: 316, y: 156 }],
-        pages: [],
-      },
-      tr_dragon: { id: "tr_dragon", name: "炎の竜", members: [{ enemy: "en_dragon", x: 208, y: 144 }], pages: [] },
-    },
+    troops: troops(),
     states: {
       st_poison: { id: "st_poison", name: "毒", restriction: "none", turns: 5, paramRates: {}, hpRegen: -0.08 },
       st_sleep: { id: "st_sleep", name: "眠り", restriction: "cannotAct", turns: 2, paramRates: {}, hpRegen: 0 },
@@ -1084,9 +1175,23 @@ function database(assets) {
 // ── 書き出し ──────────────────────────────────────────────────────────
 
 const monsterSprites = Object.fromEntries(Object.keys(MONSTER_INDEX).map((name) => [name, MONSTERS[name]()]));
-const battlerImages = Object.fromEntries(
-  Object.entries(monsterSprites).map(([name, sprite]) => [`${name}.png`, scale(sprite, name === "dragon" ? 3 : 2)]),
-);
+/** 色を `color` へ `k`（0〜1）だけ寄せた絵（変身した姿）。 */
+function tint(src, color, k) {
+  const out = image(src.width, src.height);
+  for (let y = 0; y < src.height; y++) for (let x = 0; x < src.width; x++) {
+    const c = src.get(x, y);
+    if (c[3] > 0) out.set(x, y, [...c.slice(0, 3).map((v, i) => Math.round(v + (color[i] - v) * k)), c[3]]);
+  }
+  return out;
+}
+const battlerImages = {
+  ...Object.fromEntries(Object.entries(monsterSprites).map(([name, sprite]) => [`${name}.png`, scale(sprite, name === "dragon" ? 3 : 2)])),
+  // バトルイベントで出てくる・変身する敵（増援は小さく、変身は色を変える）
+  "goblin_kid.png": monsterSprites.goblin,
+  "spiderling.png": monsterSprites.spider,
+  "golem_core.png": scale(tint(monsterSprites.golem, [255, 110, 50], 0.4), 2),
+  "dragon_rage.png": scale(tint(monsterSprites.dragon, [255, 30, 30], 0.35), 3),
+};
 const walkSheets = Object.entries(MONSTER_INDEX)
   .sort((a, b) => a[1] - b[1])
   .map(([name]) => monsterWalk(monsterSprites[name]));

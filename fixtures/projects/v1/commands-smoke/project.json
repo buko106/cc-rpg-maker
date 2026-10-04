@@ -178,6 +178,77 @@
           }
         ],
         "pages": []
+      },
+      "tr_events": {
+        "id": "tr_events",
+        "name": "バトルイベント",
+        "members": [
+          {
+            "enemy": "en_slime",
+            "x": 120,
+            "y": 130
+          },
+          {
+            "enemy": "en_slime",
+            "x": 210,
+            "y": 130,
+            "hidden": true
+          }
+        ],
+        "pages": [
+          {
+            "condition": {
+              "kind": "turn",
+              "turn": 1
+            },
+            "commands": [
+              {
+                "code": "ShowText",
+                "params": {
+                  "text": "仲間を 呼んだ！"
+                },
+                "indent": 0
+              },
+              {
+                "code": "EnemyAppear",
+                "params": {
+                  "member": 1
+                },
+                "indent": 0
+              }
+            ]
+          },
+          {
+            "condition": {
+              "kind": "enemyHp",
+              "member": 0,
+              "percent": 100
+            },
+            "commands": [
+              {
+                "code": "EnemyTransform",
+                "params": {
+                  "member": 0,
+                  "enemy": "en_slime"
+                },
+                "indent": 0
+              }
+            ]
+          },
+          {
+            "condition": {
+              "kind": "turn",
+              "turn": 2
+            },
+            "commands": [
+              {
+                "code": "AbortBattle",
+                "params": {},
+                "indent": 0
+              }
+            ]
+          }
+        ]
       }
     },
     "states": {},

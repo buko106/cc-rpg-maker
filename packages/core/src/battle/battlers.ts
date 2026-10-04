@@ -107,7 +107,7 @@ export function allyBattler(state: GameState, ctx: ProjectCtx, actorId: ActorId)
   };
 }
 
-export function enemyBattler(ctx: ProjectCtx, index: number, member: { enemy: EnemyBattler["enemyId"]; x: number; y: number }, name: string): EnemyBattler | undefined {
+export function enemyBattler(ctx: ProjectCtx, index: number, member: { enemy: EnemyBattler["enemyId"]; x: number; y: number; hidden?: boolean | undefined }, name: string): EnemyBattler | undefined {
   const def = ctx.project.enemy(member.enemy);
   if (def === undefined) return undefined;
   return {
@@ -122,7 +122,7 @@ export function enemyBattler(ctx: ProjectCtx, index: number, member: { enemy: En
     enemyId: def.id,
     x: member.x,
     y: member.y,
-    hidden: false,
+    hidden: member.hidden === true,
   };
 }
 
