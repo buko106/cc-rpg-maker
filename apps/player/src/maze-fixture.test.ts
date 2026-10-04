@@ -23,7 +23,8 @@ interface Door {
 /** 部屋の出入口（接触で場所移動するイベント）。 */
 const doorsOf = (map: MapData): Door[] =>
   Object.values(map.events).flatMap((ev) => {
-    const cmd = ev.pages[0]!.commands.find((c) => c.code === "TransferPlayer");
+    // 押し戻しは、看板の記録による分岐のあとに標準の戻り先がある（最後の場所移動）
+    const cmd = ev.pages[0]!.commands.filter((c) => c.code === "TransferPlayer").at(-1);
     if (cmd === undefined) return [];
     const p = cmd.params as { mapId: string; x: number; y: number };
     const dir: Dir = ev.y === 0 ? "up" : ev.y === map.height - 1 ? "down" : ev.x === 0 ? "left" : "right";
@@ -187,5 +188,57 @@ describe("迷宮デモ（fixtures/projects/v1/maze）", () => {
     }
     expect(sawMessage).toBe(true);
     expect([s.map.mapId, s.map.player.x, s.map.player.y]).toEqual([trap.to, trap.x, trap.y]);
+  });
+
+  it("看板を読むと覚えて、押し戻されるときは一番進んだ看板の部屋へ戻る（先の看板を読んだあとで手前の看板を読んでも戻らない）", () => {
+    const readSign = (state: State, k: number): State => {
+      const map = maps[roomId(k) as keyof typeof maps]!;
+      const sign = map.events["ev_sign" as keyof typeof map.events]!;
+      const s = walk(state, route(map, state.map.player.x, state.map.player.y, sign.x, sign.y + 1)!);
+      let r = drive(s, ctx, [press("up"), ...idleFrames(2), press("ok")]).state;
+      for (let i = 0; i < 20 && !settled(r); i++) {
+        r = driveUntil(r, ctx, (x) => settled(x) || x.message.open, 600);
+        if (r.message.open) r = drive(r, ctx, [...idleFrames(2), press("ok")]).state;
+      }
+      return r;
+    };
+    const checkpoint = (s: State): number => (s.variables as Record<string, number>)["var_maze_checkpoint"] ?? 0;
+    /** 第 k の間から、標準の戻り先が 1 つ以上手前の押し戻しの出入口へ入る。 */
+    const blown = (state: State, k: number): State => {
+      const map = maps[roomId(k) as keyof typeof maps]!;
+      const trap = doorsOf(map).find((d) => d.event.pages[0]!.commands.some((c) => c.code === "ShowText"))!;
+      let s = state;
+      for (const d of route(map, s.map.player.x, s.map.player.y, trap.event.x, trap.event.y)!) {
+        s = drive(s, ctx, [press(d)]).state;
+        s = driveUntil(s, ctx, (x) => settled(x) || x.message.open, 600);
+      }
+      for (let i = 0; i < 5 && !settled(s); i++) {
+        if (s.message.open) s = drive(s, ctx, [...idleFrames(2), press("ok")]).state;
+        s = driveUntil(s, ctx, (x) => settled(x) || x.message.open, 600);
+      }
+      return s;
+    };
+    // 第 1・5 の間の看板を読んでから、第 6 の間で押し戻される → 第 5 の間（標準なら第 1 の間）
+    let s = readSign(start(), 1);
+    expect(checkpoint(s)).toBe(1);
+    const room1 = maps[roomId(1) as keyof typeof maps]!;
+    const f1 = doorsOf(room1).find((d) => roomOf(d.to) === 2)!;
+    s = walk(s, route(room1, s.map.player.x, s.map.player.y, f1.event.x, f1.event.y)!);
+    expect(s.map.mapId).toBe(roomId(2));
+    // 第 2〜4 の間の正解をたどって第 5 の間へ
+    for (let k = 2; k < 5; k++) {
+      const map = maps[s.map.mapId as keyof typeof maps]!;
+      const f = doorsOf(map).find((d) => roomOf(d.to) === k + 1)!;
+      s = walk(s, route(map, s.map.player.x, s.map.player.y, f.event.x, f.event.y)!);
+    }
+    s = readSign(s, 5);
+    expect(checkpoint(s)).toBe(5);
+    // 第 6 の間へ進んで押し戻される
+    const room5 = maps[roomId(5) as keyof typeof maps]!;
+    const f5 = doorsOf(room5).find((d) => roomOf(d.to) === 6)!;
+    s = walk(s, route(room5, s.map.player.x, s.map.player.y, f5.event.x, f5.event.y)!);
+    s = blown(s, 6);
+    expect(s.map.mapId).toBe(roomId(5));
+    expect(checkpoint(s)).toBe(5);
   });
 });

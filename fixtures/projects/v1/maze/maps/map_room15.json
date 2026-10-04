@@ -117,6 +117,62 @@
               "indent": 0
             },
             {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_maze_checkpoint",
+                  "op": ">=",
+                  "value": 17
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_room17",
+                "x": 5,
+                "y": 9,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 1
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_maze_checkpoint",
+                  "op": ">=",
+                  "value": 13
+                }
+              },
+              "indent": 1
+            },
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_room13",
+                "x": 5,
+                "y": 1,
+                "dir": "down",
+                "fade": "black"
+              },
+              "indent": 2
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 1
+            },
+            {
               "code": "TransferPlayer",
               "params": {
                 "mapId": "map_room09",
@@ -125,6 +181,16 @@
                 "dir": "left",
                 "fade": "black"
               },
+              "indent": 2
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 1
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
               "indent": 0
             }
           ]
