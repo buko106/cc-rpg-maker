@@ -172,6 +172,23 @@
           },
           "commands": [
             {
+              "code": "ShowPicture",
+              "params": {
+                "id": 1,
+                "image": {
+                  "asset": "3cd4c4c44e8df741"
+                },
+                "x": 240,
+                "y": 150,
+                "origin": "center",
+                "opacity": 0.95,
+                "scale": 2.4,
+                "duration": 30,
+                "wait": true
+              },
+              "indent": 0
+            },
+            {
               "code": "ShowText",
               "params": {
                 "text": "グオオオ……！ よくぞ ここまで 来た。\nわれこそ ほこらの 主。\n人間ごときに 倒されは せぬ！",
@@ -212,6 +229,26 @@
               "indent": 1
             },
             {
+              "code": "MovePicture",
+              "params": {
+                "id": 1,
+                "x": 240,
+                "y": 150,
+                "opacity": 0,
+                "scale": 3.4,
+                "duration": 16,
+                "wait": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ErasePicture",
+              "params": {
+                "id": 1
+              },
+              "indent": 1
+            },
+            {
               "code": "BattleProcessing",
               "params": {
                 "troop": "tr_boss",
@@ -238,6 +275,23 @@
               "indent": 2
             },
             {
+              "code": "ShowPicture",
+              "params": {
+                "id": 1,
+                "image": {
+                  "asset": "3cd4c4c44e8df741"
+                },
+                "x": 240,
+                "y": 150,
+                "origin": "center",
+                "opacity": 1,
+                "scale": 2,
+                "duration": 0,
+                "wait": false
+              },
+              "indent": 2
+            },
+            {
               "code": "FlashScreen",
               "params": {
                 "color": {
@@ -247,6 +301,26 @@
                   "a": 1
                 },
                 "duration": 40
+              },
+              "indent": 2
+            },
+            {
+              "code": "MovePicture",
+              "params": {
+                "id": 1,
+                "x": 240,
+                "y": 150,
+                "opacity": 0,
+                "scale": 2,
+                "duration": 60,
+                "wait": true
+              },
+              "indent": 2
+            },
+            {
+              "code": "ErasePicture",
+              "params": {
+                "id": 1
               },
               "indent": 2
             },
@@ -359,6 +433,26 @@
                 "index": 1
               },
               "indent": 0
+            },
+            {
+              "code": "MovePicture",
+              "params": {
+                "id": 1,
+                "x": 240,
+                "y": 150,
+                "opacity": 0,
+                "scale": 2.4,
+                "duration": 20,
+                "wait": true
+              },
+              "indent": 1
+            },
+            {
+              "code": "ErasePicture",
+              "params": {
+                "id": 1
+              },
+              "indent": 1
             },
             {
               "code": "ShowText",

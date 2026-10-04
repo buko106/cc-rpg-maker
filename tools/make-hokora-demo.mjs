@@ -827,19 +827,33 @@ function caveEvents(assets) {
 
 function shrineEvents(assets) {
   const monsters = assets["monsters.png"].id;
+  /** ほこらの主の絵（戦闘の絵と同じ）をピクチャとして画面の中央に出す。 */
+  const gargoyle = { asset: assets["gargoyle.png"].id };
+  const showBoss = (opacity, scale, duration, indent = 0) =>
+    cmd("ShowPicture", { id: 1, image: gargoyle, x: (SCREEN_W * TILE) / 2, y: 150, origin: "center", opacity, scale, duration, wait: duration > 0 }, indent);
+  const moveBoss = (opacity, scale, duration, indent = 0) =>
+    cmd("MovePicture", { id: 1, x: (SCREEN_W * TILE) / 2, y: 150, opacity, scale, duration, wait: true }, indent);
   const boss = event("ev_boss", "ほこらの主", SHRINE.boss, [
     page({
       graphic: { asset: monsters, index: MONSTER_INDEX.gargoyle, direction: "down" },
       conditions: [sw("sw_boss", false)],
       commands: [
+        // ほこらの主が、画面いっぱいに浮かび上がって名乗る（ピクチャ）
+        showBoss(0.95, 2.4, 30),
         text("グオオオ……！ よくぞ ここまで 来た。\nわれこそ ほこらの 主。\n人間ごときに 倒されは せぬ！"),
         choices(["挑む", "まだ やめておく"], 1),
         branch(0),
         flash({ r: 255, g: 60, b: 40, a: 0.5 }, 16, 1),
+        moveBoss(0, 3.4, 16, 1),
+        cmd("ErasePicture", { id: 1 }, 1),
         cmd("BattleProcessing", { troop: "tr_boss", canEscape: false, canLose: true }, 1),
         branch(0, 1),
         setSwitch("sw_boss", true, 2),
+        // 主がくずれ去る：絵を出して光に包み、薄れて消えていく
+        showBoss(1, 2, 0, 2),
         flash({ r: 255, g: 255, b: 220, a: 1 }, 40, 2),
+        moveBoss(0, 2, 60, 2),
+        cmd("ErasePicture", { id: 1 }, 2),
         text("ほこらの 主は くずれ去り、\n洞窟には ふたたび 静けさが もどった……", 2),
         text("\\C[6]ミルト村に 平和が もどった！\\C[0]\n勇者と ミナの 冒険は ここで ひとまず 終わり。\nおめでとう！", 2),
         cmd("Fadeout", { duration: 40 }, 2),
@@ -852,6 +866,8 @@ function shrineEvents(assets) {
         text("……気がつくと、村の 入口に 運ばれていた。\n（ほこらの主は 何度でも 挑戦を 受けてくれる）", 2),
         endBranch(1),
         branch(1),
+        moveBoss(0, 2.4, 20, 1),
+        cmd("ErasePicture", { id: 1 }, 1),
         text("体勢を 立て直してから 挑もう。\n（奥の 泉で 回復できる）", 1),
         endBranch(),
       ],

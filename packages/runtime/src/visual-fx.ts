@@ -1,4 +1,5 @@
 import type { Effect, RGBA } from "@rpg/core";
+import type { AssetId } from "@rpg/schema";
 import type { Overlay } from "./frame-spec.js";
 import { NO_TINT } from "./projection/theme.js";
 
@@ -6,7 +7,26 @@ import { NO_TINT } from "./projection/theme.js";
  * 画面効果の一時状態（シェイク・フラッシュ）。`GameState` には入れない見た目だけの状態で、
  * `Effect` を受けて始まり、`step` ごとに 1 ずつ進む。セーブ・リプレイの対象外。
  */
+export interface PictureView {
+  readonly x: number;
+  readonly y: number;
+  readonly opacity: number;
+  readonly scale: number;
+}
+
+/** ピクチャ（一枚絵）：`from` から `to` へ `total` フレームかけて変わり、終わってもそのまま保たれる（消去まで）。 */
+export interface PictureFx {
+  readonly asset: AssetId;
+  readonly origin: "topLeft" | "center";
+  readonly from: PictureView;
+  readonly to: PictureView;
+  readonly total: number;
+  readonly left: number;
+}
+
 export interface VisualFx {
+  /** 番号 → ピクチャ。 */
+  readonly pictures?: Readonly<Record<number, PictureFx>>;
   readonly shake?: { readonly power: number; readonly total: number; readonly left: number };
   readonly flash?: { readonly color: RGBA; readonly total: number; readonly left: number };
   /** 色調：`from` から `color` へ `total` フレームかけて変わり、`left` が 0 になったらそのまま保たれる（`a` = 0 なら消える）。 */
@@ -32,7 +52,40 @@ export function applyFxEffect(fx: VisualFx, effect: Effect): VisualFx {
     const color = effect.color ?? (effect.to === 0 ? (fx.fade?.color ?? "black") : "black");
     return { ...fx, fade: { from: fadeNow(fx), to: effect.to, total: effect.durationTicks, left: effect.durationTicks, color } };
   }
+  if (effect.kind === "showPicture") {
+    const to: PictureView = { x: effect.x, y: effect.y, opacity: effect.opacity, scale: effect.scale };
+    const picture: PictureFx = { asset: effect.asset, origin: effect.origin, from: { ...to, opacity: effect.durationTicks > 0 ? 0 : effect.opacity }, to, total: effect.durationTicks, left: effect.durationTicks };
+    return { ...fx, pictures: { ...fx.pictures, [effect.id]: picture } };
+  }
+  if (effect.kind === "movePicture") {
+    const pic = fx.pictures?.[effect.id];
+    if (pic === undefined) return fx;
+    const to: PictureView = { x: effect.x, y: effect.y, opacity: effect.opacity, scale: effect.scale };
+    return { ...fx, pictures: { ...fx.pictures, [effect.id]: { ...pic, from: pictureNow(pic), to, total: effect.durationTicks, left: effect.durationTicks } } };
+  }
+  if (effect.kind === "erasePicture") {
+    if (fx.pictures?.[effect.id] === undefined) return fx;
+    const { [effect.id]: _gone, ...rest } = fx.pictures;
+    return withPictures(fx, rest);
+  }
   return fx;
+}
+
+/** `pictures` を差し替える（空なら項目ごと取り除く）。 */
+function withPictures(fx: VisualFx, pictures: Readonly<Record<number, PictureFx>>): VisualFx {
+  const { pictures: _old, ...rest } = fx;
+  return Object.keys(pictures).length === 0 ? rest : { ...rest, pictures };
+}
+
+/** ピクチャをすべて消す（タイトルに戻ったとき）。 */
+export function clearPictures(fx: VisualFx): VisualFx {
+  return fx.pictures === undefined ? fx : withPictures(fx, {});
+}
+
+/** 今のピクチャの位置・不透明度・倍率（線形補間）。 */
+export function pictureNow(p: PictureFx): PictureView {
+  const k = progress(p);
+  return { x: mix(p.from.x, p.to.x, k), y: mix(p.from.y, p.to.y, k), opacity: mix(p.from.opacity, p.to.opacity, k), scale: mix(p.from.scale, p.to.scale, k) };
 }
 
 /** 進み具合（0 → 1）。`total` が 0 なら最初から終わっている。 */
@@ -63,6 +116,9 @@ export function tickFx(fx: VisualFx): VisualFx {
   if (fx.tint) {
     const left = Math.max(0, fx.tint.left - 1);
     if (left > 0 || fx.tint.color.a > 0) next.tint = { ...fx.tint, left };
+  }
+  if (fx.pictures) {
+    next.pictures = Object.fromEntries(Object.entries(fx.pictures).map(([id, p]) => [id, p.left > 0 ? { ...p, left: p.left - 1 } : p]));
   }
   if (fx.fade) {
     const left = Math.max(0, fx.fade.left - 1);

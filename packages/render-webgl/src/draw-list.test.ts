@@ -161,6 +161,17 @@ describe("buildDrawList: overlay と UI", () => {
   });
 });
 
+describe("buildDrawList: ピクチャ（image の倍率・不透明度・中心基準）", () => {
+  it("倍率をかけた大きさで、center なら中心を (x, y) に置く。alpha は頂点色に。完全に透明なら出さない", () => {
+    const q = buildDrawList(
+      frame({ ui: [{ kind: "image", x: 100, y: 80, asset: SPRITE, scale: 0.5, origin: "center", alpha: 0.25 }, { kind: "image", x: 0, y: 0, asset: SPRITE, alpha: 0 }] }),
+      env,
+    );
+    expect(q).toHaveLength(1);
+    expect(q[0]).toMatchObject({ x: 100 - 24, y: 80 - 32, w: 48, h: 64, a: 0.25, u0: 0, u1: 1, v0: 0, v1: 1 });
+  });
+});
+
 describe("buildDrawList: 文字", () => {
   const font = { family: "sans-serif", size: 16 };
   const text = (over: Partial<Extract<FrameSpec["ui"][number], { kind: "text" }>>): FrameSpec["ui"][number] => ({ kind: "text", x: 100, y: 10, text: "abc", font, color: white, ...over });

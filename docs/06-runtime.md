@@ -212,3 +212,9 @@ export type UiNode =
 - **用語**：`equip`（既定「装備」）、`equipWeapon` / `equipArmor` / `equipAccessory`（「武器」「防具」「装飾品」）、`unequip`（「（外す）」）。
 - **能力値は装備込み**：メインメニューのパーティ・スキル画面の最大 MP・ステータス画面の能力値と最大 HP/MP は、装備の加算を含む（`actorParamsOf`。戦闘の開始時の値と同じ）。これまではクラスの値だけだった。
 - **テスト**：`projection/screens.test.ts` の「装備」。操作の流れは core（`game/equip.test.ts`）、デモでの使い方は `apps/player/src/hokora-fixture.test.ts`。
+
+## 実装メモ（ピクチャ）
+- `showPicture` / `movePicture` / `erasePicture` の Effect（core）は `distributeEffect` で `visual` シンクに届き、`VisualFx.pictures`（番号 → `PictureFx`：`from` → `to` を `total` フレームで補間。終わっても消去まで保たれる）に入る。セーブ・リプレイの対象外で、ロードすると消え、タイトルシーンになると `clearPictures` で取り除かれる。
+- **投影**（`projection/picture.ts` の `projectPictures`）：マップシーンの `FrameSpec.ui` の先頭（タイマー・メッセージより奥）に、番号の小さい順の `image` ノードとして並べる。`image` ノードに `alpha`（不透明度）・`scale`（倍率）・`origin`（`center` で `x` `y` が中心）を足した（省略時は従来どおり）。メニュー・ショップ・戦闘は `ui` を差し替えるので、ピクチャは出ない。
+- **レンダラ**：canvas2d・webgl とも、倍率をかけた大きさで描き、`center` は中心合わせ、`alpha` は canvas2d が `globalAlpha`、webgl が頂点色の a。完全に透明なら描かない。
+- **テスト**：`visual-fx.test.ts`（補間・再移動・消去）、`projection/picture.test.ts`、`effects.test.ts`、両レンダラのテスト、core の `commands-m6.test.ts` / `meta.test.ts`、デモは `commands-smoke`。

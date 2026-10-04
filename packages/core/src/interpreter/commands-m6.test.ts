@@ -410,6 +410,25 @@ describe("音と画面", () => {
     expect(r.effects[7]).toEqual({ kind: "screenFade", to: 0, durationTicks: 8 });
   });
 
+  it("ShowPicture / MovePicture / ErasePicture emit picture Effects", () => {
+    const image = { asset: "fedcba9876543210" };
+    const r = run([
+      cmd("ShowPicture", { id: 2, image, x: 10, y: 20, origin: "center", opacity: 0.5, scale: 2, duration: 4 }),
+      cmd("MovePicture", { id: 2, x: 30, y: 40, duration: 6 }),
+      cmd("ErasePicture", { id: 2 }),
+    ]);
+    expect(r.effects).toEqual([
+      { kind: "showPicture", id: 2, asset: "fedcba9876543210", x: 10, y: 20, origin: "center", opacity: 0.5, scale: 2, durationTicks: 4 },
+      { kind: "movePicture", id: 2, x: 30, y: 40, opacity: 1, scale: 1, durationTicks: 6 },
+      { kind: "erasePicture", id: 2 },
+    ]);
+  });
+
+  it("MovePicture with wait: true holds the event for its duration", () => {
+    expect(run([cmd("MovePicture", { id: 1, duration: 10, wait: true })]).frames).toBeGreaterThanOrEqual(10);
+    expect(run([cmd("MovePicture", { id: 1, duration: 10 })]).frames).toBe(1);
+  });
+
   it("wait: true holds the event for the effect's duration; zero duration never waits", () => {
     expect(run([cmd("Fadeout", { duration: 10 })]).frames).toBeGreaterThanOrEqual(10);
     expect(run([cmd("Fadeout", { duration: 0 })]).frames).toBe(1);

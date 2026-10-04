@@ -49,7 +49,7 @@ describe("registry", () => {
       "ShowText", "ShowChoices", "ChoiceBranch", "InputNumber", "SelectItem", "ControlSwitches", "ControlVariables", "ControlSelfSwitch", "ControlTimer",
       "ConditionalBranch", "Else", "EndBranch", "Loop", "BreakLoop", "EndLoop", "ExitEventProcessing", "CallCommonEvent", "Label", "JumpToLabel", "Wait",
       "TransferPlayer", "SetMoveRoute", "SetEventLocation", "ChangeMapTile", "MoveStep", "WaitPlayerStep", "ChangeGold", "ChangeItems", "ChangeParty", "ChangeEquipment", "ChangeHp", "ChangeMp", "ChangeExp", "ChangeLevel",
-      "ChangeBgm", "PlaySe", "FadeoutBgm", "ShakeScreen", "FlashScreen", "TintScreen", "Fadein", "Fadeout", "BattleProcessing", "ShopProcessing",
+      "ChangeBgm", "PlaySe", "FadeoutBgm", "ShakeScreen", "FlashScreen", "TintScreen", "Fadein", "Fadeout", "ShowPicture", "MovePicture", "ErasePicture", "BattleProcessing", "ShopProcessing",
       "EnemyAppear", "EnemyTransform", "AbortBattle",
       "SaveGame", "LoadGame", "GameOver", "ReturnToTitle", "Script", "Comment",
     ].sort();

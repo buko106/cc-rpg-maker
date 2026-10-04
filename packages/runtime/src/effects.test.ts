@@ -52,11 +52,14 @@ describe("distributeEffect", () => {
     const { logs, visual, loads, sinks } = setup();
     distributeEffect({ kind: "screenShake", power: 1, durationTicks: 1 }, sinks);
     distributeEffect({ kind: "screenFlash", color: white, durationTicks: 1 }, sinks);
+    distributeEffect({ kind: "showPicture", id: 1, asset: "aaaaaaaaaaaaaaaa" as never, x: 0, y: 0, origin: "topLeft", opacity: 1, scale: 1, durationTicks: 0 }, sinks);
+    distributeEffect({ kind: "movePicture", id: 1, x: 1, y: 1, opacity: 1, scale: 1, durationTicks: 1 }, sinks);
+    distributeEffect({ kind: "erasePicture", id: 1 }, sinks);
     distributeEffect({ kind: "requestMapData", mapId: "map_b" as never }, sinks);
     distributeEffect({ kind: "log", level: "warn", message: "w" }, sinks);
     distributeEffect({ kind: "log", level: "info", message: "i" }, sinks);
     distributeEffect({ kind: "log", level: "debug", message: "d" }, sinks);
-    expect(visual).toEqual(["screenShake", "screenFlash"]);
+    expect(visual).toEqual(["screenShake", "screenFlash", "showPicture", "movePicture", "erasePicture"]);
     expect(loads).toEqual(["map_b"]);
     expect(logs).toEqual(["warn:w", "info:i", "debug:d"]);
   });

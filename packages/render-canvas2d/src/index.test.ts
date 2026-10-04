@@ -217,6 +217,20 @@ describe("createCanvas2dRenderer", () => {
     expect(calls).toContain("strokeRect(3,3,8,8)");
   });
 
+  it("image：倍率・不透明度・中心基準（ピクチャ）。完全に透明なら描かない", async () => {
+    const { ctx, calls } = mockContext();
+    const { source } = assetsOf({ cccccccccccccccc: img(16, 16) });
+    const r = createCanvas2dRenderer(mockCanvas(ctx));
+    await r.init({ width: 64, height: 48, assets: source });
+    const node = (over: object) => ({ kind: "image" as const, x: 20, y: 20, asset: "cccccccccccccccc" as never, ...over });
+    const ui = frame({ ui: [node({ scale: 2, origin: "center", alpha: 0.5 }), node({ alpha: 0 })] });
+    r.render(ui);
+    await flush();
+    calls.length = 0;
+    r.render(ui);
+    expect(calls.filter((c) => c.startsWith("drawImage") || c.startsWith("globalAlpha"))).toEqual(["globalAlpha=1", "globalAlpha=0.5", "drawImage(img,0,0,16,16,4,4,32,32)", "globalAlpha=1"]);
+  });
+
   it("[inv-3] dispose 後の render は何も描かない", async () => {
     const { ctx, calls } = mockContext();
     const r = createCanvas2dRenderer(mockCanvas(ctx));

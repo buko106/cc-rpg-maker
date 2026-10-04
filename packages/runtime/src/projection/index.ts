@@ -5,6 +5,7 @@ import type { VisualFx } from "../visual-fx.js";
 import { projectBattle, projectGameOver } from "./battle.js";
 import { projectMapLayers } from "./map-scene.js";
 import { projectMenu } from "./menu.js";
+import { projectPictures } from "./picture.js";
 import { projectMessage } from "./message.js";
 import { projectShop } from "./shop.js";
 import { projectTitle } from "./title.js";
@@ -62,6 +63,7 @@ export function projectFrame(state: GameState, view: ProjectView, fx: VisualFx =
     layers,
     overlay,
     ui: [
+      ...projectPictures(fx),
       ...projectTimer(state, screen),
       ...projectMessage(state, (id) => (Object.hasOwn(state.actors, id) ? state.actors[id as keyof typeof state.actors]?.name : undefined), screen),
       ...projectNotice(view, ui, screen, "top"),
