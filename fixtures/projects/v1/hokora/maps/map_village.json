@@ -324,7 +324,7 @@
             {
               "code": "ShowText",
               "params": {
-                "text": "お金は 魔物を 倒すと もらえるよ。\n貯めて よろず屋で 薬を 買おう。",
+                "text": "お金は 魔物を 倒すと もらえるよ。\n貯めて よろず屋で 薬や 武器を 買おう。\n買った 武器は メニューの 装備で 持たせるんだ。",
                 "position": "bottom",
                 "background": "window"
               },
@@ -557,7 +557,7 @@
             {
               "code": "ShowText",
               "params": {
-                "text": "いらっしゃい！ 旅の 薬なら おまかせだ。",
+                "text": "いらっしゃい！ 旅の 薬から 武器・防具まで そろってるよ。",
                 "position": "bottom",
                 "background": "window"
               },
@@ -569,7 +569,12 @@
                 "goods": [
                   "item_potion",
                   "item_hipotion",
-                  "item_ether"
+                  "item_ether",
+                  "wp_iron",
+                  "wp_rod",
+                  "ar_iron",
+                  "ar_mage",
+                  "ac_ring"
                 ],
                 "canSell": true
               },

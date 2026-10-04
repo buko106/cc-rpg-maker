@@ -1,4 +1,4 @@
-import type { ActorId, AssetId, AssetRef, Direction, EventId, EventPage, ItemId, MapId, SkillId, SwitchId, VariableId } from "@rpg/schema";
+import type { ActorId, AssetId, AssetRef, Direction, EquipSlot, EventId, EventPage, ItemId, MapId, SkillId, SwitchId, VariableId } from "@rpg/schema";
 import type { BattleState } from "./battle/state.js";
 import type { InterpreterState } from "./interpreter/state.js";
 import type { RandomState } from "./random.js";
@@ -7,7 +7,7 @@ import type { RandomState } from "./random.js";
 export type JsonValue = null | boolean | number | string | readonly JsonValue[] | { readonly [key: string]: JsonValue };
 
 export type TitleScreen = "main" | "continue";
-export type MenuScreen = "main" | "item" | "skill" | "status" | "save" | "load";
+export type MenuScreen = "main" | "item" | "skill" | "equip" | "status" | "save" | "load";
 /** ショップの画面：コマンド（購入/売却/やめる）→ 商品の一覧（`buy`）または所持品の一覧（`sell`）。 */
 export type ShopScreen = "command" | "buy" | "sell";
 
@@ -57,8 +57,10 @@ export type SceneState =
       readonly cursor: number;
       readonly confirm?: MenuConfirm;
       readonly portal?: boolean;
-      /** `skill` 画面で、使う人（`party.members` の位置）を選んだあと。ないあいだは `cursor` が使う人を指す。 */
+      /** `skill` / `equip` 画面で、使う人・装備を替える人（`party.members` の位置）を選んだあと。ないあいだは `cursor` が人を指す。 */
       readonly actor?: number;
+      /** `equip` 画面で、替える装備欄（`EQUIP_SLOTS` の位置）を選んだあと。あるあいだは `cursor` が付け替える候補（`equipCandidates`）を指す。 */
+      readonly slot?: number;
       /** `item` / `skill` 画面で、使うものを選んで対象を選んでいる間。 */
       readonly pick?: MenuPick;
     }
@@ -129,6 +131,11 @@ export interface ActorState {
   readonly exp: number;
   readonly hp: number;
   readonly mp: number;
+  /**
+   * いまの装備（欄 → アイテム。空いた欄は無い）。一度も付け替えていないあいだは無く、データベースのアクターの初期装備（`Actor.equips`）のまま。
+   * 付け替えると、全部の欄をここに持つ（`equipsOf`）。
+   */
+  readonly equips?: Partial<Record<EquipSlot, ItemId>>;
 }
 
 export interface PartyState {

@@ -256,11 +256,12 @@ function grind(state: State, done: (s: State) => boolean, map: string, max = 150
 const refill = (s: State): State => ({ ...s, actors: { ...s.actors, [HERO]: { ...s.actors[HERO]!, hp: 9999, mp: 999 }, [MINA]: { ...s.actors[MINA]!, hp: 9999, mp: 999 } } });
 
 describe("ほこらの冒険のデモ（fixtures/projects/v1/hokora）", () => {
-  it("村・草原・洞窟・ほこらの 4 枚のマップ。画面は 15×11 タイル（480×352）。メニューにスキルが並ぶ", () => {
+  it("村・草原・洞窟・ほこらの 4 枚のマップ。画面は 15×11 タイル（480×352）。メニューにスキルと装備が並ぶ", () => {
     expect(Object.keys(maps).sort()).toEqual([CAVE, FIELD, SHRINE, VILLAGE]);
     expect(project.system.screen).toEqual({ width: 15 * 32, height: 11 * 32 });
     expect(project.system.initialParty).toEqual(["actor_hero", "actor_mina"]);
     expect(project.system.menuSkill).toBe(true);
+    expect(project.system.menuEquip).toBe(true);
     expect(project.system.startMap).toBe(VILLAGE);
   });
 
@@ -376,6 +377,22 @@ describe("ほこらの冒険のデモ（fixtures/projects/v1/hokora）", () => {
     expect(s.scene.kind).toBe("map");
   });
 
+  it("メニューの装備：よろず屋の鉄の剣を勇者に持たせると、銅の剣は持ち物に戻り、戦闘での攻撃力が 4 上がる", () => {
+    let s = afterElder("hokora-equip");
+    expect(s.actors[HERO]!.equips).toBeUndefined(); // 付け替えるまでは初期装備（銅の剣・革の鎧）
+    s = { ...s, party: { ...s.party, items: { ...s.party.items, [item("wp_iron")]: 1 } } };
+    const atkInBattle = (from: State): number => beginBattle({ project, ctx, state: from }, "tr_slime", {}, from).battle!.allies[HERO as never]!.params.atk;
+    const before = atkInBattle(s);
+    // メニュー → 装備（アイテム・スキルの次）→ 勇者 → 武器の欄 → 鉄の剣（候補の先頭）
+    s = tap(s, "menu", "down", "down", "ok", "ok", "ok", "ok");
+    expect(s.actors[HERO]!.equips).toEqual({ weapon: "wp_iron", armor: "ar_leather" });
+    expect(s.party.items[item("wp_iron")]).toBeUndefined();
+    expect(s.party.items[item("wp_sword")]).toBe(1);
+    expect(s.scene).toMatchObject({ kind: "menu", screen: "equip", actor: 0, cursor: 0 });
+    s = tap(s, "menu");
+    expect(atkInBattle(s)).toBe(before + 4); // 鉄の剣 +8 − 銅の剣 +4
+  });
+
   it("宿屋：15G で泊まると HP/MP が回復する。おかねが足りないと泊まれない", () => {
     const inn = at(VILLAGE, "ev_inn");
     /** 宿屋の戸口の前まで歩いてから、傷ついた状態で話しかける（歩いている間は、戦闘の回復の手当てが入るので）。 */
@@ -398,12 +415,12 @@ describe("ほこらの冒険のデモ（fixtures/projects/v1/hokora）", () => {
     expect(poor.actors[MINA]!.mp).toBe(0);
   });
 
-  it("宿屋は「冒険を記録する」で SaveGame（セーブ画面）が開き、よろず屋はポーション・ハイポーション・エーテルを売る", () => {
+  it("宿屋は「冒険を記録する」で SaveGame（セーブ画面）が開き、よろず屋は薬と、装備（武器・防具・装飾品）を売る", () => {
     const inn = at(VILLAGE, "ev_inn").pages[0]!.commands;
     expect(inn.some((c) => c.code === "SaveGame")).toBe(true);
     expect(inn.some((c) => c.code === "ConditionalBranch" && c.params["condition"] === "gold >= 15")).toBe(true);
     const shop = at(VILLAGE, "ev_shop").pages[0]!.commands.find((c) => c.code === "ShopProcessing")!.params as { goods: string[]; canSell: boolean };
-    expect(shop.goods).toEqual(["item_potion", "item_hipotion", "item_ether"]);
+    expect(shop.goods).toEqual(["item_potion", "item_hipotion", "item_ether", "wp_iron", "wp_rod", "ar_iron", "ar_mage", "ac_ring"]);
     expect(shop.canSell).toBe(true);
   });
 

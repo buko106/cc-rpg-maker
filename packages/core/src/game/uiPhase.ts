@@ -1,9 +1,11 @@
+import { EQUIP_SLOTS } from "@rpg/schema";
 import type { ActorId } from "@rpg/schema";
 import type { Ctx } from "../ctx-types.js";
 import type { Effect } from "../effects.js";
 import type { InputFrame } from "../input.js";
 import type { GameState, MenuConfirm, MenuPick, SceneState } from "../state.js";
 import type { StepResult } from "./actions.js";
+import { changeEquip, equipCandidates } from "./equip.js";
 import { fieldItemUsable, fieldScope, fieldSkills, fieldSkillUsable, needsFieldTarget, useOnField } from "./fieldUse.js";
 import type { FieldUse } from "./fieldUse.js";
 import { initialState, titleState } from "./initial.js";
@@ -57,6 +59,13 @@ function screenSize(state: GameState, scene: MenuScene, ctx: Ctx): number {
     case "skill": {
       const user = scene.actor === undefined ? undefined : state.party.members[scene.actor];
       return user === undefined ? state.party.members.length : fieldSkills(state, ctx, user).length;
+    }
+    case "equip": {
+      const actorId = scene.actor === undefined ? undefined : state.party.members[scene.actor];
+      if (actorId === undefined) return state.party.members.length;
+      const slot = scene.slot === undefined ? undefined : EQUIP_SLOTS[scene.slot];
+      // 欄を選んだあとは、付けられる持ち物 + 末尾の「外す」
+      return slot === undefined ? EQUIP_SLOTS.length : equipCandidates(state, ctx, slot).length + 1;
     }
     case "status":
       return state.party.members.length;
@@ -112,6 +121,22 @@ function handlePickInput(state: GameState, scene: MenuScene, pick: MenuPick, inp
 }
 
 /**
+ * 装備画面の決定：装備を替える人 → 替える欄 → 付けるもの（末尾は「外す」）。付け替えたら欄の一覧に戻る（同じ欄にカーソル）。
+ * 付けられない（持ち物が無くなった など）ときは何も起きない。
+ */
+function handleEquipOk(state: GameState, scene: MenuScene, ctx: Ctx): StepResult {
+  if (scene.actor === undefined) return state.party.members[scene.cursor] === undefined ? { state, effects: [] } : withScene(state, { ...scene, actor: scene.cursor, cursor: 0 });
+  const actorId = state.party.members[scene.actor];
+  if (actorId === undefined) return { state, effects: [] };
+  if (scene.slot === undefined) return withScene(state, { ...scene, slot: scene.cursor, cursor: 0 });
+  const slot = EQUIP_SLOTS[scene.slot];
+  if (slot === undefined) return { state, effects: [] };
+  const { slot: index, ...rest } = scene;
+  const next = changeEquip(state, ctx, actorId, slot, equipCandidates(state, ctx, slot)[scene.cursor]);
+  return next === undefined ? { state, effects: [] } : withScene(next, { ...rest, cursor: index });
+}
+
+/**
  * メニューの入力。キャンセルで一つ前の画面（メインならマップ）へ、メニューボタンで一度に閉じる。
  * セーブ/ロード画面の決定は `requestSave` / `requestLoad`（書き込み・読み込みは runtime）。
  */
@@ -121,9 +146,13 @@ export function handleMenuInput(state: GameState, input: InputFrame, ctx: Ctx): 
 
   if (input.triggered.has("menu")) return withScene(state, { kind: "map" });
   if (scene.confirm !== undefined) return handleConfirmInput(state, scene, scene.confirm, input);
-  // 対象を選んでいる間・スキル画面で使う人を選んだあとは、キャンセルで一つ内側に戻るだけ（メインメニューへは戻らない）
+  // 対象を選んでいる間・スキル/装備の画面で人（装備は欄も）を選んだあとは、キャンセルで一つ内側に戻るだけ（メインメニューへは戻らない）
   if (scene.pick !== undefined) return handlePickInput(state, scene, scene.pick, input, ctx);
-  if (scene.screen === "skill" && scene.actor !== undefined && input.triggered.has("cancel")) {
+  if (scene.screen === "equip" && scene.slot !== undefined && input.triggered.has("cancel")) {
+    const { slot, ...rest } = scene;
+    return withScene(state, { ...rest, cursor: slot });
+  }
+  if ((scene.screen === "skill" || scene.screen === "equip") && scene.actor !== undefined && input.triggered.has("cancel")) {
     const { actor, ...rest } = scene;
     return withScene(state, { ...rest, cursor: actor });
   }
@@ -156,6 +185,8 @@ export function handleMenuInput(state: GameState, input: InputFrame, ctx: Ctx): 
       if (user === undefined || skill === undefined || !fieldSkillUsable(skill)) return { state, effects: [] };
       return startUse(state, scene, { kind: "skill", id: skill.id, user }, ctx);
     }
+    case "equip":
+      return handleEquipOk(state, scene, ctx);
     case "save": {
       const slot = saveSlotNumbers()[scene.cursor];
       return slot === undefined ? { state, effects: [] } : { state, effects: [{ kind: "requestSave", slot }] };

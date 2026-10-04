@@ -148,6 +148,32 @@ describe("ゲーム進行", () => {
     expect(warnings(run([cmd("ChangeParty", { actor: "actor_nope", op: "add" })]).effects)).toHaveLength(1);
   });
 
+  it("ChangeEquipment equips an owned item (taking it from the party's items) and unequips back into the items", () => {
+    const gain = cmd("ChangeItems", { item: "item_sword", op: "gain", amount: c(1) });
+    const r = run([gain, cmd("ChangeEquipment", { actor: "actor_hero", slot: "weapon", item: "item_sword" })]);
+    expect(warnings(r.effects)).toEqual([]);
+    expect(r.state.actors["actor_hero" as never]!.equips).toEqual({ weapon: "item_sword" });
+    expect(r.state.party.items).toEqual({});
+    const off = run([cmd("ChangeEquipment", { actor: "actor_hero", slot: "weapon" })], { state: r.state });
+    expect(off.state.actors["actor_hero" as never]!.equips).toEqual({});
+    expect(off.state.party.items).toEqual({ item_sword: 1 });
+  });
+
+  it("ChangeEquipment warns and skips: not owned, wrong slot, non-equipment, unknown actor", () => {
+    const owned = run([cmd("ChangeItems", { item: "item_sword", op: "gain", amount: c(1) })]).state;
+    const cases = [
+      { actor: "actor_hero", slot: "weapon", item: "item_sword" }, // 持っていない（fresh の状態）
+      { actor: "actor_hero", slot: "armor", item: "item_sword" },
+      { actor: "actor_hero", slot: "weapon", item: "item_potion" },
+      { actor: "actor_nope", slot: "weapon", item: "item_sword" },
+    ];
+    for (const [i, params] of cases.entries()) {
+      const r = run([cmd("ChangeEquipment", params)], i === 0 ? {} : { state: owned });
+      expect(warnings(r.effects), JSON.stringify(params)).toHaveLength(1);
+      expect(r.state.actors["actor_hero" as never]!.equips).toBeUndefined();
+    }
+  });
+
   describe("HP / MP / 経験値 / レベル", () => {
     const hero = (s: GameState) => s.actors["actor_hero" as never]!;
     it("ChangeHp clamps to [1, max] (or [0, max] when death is allowed); the dead stay dead when damaged", () => {
@@ -482,6 +508,7 @@ describe("commands-smoke（全コマンドを 1 回ずつ使うイベント）",
     expect(r.state.party.gold).toBe(90); // +100、ポーションを 1 個買って -10
     expect(r.state.party.items).toEqual({ item_potion: 4 });
     expect(r.state.party.members).toEqual(["actor_hero"]);
+    expect(r.state.actors["actor_hero" as never]!.equips).toEqual({ weapon: "item_sword" });
   });
 
   it("the scene events (transfer / battle / save / load / game over / title) each do their job", () => {

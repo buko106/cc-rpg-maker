@@ -129,6 +129,16 @@
             "value": 30
           }
         ]
+      },
+      "item_sword": {
+        "id": "item_sword",
+        "name": "銅の剣",
+        "kind": "weapon",
+        "price": 50,
+        "effects": [],
+        "params": {
+          "atk": 3
+        }
       }
     },
     "enemies": {

@@ -4,15 +4,17 @@ import type { GameState } from "../state.js";
 /** タイトルのコマンド（順序が `scene.cursor` の意味）。表示文言は runtime が `system.terms[key]` から引く。 */
 export const TITLE_ITEMS = ["newGame", "continue"] as const;
 /** メニューのコマンド（すべて）。 */
-export const MENU_ITEMS = ["item", "skill", "status", "save", "load"] as const;
+export const MENU_ITEMS = ["item", "skill", "equip", "status", "save", "load"] as const;
 export type MenuItem = (typeof MENU_ITEMS)[number];
 
 /**
  * このプロジェクトのメインメニューに並ぶコマンド（順序が `scene.cursor` の意味）。
- * `system.menuSave: false` なら「セーブ」が無く、`system.menuSkill` が `true` でなければ「スキル」が無い。
+ * `system.menuSave: false` なら「セーブ」が無く、`system.menuSkill` / `system.menuEquip` が `true` でなければ「スキル」/「装備」が無い。
  */
-export const menuItems = (project: ProjectView): readonly MenuItem[] =>
-  MENU_ITEMS.filter((i) => (i === "save" ? project.project.system.menuSave !== false : i === "skill" ? project.project.system.menuSkill === true : true));
+export const menuItems = (project: ProjectView): readonly MenuItem[] => {
+  const system = project.project.system;
+  return MENU_ITEMS.filter((i) => (i === "save" ? system.menuSave !== false : i === "skill" ? system.menuSkill === true : i === "equip" ? system.menuEquip === true : true));
+};
 
 /** セーブ/ロード画面に並べるスロット番号は `SAVE_SLOT_FIRST` から `SAVE_SLOT_COUNT` 個（スロット 0 はオートセーブ用で別扱い）。 */
 export const SAVE_SLOT_FIRST = 1;

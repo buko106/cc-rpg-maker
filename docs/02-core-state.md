@@ -220,7 +220,7 @@ export const snapshotMigrations: readonly { from: number; to: number; migrate(s:
 - **`SceneState` に `shop`**：`{ kind: "shop"; goods; canSell; owner; screen: "command" | "buy" | "sell"; cursor; quantity? }`（`ShopScene`）。`ShopProcessing`（03）が開き、閉じるとマップに戻る。入力は `game/shop.ts`、`handleTick` はメニューと同じく `tick` とプレイ時間だけを進める。`stripTransient` はマップに戻す。`WaitState` に `{ kind: "shop" }` を追加した。
 - **セーブの 3 種類**：①メニューから（従来。`save` 画面の決定が `requestSave { slot }`。`system.menuSave: false` でメインメニューから「セーブ」を外せる）、②イベントから（`SaveGame`＝セーブポータル。同じセーブ画面を直接開く。03）、③オートセーブ（`system.autosave.onTransfer`）。どれも `requestSave` Effect で、書き込みは runtime（06）。
 - **オートセーブ**：`handleTick` の場所移動（`applyTransfer`）が移動先に着いたとき、`autosaveOnTransfer(project)` なら `{ kind: "requestSave", slot: AUTOSAVE_SLOT }`（`AUTOSAVE_SLOT = 0`、`confirmed` なし）を 1 つ出す。保存されるのは移動が済んだ状態で、移動を待っていたインタプリタは次の `tick` で続きから動く（ロードしても同じ）。
-- **メニューのコマンドの並び**（`game/scenes.ts`）：`menuItems(project)`。`MENU_ITEMS`（`item` / `skill` / `status` / `save` / `load`）から、`system.menuSave === false` のとき `save` を、`system.menuSkill` が `true` でないとき `skill` を除いたもの。メインメニューのカーソル・行数・サブ画面から戻るときのカーソル位置はこの並びに従う。`MenuScene.portal`（イベントが開いたセーブ/ロード画面）はキャンセルで直接マップに戻る。`handleMenuInput` の「キャンセルは一つ前の画面へ」の例外。
+- **メニューのコマンドの並び**（`game/scenes.ts`）：`menuItems(project)`。`MENU_ITEMS`（`item` / `skill` / `equip` / `status` / `save` / `load`）から、`system.menuSave === false` のとき `save` を、`system.menuSkill` / `system.menuEquip` が `true` でないとき `skill` / `equip` を除いたもの。メインメニューのカーソル・行数・サブ画面から戻るときのカーソル位置はこの並びに従う。`MenuScene.portal`（イベントが開いたセーブ/ロード画面）はキャンセルで直接マップに戻る。`handleMenuInput` の「キャンセルは一つ前の画面へ」の例外。
 - **スロット一覧の対応**（`game/scenes.ts`）：カーソル位置 → スロット番号は `saveSlotNumbers()`（セーブ画面。1〜`SAVE_SLOT_COUNT`）と `loadSlotNumbers(project)`（ロード画面とタイトルのコンティニュー。オートセーブが有効なら先頭にスロット 0 が付き、11 行になる。無効なら従来どおり 10 行）。セーブ画面にスロット 0 は並ばず、手動では書けない。`handleMenuInput` は `ctx` を取る（ロード画面の行数がプロジェクトの設定に依るため）。
 
 ## 実装メモ（ランダムエンカウント・メニューでの使用）
@@ -272,3 +272,8 @@ export const snapshotMigrations: readonly { from: number; to: number; migrate(s:
 - **セーブ**：`snapshot` の検証スキーマに `pluginState`（キーごとに JSON の値）を足した。JSON でない値（関数・`undefined` など）の入ったセーブは弾く。`pluginState` の無いセーブはそのまま読める。**`SNAPSHOT_VERSION` は上げていない**：足したのは省略できる項目だけで、これまでのセーブは変換なしで読めるから（バージョンを上げると、`pluginState` を使わないゲームのセーブまで古いビルドで読めなくなる）。古いビルドが `pluginState` の入ったセーブを読むと、検証で「不正」として弾かれる。
 - **使い道**：デモ「風鳴りの洞窟」（`@rpg/plugin-dungeon`。18）が、何階か・敵の位置と HP・落ちている物・歩いた場所・満腹度・ログを持つ。デモ「港町の釣り大会」（`@rpg/plugin-fishing`。19）は、図鑑（魚ごとの数と最大の大きさ）・大会の点数・釣りの 1 回分（待つ・あたり・巻き上げ）・図鑑や結果発表の画面を持つ。ほかに、クエストの記録・クラフトなど、数値の変数に収まらない状態をプラグインが持てる。
 
+## 実装メモ（装備）
+- **`ActorState.equips?`**：いまの装備（欄 → アイテム。空いた欄は無い）。一度も付け替えていないあいだは無く、データベースの初期装備（`Actor.equips`）のまま（`equipsOf`）。付け替えると全部の欄を持つ。省略可能なフィールドなので、古いセーブ・既存のリプレイのハッシュはそのまま（`snapshot.ts` のスキーマも省略可）。
+- **付け替え**（`game/equip.ts` の `changeEquip`）：付けるものはパーティの持ち物から 1 つ減り、外したものは持ち物に戻る。持っていない・欄が違う（`equipSlotOf`：武器 → `weapon`、防具 → `equipSlot ?? "armor"`）・いないアクターには付けられない（`undefined`）。最大 HP/MP が下がったら HP/MP を切り詰める（戦闘不能の HP 0 はそのまま）。職業ごとの装備の制限は無い（誰でも何でも付けられる）。
+- **能力値**：`actorParams(ctx, actorId, level, equips?)`（`battle/battlers.ts`）が装備の `params` を足す。`equips` を省略すると初期装備。戦闘の味方（`allyBattler`）・`ChangeHp` / `ChangeMp` / `ChangeLevel` の最大値（03）・メニューの表示（06）は、どれも `ActorState.equips` を使う（`actorParamsOf`）。
+- **メニューの装備画面**（`game/uiPhase.ts`）：`MenuScreen` に `equip` を足した。替える人を選び（`cursor` → 決定で `MenuScene.actor`）、欄を選び（`cursor` → 決定で `MenuScene.slot`。`EQUIP_SLOTS` の位置）、付けるものを選ぶ（`cursor` は `equipCandidates(state, ctx, slot)` の位置。末尾の 1 行は「外す」）。決定で付け替えて欄の一覧に戻る（カーソルはその欄）。キャンセルは一つ前（付けるもの → 欄 → 人 → メインメニュー）。

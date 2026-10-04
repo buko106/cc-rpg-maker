@@ -198,3 +198,8 @@ export type UiNode =
 - **折り返し**：`wrapLines` が全角を 1em・半角を約 0.55em として窓の幅に収まるよう折り返す（フォントを測らないので目安）。3 行目以降は出ない。
 - **テスト**：`projection/describe.test.ts`（自動の説明・折り返し・メニューでの出方・秘密の説明）、`shop.test.ts` / `battle.test.ts`（一覧での出方）。デモ「謎解きの館」の鍵に説明文を付けてある。
 
+## 実装メモ（装備画面）
+- **投影**（`projection/menu.ts` の `projectEquip`）：`equip` 画面（`system.menuEquip`）は、替える人の一覧（スキル画面と同じ `memberList`）→ 左上に装備欄（武器・防具・装飾品といまの装備。空きは「（なし）」）、左下に付けられる持ち物（`× 個数`。末尾に「（外す）」）、右に能力値、下端に説明の窓。付けるものを選んでいる間は、能力値の右に付け替えたあとの値（`paramsIfEquipped`）を `→ 値` で出し、上がれば緑（`\C[3]`）、下がれば赤（`\C[2]`）。説明は、欄を選んでいる間はその欄のいまの装備、付けるものを選んでいる間はその候補。
+- **用語**：`equip`（既定「装備」）、`equipWeapon` / `equipArmor` / `equipAccessory`（「武器」「防具」「装飾品」）、`unequip`（「（外す）」）。
+- **能力値は装備込み**：メインメニューのパーティ・スキル画面の最大 MP・ステータス画面の能力値と最大 HP/MP は、装備の加算を含む（`actorParamsOf`。戦闘の開始時の値と同じ）。これまではクラスの値だけだった。
+- **テスト**：`projection/screens.test.ts` の「装備」。操作の流れは core（`game/equip.test.ts`）、デモでの使い方は `apps/player/src/hokora-fixture.test.ts`。

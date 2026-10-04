@@ -1,4 +1,4 @@
-import { assetIdSchema, assetRefSchema, directionSchema, eventCommandSchema, eventIdSchema, err, mapIdSchema, nonNegativeInt, ok } from "@rpg/schema";
+import { assetIdSchema, assetRefSchema, directionSchema, equipSlotSchema, eventCommandSchema, eventIdSchema, err, mapIdSchema, nonNegativeInt, ok } from "@rpg/schema";
 import type { Result, SchemaIssue } from "@rpg/schema";
 import * as z from "zod";
 import type { Ctx } from "./ctx-types.js";
@@ -164,7 +164,10 @@ const serializedStateSchema = z.strictObject({
     turnWait: nonNegativeInt.optional(),
   }),
   party: z.strictObject({ gold: nonNegativeInt, members: z.array(z.string()), items: z.record(z.string(), nonNegativeInt) }),
-  actors: z.record(z.string(), z.strictObject({ id: z.string(), name: z.string(), level: int, exp: nonNegativeInt, hp: int, mp: int })),
+  actors: z.record(
+    z.string(),
+    z.strictObject({ id: z.string(), name: z.string(), level: int, exp: nonNegativeInt, hp: int, mp: int, equips: z.partialRecord(equipSlotSchema, z.string()).optional() }),
+  ),
   switches: z.record(z.string(), z.boolean()),
   variables: z.record(z.string(), z.number()),
   selfSwitches: z.record(z.string(), z.boolean()),

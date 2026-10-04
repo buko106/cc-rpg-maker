@@ -1,4 +1,4 @@
-import type { ActorId, BuffParam, Item, ItemId, Param, Skill, SkillId } from "@rpg/schema";
+import type { ActorId, BuffParam, EquipSlot, Item, ItemId, Param, Skill, SkillId } from "@rpg/schema";
 import { PARAMS } from "@rpg/schema";
 import type { Ctx } from "../ctx-types.js";
 import type { BattlerView } from "../expression/index.js";
@@ -76,13 +76,13 @@ export function hasRestriction(ctx: ProjectCtx, b: Battler): boolean {
 /** 行動できる（生きていて、行動を制限する状態が無い）。 */
 export const canAct = (ctx: ProjectCtx, b: Battler): boolean => isAlive(b) && !hasRestriction(ctx, b);
 
-/** アクターの装備品のパラメータ加算を含めた基本パラメータ。 */
-export function actorParams(ctx: ProjectCtx, actorId: ActorId, level: number): Record<Param, number> {
+/** アクターの装備品のパラメータ加算を含めた基本パラメータ。`equips` を省略すると、データベースの初期装備（`Actor.equips`）で計算する。 */
+export function actorParams(ctx: ProjectCtx, actorId: ActorId, level: number, equips?: Partial<Record<EquipSlot, ItemId>>): Record<Param, number> {
   const actor = ctx.project.actor(actorId);
   const cls = actor === undefined ? undefined : ctx.project.class(actor.classId);
   const params = {} as Record<Param, number>;
   for (const p of PARAMS) params[p] = paramAt(cls, p, level);
-  for (const itemId of Object.values(actor?.equips ?? {})) {
+  for (const itemId of Object.values(equips ?? actor?.equips ?? {})) {
     const add = ctx.project.item(itemId)?.params;
     if (add === undefined) continue;
     for (const p of PARAMS) params[p] += add[p] ?? 0;
@@ -94,7 +94,7 @@ export function actorParams(ctx: ProjectCtx, actorId: ActorId, level: number): R
 export function allyBattler(state: GameState, ctx: ProjectCtx, actorId: ActorId): Battler | undefined {
   const a = Object.hasOwn(state.actors, actorId) ? state.actors[actorId] : undefined;
   if (a === undefined) return undefined;
-  const params = actorParams(ctx, actorId, a.level);
+  const params = actorParams(ctx, actorId, a.level, a.equips);
   return {
     id: actorId,
     name: a.name,
