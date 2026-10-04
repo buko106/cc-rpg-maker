@@ -34,6 +34,12 @@ describe("pnpm bot（cli.ts）", () => {
     expect(all.length).toBeGreaterThan(5);
   });
 
+  it("--party でパーティの顔ぶれを変える（あとから仲間になる人を入れて試す）", () => {
+    const table = runBotCli(["tower", "--troop", "tr_dummy", "--runs", "1", "--party", "actor_hero, actor_mage,actor_cleric"]);
+    expect(table).toMatch(/^■ かかし（tr_dummy）  パーティ：勇者・魔法使い・僧侶  作戦：smart  各 1 回\n/);
+    expect(() => runBotCli(["tower", "--troop", "tr_dummy", "--runs", "1", "--party", "nobody"])).toThrow(/nobody/);
+  });
+
   it("使い方の間違いは例外", () => {
     expect(() => runBotCli(["hokora"])).toThrow(/使い方/);
     expect(() => runBotCli(["hokora", "--troop", "tr_slime", "--policy", "nope"])).toThrow(/--policy/);

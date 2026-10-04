@@ -1,7 +1,7 @@
 /**
  * 難易度調整の bot を端末から使う（`pnpm bot`。docs/20-bot.md）。`tools/bot.mjs` が esbuild でまとめて動かす（Node 専用。`index.ts` からは出さない）。
  *
- *   pnpm bot <プロジェクトのフォルダ | fixtures の名前> --troop <ID|all> [--levels 3-8] [--runs 30] [--policy smart] [--seed bot] [--items potion:3] [--equip actor_hero:wp_iron] [--json]
+ *   pnpm bot <プロジェクトのフォルダ | fixtures の名前> --troop <ID|all> [--levels 3-8] [--runs 30] [--policy smart] [--seed bot] [--party actor_hero,actor_mage] [--items potion:3] [--equip actor_hero:wp_iron] [--json]
  */
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
@@ -12,7 +12,7 @@ import type { LevelRow } from "./simulate.js";
 import { createCtx, createProjectView, initialState } from "@rpg/core";
 import type { Ctx } from "@rpg/core";
 import { parseMapData, parseProject } from "@rpg/schema";
-import type { MapData, MapId } from "@rpg/schema";
+import type { ActorId, MapData, MapId } from "@rpg/schema";
 
 const FIXTURES = resolve(import.meta.dirname, "../../../fixtures/projects/v1");
 
@@ -80,13 +80,14 @@ export function runBotCli(argv: readonly string[]): string {
       runs: { type: "string", default: "30" },
       policy: { type: "string", default: "smart" },
       seed: { type: "string", default: "bot" },
+      party: { type: "string" },
       items: { type: "string" },
       equip: { type: "string" },
       json: { type: "boolean", default: false },
     },
   });
   const [target] = positionals;
-  if (target === undefined || values.troop === undefined) throw new Error("使い方: pnpm bot <プロジェクト> --troop <ID|all> [--levels 3-8] [--runs 30] [--policy smart|attack|guard] [--seed bot] [--items potion:3] [--equip actor_hero:wp_iron] [--json]");
+  if (target === undefined || values.troop === undefined) throw new Error("使い方: pnpm bot <プロジェクト> --troop <ID|all> [--levels 3-8] [--runs 30] [--policy smart|attack|guard] [--seed bot] [--party actor_hero,actor_mage] [--items potion:3] [--equip actor_hero:wp_iron] [--json]");
   const ctx = loadProjectDir(target);
   const policy = POLICIES[values.policy];
   if (policy === undefined) throw new Error(`--policy: ${values.policy} は無い（${Object.keys(POLICIES).join(" / ")}）`);
@@ -96,6 +97,7 @@ export function runBotCli(argv: readonly string[]): string {
   const state = initialState(ctx, values.seed);
   const levels = values.levels === undefined ? [Math.max(1, ...state.party.members.map((id) => state.actors[id]?.level ?? 1))] : parseLevels(values.levels);
   const party = {
+    ...(values.party === undefined ? {} : { members: values.party.split(",").map((id) => id.trim()) }),
     ...(values.items === undefined ? {} : { items: parseItems(values.items) }),
     ...(values.equip === undefined ? {} : { equips: parseEquips(values.equip) }),
   };
@@ -105,6 +107,6 @@ export function runBotCli(argv: readonly string[]): string {
     rows: levelSweep(state, ctx, levels, { troop, runs, policy, seed: values.seed, party }),
   }));
   if (values.json) return JSON.stringify(results.map(({ troop, rows }) => ({ troop, levels: rows.map((r) => ({ level: r.level, ...r.report })) })), null, 2);
-  const members = state.party.members.map((id) => ctx.project.actor(id)?.name ?? id).join("・");
+  const members = (party.members ?? state.party.members).map((id) => ctx.project.actor(id as ActorId)?.name ?? id).join("・");
   return results.map(({ troop, name, rows }) => `■ ${name}（${troop}）  パーティ：${members}  作戦：${values.policy}  各 ${runs} 回\n${formatLevelTable(rows)}`).join("\n\n");
 }

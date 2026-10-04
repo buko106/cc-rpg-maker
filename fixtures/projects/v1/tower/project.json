@@ -706,6 +706,32 @@
         "exp": 20,
         "gold": 15
       },
+      "en_goblin_kid": {
+        "id": "en_goblin_kid",
+        "name": "ちびゴブリン",
+        "graphic": {
+          "asset": "f00511e5669cb558"
+        },
+        "params": {
+          "mhp": 60,
+          "mmp": 0,
+          "atk": 9,
+          "def": 6,
+          "mat": 0,
+          "mdf": 3,
+          "agi": 12,
+          "luk": 4
+        },
+        "actions": [
+          {
+            "skill": "sk_club",
+            "rating": 5
+          }
+        ],
+        "drops": [],
+        "exp": 6,
+        "gold": 5
+      },
       "en_spider": {
         "id": "en_spider",
         "name": "大グモ",
@@ -744,6 +770,36 @@
         ],
         "exp": 80,
         "gold": 60
+      },
+      "en_spiderling": {
+        "id": "en_spiderling",
+        "name": "子グモ",
+        "graphic": {
+          "asset": "52e6c80b2f5b89b6"
+        },
+        "params": {
+          "mhp": 60,
+          "mmp": 0,
+          "atk": 10,
+          "def": 6,
+          "mat": 0,
+          "mdf": 4,
+          "agi": 14,
+          "luk": 4
+        },
+        "actions": [
+          {
+            "skill": "sk_bite",
+            "rating": 5
+          },
+          {
+            "skill": "sk_fang",
+            "rating": 3
+          }
+        ],
+        "drops": [],
+        "exp": 8,
+        "gold": 4
       },
       "en_golem": {
         "id": "en_golem",
@@ -785,6 +841,42 @@
         "exp": 150,
         "gold": 120
       },
+      "en_golem_core": {
+        "id": "en_golem_core",
+        "name": "暴走ゴーレム",
+        "graphic": {
+          "asset": "ea028724936b8752"
+        },
+        "params": {
+          "mhp": 500,
+          "mmp": 0,
+          "atk": 24,
+          "def": 14,
+          "mat": 0,
+          "mdf": 6,
+          "agi": 8,
+          "luk": 4
+        },
+        "actions": [
+          {
+            "skill": "sk_punch",
+            "rating": 5
+          },
+          {
+            "skill": "sk_rocks",
+            "rating": 5,
+            "condition": "turn % 2 == 0"
+          }
+        ],
+        "drops": [
+          {
+            "item": "item_hipotion",
+            "rate": 1
+          }
+        ],
+        "exp": 150,
+        "gold": 120
+      },
       "en_sorcerer": {
         "id": "en_sorcerer",
         "name": "闇の魔術師",
@@ -792,7 +884,7 @@
           "asset": "1966439fb7193c7b"
         },
         "params": {
-          "mhp": 280,
+          "mhp": 250,
           "mmp": 120,
           "atk": 10,
           "def": 14,
@@ -834,7 +926,7 @@
         "params": {
           "mhp": 120,
           "mmp": 0,
-          "atk": 18,
+          "atk": 16,
           "def": 14,
           "mat": 0,
           "mdf": 6,
@@ -880,11 +972,41 @@
           {
             "skill": "sk_roar",
             "rating": 3
+          }
+        ],
+        "drops": [],
+        "exp": 500,
+        "gold": 500
+      },
+      "en_dragon_rage": {
+        "id": "en_dragon_rage",
+        "name": "怒れる炎の竜",
+        "graphic": {
+          "asset": "2d316789b1a92a3c"
+        },
+        "params": {
+          "mhp": 1100,
+          "mmp": 0,
+          "atk": 26,
+          "def": 20,
+          "mat": 22,
+          "mdf": 14,
+          "agi": 18,
+          "luk": 10
+        },
+        "actions": [
+          {
+            "skill": "sk_bite",
+            "rating": 5
+          },
+          {
+            "skill": "sk_breath",
+            "rating": 4
           },
           {
             "skill": "sk_inferno",
             "rating": 8,
-            "condition": "a.hp * 2 < a.mhp && turn % 3 == 0"
+            "condition": "turn % 3 == 0"
           }
         ],
         "drops": [],
@@ -903,7 +1025,25 @@
             "y": 150
           }
         ],
-        "pages": []
+        "pages": [
+          {
+            "condition": {
+              "kind": "turn",
+              "turn": 1
+            },
+            "commands": [
+              {
+                "code": "ShowText",
+                "params": {
+                  "text": "かかしは だまって 立っている……\n（遠慮なく 打ちこもう！）",
+                  "position": "top",
+                  "background": "window"
+                },
+                "indent": 0
+              }
+            ]
+          }
+        ]
       },
       "tr_goblins": {
         "id": "tr_goblins",
@@ -918,9 +1058,66 @@
             "enemy": "en_goblin",
             "x": 266,
             "y": 150
+          },
+          {
+            "enemy": "en_goblin_kid",
+            "x": 208,
+            "y": 184,
+            "hidden": true
           }
         ],
-        "pages": []
+        "pages": [
+          {
+            "condition": {
+              "kind": "turn",
+              "turn": 1
+            },
+            "commands": [
+              {
+                "code": "ShowText",
+                "params": {
+                  "text": "ゴブリン兄「行くぞ、弟よ！」\nゴブリン弟「おうよ、兄者！」",
+                  "position": "top",
+                  "background": "window"
+                },
+                "indent": 0
+              }
+            ]
+          },
+          {
+            "condition": {
+              "kind": "turn",
+              "turn": 2
+            },
+            "commands": [
+              {
+                "code": "ShowText",
+                "params": {
+                  "text": "ゴブリン弟「おーい、末っ子！ 出番だぞ！」",
+                  "position": "top",
+                  "background": "window"
+                },
+                "indent": 0
+              },
+              {
+                "code": "EnemyAppear",
+                "params": {
+                  "member": 2
+                },
+                "indent": 0
+              },
+              {
+                "code": "ShowText",
+                "params": {
+                  "text": "ちびゴブリンが 加勢に 来た！",
+                  "position": "top",
+                  "background": "window"
+                },
+                "indent": 0
+              }
+            ]
+          }
+        ]
       },
       "tr_spider": {
         "id": "tr_spider",
@@ -930,9 +1127,80 @@
             "enemy": "en_spider",
             "x": 208,
             "y": 150
+          },
+          {
+            "enemy": "en_spiderling",
+            "x": 96,
+            "y": 176,
+            "hidden": true
+          },
+          {
+            "enemy": "en_spiderling",
+            "x": 320,
+            "y": 176,
+            "hidden": true
           }
         ],
-        "pages": []
+        "pages": [
+          {
+            "condition": {
+              "kind": "turn",
+              "turn": 1
+            },
+            "commands": [
+              {
+                "code": "ShowText",
+                "params": {
+                  "text": "大グモが 天井から 糸を つたって 降りてきた！",
+                  "position": "top",
+                  "background": "window"
+                },
+                "indent": 0
+              }
+            ]
+          },
+          {
+            "condition": {
+              "kind": "enemyHp",
+              "member": 0,
+              "percent": 50
+            },
+            "commands": [
+              {
+                "code": "ShowText",
+                "params": {
+                  "text": "大グモは 巣の 卵を 破った！",
+                  "position": "top",
+                  "background": "window"
+                },
+                "indent": 0
+              },
+              {
+                "code": "EnemyAppear",
+                "params": {
+                  "member": 1
+                },
+                "indent": 0
+              },
+              {
+                "code": "EnemyAppear",
+                "params": {
+                  "member": 2
+                },
+                "indent": 0
+              },
+              {
+                "code": "ShowText",
+                "params": {
+                  "text": "子グモが 2匹 かえった！",
+                  "position": "top",
+                  "background": "window"
+                },
+                "indent": 0
+              }
+            ]
+          }
+        ]
       },
       "tr_golem": {
         "id": "tr_golem",
@@ -944,7 +1212,73 @@
             "y": 146
           }
         ],
-        "pages": []
+        "pages": [
+          {
+            "condition": {
+              "kind": "turn",
+              "turn": 1
+            },
+            "commands": [
+              {
+                "code": "ShowText",
+                "params": {
+                  "text": "ストーンゴーレムの 目に 赤い 光が ともった。",
+                  "position": "top",
+                  "background": "window"
+                },
+                "indent": 0
+              }
+            ]
+          },
+          {
+            "condition": {
+              "kind": "enemyHp",
+              "member": 0,
+              "percent": 50
+            },
+            "commands": [
+              {
+                "code": "FlashScreen",
+                "params": {
+                  "color": {
+                    "r": 255,
+                    "g": 140,
+                    "b": 60,
+                    "a": 0.6
+                  },
+                  "duration": 20
+                },
+                "indent": 0
+              },
+              {
+                "code": "EnemyTransform",
+                "params": {
+                  "member": 0,
+                  "enemy": "en_golem_core"
+                },
+                "indent": 0
+              },
+              {
+                "code": "ShowText",
+                "params": {
+                  "text": "ゴーレムの 岩の鎧が はがれ落ちた！\n「……ボウソウ…… モード……」",
+                  "position": "top",
+                  "background": "window"
+                },
+                "indent": 0
+              },
+              {
+                "code": "ShowText",
+                "params": {
+                  "text": "（守りは 弱くなったが、攻撃が 激しくなった！）",
+                  "position": "top",
+                  "background": "window"
+                },
+                "indent": 0
+              }
+            ]
+          }
+        ]
       },
       "tr_sorcerer": {
         "id": "tr_sorcerer",
@@ -964,9 +1298,80 @@
             "enemy": "en_skeleton",
             "x": 316,
             "y": 156
+          },
+          {
+            "enemy": "en_skeleton",
+            "x": 40,
+            "y": 120,
+            "hidden": true
+          },
+          {
+            "enemy": "en_skeleton",
+            "x": 376,
+            "y": 120,
+            "hidden": true
           }
         ],
-        "pages": []
+        "pages": [
+          {
+            "condition": {
+              "kind": "turn",
+              "turn": 1
+            },
+            "commands": [
+              {
+                "code": "ShowText",
+                "params": {
+                  "text": "闇の魔術師が 杖を 掲げると、\n骸骨兵たちが いっせいに 剣を 抜いた！",
+                  "position": "top",
+                  "background": "window"
+                },
+                "indent": 0
+              }
+            ]
+          },
+          {
+            "condition": {
+              "kind": "enemyHp",
+              "member": 1,
+              "percent": 40
+            },
+            "commands": [
+              {
+                "code": "ShowText",
+                "params": {
+                  "text": "闇の魔術師「おのれ……！\n地の底より 来たれ、骸骨兵！」",
+                  "position": "top",
+                  "background": "window"
+                },
+                "indent": 0
+              },
+              {
+                "code": "EnemyAppear",
+                "params": {
+                  "member": 3
+                },
+                "indent": 0
+              },
+              {
+                "code": "EnemyAppear",
+                "params": {
+                  "member": 4
+                },
+                "indent": 0
+              },
+              {
+                "code": "ShowText",
+                "params": {
+                  "text": "骸骨兵が 2体 よみがえった！",
+                  "position": "top",
+                  "background": "window"
+                },
+                "indent": 0
+              }
+            ]
+          }
+        ]
       },
       "tr_dragon": {
         "id": "tr_dragon",
@@ -978,7 +1383,95 @@
             "y": 144
           }
         ],
-        "pages": []
+        "pages": [
+          {
+            "condition": {
+              "kind": "turn",
+              "turn": 1
+            },
+            "commands": [
+              {
+                "code": "FlashScreen",
+                "params": {
+                  "color": {
+                    "r": 255,
+                    "g": 200,
+                    "b": 120,
+                    "a": 0.5
+                  },
+                  "duration": 16
+                },
+                "indent": 0
+              },
+              {
+                "code": "ShowText",
+                "params": {
+                  "text": "炎の竜は 天に 向かって 吠えた！\n「グオオオオオ……！」",
+                  "position": "top",
+                  "background": "window"
+                },
+                "indent": 0
+              }
+            ]
+          },
+          {
+            "condition": {
+              "kind": "enemyHp",
+              "member": 0,
+              "percent": 50
+            },
+            "commands": [
+              {
+                "code": "FlashScreen",
+                "params": {
+                  "color": {
+                    "r": 255,
+                    "g": 60,
+                    "b": 40,
+                    "a": 0.7
+                  },
+                  "duration": 24
+                },
+                "indent": 0
+              },
+              {
+                "code": "EnemyTransform",
+                "params": {
+                  "member": 0,
+                  "enemy": "en_dragon_rage"
+                },
+                "indent": 0
+              },
+              {
+                "code": "ShowText",
+                "params": {
+                  "text": "竜の 鱗が 真っ赤に 燃えあがった！\n（\\C[2]業火\\C[0]に 気をつけよう）",
+                  "position": "top",
+                  "background": "window"
+                },
+                "indent": 0
+              }
+            ]
+          },
+          {
+            "condition": {
+              "kind": "enemyHp",
+              "member": 0,
+              "percent": 20
+            },
+            "commands": [
+              {
+                "code": "ShowText",
+                "params": {
+                  "text": "炎の竜は ふらついている……！\nあと 少しだ！",
+                  "position": "top",
+                  "background": "window"
+                },
+                "indent": 0
+              }
+            ]
+          }
+        ]
       }
     },
     "states": {
@@ -1085,6 +1578,38 @@
       },
       "0afff08f1d6cb7b0": {
         "name": "dragon.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 624,
+        "width": 96,
+        "height": 96
+      },
+      "f00511e5669cb558": {
+        "name": "goblin_kid.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 291,
+        "width": 32,
+        "height": 32
+      },
+      "52e6c80b2f5b89b6": {
+        "name": "spiderling.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 361,
+        "width": 32,
+        "height": 32
+      },
+      "ea028724936b8752": {
+        "name": "golem_core.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 352,
+        "width": 64,
+        "height": 64
+      },
+      "2d316789b1a92a3c": {
+        "name": "dragon_rage.png",
         "kind": "image",
         "mime": "image/png",
         "size": 624,

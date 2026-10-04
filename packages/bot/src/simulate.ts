@@ -7,6 +7,8 @@ import { smartPolicy } from "./policies.js";
 
 /** 試す前のパーティの整え方。 */
 export interface PartySetup {
+  /** パーティの顔ぶれ（アクター ID の並び）。省略時はいまのまま。いないアクターは例外。 */
+  members?: readonly string[];
   /** パーティ全員をこのレベルにする（経験値もそのレベルの最低値）。省略時はいまのまま。 */
   level?: number;
   /** 持ち物をこの数にする（ここに無いアイテムはそのまま）。 */
@@ -17,8 +19,13 @@ export interface PartySetup {
   fullRecover?: boolean;
 }
 
-/** パーティを `setup` のとおりに整える（レベル・装備 → 全快 → 持ち物）。 */
+/** パーティを `setup` のとおりに整える（顔ぶれ → レベル・装備 → 全快 → 持ち物）。 */
 export function prepareParty(state: GameState, ctx: Ctx, setup: PartySetup = {}): GameState {
+  if (setup.members !== undefined) {
+    const missing = setup.members.find((id) => !Object.hasOwn(state.actors, id));
+    if (missing !== undefined) throw new Error(`prepareParty: アクター ${missing} がいない`);
+    state = { ...state, party: { ...state.party, members: setup.members.map((id) => id as ActorId) } };
+  }
   const actors = { ...state.actors };
   for (const id of state.party.members) {
     const actor = Object.hasOwn(actors, id) ? actors[id] : undefined;

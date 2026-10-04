@@ -108,6 +108,14 @@ describe("試行とまとめ", () => {
     expect(prepareParty(kit.state, ctx, { level: 500 }).actors[HERO as never]!.level).toBe(99);
   });
 
+  it("パーティを整える：顔ぶれ（いないアクターは例外）", () => {
+    const s = prepareParty(kit.state, ctx, { members: [MAGE], level: 3 });
+    expect(s.party.members).toEqual([MAGE]);
+    expect(s.actors[MAGE as never]!.level).toBe(3);
+    expect(s.actors[HERO as never]!.level).toBe(kit.state.actors[HERO as never]!.level);
+    expect(() => prepareParty(kit.state, ctx, { members: ["nobody"] })).toThrow(/nobody/);
+  });
+
   it("パーティを整える：装備（欄はアイテムから。持ち物は減らさない）。付けられないものは例外", () => {
     const s = prepareParty(kit.state, ctx, { equips: { [HERO]: ["sword"] } });
     expect(s.actors[HERO as never]!.equips).toEqual({ weapon: "sword" });

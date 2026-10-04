@@ -1,5 +1,5 @@
 import { loadFixtureProject } from "@rpg/test-utils";
-import { initialState, startBattle, step } from "@rpg/core";
+import { createRandom, initialState, startBattle, step } from "@rpg/core";
 import type { GameState } from "@rpg/core";
 import { describe, expect, it } from "vitest";
 import { battleBotInput, levelSweep, prepareParty, smartPolicy } from "./index.js";
@@ -42,5 +42,68 @@ describe("ほこらの冒険（fixtures/projects/v1/hokora）", () => {
     }
     expect(seen).toEqual(["名乗り", "増援", "変身"]);
     expect(s.scene.kind).toBe("map");
+  });
+});
+
+describe("バトルタワー（fixtures/projects/v1/tower）", () => {
+  const { ctx } = loadFixtureProject("tower");
+  const start = initialState(ctx, "tower-bot");
+  /** 3F の大グモを倒すと僧侶が加わる。支度金でもらうポーション 3 個を持って挑む。 */
+  const party = (troop: string) => ({
+    members: ["tr_goblins", "tr_spider", "tr_dummy"].includes(troop) ? ["actor_hero", "actor_mage"] : ["actor_hero", "actor_mage", "actor_cleric"],
+    items: { item_potion: 3 },
+  });
+  const rate = (troop: string, level: number): number => levelSweep(start, ctx, [level], { troop, runs: 30, seed: "tower", party: party(troop) })[0]!.report.winRate;
+
+  it("[calibration] 番人には、ふつうに登って着いたときのレベルなら 8 割ほどは勝て、1 つ下のレベルでは苦しい", () => {
+    // ふつうに登ると 2F で Lv1、3F で Lv2、4F で Lv3、5F で Lv4（apps/player/src/tower-fixture.test.ts の通しプレイ）
+    expect(rate("tr_goblins", 1)).toBeGreaterThanOrEqual(0.9);
+    expect(rate("tr_spider", 2)).toBeGreaterThanOrEqual(0.75);
+    expect(rate("tr_spider", 1)).toBeLessThanOrEqual(0.5);
+    expect(rate("tr_golem", 3)).toBeGreaterThanOrEqual(0.7);
+    expect(rate("tr_golem", 2)).toBeLessThanOrEqual(0.3);
+    expect(rate("tr_sorcerer", 4)).toBeGreaterThanOrEqual(0.75);
+    expect(rate("tr_sorcerer", 3)).toBeLessThanOrEqual(0.3);
+  });
+
+  it("[calibration] 屋上の炎の竜は、着いたとき（Lv5）で 7 割前後、Lv6 ならほぼ勝てる。Lv4 ではまず勝てない", () => {
+    expect(rate("tr_dragon", 4)).toBeLessThanOrEqual(0.15);
+    const lv5 = rate("tr_dragon", 5);
+    expect(lv5).toBeGreaterThanOrEqual(0.55);
+    expect(lv5).toBeLessThan(0.9);
+    expect(rate("tr_dragon", 6)).toBeGreaterThanOrEqual(0.9);
+  });
+
+  /** `troop` と `level` で 1 回戦い、敵の出現と変身を順に書き出す。 */
+  function happenings(troop: string, level: number, seed: string): string[] {
+    const seeded: GameState = { ...prepareParty(start, ctx, { level, ...party(troop) }), rng: createRandom(seed).serialize() };
+    let s = startBattle(seeded, troop as never, { canEscape: false, canLose: true }, ctx);
+    const seen: string[] = [];
+    let before = s.battle!.enemies;
+    const policy = smartPolicy();
+    for (let i = 0; i < 20000 && s.scene.kind === "battle"; i++) {
+      s = step(s, battleBotInput(s, ctx, policy), ctx).state;
+      const now = s.battle?.enemies;
+      if (now === undefined) break;
+      for (const [id, e] of Object.entries(now)) {
+        const was = before[id as keyof typeof before]!;
+        if (was.hidden && !e.hidden) seen.push(`出現 ${e.name}`);
+        if (was.enemyId !== e.enemyId) seen.push(`変身 ${e.name}`);
+      }
+      before = now;
+    }
+    expect(s.scene.kind).toBe("map");
+    return seen;
+  }
+
+  it("どの番人の戦いにもバトルイベントがあり、増援や変身が起きる", () => {
+    for (const troop of ["tr_dummy", "tr_goblins", "tr_spider", "tr_golem", "tr_sorcerer", "tr_dragon"]) {
+      expect(ctx.project.troop(troop as never)!.pages.length, troop).toBeGreaterThan(0);
+    }
+    expect(happenings("tr_goblins", 2, "a")).toEqual(["出現 ちびゴブリン"]);
+    expect(happenings("tr_spider", 3, "a")).toEqual(["出現 子グモA", "出現 子グモB"]);
+    expect(happenings("tr_golem", 4, "a")).toEqual(["変身 暴走ゴーレム"]);
+    expect(happenings("tr_sorcerer", 5, "a")).toEqual(["出現 骸骨兵C", "出現 骸骨兵D"]);
+    expect(happenings("tr_dragon", 7, "a")).toEqual(["変身 怒れる炎の竜"]);
   });
 });
