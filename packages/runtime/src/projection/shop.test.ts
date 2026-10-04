@@ -48,13 +48,14 @@ describe("projectFrame（ショップ）", () => {
     expect(textsOf(projectShop(shopState({ screen: "sell", cursor: 0 }), view, size))).toContain("味方1人：HPを30回復");
   });
 
-  it("購入の一覧：カーソルは品物の行。買えないものは灰色", () => {
+  it("購入の一覧：カーソルは品物の行（分類の見出しの行は飛ばす）。買えないものは灰色", () => {
     const s = shopState({ screen: "buy", cursor: 0 }, { gold: 5 });
     const nodes = flatten(projectShop(s, view, size));
     const grey = nodes.filter((n) => n.kind === "text" && n.text === "ポーション");
     expect(grey[0]).toMatchObject({ color: { r: 128, g: 128, b: 128 } });
     const at = (cursor: number): number => (cursors(projectShop(shopState({ screen: "buy", cursor }), view, size))[0] as { y: number }).y;
-    expect(at(1) - at(0)).toBe(24);
+    expect(at(1) - at(0)).toBe(48); // ポーションと古い鍵のあいだに「大事なもの」の見出し
+    expect(textsOf(projectShop(shopState({ screen: "buy", cursor: 0 }), view, size))).toEqual(expect.arrayContaining(["アイテム", "大事なもの"]));
     expect(cursors(projectShop(shopState(), view, size))).toHaveLength(1); // コマンド画面では一覧にカーソルは無い
   });
 

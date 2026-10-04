@@ -1,5 +1,7 @@
+import type { ProjectCtx } from "../battle/battlers.js";
 import type { ProjectView } from "../project-view.js";
 import type { GameState } from "../state.js";
+import { sortByCategory } from "./item-order.js";
 
 /** タイトルのコマンド（順序が `scene.cursor` の意味）。表示文言は runtime が `system.terms[key]` から引く。 */
 export const TITLE_ITEMS = ["newGame", "continue"] as const;
@@ -31,10 +33,11 @@ export const saveSlotNumbers = (): number[] => Array.from({ length: SAVE_SLOT_CO
 /** ロード画面・コンティニューに並ぶスロット番号。オートセーブが有効なら先頭にスロット 0 が付く。 */
 export const loadSlotNumbers = (project: ProjectView): number[] => (autosaveOnTransfer(project) ? [AUTOSAVE_SLOT, ...saveSlotNumbers()] : saveSlotNumbers());
 
-/** メニューのアイテム画面に並ぶアイテム ID（所持数 1 以上、ID 順）。 */
-export function menuItemIds(state: GameState): string[] {
-  return Object.entries(state.party.items)
+/** メニューのアイテム画面に並ぶアイテム ID（所持数 1 以上）。分類の順（消耗品 → 武器 → 防具 → 装飾品 → 大事なもの。`sortByCategory`）、同じ分類の中は ID 順。 */
+export function menuItemIds(state: GameState, ctx: ProjectCtx): string[] {
+  const ids = Object.entries(state.party.items)
     .filter(([, count]) => count > 0)
     .map(([id]) => id)
     .sort();
+  return sortByCategory(ids, ctx);
 }

@@ -10,10 +10,10 @@ export * from "./interpreter/index.js";
 export { computeCamera, activePage, activePageIndex, canPass, currentMap, eventsToTrigger, moveCharacter, newCharacter, refreshEventPages, stateConditionHolds, tileKey, withTileChanges } from "./map/index.js";
 export type { MapTileChanges, PassabilityCtx } from "./map/index.js";
 export {
-  actorParamsOf, AUTOSAVE_SLOT, autosaveOnTransfer, changeEquip, dispatch, equipCandidates, equipsOf, equipSlotOf, fieldItemUsable, fieldScope, fieldSkills, fieldSkillUsable, initialState, isSellable, loadSlotNumbers, MENU_ITEMS, maxBuyQuantity, menuItemIds, menuItems, needsFieldTarget, openShop, paramAt, SAVE_SLOT_COUNT, SAVE_SLOT_FIRST, saveSlotNumbers, sellableItemIds, sellPrice, SHOP_ITEM_LIMIT, shopCommands,
-  paramsIfEquipped, shopListIds, step, TITLE_ITEMS, titleState, useOnField,
+  actorParamsOf, AUTOSAVE_SLOT, autosaveOnTransfer, changeEquip, dispatch, equipCandidates, equipsOf, equipSlotOf, fieldItemUsable, fieldScope, fieldSkills, fieldSkillUsable, initialState, isSellable, ITEM_CATEGORIES, itemCategory, loadSlotNumbers, MENU_ITEMS, maxBuyQuantity, menuItemIds, menuItems, needsFieldTarget, openShop, paramAt, SAVE_SLOT_COUNT, SAVE_SLOT_FIRST, saveSlotNumbers, sellableItemIds, sellPrice, SHOP_ITEM_LIMIT, shopCommands,
+  paramsIfEquipped, shopListIds, sortByCategory, step, TITLE_ITEMS, titleState, useOnField,
 } from "./game/index.js";
-export type { Action, Equips, FieldUse, InterpreterAction, StepResult } from "./game/index.js";
+export type { Action, Equips, FieldUse, ItemCategory, InterpreterAction, StepResult } from "./game/index.js";
 export { createCtx } from "./ctx.js";
 export type { Ctx } from "./ctx.js";
 export { warn } from "./effects.js";

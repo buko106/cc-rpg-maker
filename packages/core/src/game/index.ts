@@ -15,6 +15,8 @@ export { paramAt } from "../params.js";
 export { initialState, titleState } from "./initial.js";
 export type { Equips } from "./equip.js";
 export { actorParamsOf, changeEquip, equipCandidates, equipsOf, equipSlotOf, paramsIfEquipped } from "./equip.js";
+export type { ItemCategory } from "./item-order.js";
+export { ITEM_CATEGORIES, itemCategory, sortByCategory } from "./item-order.js";
 export type { FieldUse } from "./fieldUse.js";
 export { fieldItemUsable, fieldScope, fieldSkills, fieldSkillUsable, needsFieldTarget, useOnField } from "./fieldUse.js";
 export { isSellable, maxBuyQuantity, openShop, sellableItemIds, sellPrice, SHOP_ITEM_LIMIT, shopCommands, shopListIds } from "./shop.js";

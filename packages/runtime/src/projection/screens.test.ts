@@ -210,6 +210,25 @@ describe("projectFrame（メニュー）", () => {
       expect(find(ui, String(bareAtk + 10))).toBeDefined();
     });
 
+    it("アイテム画面は 消耗品 → 武器 → 装飾品 の順に、分類の見出しを挟んで並ぶ。カーソルは見出しを飛ばす", async () => {
+      const { view, state } = await equipState({ kind: "menu", screen: "item", cursor: 0 });
+      const withPotion = { ...state, party: { ...state.party, items: { ring: 1, copper: 1, potion: 2 } } } as GameState;
+      const patched = createProjectView(
+        { ...view.project, database: { ...view.project.database, items: { ...view.project.database.items, potion: { id: "potion", name: "ポーション", kind: "consumable", price: 1, effects: [{ kind: "recoverHp", value: 10 }] } } } } as unknown as Project,
+        {},
+      );
+      const ui = projectFrame(withPotion, patched).ui;
+      const texts = textsOf(ui);
+      const order = ["アイテム", "ポーション", "武器", "銅の剣", "装飾品", "指輪"].map((t) => texts.indexOf(t));
+      expect(order.every((i) => i >= 0)).toBe(true);
+      expect([...order].sort((a, b) => a - b)).toEqual(order);
+      const cursorY = (cursor: number) => flatten(projectFrame({ ...withPotion, scene: { kind: "menu", screen: "item", cursor } } as GameState, patched).ui).find((n) => n.kind === "cursor")!.y;
+      expect(cursorY(1) - cursorY(0)).toBe(48); // ポーション → （武器の見出し）→ 銅の剣
+      // 消耗品だけなら見出しは付けない（これまでどおり）
+      const only = { ...withPotion, party: { ...withPotion.party, items: { potion: 2 } } } as GameState;
+      expect(textsOf(projectFrame(only, patched).ui).filter((t) => t === "アイテム")).toHaveLength(1); // 窓の題だけ
+    });
+
     it("欄を選ぶと、付けられる持ち物と末尾に「（外す）」が並び、付け替えたあとの能力値を色で示す（下がれば赤、上がれば緑）", async () => {
       const { view, state } = await equipState({ kind: "menu", screen: "equip", cursor: 0, actor: 0, slot: 0 });
       const ui = projectFrame(state, view).ui;

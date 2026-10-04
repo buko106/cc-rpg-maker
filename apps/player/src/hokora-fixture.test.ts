@@ -99,11 +99,19 @@ const ratio = (s: State, id: keyof State["actors"]): number => s.actors[id]!.hp 
 const healWithSkill = (s: State, target: number): State => tap(s, "menu", "down", "ok", "down", "ok", "ok", ...down(target), "ok", "menu");
 /** メニューを開いて、アイテム一覧の `index` 番のアイテムを `target`（パーティの位置）に使い、メニューを閉じる。 */
 const useItem = (s: State, index: number, target: number): State => tap(s, "menu", "ok", ...down(index), "ok", ...down(target), "ok", "menu");
+/** メニューのアイテム一覧は 消耗品 → 武器 → 防具 → 装飾品 → 大事なもの の順（同じ分類の中は ID 順）。 */
+const categoryRank = (id: string): number => {
+  const def = project.database.items[id as never] as { kind: string; equipSlot?: string } | undefined;
+  if (def?.kind === "weapon") return 1;
+  if (def?.kind === "armor") return def.equipSlot === "accessory" ? 3 : 2;
+  return def?.kind === "key" ? 4 : 0;
+};
 const itemIndex = (s: State, id: string): number =>
   Object.entries(s.party.items)
     .filter(([, n]) => n > 0)
     .map(([k]) => k)
     .sort()
+    .sort((a, b) => categoryRank(a) - categoryRank(b))
     .indexOf(id);
 
 /** HP が低いときにメニューから回復する：ミナのヒール（MP があれば）、なければポーション。 */

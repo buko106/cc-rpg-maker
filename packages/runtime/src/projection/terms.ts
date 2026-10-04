@@ -22,6 +22,7 @@ const DEFAULT_TERMS = {
   equipArmor: "防具",
   equipAccessory: "装飾品",
   unequip: "（外す）",
+  keyItem: "大事なもの",
   confirmOverwrite: "スロット{slot} に上書きしますか？",
   confirmLoad: "未セーブの進行は失われます。ロードしますか？",
   buy: "購入する",

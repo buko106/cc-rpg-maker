@@ -4,6 +4,7 @@ import { EQUIP_SLOTS } from "@rpg/schema";
 import type { ActorId, EquipSlot, Param } from "@rpg/schema";
 import type { UiNode } from "../frame-spec.js";
 import { projectConfirm } from "./confirm.js";
+import { headerNode, itemRows, rowOfItem } from "./item-rows.js";
 import { HELP_HEIGHT, helpWindow } from "./describe.js";
 import { projectSlotList } from "./slot-list.js";
 import { term } from "./terms.js";
@@ -84,27 +85,34 @@ const projectHelp = (view: ProjectView, screen: Screen, def: Parameters<typeof h
 const listWidth = (screen: Screen, picking: boolean): number => (picking ? Math.floor(screen.width * 0.5) - UI_MARGIN : screen.width - UI_MARGIN * 2);
 
 function projectItems(state: GameState, view: ProjectView, screen: Screen, cursor: number, pick: MenuPick | undefined): UiNode[] {
-  const ids = menuItemIds(state);
+  const ids = menuItemIds(state, { project: view });
+  const list = itemRows(ids, view);
   const x = UI_MARGIN;
   const y = UI_MARGIN;
   const w = listWidth(screen, pick !== undefined);
   const upper = aboveHelp(screen);
   const h = upper.height - UI_MARGIN * 2;
   const rows = Math.max(1, Math.floor((h - 28 - UI_PADDING) / UI_ROW_HEIGHT));
-  const first = firstVisible(cursor, ids.length, rows);
+  const cursorRow = rowOfItem(list, cursor);
+  const first = firstVisible(cursorRow, list.length, rows);
   const children: UiNode[] = [textNode(x + UI_PADDING, y + UI_PADDING, term(view, "item"), textColor(6))];
   if (ids.length === 0) children.push(textNode(x + UI_PADDING, y + 30, term(view, "noItems"), textColor(7)));
-  ids.slice(first, first + rows).forEach((id, i) => {
+  list.slice(first, first + rows).forEach((row, i) => {
     const ty = y + 28 + i * UI_ROW_HEIGHT + 2;
+    if (row.kind === "header") {
+      children.push(headerNode(view, row.category, x + UI_PADDING, ty));
+      return;
+    }
+    const id = row.id;
     const item = view.item(id as never);
     const color = fieldItemUsable(item) ? textColor(0) : textColor(7);
     children.push(textNode(x + UI_PADDING, ty, item?.name ?? id, color));
     children.push(textNode(x + w - UI_PADDING, ty, `× ${state.party.items[id as keyof typeof state.party.items]}`, color, { align: "right" }));
   });
-  if (ids.length > 0) children.push(cursorNode(x + 4, y + 28 + (cursor - first) * UI_ROW_HEIGHT, w - 8));
-  const list = windowNode(x, y, w, h, children);
+  if (ids.length > 0) children.push(cursorNode(x + 4, y + 28 + (cursorRow - first) * UI_ROW_HEIGHT, w - 8));
+  const listWindow = windowNode(x, y, w, h, children);
   const help = projectHelp(view, screen, view.item(ids[cursor] as never));
-  return pick === undefined ? [list, help] : [list, ...projectTargets(state, view, upper, x + w + UI_MARGIN, pick), help];
+  return pick === undefined ? [listWindow, help] : [listWindow, ...projectTargets(state, view, upper, x + w + UI_MARGIN, pick), help];
 }
 
 /** 人を選ぶ一覧（スキル・装備の画面の最初）：名前・Lv と、右に HP・MP。 */

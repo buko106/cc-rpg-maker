@@ -55,7 +55,7 @@ function screenSize(state: GameState, scene: MenuScene, ctx: Ctx): number {
     case "main":
       return menuItems(ctx.project).length;
     case "item":
-      return menuItemIds(state).length;
+      return menuItemIds(state, ctx).length;
     case "skill": {
       const user = scene.actor === undefined ? undefined : state.party.members[scene.actor];
       return user === undefined ? state.party.members.length : fieldSkills(state, ctx, user).length;
@@ -104,7 +104,7 @@ function applyUse(state: GameState, scene: MenuScene, use: FieldUse, target: Act
   const used = useOnField(state, ctx, use, target);
   const next = used ?? state;
   // 使い切ったアイテムは一覧から消えるので、カーソルを範囲内に収める
-  const cursor = scene.screen === "item" ? Math.min(scene.cursor, Math.max(0, menuItemIds(next).length - 1)) : scene.cursor;
+  const cursor = scene.screen === "item" ? Math.min(scene.cursor, Math.max(0, menuItemIds(next, ctx).length - 1)) : scene.cursor;
   return withScene(next, { ...open, cursor });
 }
 
@@ -173,7 +173,7 @@ export function handleMenuInput(state: GameState, input: InputFrame, ctx: Ctx): 
       return next === undefined ? { state, effects: [] } : withScene(state, { kind: "menu", screen: next, cursor: 0 });
     }
     case "item": {
-      const id = menuItemIds(state)[scene.cursor];
+      const id = menuItemIds(state, ctx)[scene.cursor];
       const item = id === undefined ? undefined : ctx.project.item(id as never);
       if (id === undefined || !fieldItemUsable(item)) return { state, effects: [] };
       return withScene(state, { ...scene, pick: { kind: "item", id: id as never, cursor: 0 } });

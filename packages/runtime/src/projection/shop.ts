@@ -2,6 +2,7 @@ import type { GameState, ProjectView, ShopScene } from "@rpg/core";
 import { maxBuyQuantity, sellPrice, shopCommands, shopListIds } from "@rpg/core";
 import type { UiNode } from "../frame-spec.js";
 import { HELP_HEIGHT, helpWindow } from "./describe.js";
+import { headerNode, itemRows, rowOfItem } from "./item-rows.js";
 import { term } from "./terms.js";
 import { textColor, UI_MARGIN, UI_PADDING, UI_ROW_HEIGHT } from "./theme.js";
 import { cursorNode, firstVisible, textNode, windowNode } from "./ui.js";
@@ -28,12 +29,19 @@ function projectList(state: GameState, view: ProjectView, scene: ShopScene, box:
   const { x, y, w, h } = box;
   const ids = shopListIds(state, scene, { project: view });
   if (ids.length === 0) return [textNode(x + UI_PADDING, rowY(y, 0), term(view, "noItems"), textColor(7))];
+  const list = itemRows(ids, view);
   const rows = Math.max(1, Math.floor((h - UI_PADDING * 2) / UI_ROW_HEIGHT));
-  const first = firstVisible(scene.cursor, ids.length, rows);
+  const cursorRow = rowOfItem(list, scene.cursor);
+  const first = firstVisible(cursorRow, list.length, rows);
   const nodes: UiNode[] = [];
-  ids.slice(first, first + rows).forEach((id, i) => {
-    const item = view.item(id);
+  list.slice(first, first + rows).forEach((row, i) => {
     const ty = rowY(y, i);
+    if (row.kind === "header") {
+      nodes.push(headerNode(view, row.category, x + UI_PADDING, ty));
+      return;
+    }
+    const id = row.id;
+    const item = view.item(id);
     const price = item === undefined ? 0 : scene.screen === "sell" ? sellPrice(item) : item.price;
     const color = scene.screen !== "sell" && item !== undefined && maxBuyQuantity(state, item) < 1 ? textColor(7) : textColor(0);
     nodes.push(
@@ -42,7 +50,7 @@ function projectList(state: GameState, view: ProjectView, scene: ShopScene, box:
       textNode(x + w - UI_PADDING, ty, `${price}G`, color, { align: "right" }),
     );
   });
-  if (scene.screen !== "command") nodes.push(cursorNode(x + 4, y + UI_PADDING + (scene.cursor - first) * UI_ROW_HEIGHT, w - 8));
+  if (scene.screen !== "command") nodes.push(cursorNode(x + 4, y + UI_PADDING + (cursorRow - first) * UI_ROW_HEIGHT, w - 8));
   return nodes;
 }
 

@@ -2,6 +2,7 @@ import { itemIdSchema, nonNegativeInt, variableIdSchema } from "@rpg/schema";
 import type { ItemId } from "@rpg/schema";
 import * as z from "zod";
 import { warn } from "../../effects.js";
+import { sortByCategory } from "../../game/item-order.js";
 import { openShop } from "../../game/shop.js";
 import type { GameState, MessageState } from "../../state.js";
 import { defineCommand } from "../handler.js";
@@ -102,9 +103,13 @@ export const selectItem = defineCommand({
     refs: (p) => [{ kind: "variable", id: p.variable }],
   },
   run(p, c) {
-    const ids = Object.keys(c.state.party.items)
-      .filter((id) => (c.state.party.items[id as ItemId] ?? 0) > 0 && (p.kind === "all" || c.project.item(id as ItemId)?.kind === "key"))
-      .sort();
+    // 消耗品 → 装備 → 大事なもの の順（メニューのアイテム画面と同じ）
+    const ids = sortByCategory(
+      Object.keys(c.state.party.items)
+        .filter((id) => (c.state.party.items[id as ItemId] ?? 0) > 0 && (p.kind === "all" || c.project.item(id as ItemId)?.kind === "key"))
+        .sort(),
+      c,
+    );
     if (ids.length === 0) return { state: { ...c.state, variables: { ...c.state.variables, [p.variable]: 0 } } };
     const state = openWindow(c, { choices: ids.map((id) => c.project.item(id as ItemId)?.name ?? id), cursor: 0 });
     if (state === undefined) return RETRY;
