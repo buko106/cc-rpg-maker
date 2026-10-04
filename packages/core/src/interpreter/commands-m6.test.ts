@@ -10,6 +10,8 @@ import { BUILTIN_COMMANDS } from "./builtins.js";
 import { runInterpreters, startInterpreter } from "./run.js";
 import { step } from "../game/index.js";
 import type { GameState } from "../state.js";
+import type { Effect } from "../effects.js";
+import { startBattle } from "../battle/index.js";
 
 const loaded = loadFixtureProject("commands-smoke");
 const { ctx } = loaded;
@@ -477,10 +479,27 @@ describe("commands-smoke（全コマンドを 1 回ずつ使うイベント）",
   const map = loaded.maps["map_start" as never]!;
   const eventCommands = (id: string) => map.events[id as never]!.pages[0]!.commands as EventCommand[];
 
-  it("every builtin command (except the internal MoveStep / WaitPlayerStep) appears in the smoke map's events", () => {
-    const used = new Set(Object.values(map.events).flatMap((e) => e.pages.flatMap((p) => p.commands.map((c2) => c2.code))));
+  it("every builtin command (except the internal MoveStep / WaitPlayerStep) appears in the smoke map's events (battle commands: in the troop's battle events)", () => {
+    const troopCommands = Object.values(loaded.project.database.troops).flatMap((t) => t.pages.flatMap((p) => p.commands));
+    const used = new Set([...Object.values(map.events).flatMap((e) => e.pages.flatMap((p) => p.commands)), ...troopCommands].map((c2) => c2.code));
     const missing = BUILTIN_COMMANDS.map((h) => h.code).filter((code) => code !== "MoveStep" && code !== "WaitPlayerStep" && !used.has(code));
     expect(missing).toEqual([]);
+  });
+
+  it("the smoke troop's battle events (EnemyAppear / EnemyTransform / AbortBattle) run without any warning", () => {
+    const started = startBattle(fresh(), "tr_events" as never, { canEscape: false, canLose: true }, ctx);
+    let s = started;
+    const effects: Effect[] = [];
+    for (let i = 0; i < 600 && s.scene.kind === "battle"; i++) {
+      // メッセージを送り、コマンドは防御だけ選ぶ
+      const b = s.battle;
+      const input = s.message.open ? press("ok") : b?.phase === "input" ? press(b.inputCursor.index === 3 ? "ok" : "down") : emptyInput();
+      const r = step(s, input, ctx);
+      s = r.state;
+      effects.push(...r.effects);
+    }
+    expect(s.scene.kind).toBe("map");
+    expect(warnings(effects)).toEqual([]);
   });
 
   it("every command in the smoke events validates against its params schema", () => {

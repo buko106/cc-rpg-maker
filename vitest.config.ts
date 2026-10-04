@@ -19,7 +19,7 @@ export default defineConfig({
         // それ以外の実装済みパッケージは 70%（未実装のパッケージは対象外。実装したマイルストーンで追加する）
         ...Object.fromEntries(
           [
-            ...["runtime", "assets", "render-null", "render-canvas2d", "audio-null", "input-script", "input-browser", "save-store", "audio-webaudio", "project-store", "editor-core", "exporter", "plugin-api", "render-webgl"].map((name) => `packages/${name}`),
+            ...["runtime", "assets", "render-null", "render-canvas2d", "audio-null", "input-script", "input-browser", "save-store", "audio-webaudio", "project-store", "editor-core", "exporter", "plugin-api", "render-webgl", "bot"].map((name) => `packages/${name}`),
             // プラグインの実装は plugins/ に置く（ディレクトリ名は `plugin-` を省く）
             ...["samples", "dungeon", "fishing"].map((name) => `plugins/${name}`),
           ].map((dir) => [`${dir}/src/**`, { statements: 70, branches: 70, functions: 70, lines: 70 }]),

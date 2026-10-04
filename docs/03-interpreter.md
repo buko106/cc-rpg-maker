@@ -117,6 +117,9 @@ export function runInterpreters(state: GameState, input: InputFrame, ctx: Ctx): 
 | `ShakeScreen` / `FlashScreen` / `TintScreen` / `Fadein` / `Fadeout` | | Effect + 一時状態 |
 | `BattleProcessing` | `{ troop, canEscape, canLose }` | 04 へ遷移、`wait: battle`、結果を branch へ |
 | `ShopProcessing` | `{ goods, canSell }` | ショップ画面（`scene: shop`）を開き、`wait: shop`。閉じるまで進まない |
+| `EnemyAppear` | `{ member }` | 戦闘中だけ。隠れている敵（`members[member].hidden`）を場に出す（増援）。04 |
+| `EnemyTransform` | `{ member, enemy }` | 戦闘中だけ。敵を別の敵に変える（HP/MP は最大値に対する割合を保つ）。04 |
+| `AbortBattle` | `{}` | 戦闘中だけ。戦闘を中断する（結果は `aborted`。動いているバトルイベントが終わったところで抜ける）。04 |
 | `SaveGame` / `LoadGame` / `GameOver` / `ReturnToTitle` | | Effect |
 | `Script` | `{ expr }` | 05 の式言語で **副作用付き関数**（`setVar` 等）のみ許可 |
 | `Comment` | | no-op |

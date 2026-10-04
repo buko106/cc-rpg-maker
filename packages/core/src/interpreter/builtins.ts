@@ -1,5 +1,6 @@
 import type { CommandRegistry } from "./handler.js";
 import { changeBgm, fadeoutBgm, playSe } from "./commands/audio.js";
+import { abortBattleCommand, enemyAppear, enemyTransform } from "./commands/battle.js";
 import { battleProcessing } from "./commands/battleProcessing.js";
 import { choiceBranch, elseCommand, endBranch } from "./commands/branchEnds.js";
 import { inputNumber, selectItem, shopProcessing, showChoices } from "./commands/choices.js";
@@ -28,6 +29,8 @@ export const BUILTIN_COMMANDS = [
   // ゲーム進行
   controlSwitches, controlVariables, controlSelfSwitch, controlTimer, changeGold, changeItems, changeParty, changeEquipment, changeHp, changeMp, changeExp, changeLevel,
   transferPlayer, battleProcessing, shopProcessing,
+  // 戦闘（敵グループのバトルイベント）
+  enemyAppear, enemyTransform, abortBattleCommand,
   // フロー制御
   conditionalBranch, elseCommand, endBranch, choiceBranch, loop, breakLoop, endLoop, exitEventProcessing, callCommonEvent, label, jumpToLabel, wait, comment,
   // 移動

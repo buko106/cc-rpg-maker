@@ -888,6 +888,47 @@ const CX = (SCREEN_W * TILE) / 2;
 const row = (...enemies) => enemies.map((enemy, i) => ({ enemy, x: CX + (i - (enemies.length - 1) / 2) * 120, y: 150 }));
 const troop = (id, name, ...enemies) => ({ id, name, members: row(...enemies), pages: [] });
 
+/**
+ * ほこらの主の戦い。こうもり 2 匹は隠れていて（増援）、バトルイベントで動く：
+ * 最初のターンに名乗り → HP が 60% を切ると、こうもりを呼ぶ → 25% を切ると「怒れるほこらの主」に変身する。
+ * 強さは `pnpm bot hokora --troop tr_boss --levels 3-8` で確かめる（docs/20-bot.md）。
+ */
+const BOSS = stats(1250, 60, 19, 12, 18, 10, 12, 8);
+const BOSS_RAGE = stats(1250, 60, 22, 10, 20, 8, 14, 8);
+/** 戦闘中のメッセージは上に出す（下はパーティの状態とコマンド）。 */
+const battleText = (t) => cmd("ShowText", { text: t, position: "top", background: "window" });
+function bossTroop() {
+  return {
+    id: "tr_boss",
+    name: "ほこらの主",
+    members: [
+      { enemy: "en_gargoyle", x: CX, y: 150 },
+      { enemy: "en_bat", x: CX - 150, y: 120, hidden: true },
+      { enemy: "en_bat", x: CX + 150, y: 120, hidden: true },
+    ],
+    pages: [
+      { condition: { kind: "turn", turn: 1 }, commands: [battleText("ほこらの主「人間よ……\nこの ほこらで 朽ち果てるが いい！」")] },
+      {
+        condition: { kind: "enemyHp", member: 0, percent: 50 },
+        commands: [
+          battleText("ほこらの主「小癪な……！\n眷属どもよ、来い！」"),
+          cmd("EnemyAppear", { member: 1 }),
+          cmd("EnemyAppear", { member: 2 }),
+          battleText("こうもりの 群れが 舞い降りた！"),
+        ],
+      },
+      {
+        condition: { kind: "enemyHp", member: 0, percent: 25 },
+        commands: [
+          flash({ r: 255, g: 60, b: 40, a: 0.6 }, 20),
+          cmd("EnemyTransform", { member: 0, enemy: "en_gargoyle_rage" }),
+          battleText("ほこらの主の 目が 赤く 燃えあがった！\n「グオオオ……！ 許さぬ……！」"),
+        ],
+      },
+    ],
+  };
+}
+
 function database(assets) {
   const battler = (name) => ({ asset: assets[`${name}.png`].id });
   return {
@@ -955,12 +996,25 @@ function database(assets) {
         id: "en_gargoyle",
         name: "ほこらの主",
         graphic: battler("gargoyle"),
-        params: stats(1250, 60, 19, 12, 18, 10, 12, 8),
+        params: BOSS,
         actions: [
           { skill: "sk_claw", rating: 5 },
           { skill: "sk_gale", rating: 4, condition: "turn >= 2" },
           { skill: "sk_harden", rating: 3, condition: "turn == 1" },
-          { skill: "sk_rage", rating: 8, condition: "a.hp * 2 < a.mhp && turn % 2 == 0" },
+        ],
+        drops: [],
+        exp: 200,
+        gold: 300,
+      },
+      // HP が減ると、バトルイベントの「敵の変身」でこの姿になる（HP の割合はそのまま）
+      en_gargoyle_rage: {
+        id: "en_gargoyle_rage",
+        name: "怒れるほこらの主",
+        graphic: battler("gargoyle"),
+        params: BOSS_RAGE,
+        actions: [
+          { skill: "sk_claw", rating: 5 },
+          { skill: "sk_rage", rating: 6, condition: "turn % 2 == 0" },
         ],
         drops: [],
         exp: 200,
@@ -979,7 +1033,7 @@ function database(assets) {
         troop("tr_wolf_bat", "野犬とこうもり", "en_wolf", "en_bat"),
         troop("tr_skel_bat", "ガイコツとこうもり", "en_skeleton", "en_bat"),
         troop("tr_skeletons", "ガイコツ×2", "en_skeleton", "en_skeleton"),
-        troop("tr_boss", "ほこらの主", "en_gargoyle"),
+        bossTroop(),
       ].map((t) => [t.id, t]),
     ),
     states: {},

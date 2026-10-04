@@ -12,9 +12,11 @@ export {
   usableItems,
 } from "./battlers.js";
 export { calcDamage, CRITICAL_MULTIPLIER, DAMAGE_VARIANCE_PERCENT } from "./damage.js";
+export { memberBattlerId, nextTroopPage, troopConditionMet } from "./events.js";
 export {
   abortBattle,
   ACTION_WAIT,
+  agePopups,
   BATTLE_COMMANDS,
   battleCommands,
   battleInput,
@@ -23,12 +25,14 @@ export {
   battleTick,
   END_WAIT,
   leaveBattle,
+  markAborted,
   startBattle,
   targetCandidates,
   TURN_START_WAIT,
 } from "./flow.js";
+export { withoutTroopEvents } from "../troop-events.js";
 export type { BattleCommand, BattleVerdict } from "./flow.js";
-export { LOG_MAX, POPUP_TTL } from "./helpers.js";
+export { enemyBattlers, LOG_MAX, partyBattlers, POPUP_TTL } from "./helpers.js";
 export { applyRewards, expToReach, gainExp } from "./rewards.js";
 export type { LevelUp } from "./rewards.js";
 export { resolveAction, resolveTargets } from "./resolve.js";

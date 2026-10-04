@@ -110,7 +110,7 @@
 | データ・ゲームロジック | [01 schema](./docs/01-schema.md) · [02 core 状態](./docs/02-core-state.md) · [03 インタプリタ](./docs/03-interpreter.md) · [04 戦闘](./docs/04-battle.md) · [05 式言語](./docs/05-expression.md) |
 | 実行環境 | [06 runtime](./docs/06-runtime.md) · [07 描画](./docs/07-render.md) · [08 音声・入力](./docs/08-audio-input.md) · [09 アセット](./docs/09-assets.md) |
 | 永続化 | [10 project-store](./docs/10-project-store.md) · [11 save-store](./docs/11-save-store.md) |
-| エディタ・配布 | [12 editor-core](./docs/12-editor-core.md) · [13 editor-ui](./docs/13-editor-ui.md) · [14 プラグイン](./docs/14-plugin-api.md) · [15 プレイヤー・エクスポート](./docs/15-player-export.md) · [18 不思議のダンジョン（プラグイン）](./docs/18-dungeon-plugin.md) · [19 釣り大会（プラグイン）](./docs/19-fishing-plugin.md) |
+| エディタ・配布 | [12 editor-core](./docs/12-editor-core.md) · [13 editor-ui](./docs/13-editor-ui.md) · [14 プラグイン](./docs/14-plugin-api.md) · [15 プレイヤー・エクスポート](./docs/15-player-export.md) · [18 不思議のダンジョン（プラグイン）](./docs/18-dungeon-plugin.md) · [19 釣り大会（プラグイン）](./docs/19-fishing-plugin.md) · [20 難易度調整の bot](./docs/20-bot.md) |
 
 ## ロードマップ
 
@@ -142,6 +142,7 @@ pnpm demo           # デモ（はじまりの村・地下迷宮・バトルタ�
 pnpm editor         # エディタをビルドして http://127.0.0.1:4174/ で配信（プロジェクトはブラウザの IndexedDB に保存）
 pnpm site           # 公開するサイト（ランディング + editor/ + demo/）をビルドして http://127.0.0.1:4175/ で配信
 pnpm lint:deps      # 依存ルール検査（dependency-cruiser + package.json 検査）
+pnpm bot hokora --troop tr_boss --levels 3-8  # 難易度調整の bot：レベルごとの勝率・ターン数・HP の残り（docs/20-bot.md）
 ```
 
 PR を出すと、`pnpm site` と同じサイト（ランディング + editor/ + demo/）が Cloudflare Pages にデプロイされ、PR のコメントにプレビューの URL が付きます（[`.github/workflows/preview.yml`](./.github/workflows/preview.yml)。fork の PR は対象外。設定と確認の手順は [`15-player-export.md`](./docs/15-player-export.md) の「PR ごとのプレビュー」）。本番（GitHub Pages）は `main` に入ったときだけ更新されます。

@@ -139,8 +139,9 @@ export interface Item { id: ItemId; name: string; kind: "consumable" | "weapon" 
   description?: string }
 export interface Enemy { id: EnemyId; name: string; params: Record<Param, number>;
   actions: { skill: SkillId; condition?: string; rating: number }[]; drops: Drop[]; exp: number; gold: number }
-export interface Troop { id: TroopId; name: string; members: { enemy: EnemyId; x: number; y: number }[];
-  pages: { condition: TroopCondition; commands: EventCommand[] }[] }
+export interface Troop { id: TroopId; name: string; members: { enemy: EnemyId; x: number; y: number; hidden?: boolean }[];
+  pages: { condition: TroopCondition; commands: EventCommand[] }[] }   // バトルイベント（04）
+// TroopCondition = always | turn { turn } | switch { id } | enemyHp { member, percent }
 export interface CommonEvent { id: CommonEventId; name: string;
   trigger: "none" | "autorun" | "parallel"; switch?: SwitchId; commands: EventCommand[] }
 
@@ -253,3 +254,4 @@ export function findDanglingRefs(...): RefTarget[];
   - **合わせ方**：歩き出す 1 歩の速さ = 基準（`player.speed`）+ 足元の `speed` + 成り立っているルールの `speed` の合計 + 走るときの `bonus`、を 1〜6 に丸めた値。走れるのは、`system.dash` があり、マップが `noDash` でなく、足元のタイルにも成り立っているルールにも `noDash` が無いとき（走れないときは Shift を押しても無視する）。
 - **`system.menuSkill`（メニューに「スキル」を出すか）を足した**：`boolean`（省略可）。`true` のときだけメインメニューの「アイテム」の次に「スキル」が並び、味方に向けたスキル（回復など）をマップで使える（02・06）。省略または `false` なら並ばない（従来のメニューのまま）。`menuSave` と違って省略時は出さない（既存のゲームのメニューを変えないため）。値を足しただけで `formatVersion` は上げていない。
 - **装備を足した**：`system.menuEquip`（`boolean`、省略可）が `true` のときだけ、メインメニューの「スキル」の位置の次に「装備」が並ぶ（02・06）。省略時は出さない（既存のゲームのメニューを変えないため。`menuSkill` と同じ）。`Item.equipSlot`（`"armor" | "accessory"`、省略可）で、防具を付ける欄を決める（省略 = 防具の欄。`accessory` で装飾品の欄）。武器（`kind: "weapon"`）はいつも武器の欄、消耗品・大事なものは付けられない。`Actor.equips` は**初期装備**で、ゲーム中の装備は `ActorState.equips`（02）。どちらも値を足しただけで `formatVersion` は上げていない。
+- **バトルイベントの条件と増援を足した**：`TroopCondition` に `enemyHp { member, percent }`（`members` の 0 始まりの番号の敵が出ていて生きていて、HP が最大 HP の `percent`% 以下。`percent` は 0〜100 の整数）を足した。`Troop.members[].hidden`（`boolean`、省略可）が `true` の敵は、バトルイベントの「敵の出現」（03）で現れるまで場に出ない（増援）。ページはどれも 1 回の戦闘で 1 回だけ動き、`turn` の 0 と 1 はどちらも最初のターン（04「実装メモ（バトルイベント）」）。どちらも値を足しただけで `formatVersion` は上げていない。

@@ -617,11 +617,37 @@
             "skill": "sk_harden",
             "rating": 3,
             "condition": "turn == 1"
+          }
+        ],
+        "drops": [],
+        "exp": 200,
+        "gold": 300
+      },
+      "en_gargoyle_rage": {
+        "id": "en_gargoyle_rage",
+        "name": "怒れるほこらの主",
+        "graphic": {
+          "asset": "3cd4c4c44e8df741"
+        },
+        "params": {
+          "mhp": 1250,
+          "mmp": 60,
+          "atk": 22,
+          "def": 10,
+          "mat": 20,
+          "mdf": 8,
+          "agi": 14,
+          "luk": 8
+        },
+        "actions": [
+          {
+            "skill": "sk_claw",
+            "rating": 5
           },
           {
             "skill": "sk_rage",
-            "rating": 8,
-            "condition": "a.hp * 2 < a.mhp && turn % 2 == 0"
+            "rating": 6,
+            "condition": "turn % 2 == 0"
           }
         ],
         "drops": [],
@@ -788,9 +814,119 @@
             "enemy": "en_gargoyle",
             "x": 240,
             "y": 150
+          },
+          {
+            "enemy": "en_bat",
+            "x": 90,
+            "y": 120,
+            "hidden": true
+          },
+          {
+            "enemy": "en_bat",
+            "x": 390,
+            "y": 120,
+            "hidden": true
           }
         ],
-        "pages": []
+        "pages": [
+          {
+            "condition": {
+              "kind": "turn",
+              "turn": 1
+            },
+            "commands": [
+              {
+                "code": "ShowText",
+                "params": {
+                  "text": "ほこらの主「人間よ……\nこの ほこらで 朽ち果てるが いい！」",
+                  "position": "top",
+                  "background": "window"
+                },
+                "indent": 0
+              }
+            ]
+          },
+          {
+            "condition": {
+              "kind": "enemyHp",
+              "member": 0,
+              "percent": 50
+            },
+            "commands": [
+              {
+                "code": "ShowText",
+                "params": {
+                  "text": "ほこらの主「小癪な……！\n眷属どもよ、来い！」",
+                  "position": "top",
+                  "background": "window"
+                },
+                "indent": 0
+              },
+              {
+                "code": "EnemyAppear",
+                "params": {
+                  "member": 1
+                },
+                "indent": 0
+              },
+              {
+                "code": "EnemyAppear",
+                "params": {
+                  "member": 2
+                },
+                "indent": 0
+              },
+              {
+                "code": "ShowText",
+                "params": {
+                  "text": "こうもりの 群れが 舞い降りた！",
+                  "position": "top",
+                  "background": "window"
+                },
+                "indent": 0
+              }
+            ]
+          },
+          {
+            "condition": {
+              "kind": "enemyHp",
+              "member": 0,
+              "percent": 25
+            },
+            "commands": [
+              {
+                "code": "FlashScreen",
+                "params": {
+                  "color": {
+                    "r": 255,
+                    "g": 60,
+                    "b": 40,
+                    "a": 0.6
+                  },
+                  "duration": 20
+                },
+                "indent": 0
+              },
+              {
+                "code": "EnemyTransform",
+                "params": {
+                  "member": 0,
+                  "enemy": "en_gargoyle_rage"
+                },
+                "indent": 0
+              },
+              {
+                "code": "ShowText",
+                "params": {
+                  "text": "ほこらの主の 目が 赤く 燃えあがった！\n「グオオオ……！ 許さぬ……！」",
+                  "position": "top",
+                  "background": "window"
+                },
+                "indent": 0
+              }
+            ]
+          }
+        ]
       }
     },
     "states": {},

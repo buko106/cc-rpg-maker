@@ -19,7 +19,8 @@ export function formatLogEntry(entry: BattleLogEntry, state: GameState, view: Pr
 
   switch (entry.kind) {
     case "appear": {
-      const names = b.enemyOrder.map((id) => b.enemies[id]?.name).filter((n): n is string => n !== undefined);
+      // 隠れている敵（増援）は、出てくるまで名前を出さない
+      const names = b.enemyOrder.flatMap((id) => (b.enemies[id] === undefined || b.enemies[id].hidden ? [] : [b.enemies[id].name]));
       if (names.length === 0) return [];
       return [names.length === 1 ? t("battleAppear", { name: names[0]! }) : t("battleAppearMany", { name: names[0]! })];
     }

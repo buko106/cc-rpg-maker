@@ -548,8 +548,6 @@ describe("ほこらの冒険のデモ（fixtures/projects/v1/hokora）", () => {
     expect(wins("tr_skeletons", 5)).toBeGreaterThanOrEqual(11);
     expect(wins("tr_skeletons", 1)).toBeLessThanOrEqual(3);
     expect(wins("tr_slime", 1)).toBe(12);
-    // ほこらの主は、Lv3 ではまず勝てず、Lv6 ならほぼ勝てる
-    expect(wins("tr_boss", 3)).toBeLessThanOrEqual(2);
-    expect(wins("tr_boss", 6)).toBeGreaterThanOrEqual(11);
+    // ほこらの主（バトルイベントで増援・変身がある）の強さは、bot の試行で確かめる（packages/bot/src/demos.test.ts）
   });
 });

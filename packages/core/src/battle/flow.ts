@@ -5,6 +5,7 @@ import type { Effect } from "../effects.js";
 import type { InputFrame } from "../input.js";
 import { createRandom, restoreRandom } from "../random.js";
 import type { GameState } from "../state.js";
+import { withoutTroopEvents } from "../troop-events.js";
 import type { StepResult } from "../game/actions.js";
 import { chooseEnemyAction } from "./ai.js";
 import {
@@ -234,7 +235,9 @@ export function leaveBattle(state: GameState, ctx: Ctx): StepResult {
   const b = state.battle;
   if (b === undefined) return idle(state);
   const outcome = b.result?.outcome ?? "aborted";
-  const { battle: _battle, ...rest } = state;
+  const { battle: _battle, ...stripped } = state;
+  // バトルイベントが残っていれば止める（マップに持ち出さない）
+  const rest = withoutTroopEvents(stripped);
   const effects: Effect[] = ctx.project.project.system.bgm.battle === undefined ? [] : [{ kind: "stopBgm", fadeMs: 500 }];
 
   if (outcome === "defeat" && !b.canLose) {
@@ -248,6 +251,24 @@ export function leaveBattle(state: GameState, ctx: Ctx): StepResult {
   }
   const interpreters = rest.interpreters.map((i) => (i.wait.kind === "battle" ? { ...i, locals: { ...i.locals, battleResult: outcome } } : i));
   return { state: { ...rest, scene: { kind: "map" }, actors, interpreters }, effects };
+}
+
+/**
+ * 戦闘を中断する印を付ける（結果は `aborted`。バトルイベントの「戦闘の中断」）。HP/MP は書き戻す。
+ * すぐには抜けず、動いているバトルイベントが終わったところで抜ける（`game` の時間経過）。
+ */
+export function markAborted(state: GameState): GameState {
+  const b = state.battle;
+  if (b === undefined || b.result !== null) return state;
+  const s = syncAllies(state);
+  return withBattle(s, { ...s.battle!, phase: "aborted", queue: [], actions: [], wait: 0, result: { outcome: "aborted", exp: 0, gold: 0, drops: [] } });
+}
+
+/** ダメージなどの数字の表示を 1 フレーム分だけ古くする（バトルイベントの間も数字は消えていく）。 */
+export function agePopups(state: GameState): GameState {
+  const b = state.battle;
+  if (b === undefined || b.popups.length === 0) return state;
+  return withBattle(state, { ...b, popups: b.popups.flatMap((p) => (p.ttl > 1 ? [{ ...p, ttl: p.ttl - 1 }] : [])) });
 }
 
 /** 戦闘を中断して抜ける（結果は `aborted`）。 */

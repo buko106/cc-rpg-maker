@@ -39,6 +39,7 @@
 | 17 | [17-milestones.md](./17-milestones.md) | 全体 | 実装順序、マイルストーン、各段階の完了条件 |
 | 18 | [18-dungeon-plugin.md](./18-dungeon-plugin.md) | `@rpg/plugin-dungeon` | 不思議のダンジョンのプラグイン（デモ実装済み）と、そのために core に足した汎用の部品 |
 | 19 | [19-fishing-plugin.md](./19-fishing-plugin.md) | `@rpg/plugin-fishing` | 釣り大会（ミニゲーム・図鑑・制限時間つきの大会）のプラグイン（デモ実装済み）と、そのために core に足した「プラグインの待機」 |
+| 20 | [20-bot.md](./20-bot.md) | `@rpg/bot` | 難易度調整の bot（人と同じ入力で戦闘を何回も試し、勝率・ターン数・HP の残りを出す。`pnpm bot`） |
 
 ## システム概要
 
@@ -87,6 +88,7 @@
 │   ├── save-store/
 │   ├── editor-core/
 │   ├── plugin-api/       ← プラグインの土台（PluginHost・ローダ）。プラグイン自体は plugins/
+│   ├── bot/              ← 難易度調整の bot（20-bot.md）
 │   └── test-utils/       ← 16-testing.md 参照
 ├── plugins/              ← プラグインの実装（plugin-api だけに依存する。第三者のプラグインと同じ立場）
 │   ├── samples/          ← @rpg/plugin-samples

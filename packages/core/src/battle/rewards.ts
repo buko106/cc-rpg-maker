@@ -4,6 +4,7 @@ import { paramAt } from "../params.js";
 import { restoreRandom } from "../random.js";
 import type { ActorState, GameState } from "../state.js";
 import { LEVEL_MAX } from "./battlers.js";
+import { enemyBattlers } from "./helpers.js";
 
 /** そのレベルに到達するのに必要な累計経験値（レベル 1 は 0）。 */
 export const expToReach = (level: number): number => (level <= 1 ? 0 : 20 * (level - 1) ** 2 + 10 * (level - 1));
@@ -34,6 +35,7 @@ export function gainExp(ctx: Pick<Ctx, "project">, actor: ActorState, exp: numbe
 
 /**
  * 勝利の報酬を反映する：経験値は生きているパーティ全員に（同じ量）、ゴールドは共有、ドロップは確率で判定して所持品へ。
+ * 戦闘中は場に出た敵（変身したら変身後）の報酬で、出てこなかった増援の分は無い。戦闘の外では `troop` のメンバー全員の分。
  * ドロップの乱数は `battle.rng`（戦闘中でなければ `state.rng`）から引く。
  */
 export function applyRewards(
@@ -45,8 +47,10 @@ export function applyRewards(
   let exp = 0;
   let gold = 0;
   const drops: ItemId[] = [];
-  for (const member of troop.members) {
-    const enemy = ctx.project.enemy(member.enemy);
+  // 戦闘中なら、場に出た敵（変身したら変身後の敵）の分。出てこなかった増援（`hidden`）の分は無い
+  const enemyIds = state.battle === undefined ? troop.members.map((m) => m.enemy) : enemyBattlers(state.battle).map((e) => e.enemyId);
+  for (const id of enemyIds) {
+    const enemy = ctx.project.enemy(id);
     if (enemy === undefined) continue;
     exp += enemy.exp;
     gold += enemy.gold;

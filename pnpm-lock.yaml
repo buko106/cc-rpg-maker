@@ -211,6 +211,19 @@ importers:
         specifier: workspace:*
         version: link:../test-utils
 
+  packages/bot:
+    dependencies:
+      '@rpg/core':
+        specifier: workspace:*
+        version: link:../core
+      '@rpg/schema':
+        specifier: workspace:*
+        version: link:../schema
+    devDependencies:
+      '@rpg/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
+
   packages/core:
     dependencies:
       '@rpg/schema':
@@ -382,6 +395,9 @@ importers:
       '@rpg/audio-null':
         specifier: workspace:*
         version: link:../audio-null
+      '@rpg/bot':
+        specifier: workspace:*
+        version: link:../bot
       '@rpg/core':
         specifier: workspace:*
         version: link:../core

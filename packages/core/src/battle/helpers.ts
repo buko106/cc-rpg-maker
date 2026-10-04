@@ -17,7 +17,7 @@ export function setBattler(b: BattleState, battler: Battler | EnemyBattler): Bat
   return { ...b, allies: { ...b.allies, [battler.id]: battler } };
 }
 
-/** 生死・順序を問わず、戦闘者を「味方（パーティ順）→ 敵（並び順）」の順に返す。 */
+/** 生死・順序を問わず、戦闘者を「味方（パーティ順）→ 敵（並び順）」の順に返す。まだ出ていない敵（`hidden`。増援）は含めない。 */
 export function allBattlers(b: BattleState): Battler[] {
   const out: Battler[] = [];
   for (const id of b.party) {
@@ -26,13 +26,14 @@ export function allBattlers(b: BattleState): Battler[] {
   }
   for (const id of b.enemyOrder) {
     const enemy = b.enemies[id];
-    if (enemy !== undefined) out.push(enemy);
+    if (enemy !== undefined && !enemy.hidden) out.push(enemy);
   }
   return out;
 }
 
 export const partyBattlers = (b: BattleState): Battler[] => b.party.flatMap((id) => (b.allies[id] === undefined ? [] : [b.allies[id]]));
-export const enemyBattlers = (b: BattleState): EnemyBattler[] => b.enemyOrder.flatMap((id) => (b.enemies[id] === undefined ? [] : [b.enemies[id]]));
+/** 場に出ている敵（並び順）。まだ出ていない敵（`hidden`。増援）は含めない。 */
+export const enemyBattlers = (b: BattleState): EnemyBattler[] => b.enemyOrder.flatMap((id) => (b.enemies[id] === undefined || b.enemies[id].hidden ? [] : [b.enemies[id]]));
 
 /** 実効パラメータでの `Record<BattlerId, Battler>`（行動順の計算用）。 */
 export function battlerTable(b: BattleState): Record<BattlerId, Battler> {

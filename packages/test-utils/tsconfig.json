@@ -28,6 +28,9 @@
       "path": "../../packages/audio-null"
     },
     {
+      "path": "../../packages/bot"
+    },
+    {
       "path": "../../packages/core"
     },
     {
