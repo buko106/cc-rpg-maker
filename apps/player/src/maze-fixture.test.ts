@@ -119,6 +119,7 @@ describe("迷宮デモ（fixtures/projects/v1/maze）", () => {
         const trap = d.event.pages[0]!.commands.some((c) => c.code === "ShowText");
         // 押し戻し（メッセージが出る）は 1 つ以上手前の間へ。それ以外は同じ間（ループ）か、1 つ前の間（来た道）
         if (trap) {
+          expect(SIGN_ROOMS, `看板の間 ${roomId(k)} に風が吹いている`).not.toContain(k);
           expect(roomOf(d.to), `${roomId(k)} の ${d.dir}`).toBeLessThan(k);
           traps.push(roomOf(d.to));
         } else expect([k, k - 1], `${roomId(k)} の ${d.dir}`).toContain(roomOf(d.to));

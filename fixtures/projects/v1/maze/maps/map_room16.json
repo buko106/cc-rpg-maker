@@ -68,11 +68,11 @@
         }
       ]
     },
-    "ev_door_down": {
-      "id": "ev_door_down",
-      "name": "下の出入口",
-      "x": 5,
-      "y": 10,
+    "ev_door_right": {
+      "id": "ev_door_right",
+      "name": "右の出入口",
+      "x": 10,
+      "y": 5,
       "pages": [
         {
           "conditions": [],
@@ -84,9 +84,9 @@
               "code": "TransferPlayer",
               "params": {
                 "mapId": "map_room16",
-                "x": 5,
-                "y": 1,
-                "dir": "down",
+                "x": 1,
+                "y": 5,
+                "dir": "right",
                 "fade": "black"
               },
               "indent": 0
@@ -95,11 +95,11 @@
         }
       ]
     },
-    "ev_door_right": {
-      "id": "ev_door_right",
-      "name": "右の出入口",
-      "x": 10,
-      "y": 5,
+    "ev_door_down": {
+      "id": "ev_door_down",
+      "name": "下の出入口",
+      "x": 5,
+      "y": 10,
       "pages": [
         {
           "conditions": [],

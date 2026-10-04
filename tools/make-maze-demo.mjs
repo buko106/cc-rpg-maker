@@ -88,13 +88,14 @@ function planMaze(seed) {
     }
     room[correct[k]] = { kind: "forward", to: k + 1, ...at(INSIDE[OPP[correct[k]]], correct[k]) };
     const wrong = DIRS.filter((d) => room[d] === undefined);
-    // 間違いの出入口：1 つめはループ。2 つめは（第 1 の間を除き）たいてい押し戻し、ときどきループ
+    // 間違いの出入口：1 つめはループ。2 つめは（第 1 の間を除き）たいてい押し戻し、ときどきループ（看板の間は必ずループ）
     for (let i = wrong.length - 1; i > 0; i--) {
       const j = Math.floor(rnd() * (i + 1));
       [wrong[i], wrong[j]] = [wrong[j], wrong[i]];
     }
     wrong.forEach((d, i) => {
-      const trap = k > 1 && i === wrong.length - 1 && rnd() < 0.75;
+      // 看板の間には風を吹かせない（看板で一息つく場所なので、間違いの出入口はループにする）
+      const trap = k > 1 && !SIGN_ROOMS.includes(k) && i === wrong.length - 1 && rnd() < 0.75;
       room[d] = trap ? { kind: "trap", to: trapTarget(k), ...arrival(trapTarget(k)) } : { kind: "loop", to: k, ...at(INSIDE[OPP[d]], d) };
     });
     doors[k] = room;
