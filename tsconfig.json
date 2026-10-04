@@ -20,6 +20,9 @@
       "path": "./packages/render-webgl"
     },
     {
+      "path": "./packages/render-dom"
+    },
+    {
       "path": "./packages/render-null"
     },
     {

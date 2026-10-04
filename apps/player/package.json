@@ -20,6 +20,7 @@
     "@rpg/plugin-samples": "workspace:*",
     "@rpg/project-store": "workspace:*",
     "@rpg/render-canvas2d": "workspace:*",
+    "@rpg/render-dom": "workspace:*",
     "@rpg/render-null": "workspace:*",
     "@rpg/render-webgl": "workspace:*",
     "@rpg/runtime": "workspace:*",

@@ -19,6 +19,7 @@ const LOCATIONS = {
   runtime: "packages",
   "render-canvas2d": "packages",
   "render-webgl": "packages",
+  "render-dom": "packages",
   "render-null": "packages",
   "audio-webaudio": "packages",
   "audio-null": "packages",
@@ -43,6 +44,7 @@ const LOCATIONS = {
 const ADAPTERS = [
   "render-canvas2d",
   "render-webgl",
+  "render-dom",
   "render-null",
   "audio-webaudio",
   "audio-null",
@@ -63,6 +65,7 @@ const ALLOWED = {
   runtime: ["core", "schema"],
   "render-canvas2d": ["runtime"],
   "render-webgl": ["runtime"],
+  "render-dom": ["runtime"],
   "render-null": ["runtime"],
   "audio-webaudio": ["runtime"],
   "audio-null": ["runtime"],

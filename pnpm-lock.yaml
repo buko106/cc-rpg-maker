@@ -161,6 +161,9 @@ importers:
       '@rpg/render-canvas2d':
         specifier: workspace:*
         version: link:../../packages/render-canvas2d
+      '@rpg/render-dom':
+        specifier: workspace:*
+        version: link:../../packages/render-dom
       '@rpg/render-null':
         specifier: workspace:*
         version: link:../../packages/render-null
@@ -322,6 +325,16 @@ importers:
         version: link:../test-utils
 
   packages/render-canvas2d:
+    dependencies:
+      '@rpg/runtime':
+        specifier: workspace:*
+        version: link:../runtime
+    devDependencies:
+      '@rpg/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
+
+  packages/render-dom:
     dependencies:
       '@rpg/runtime':
         specifier: workspace:*
