@@ -10,7 +10,7 @@ import type { EmbeddedData } from "./embedded-project-source.js";
  * ブラウザのエントリポイント（`player.js`）。
  * - 単一 HTML：`<script type="application/json" id="rpg-embedded">` があれば、それを読んで起動する（通信しない）。
  * - フォルダ形式：`?project=<url>` でプロジェクトを指定でき、既定は `project/project.json`。`?debug` でスタックを表示する。
- * - 描画方式：`?renderer=canvas2d|webgl|dom|auto`、無ければ `#app` の `data-renderer`（書き出しが埋める）、それも無ければ `auto`。
+ * - 描画方式：`?renderer=canvas2d|webgl|dom|ascii|auto`、無ければ `#app` の `data-renderer`（書き出しが埋める）、それも無ければ `auto`。
  * - 操作パッド：`?touch=on|off`（既定 `auto` は主入力が指の端末だけ）。
  * 起動した Runtime は `window.__rpg` に置く（E2E とデバッグ用）。
  */
@@ -18,7 +18,7 @@ const params = new URLSearchParams(location.search);
 const root = document.getElementById("app");
 if (root === null) throw new Error("#app が無い");
 
-const isRenderer = (v: string | null | undefined): v is RendererKind => v === "canvas2d" || v === "webgl" || v === "dom" || v === "auto";
+const isRenderer = (v: string | null | undefined): v is RendererKind => v === "canvas2d" || v === "webgl" || v === "dom" || v === "ascii" || v === "auto";
 const requested = params.get("renderer") ?? root.dataset["renderer"];
 const renderer: RendererKind = isRenderer(requested) ? requested : "auto";
 

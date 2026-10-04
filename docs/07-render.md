@@ -76,3 +76,9 @@ export function createNullRenderer(): NullRenderer;
 - 読み上げ向けに `ui` に `aria-live`、`window` に `role=group`、`gauge` に `role=progressbar` を付ける。
 - canvas2d / webgl とピクセル一致は目指さない（フォント・サブピクセル）。`e2e/dom.spec.ts` は canvas2d との差が緩い閾値内であることだけを見る。
 - player は `?renderer=dom` のときだけ canvas の代わりに div を作り、枠の幅に合わせて拡大する。
+
+## 実験: `@rpg/render-ascii`（`?renderer=ascii`）
+- `createAsciiRenderer(root, { cellW = 8, cellH = 16, sampleImage })`。`FrameSpec` を等幅文字のマス目（既定 8×16 ゲームピクセル/マス）にして `root` に出す。DOM に依存しない `rasterize(frame, { cellW, cellH, sampler })` と `gridToText` も公開する（端末出力・テスト用）。
+- `FrameSpec` に意味情報（壁・人物）は無いので、画像から推す。マスごとの平均色（積分画像で O(1)）の明るさで文字を選び（地形 `.:-=+*#%@`、スプライト `ao&8@`）、文字色と地形の背景色に平均色を使う。
+- UI の `text` はそのまま文字に（全角は 2 マス、`maxWidth` で折り返し、`align` 対応）、`window` は背景だけ塗り、`gauge` は `#` と `.`、`cursor` は背景を明るくする。`overlay`（tint → flash → fade）は文字色と背景色に混ぜる。
+- 前フレームと全マスが同じなら DOM を触らない。`text()` で直近の文字だけを読める。

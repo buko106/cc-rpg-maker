@@ -158,6 +158,9 @@ importers:
       '@rpg/project-store':
         specifier: workspace:*
         version: link:../../packages/project-store
+      '@rpg/render-ascii':
+        specifier: workspace:*
+        version: link:../../packages/render-ascii
       '@rpg/render-canvas2d':
         specifier: workspace:*
         version: link:../../packages/render-canvas2d
@@ -319,6 +322,16 @@ importers:
       '@rpg/schema':
         specifier: workspace:*
         version: link:../schema
+    devDependencies:
+      '@rpg/test-utils':
+        specifier: workspace:*
+        version: link:../test-utils
+
+  packages/render-ascii:
+    dependencies:
+      '@rpg/runtime':
+        specifier: workspace:*
+        version: link:../runtime
     devDependencies:
       '@rpg/test-utils':
         specifier: workspace:*

@@ -3,6 +3,7 @@ import { createBrowserInput, createTouchInput, isCoarsePointer, mergeInputSource
 import type { TouchPadMode } from "@rpg/input-browser";
 import { createPluginRegistry, loadPlugins, selectPlugins, toRuntimeExtensions } from "@rpg/plugin-api";
 import type { PluginModule } from "@rpg/plugin-api";
+import { createAsciiRenderer } from "@rpg/render-ascii";
 import { createCanvas2dRenderer } from "@rpg/render-canvas2d";
 import { createDomRenderer } from "@rpg/render-dom";
 import { createWebglRenderer, isWebglAvailable } from "@rpg/render-webgl";
@@ -21,12 +22,13 @@ import { createScreens } from "./screens.js";
  * プレイヤーの設定。フォルダ形式（`projectUrl`：`project/` + `assets/`）か、単一 HTML（`embedded`）のどちらか。
  * `plugins` はビルドに入っているプラグイン。`renderer` は描画方式（既定は `auto`）。
  */
-export type RendererKind = "canvas2d" | "webgl" | "dom" | "auto";
+export type RendererKind = "canvas2d" | "webgl" | "dom" | "ascii" | "auto";
 
 /** 描画方式を決める。`auto` は WebGL が使えれば WebGL、使えなければ Canvas2D。 */
-export function pickRenderer(kind: RendererKind | undefined, webglAvailable: () => boolean = isWebglAvailable): "canvas2d" | "webgl" | "dom" {
+export function pickRenderer(kind: RendererKind | undefined, webglAvailable: () => boolean = isWebglAvailable): "canvas2d" | "webgl" | "dom" | "ascii" {
   if (kind === "canvas2d") return "canvas2d";
   if (kind === "dom") return "dom";
+  if (kind === "ascii") return "ascii";
   if (kind === "webgl") return "webgl";
   return webglAvailable() ? "webgl" : "canvas2d";
 }
@@ -89,8 +91,8 @@ export async function bootPlayer(root: HTMLElement, config: PlayerConfig): Promi
   const debug = config.debug ?? false;
   root.replaceChildren();
   root.style.position = "relative";
-  // dom 描画のときは canvas ではなく div に描く（実験用）
-  const useDom = config.renderer === "dom";
+  // dom / ascii 描画のときは canvas ではなく div に描く（実験用）
+  const useDom = config.renderer === "dom" || config.renderer === "ascii";
   const canvas = document.createElement(useDom ? "div" : "canvas") as HTMLCanvasElement;
   canvas.tabIndex = 0;
   canvas.setAttribute("aria-label", "ゲーム画面");
@@ -148,7 +150,9 @@ export async function bootPlayer(root: HTMLElement, config: PlayerConfig): Promi
     const renderer: Renderer =
       rendererName === "dom"
         ? createDomRenderer(mountDomSurface(canvas, width, height), { pixelated: true })
-        : rendererName === "webgl"
+        : rendererName === "ascii"
+          ? createAsciiRenderer(mountDomSurface(canvas, width, height))
+          : rendererName === "webgl"
           ? createWebglRenderer(canvas, { pixelated: true, preserveDrawingBuffer: debug })
           : createCanvas2dRenderer(canvas, { pixelated: true });
     const runtime = createRuntime({
