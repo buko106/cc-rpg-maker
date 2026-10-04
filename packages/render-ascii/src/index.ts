@@ -8,19 +8,24 @@ import { createSampler, gridToText, isWide, rasterize } from "./raster.js";
 import type { Grid, ImageSampler, RGB } from "./raster.js";
 
 export { createSampler, gridToText, isWide, rasterize } from "./raster.js";
-export type { Cell, Grid, ImageSampler, RasterOptions, RGB } from "./raster.js";
+export type { Cell, Grid, ImageSampler, RasterOptions, Rasterized, RGB } from "./raster.js";
 
 export interface AsciiRendererOptions {
-  /** 1 マスの大きさ（ゲームのピクセル）。既定は 8 × 16（等幅文字の縦横比に合わせる）。 */
+  /** UI の 1 マスの大きさ（ゲームのピクセル）。既定は 8 × 16（等幅文字の縦横比に合わせる）。 */
   cellW?: number;
   cellH?: number;
+  /** 絵（地形・キャラ）の細かさ。UI の 1 マスを縦横 `res` 分割する。既定 3。 */
+  res?: number;
   /** 読み込んだ画像を平均色が取れる形にする。既定は canvas の `getImageData`。 */
   sampleImage?: (handle: ImageHandle) => Promise<ImageSampler>;
 }
 
 /** 直近に描いた文字（色なし）を読める Renderer。 */
 export interface AsciiRenderer extends Renderer {
+  /** 絵の層の文字。 */
   text(): string;
+  /** UI の層の文字（メニュー・メッセージなど）。 */
+  uiText(): string;
 }
 
 type Cached = ImageSampler | "loading" | "failed";
@@ -36,17 +41,24 @@ async function canvasSampler(handle: ImageHandle): Promise<ImageSampler> {
   return createSampler(src.width, src.height, ctx.getImageData(0, 0, src.width, src.height).data);
 }
 
-const css = (c: RGB): string => `rgb(${Math.round(c[0])},${Math.round(c[1])},${Math.round(c[2])})`;
+const css = (c: RGB, a = 1): string => (a >= 1 ? `rgb(${Math.round(c[0])},${Math.round(c[1])},${Math.round(c[2])})` : `rgba(${Math.round(c[0])},${Math.round(c[1])},${Math.round(c[2])},${Math.round(a * 100) / 100})`);
 
 export function createAsciiRenderer(root: HTMLElement, options: AsciiRendererOptions = {}): AsciiRenderer {
   const cellW = options.cellW ?? 8;
   const cellH = options.cellH ?? 16;
+  const res = Math.max(1, Math.floor(options.res ?? 3));
   const sampleImage = options.sampleImage ?? canvasSampler;
 
   let assets: AssetSource | undefined;
   let disposed = false;
-  let lastKey = "";
-  let lastText = "";
+  let width = 0;
+  let height = 0;
+  let worldEl: HTMLElement | undefined;
+  let uiEl: HTMLElement | undefined;
+  let worldKey = "";
+  let uiKey = "";
+  let worldText = "";
+  let uiText = "";
   const images = new Map<AssetId, Cached>();
 
   const sampler = (id: AssetId): ImageSampler | undefined => {
@@ -68,13 +80,26 @@ export function createAsciiRenderer(root: HTMLElement, options: AsciiRendererOpt
     return undefined;
   };
 
-  const style = (): void => {
-    // 等幅フォントの字幅はおよそ 0.6em。マスの幅に合わせる
-    root.style.cssText = `background:#000;color:#ccc;overflow:hidden;white-space:pre;font:${Math.round((cellW / 0.6) * 100) / 100}px/${cellH}px ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;user-select:none`;
-    root.dataset["renderer"] = "ascii";
-  };
+  // 等幅フォントの字幅はおよそ 0.6em。マスの幅に合わせる
+  const font = `${Math.round((cellW / 0.6) * 100) / 100}px/${cellH}px ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace`;
 
-  function show(g: Grid): void {
+  function mount(): void {
+    root.replaceChildren();
+    root.dataset["renderer"] = "ascii";
+    root.style.cssText = `position:relative;overflow:hidden;background:#000;color:#ccc;white-space:pre;user-select:none;width:${width}px;height:${height}px`;
+    // 絵の層は `res` 倍の大きさで文字を並べて、1/res に縮める（小さすぎる文字サイズをブラウザに丸められないように）
+    worldEl = document.createElement("div");
+    worldEl.style.cssText = `position:absolute;left:0;top:0;width:${width * res}px;height:${height * res}px;transform:scale(${1 / res});transform-origin:0 0;font:${font}`;
+    uiEl = document.createElement("div");
+    uiEl.style.cssText = `position:absolute;left:0;top:0;width:${width}px;height:${height}px;pointer-events:none;font:${font}`;
+    root.append(worldEl, uiEl);
+    worldKey = "";
+    uiKey = "";
+  }
+
+  const keyOf = (g: Grid): string => g.cells.map((c) => `${c.ch}|${c.fg?.map(Math.round).join(",") ?? ""}|${c.bg?.map(Math.round).join(",") ?? ""}|${c.bgA ?? 1}|${c.tail ? 1 : 0}`).join("\n") + `#${g.cols}`;
+
+  function show(host: HTMLElement, g: Grid): void {
     const rows: HTMLElement[] = [];
     for (let y = 0; y < g.rows; y++) {
       const row = document.createElement("div");
@@ -93,10 +118,9 @@ export function createAsciiRenderer(root: HTMLElement, options: AsciiRendererOpt
         const c = g.cells[y * g.cols + x]!;
         if (c.tail) continue;
         const fg = c.fg === undefined ? "" : css(c.fg);
-        const bg = c.bg === undefined ? "" : css(c.bg);
-        const wide = c.ch !== "" && isWide(c.ch);
+        const bg = c.bg === undefined ? "" : css(c.bg, c.bgA ?? 1);
         // 全角文字は 2 マス分の幅の箱に入れる（等幅フォントの字幅とずれないように）
-        if (wide) {
+        if (c.ch !== "" && isWide(c.ch)) {
           flush();
           const span = document.createElement("span");
           span.textContent = c.ch;
@@ -113,37 +137,44 @@ export function createAsciiRenderer(root: HTMLElement, options: AsciiRendererOpt
       flush();
       rows.push(row);
     }
-    root.replaceChildren(...rows);
+    host.replaceChildren(...rows);
   }
 
   return {
     init(opts) {
       if (disposed) return Promise.resolve();
       assets = opts.assets;
-      style();
-      root.style.width = `${opts.width}px`;
-      root.style.height = `${opts.height}px`;
+      width = opts.width;
+      height = opts.height;
+      mount();
       return Promise.resolve();
     },
     render(frame: FrameSpec) {
-      if (disposed) return;
+      if (disposed || worldEl === undefined || uiEl === undefined) return;
       try {
-        const g = rasterize(frame, { cellW, cellH, sampler });
+        const { world, ui } = rasterize(frame, { cellW, cellH, res, sampler });
         // 前のフレームと同じなら DOM を触らない
-        const key = g.cells.map((c) => `${c.ch}|${c.fg?.map(Math.round).join(",") ?? ""}|${c.bg?.map(Math.round).join(",") ?? ""}|${c.tail ? 1 : 0}`).join("\n") + `#${g.cols}`;
-        if (key === lastKey) return;
-        lastKey = key;
-        lastText = gridToText(g);
-        show(g);
+        const wk = keyOf(world);
+        if (wk !== worldKey) {
+          worldKey = wk;
+          worldText = gridToText(world);
+          show(worldEl, world);
+        }
+        const uk = keyOf(ui);
+        if (uk !== uiKey) {
+          uiKey = uk;
+          uiText = gridToText(ui);
+          show(uiEl, ui);
+        }
       } catch {
         // 不変条件: render は例外を投げない（不正な FrameSpec はそのフレームだけ諦める）
       }
     },
     resize(w, h) {
       if (disposed) return;
-      root.style.width = `${w}px`;
-      root.style.height = `${h}px`;
-      lastKey = "";
+      width = w;
+      height = h;
+      mount();
     },
     dispose() {
       if (disposed) return;
@@ -152,6 +183,7 @@ export function createAsciiRenderer(root: HTMLElement, options: AsciiRendererOpt
       images.clear();
       assets = undefined;
     },
-    text: () => lastText,
+    text: () => worldText,
+    uiText: () => uiText,
   };
 }

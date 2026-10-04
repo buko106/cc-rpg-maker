@@ -11,13 +11,24 @@ export interface Cell {
   ch: string;
   fg: RGB | undefined;
   bg: RGB | undefined;
+  /** 背景の不透明度（0〜1）。省略は 1。UI の層で、下の絵を透かすのに使う。 */
+  bgA?: number;
   tail: boolean;
 }
 
 export interface Grid {
   readonly cols: number;
   readonly rows: number;
+  /** 1 マスの大きさ（ゲームのピクセル）。 */
+  readonly cw: number;
+  readonly ch: number;
   readonly cells: Cell[];
+}
+
+/** 絵の層（`world`、細かいマス）と UI の層（`ui`、粗いマス）。UI の文字を読めるように、層ごとにマスの大きさを変える。 */
+export interface Rasterized {
+  readonly world: Grid;
+  readonly ui: Grid;
 }
 
 /** 画像の矩形の平均色。`a` は 0〜1、rgb は α で割り戻した 0〜255。透明なら `undefined`。 */
@@ -28,9 +39,11 @@ export interface ImageSampler {
 }
 
 export interface RasterOptions {
-  /** 1 マスの大きさ（ゲームのピクセル）。 */
+  /** UI の 1 マスの大きさ（ゲームのピクセル）。 */
   cellW: number;
   cellH: number;
+  /** 絵の層の細かさ。1 マスを縦横 `res` 分割する。既定 3。 */
+  res?: number;
   /** 読み込み済みの画像だけ返す。未ロードは `undefined`（そのフレームは描かない）。 */
   sampler(id: AssetId): ImageSampler | undefined;
 }
@@ -54,9 +67,10 @@ export function isWide(ch: string): boolean {
   return cp >= 0x1100 && (cp <= 0x115f || (cp >= 0x2e80 && cp <= 0xa4cf) || (cp >= 0xac00 && cp <= 0xd7a3) || (cp >= 0xf900 && cp <= 0xfaff) || (cp >= 0xfe30 && cp <= 0xfe6f) || (cp >= 0xff00 && cp <= 0xff60) || (cp >= 0xffe0 && cp <= 0xffe6));
 }
 
-export function createGrid(cols: number, rows: number): Grid {
-  const n = Math.max(0, Math.floor(cols)) * Math.max(0, Math.floor(rows));
-  return { cols: Math.max(0, Math.floor(cols)), rows: Math.max(0, Math.floor(rows)), cells: Array.from({ length: n }, () => ({ ch: "", fg: undefined, bg: undefined, tail: false })) };
+export function createGrid(cols: number, rows: number, cw: number, ch: number): Grid {
+  const c = Math.max(0, Math.floor(cols));
+  const r = Math.max(0, Math.floor(rows));
+  return { cols: c, rows: r, cw, ch, cells: Array.from({ length: c * r }, () => ({ ch: "", fg: undefined, bg: undefined, tail: false })) };
 }
 
 const at = (g: Grid, cx: number, cy: number): Cell | undefined => (cx < 0 || cy < 0 || cx >= g.cols || cy >= g.rows ? undefined : g.cells[cy * g.cols + cx]);
@@ -81,10 +95,12 @@ export function createSampler(width: number, height: number, rgba: ArrayLike<num
     width,
     height,
     avg(x, y, w, h) {
-      const x0 = clamp(Math.floor(x), 0, width - 1);
-      const y0 = clamp(Math.floor(y), 0, height - 1);
-      const x1 = clamp(Math.max(Math.ceil(x + w), x0 + 1), x0 + 1, width);
-      const y1 = clamp(Math.max(Math.ceil(y + h), y0 + 1), y0 + 1, height);
+      // 浮動小数点の誤差で隣のピクセルを巻き込まないように、わずかに内側へ寄せる
+      const e = 1e-6;
+      const x0 = clamp(Math.floor(x + e), 0, width - 1);
+      const y0 = clamp(Math.floor(y + e), 0, height - 1);
+      const x1 = clamp(Math.max(Math.ceil(x + w - e), x0 + 1), x0 + 1, width);
+      const y1 = clamp(Math.max(Math.ceil(y + h - e), y0 + 1), y0 + 1, height);
       const get = (px: number, py: number, c: number): number => sum[(py * w1 + px) * 4 + c]!;
       const total = (c: number): number => get(x1, y1, c) - get(x0, y1, c) - get(x1, y0, c) + get(x0, y0, c);
       const area = (x1 - x0) * (y1 - y0);
@@ -113,8 +129,8 @@ interface Blit {
   paintBg: boolean;
 }
 
-function blit(g: Grid, o: RasterOptions, b: Blit): void {
-  const { cellW: cw, cellH: ch } = o;
+function blit(g: Grid, b: Blit): void {
+  const { cw, ch } = g;
   const s = b.scale > 0 ? b.scale : 1;
   const dw = b.sw * s;
   const dh = b.sh * s;
@@ -150,8 +166,8 @@ function blit(g: Grid, o: RasterOptions, b: Blit): void {
   }
 }
 
-function textCells(g: Grid, o: RasterOptions, x: number, y: number, runs: readonly { text: string; color: RGBA }[], align: "left" | "center" | "right", maxWidth: number | undefined, size: number): void {
-  const { cellW: cw, cellH: chh } = o;
+function textCells(g: Grid, x: number, y: number, runs: readonly { text: string; color: RGBA }[], align: "left" | "center" | "right", maxWidth: number | undefined, size: number): void {
+  const { cw, ch: chh } = g;
   const widthOf = (s: string): number => [...s].reduce((n, c) => n + (isWide(c) ? 2 : 1), 0);
   // 1 文字ずつ行に分ける（`maxWidth` を超えたら折り返す）
   const lines: { text: string; color: RGBA }[][] = [[]];
@@ -200,7 +216,7 @@ function textCells(g: Grid, o: RasterOptions, x: number, y: number, runs: readon
 }
 
 function drawUi(g: Grid, o: RasterOptions, node: UiNode): void {
-  const { cellW: cw, cellH: ch } = o;
+  const { cw, ch } = g;
   const rect = (x: number, y: number, w: number, h: number): { x0: number; y0: number; x1: number; y1: number } => ({
     x0: Math.round(x / cw),
     y0: Math.round(y / ch),
@@ -215,22 +231,24 @@ function drawUi(g: Grid, o: RasterOptions, node: UiNode): void {
           const cell = at(g, cx, cy);
           if (cell === undefined) continue;
           if (node.variant === "dim") {
-            cell.bg = mix(cell.bg ?? BLACK, BLACK, 0.6);
-            if (cell.fg !== undefined) cell.fg = mix(cell.fg, BLACK, 0.6);
+            // 下の絵を透かす（UI の層は絵の層の上に重なる）
+            cell.bg = BLACK;
+            cell.bgA = 0.6;
             continue;
           }
           // 枠の文字は、窓の中の文字（座標が近い）とぶつかるので描かない。背景を塗るだけにする
           cell.ch = "";
           cell.fg = undefined;
           cell.tail = false;
-          cell.bg = mix(cell.bg ?? BLACK, [40, 40, 110], 0.9);
+          cell.bg = [40, 40, 110];
+          cell.bgA = 0.9;
         }
       }
       for (const child of node.children) drawUi(g, o, child);
       break;
     }
     case "text":
-      textCells(g, o, node.x, node.y, node.runs ?? [{ text: node.text, color: node.color }], node.align ?? "left", node.maxWidth, node.font.size);
+      textCells(g, node.x, node.y, node.runs ?? [{ text: node.text, color: node.color }], node.align ?? "left", node.maxWidth, node.font.size);
       break;
     case "gauge": {
       const r = rect(node.x, node.y + node.h / 2 - ch / 2, node.w, ch);
@@ -251,7 +269,11 @@ function drawUi(g: Grid, o: RasterOptions, node: UiNode): void {
       for (let cy = r.y0; cy <= r.y1; cy++) {
         for (let cx = r.x0; cx <= r.x1; cx++) {
           const cell = at(g, cx, cy);
-          if (cell !== undefined) cell.bg = mix(cell.bg ?? BLACK, WHITE, 0.3);
+          if (cell === undefined) continue;
+          if (cell.bg === undefined) {
+            cell.bg = WHITE;
+            cell.bgA = 0.3;
+          } else cell.bg = mix(cell.bg, WHITE, 0.3);
         }
       }
       break;
@@ -264,14 +286,17 @@ function drawUi(g: Grid, o: RasterOptions, node: UiNode): void {
       const s = node.scale ?? 1;
       const dx = node.origin === "center" ? node.x - (sw * s) / 2 : node.x;
       const dy = node.origin === "center" ? node.y - (sh * s) / 2 : node.y;
-      blit(g, o, { sampler, sx: node.sx ?? 0, sy: node.sy ?? 0, sw, sh, dx, dy, scale: s, alpha: node.alpha ?? 1, ramp: SPRITE_RAMP, paintBg: false });
+      blit(g, { sampler, sx: node.sx ?? 0, sy: node.sy ?? 0, sw, sh, dx, dy, scale: s, alpha: node.alpha ?? 1, ramp: SPRITE_RAMP, paintBg: false });
       break;
     }
   }
 }
 
-export function rasterize(frame: FrameSpec, o: RasterOptions): Grid {
-  const g = createGrid(Math.floor(frame.size.width / o.cellW), Math.floor(frame.size.height / o.cellH));
+export function rasterize(frame: FrameSpec, o: RasterOptions): Rasterized {
+  const res = Math.max(1, Math.floor(o.res ?? 3));
+  const ui = createGrid(Math.floor(frame.size.width / o.cellW), Math.floor(frame.size.height / o.cellH), o.cellW, o.cellH);
+  // 絵の層は UI の層を縦横 res 分割した細かいマス
+  const world = createGrid(ui.cols * res, ui.rows * res, o.cellW / res, o.cellH / res);
   const ox = -frame.camera.x + frame.overlay.shake.dx;
   const oy = -frame.camera.y + frame.overlay.shake.dy;
 
@@ -293,23 +318,23 @@ export function rasterize(frame: FrameSpec, o: RasterOptions): Grid {
           if (id <= 0) continue;
           const sy = Math.floor(id / cols) * ts;
           if (sy + ts > sampler.height) continue;
-          blit(g, o, { sampler, sx: (id % cols) * ts, sy, sw: ts, sh: ts, dx: tx * ts + ox, dy: ty * ts + oy, scale: 1, ramp: TILE_RAMP, paintBg: true });
+          blit(world, { sampler, sx: (id % cols) * ts, sy, sw: ts, sh: ts, dx: tx * ts + ox, dy: ty * ts + oy, scale: 1, ramp: TILE_RAMP, paintBg: true });
         }
       }
     } else {
       for (const s of layer.sprites) {
         const sampler = o.sampler(s.asset);
         if (sampler === undefined) continue;
-        blit(g, o, { sampler, sx: s.sx, sy: s.sy, sw: s.sw, sh: s.sh, dx: s.x + ox, dy: s.y + oy, scale: 1, flipX: s.flipX === true, alpha: s.alpha ?? 1, ramp: SPRITE_RAMP, paintBg: false });
+        blit(world, { sampler, sx: s.sx, sy: s.sy, sw: s.sw, sh: s.sh, dx: s.x + ox, dy: s.y + oy, scale: 1, flipX: s.flipX === true, alpha: s.alpha ?? 1, ramp: SPRITE_RAMP, paintBg: false });
       }
     }
   }
 
-  // overlay の順序: tint → flash → fade（何も無いマスは黒として混ぜる）
+  // overlay の順序: tint → flash → fade（何も無いマスは黒として混ぜる）。UI には掛けない（canvas2d と同じ）
   const { tint, flash, fade, fadeColor } = frame.overlay;
   const wash = (color: RGB, t: number): void => {
     if (!(t > 0)) return;
-    for (const c of g.cells) {
+    for (const c of world.cells) {
       c.bg = mix(c.bg ?? BLACK, color, t);
       if (c.fg !== undefined) c.fg = mix(c.fg, color, t);
     }
@@ -318,8 +343,8 @@ export function rasterize(frame: FrameSpec, o: RasterOptions): Grid {
   if (flash !== undefined && flash.alpha > 0) wash(rgbOf(flash.color), flash.color.a * flash.alpha);
   if (fade > 0) wash(fadeColor === undefined ? BLACK : rgbOf(fadeColor), Math.min(1, fade));
 
-  for (const node of frame.ui) drawUi(g, o, node);
-  return g;
+  for (const node of frame.ui) drawUi(ui, o, node);
+  return { world, ui };
 }
 
 /** 色を無視した文字だけの出力（テストと端末向け）。全角の 2 マス目は出さない。 */

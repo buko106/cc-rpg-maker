@@ -78,7 +78,8 @@ export function createNullRenderer(): NullRenderer;
 - player は `?renderer=dom` のときだけ canvas の代わりに div を作り、枠の幅に合わせて拡大する。
 
 ## 実験: `@rpg/render-ascii`（`?renderer=ascii`）
-- `createAsciiRenderer(root, { cellW = 8, cellH = 16, sampleImage })`。`FrameSpec` を等幅文字のマス目（既定 8×16 ゲームピクセル/マス）にして `root` に出す。DOM に依存しない `rasterize(frame, { cellW, cellH, sampler })` と `gridToText` も公開する（端末出力・テスト用）。
+- `createAsciiRenderer(root, { cellW = 8, cellH = 16, res = 3, sampleImage })`。`FrameSpec` を等幅文字のマス目にして `root` に出す。DOM に依存しない `rasterize(frame, { cellW, cellH, res, sampler })`（`{ world, ui }` を返す）と `gridToText` も公開する（端末出力・テスト用）。
+- 2 つの層を重ねる。絵（地形・キャラクター）の層は UI のマスを縦横 `res` 分割した細かいマス（既定 3×3 倍＝2.67×5.33 ゲームピクセル/マス）、UI の層は粗いマス（8×16）。UI の文字を読めるように、UI だけは粗いまま上に重ねる。overlay（tint → flash → fade）は絵の層にだけ掛ける（canvas2d と同じ）。
 - `FrameSpec` に意味情報（壁・人物）は無いので、画像から推す。マスごとの平均色（積分画像で O(1)）の明るさで文字を選び（地形 `.:-=+*#%@`、スプライト `ao&8@`）、文字色と地形の背景色に平均色を使う。
-- UI の `text` はそのまま文字に（全角は 2 マス、`maxWidth` で折り返し、`align` 対応）、`window` は背景だけ塗り、`gauge` は `#` と `.`、`cursor` は背景を明るくする。`overlay`（tint → flash → fade）は文字色と背景色に混ぜる。
-- 前フレームと全マスが同じなら DOM を触らない。`text()` で直近の文字だけを読める。
+- UI の `text` はそのまま文字に（全角は 2 マス、`maxWidth` で折り返し、`align` 対応）、`window` は半透明の背景だけ塗り、`gauge` は `#` と `.`、`cursor` は背景を明るくする。
+- 絵の層は `res` 倍の大きさで文字を並べて 1/`res` に縮める（小さい文字サイズをブラウザに丸められないように）。前フレームと全マスが同じなら DOM を触らない。`text()` / `uiText()` で直近の文字だけを読める。
