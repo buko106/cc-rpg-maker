@@ -165,6 +165,51 @@
                 "background": "window"
               },
               "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_maze_checkpoint",
+                  "op": ">=",
+                  "value": 1
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_maze_checkpoint"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "constant",
+                  "value": 1
+                }
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "看板の前で 一息ついた。\n風に 飛ばされても、ここまでは 戻れそうだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
             }
           ]
         }

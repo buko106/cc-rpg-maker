@@ -12,13 +12,15 @@
  * - 残りの出入口は「ループ」（同じ間の反対側から出てくる。見た目では先へ進んだように見える）か、
  *   「押し戻し」（冷たい風に押し戻されて、入口の方の間へ戻される）。
  * - 第 1・5・9・13・17 の間には看板があり、今が第何の間で、出口まであといくつかがわかる。
+ *   看板を読むと変数 `var_maze_checkpoint` にその間の番号を覚える（先の看板を読んだあとは変えない）。
+ *   押し戻しのときは、標準の戻り先より先の看板を読んでいれば、一番先の看板の部屋へ戻る。
  * - 5 つの間ごとに洞窟の色（土 → 石 → 水晶 → 深淵）が変わるので、押し戻されたことにも気づける。
  * - 第 20 の間の光に触れるとクリア（タイトルへ戻る）。
  */
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { character, HERO, image, lcg, shade, TILE, writeAssets } from "./pixel-art.mjs";
-import { cmd, params, toJson } from "./demo-lib.mjs";
+import { cmd, endBranch, ifVar, otherwise, params, setVar, toJson } from "./demo-lib.mjs";
 
 const ROOT = join(import.meta.dirname, "..", "fixtures", "projects", "v1", "maze");
 
@@ -35,6 +37,9 @@ const SIGN_ROOMS = [1, 5, 9, 13, 17];
 const SIGN_POS = [C, 3];
 /** ゴールの光の位置。 */
 const LIGHT_POS = [C, C];
+
+/** 一番進んだところまで読んだ看板の部屋の番号（0 = まだ読んでいない）。押し戻しの戻り先になる。 */
+const CHECKPOINT = "var_maze_checkpoint";
 
 const DIRS = ["up", "down", "left", "right"];
 const OPP = { up: "down", down: "up", left: "right", right: "left" };
@@ -71,7 +76,9 @@ function planMaze(seed) {
   const at = ([x, y], dir) => ({ x, y, dir });
 
   const doors = [];
+  const arrivals = [];
   for (let k = 1; k <= GOAL; k++) {
+    arrivals[k] = arrival(k);
     const entry = k === 1 ? undefined : OPP[correct[k - 1]];
     const room = {};
     if (entry !== undefined) room[entry] = { kind: "back", to: k - 1, ...at(INSIDE[correct[k - 1]], OPP[correct[k - 1]]) };
@@ -81,18 +88,19 @@ function planMaze(seed) {
     }
     room[correct[k]] = { kind: "forward", to: k + 1, ...at(INSIDE[OPP[correct[k]]], correct[k]) };
     const wrong = DIRS.filter((d) => room[d] === undefined);
-    // 間違いの出入口：1 つめはループ。2 つめは（第 1 の間を除き）たいてい押し戻し、ときどきループ
+    // 間違いの出入口：1 つめはループ。2 つめは（第 1 の間を除き）たいてい押し戻し、ときどきループ（看板の間は必ずループ）
     for (let i = wrong.length - 1; i > 0; i--) {
       const j = Math.floor(rnd() * (i + 1));
       [wrong[i], wrong[j]] = [wrong[j], wrong[i]];
     }
     wrong.forEach((d, i) => {
-      const trap = k > 1 && i === wrong.length - 1 && rnd() < 0.75;
+      // 看板の間には風を吹かせない（看板で一息つく場所なので、間違いの出入口はループにする）
+      const trap = k > 1 && !SIGN_ROOMS.includes(k) && i === wrong.length - 1 && rnd() < 0.75;
       room[d] = trap ? { kind: "trap", to: trapTarget(k), ...arrival(trapTarget(k)) } : { kind: "loop", to: k, ...at(INSIDE[OPP[d]], d) };
     });
     doors[k] = room;
   }
-  return { correct, doors };
+  return { correct, doors, arrivals };
 }
 
 const START = { x: C, y: C + 1, dir: "up" };
@@ -420,12 +428,23 @@ function buildRoom(k, plan) {
 // ── イベント ──────────────────────────────────────────────────────────
 const text = (t) => cmd("ShowText", { text: t, position: "bottom", background: "window" });
 /** 部屋を移るときは暗転する（`TransferPlayer` の `fade: "black"`。暗転 → 場所移動 → 明転、終わるまで歩けない）。 */
-const transfer = (to, x, y, dir) => cmd("TransferPlayer", { mapId: mapId(to), x, y, dir, fade: "black" });
+const transfer = (to, x, y, dir, indent = 0) => cmd("TransferPlayer", { mapId: mapId(to), x, y, dir, fade: "black" }, indent);
 
-function doorEvent(k, dir, door) {
+/** 押し戻し：読んだ看板のうち、標準の戻り先より先の看板があれば、一番先の看板の部屋へ（無ければ標準の戻り先へ）。 */
+function trapCommands(door, arrivals) {
+  const signs = SIGN_ROOMS.filter((s) => s > door.to).reverse();
+  const go = (to, indent) => transfer(to, arrivals[to].x, arrivals[to].y, arrivals[to].dir, indent);
+  const chain = (i, indent) => {
+    if (i === signs.length) return [go(door.to, indent)];
+    return [ifVar(CHECKPOINT, ">=", signs[i], indent), go(signs[i], indent + 1), otherwise(indent), ...chain(i + 1, indent + 1), endBranch(indent)];
+  };
+  return chain(0, 0);
+}
+
+function doorEvent(k, dir, door, arrivals) {
   const commands = [];
-  if (door.kind === "trap") commands.push(text("ひゅうっ……！\n冷たい風に 押し戻された！"));
-  commands.push(transfer(door.to, door.x, door.y, door.dir));
+  if (door.kind === "trap") commands.push(text("ひゅうっ……！\n冷たい風に 押し戻された！"), ...trapCommands(door, arrivals));
+  else commands.push(transfer(door.to, door.x, door.y, door.dir));
   const [x, y] = DOOR[dir];
   return {
     id: `ev_door_${dir}`,
@@ -449,13 +468,24 @@ function signText(k) {
   return [text(`${lines[0]}\nここまで 来た。\n出口まで、あと \\C[1]${left}\\C[0] の間。`)];
 }
 
+/** 看板を読むと、ここまで進んだことを覚える（すでに先の看板を読んでいたら変えない）。 */
+function checkpointCommands(k) {
+  return [
+    ifVar(CHECKPOINT, ">=", k),
+    otherwise(),
+    setVar(CHECKPOINT, k, 1),
+    text("看板の前で 一息ついた。\n風に 飛ばされても、ここまでは 戻れそうだ。", 1),
+    endBranch(),
+  ];
+}
+
 function signEvent(k, signAsset) {
   return {
     id: "ev_sign",
     name: "看板",
     x: SIGN_POS[0],
     y: SIGN_POS[1],
-    pages: [{ conditions: [], graphic: { asset: signAsset, index: 0, direction: "down" }, trigger: "action", through: false, priority: "same", commands: signText(k) }],
+    pages: [{ conditions: [], graphic: { asset: signAsset, index: 0, direction: "down" }, trigger: "action", through: false, priority: "same", commands: [...signText(k), ...checkpointCommands(k)] }],
   };
 }
 
@@ -499,7 +529,7 @@ for (let k = 1; k <= GOAL; k++) {
   const { ground, props } = buildRoom(k, plan);
   const events = {};
   for (const [dir, door] of Object.entries(plan.doors[k])) {
-    const ev = doorEvent(k, dir, door);
+    const ev = doorEvent(k, dir, door, plan.arrivals);
     events[ev.id] = ev;
   }
   if (SIGN_ROOMS.includes(k)) events.ev_sign = signEvent(k, assets["signboard.png"].id);
@@ -540,7 +570,7 @@ const project = {
   },
   assets: { entries: Object.fromEntries(Object.entries(assets).map(([name, a]) => [a.id, entry(name, a, "image/png")])) },
   switches: {},
-  variables: {},
+  variables: { [CHECKPOINT]: { name: "迷宮：最後に読んだ看板の間" } },
 };
 writeFileSync(join(ROOT, "project.json"), toJson(project));
 

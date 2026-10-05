@@ -108,21 +108,12 @@
           "priority": "below",
           "commands": [
             {
-              "code": "ShowText",
-              "params": {
-                "text": "ひゅうっ……！\n冷たい風に 押し戻された！",
-                "position": "bottom",
-                "background": "window"
-              },
-              "indent": 0
-            },
-            {
               "code": "TransferPlayer",
               "params": {
-                "mapId": "map_room05",
-                "x": 9,
+                "mapId": "map_room12",
+                "x": 1,
                 "y": 5,
-                "dir": "left",
+                "dir": "right",
                 "fade": "black"
               },
               "indent": 0

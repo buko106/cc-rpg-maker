@@ -225,5 +225,9 @@
     }
   },
   "switches": {},
-  "variables": {}
+  "variables": {
+    "var_maze_checkpoint": {
+      "name": "迷宮：最後に読んだ看板の間"
+    }
+  }
 }

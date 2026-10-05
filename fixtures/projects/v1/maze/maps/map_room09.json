@@ -108,21 +108,12 @@
           "priority": "below",
           "commands": [
             {
-              "code": "ShowText",
-              "params": {
-                "text": "ひゅうっ……！\n冷たい風に 押し戻された！",
-                "position": "bottom",
-                "background": "window"
-              },
-              "indent": 0
-            },
-            {
               "code": "TransferPlayer",
               "params": {
-                "mapId": "map_room05",
-                "x": 9,
-                "y": 5,
-                "dir": "left",
+                "mapId": "map_room09",
+                "x": 5,
+                "y": 1,
+                "dir": "down",
                 "fade": "black"
               },
               "indent": 0
@@ -155,6 +146,51 @@
                 "position": "bottom",
                 "background": "window"
               },
+              "indent": 0
+            },
+            {
+              "code": "ConditionalBranch",
+              "params": {
+                "condition": {
+                  "kind": "variable",
+                  "id": "var_maze_checkpoint",
+                  "op": ">=",
+                  "value": 9
+                }
+              },
+              "indent": 0
+            },
+            {
+              "code": "Else",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ControlVariables",
+              "params": {
+                "ids": [
+                  "var_maze_checkpoint"
+                ],
+                "op": "set",
+                "operand": {
+                  "kind": "constant",
+                  "value": 9
+                }
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "看板の前で 一息ついた。\n風に 飛ばされても、ここまでは 戻れそうだ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
               "indent": 0
             }
           ]
