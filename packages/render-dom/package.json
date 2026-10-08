@@ -1,0 +1,17 @@
+{
+  "name": "@rpg/render-dom",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@rpg/runtime": "workspace:*"
+  },
+  "devDependencies": {
+    "@rpg/test-utils": "workspace:*"
+  }
+}

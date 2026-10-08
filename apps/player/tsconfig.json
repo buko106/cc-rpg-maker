@@ -49,7 +49,13 @@
       "path": "../../packages/project-store"
     },
     {
+      "path": "../../packages/render-ascii"
+    },
+    {
       "path": "../../packages/render-canvas2d"
+    },
+    {
+      "path": "../../packages/render-dom"
     },
     {
       "path": "../../packages/render-null"
