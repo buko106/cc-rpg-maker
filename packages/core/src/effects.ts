@@ -7,6 +7,9 @@ export interface RGBA {
   readonly a: number;
 }
 
+/** 天気の種類。 */
+export type WeatherKind = "none" | "rain" | "snow" | "petals" | "dust" | "fireflies";
+
 /**
  * core → 外界への要求。純データ。
  * 発行した瞬間に状態から消える（状態に副作用キューを持たない）。`runtime` は返された `effects` を同フレーム内で処理する。
@@ -36,6 +39,8 @@ export type Effect =
   /** 出ているピクチャを `durationTicks` かけて動かす（位置・不透明度・倍率）。出ていなければ何もしない。 */
   | { readonly kind: "movePicture"; readonly id: number; readonly x: number; readonly y: number; readonly opacity: number; readonly scale: number; readonly durationTicks: number }
   | { readonly kind: "erasePicture"; readonly id: number }
+  /** 天気（画面に降る粒）を変える。`weather` が `none` なら止む。`intensity`（1〜10）は粒の多さ。同じ指定の繰り返しは何も変えない。見た目だけの状態で、セーブされない。 */
+  | { readonly kind: "setWeather"; readonly weather: WeatherKind; readonly intensity: number }
   /** `confirmed` は確認ダイアログで「はい」を選んだ後の要求（runtime は再確認しない）。 */
   | { readonly kind: "requestSave"; readonly slot?: number; readonly confirmed?: boolean }
   | { readonly kind: "requestLoad"; readonly slot?: number; readonly confirmed?: boolean }

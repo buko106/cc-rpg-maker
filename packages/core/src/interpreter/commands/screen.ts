@@ -51,3 +51,18 @@ export const fadein = defineCommand({
   meta: { label: "画面のフェードイン", category: "画面", describe: (p) => `フェードイン：${p.duration}フレーム`, refs: () => [] },
   run: (p) => fx({ kind: "screenFade", to: 0, durationTicks: p.duration }, p.duration, p.wait),
 });
+
+/** 天気（雨・雪・花びら・ほこり・蛍）を降らせる。`none` で止む。マップを移っても続くので、止めるまで降る。 */
+export const setWeather = defineCommand({
+  code: "SetWeather",
+  params: z.strictObject({ weather: z.enum(["none", "rain", "snow", "petals", "dust", "fireflies"]).default("rain"), intensity: z.number().int().min(1).max(10).default(5) }),
+  meta: {
+    label: "天気の変更",
+    category: "画面",
+    describe: (p) => (p.weather === "none" ? "天気：止める" : `天気：${WEATHER_LABELS[p.weather]}（強さ ${p.intensity}）`),
+    refs: () => [],
+  },
+  run: (p) => fx({ kind: "setWeather", weather: p.weather, intensity: p.intensity }, 0, false),
+});
+
+const WEATHER_LABELS = { rain: "雨", snow: "雪", petals: "花びら", dust: "ほこり", fireflies: "蛍" } as const;

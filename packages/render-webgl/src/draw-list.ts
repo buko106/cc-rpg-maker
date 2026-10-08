@@ -212,6 +212,7 @@ export function buildDrawList(frame: FrameSpec, env: DrawEnv): Quad[] {
     if (layer.kind === "tiles") tiles(out, layer, frame, ox, oy, env);
     else sprites(out, layer, ox, oy, env);
   }
+  for (const p of frame.particles ?? []) out.push(solid(p.x, p.y, p.w, p.h, p.color));
   const { tint, flash, fade, fadeColor } = frame.overlay;
   const { width, height } = frame.size;
   if (tint.a > 0) out.push(solid(0, 0, width, height, tint));

@@ -50,6 +50,8 @@ const cases: [EventCommand, string, unknown[]][] = [
   [cmd("ChangeParty", { actor: "ac_x", op: "remove" }), "パーティ：ac_x を外す", [{ kind: "actor", id: "ac_x" }]],
   [cmd("ChangeEquipment", { actor: "ac_x", slot: "weapon", item: "it_x" }), "装備：ac_x の武器を it_x にする", [{ kind: "actor", id: "ac_x" }, { kind: "item", id: "it_x" }]],
   [cmd("ChangeEquipment", { actor: "ac_x", slot: "accessory" }), "装備：ac_x の装飾品を外す", [{ kind: "actor", id: "ac_x" }]],
+  [cmd("SetWeather", { weather: "snow", intensity: 4 }), "天気：雪（強さ 4）", []],
+  [cmd("SetWeather", { weather: "none", intensity: 1 }), "天気：止める", []],
   [cmd("ShowPicture", { id: 2, image: { asset: "0123456789abcdef" }, x: 10, y: 20 }), "ピクチャ 2 を表示：(10, 20)", [{ kind: "asset", id: "0123456789abcdef" }]],
   [cmd("MovePicture", { id: 2, x: 5, y: 6, duration: 12 }), "ピクチャ 2 を移動：(5, 6)、12フレーム", []],
   [cmd("ErasePicture", { id: 2 }), "ピクチャ 2 を消去", []],
@@ -146,7 +148,7 @@ describe("builtin command metadata", () => {
       WaitPlayerStep: {},
       ChangeBgm: { audio: { asset: "0123456789abcdef", volume: 1, pitch: 1, loop: true } },
       PlaySe: { audio: { asset: "0123456789abcdef", volume: 1, pitch: 1, loop: false } },
-      FadeoutBgm: {}, ShakeScreen: {}, FlashScreen: {}, TintScreen: { color: { r: 0, g: 0, b: 0, a: 0 } }, Fadeout: {}, Fadein: {},
+      FadeoutBgm: {}, ShakeScreen: {}, FlashScreen: {}, TintScreen: { color: { r: 0, g: 0, b: 0, a: 0 } }, Fadeout: {}, Fadein: {}, SetWeather: {},
       SaveGame: {}, LoadGame: {}, GameOver: {}, ReturnToTitle: {}, Script: { expr: "1" },
     };
     expect(Object.keys(minimal).sort()).toEqual(ctx.commands.list().map((h) => h.code).sort());

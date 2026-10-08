@@ -20,7 +20,7 @@
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { blit, canvas, character, HERO, image, lcg, shade, sheet, TILE, writeAssets } from "./pixel-art.mjs";
-import { addVar, cmd, endBranch, entry, event, flash, hidden, ifVar, otherwise, page, params, setVar, text, toJson } from "./demo-lib.mjs";
+import { addVar, cmd, endBranch, entry, event, flash, hidden, ifVar, otherwise, page, params, setVar, text, toJson, weatherEvent } from "./demo-lib.mjs";
 
 const ROOT = join(import.meta.dirname, "..", "fixtures", "projects", "v1", "haunted");
 
@@ -900,7 +900,7 @@ const assets = writeAssets(join(ROOT, "assets"), {
 mkdirSync(join(ROOT, "maps"), { recursive: true });
 const mapsMeta = {};
 const writeMap = (id, name, order, rows, theme, events) => {
-  writeFileSync(join(ROOT, "maps", `${id}.json`), toJson({ id, width: rows[0].length, height: rows.length, tileset: "ts_haunted", layers: buildLayers(rows, theme), events: Object.fromEntries(events.map((e) => [e.id, e])) }));
+  writeFileSync(join(ROOT, "maps", `${id}.json`), toJson({ id, width: rows[0].length, height: rows.length, tileset: "ts_haunted", layers: buildLayers(rows, theme), events: Object.fromEntries([...events, weatherEvent("fireflies", 5)].map((e) => [e.id, e])) }));
   mapsMeta[id] = { id, name, order };
 };
 writeMap(HALL, "玄関ホール", 0, HALL_PLAN, "living", hallEvents(assets));
