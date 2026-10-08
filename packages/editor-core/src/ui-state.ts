@@ -24,6 +24,8 @@ export interface EditorUiState {
   recentCommands: readonly string[];
   /** 最近マップに置いたタイルの番号（新しい順、重複なし。タイルパレットの「最近使った」） */
   recentTiles: readonly number[];
+  /** 最近選んだ ID（`ref` の種類ごと、新しい順、重複なし。スイッチ・変数・アクターなどの ID 欄の「最近使った」） */
+  recentRefs: Readonly<Record<string, readonly string[]>>;
 }
 
 /** `recentCommands` に残す数。 */
@@ -38,9 +40,18 @@ export const RECENT_TILES_LIMIT = 8;
 /** `tile` を先頭にした最近使ったタイルの一覧。 */
 export const withRecentTile = (recent: readonly number[], tile: number): number[] => [tile, ...recent.filter((t) => t !== tile)].slice(0, RECENT_TILES_LIMIT);
 
+/** `recentRefs` の 1 種類ごとに残す数。 */
+export const RECENT_REFS_LIMIT = 5;
+
+/** `ref` の種類の最近使った ID に `id` を足した `recentRefs`。 */
+export const withRecentRef = (recent: Readonly<Record<string, readonly string[]>>, ref: string, id: string): Record<string, readonly string[]> => ({
+  ...recent,
+  [ref]: [id, ...(recent[ref] ?? []).filter((x) => x !== id)].slice(0, RECENT_REFS_LIMIT),
+});
+
 /** 文書を開いたときの表示状態：開始マップ、下層、鉛筆。 */
 export function initialUiState(doc: ProjectDocument): EditorUiState {
   const first = Object.keys(doc.project.maps)[0] as MapId | undefined;
   const start = Object.hasOwn(doc.project.maps, doc.project.system.startMap) ? doc.project.system.startMap : first;
-  return { currentMap: start, currentLayer: 0, tool: "pencil", tile: 1, selection: { kind: "none" }, zoom: 1, clipboard: undefined, commandClipboard: undefined, eventTemplate: undefined, recentCommands: [], recentTiles: [] };
+  return { currentMap: start, currentLayer: 0, tool: "pencil", tile: 1, selection: { kind: "none" }, zoom: 1, clipboard: undefined, commandClipboard: undefined, eventTemplate: undefined, recentCommands: [], recentTiles: [], recentRefs: {} };
 }
