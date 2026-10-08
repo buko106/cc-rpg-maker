@@ -21,7 +21,7 @@
 import { mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { blit, canvas, character, HERO, image, lcg, shade, sheet, TILE, writeAssets } from "./pixel-art.mjs";
-import { cmd, endBranch, entry, event, flash, hidden, ifExpr, otherwise, page, params, setSwitch, sw, text, toJson } from "./demo-lib.mjs";
+import { cmd, endBranch, entry, event, flash, hidden, ifExpr, otherwise, page, params, setSwitch, sw, text, toJson, weatherEvent } from "./demo-lib.mjs";
 
 const ROOT = join(import.meta.dirname, "..", "fixtures", "projects", "v1", "ice");
 
@@ -600,7 +600,7 @@ const assets = writeAssets(join(ROOT, "assets"), {
 mkdirSync(join(ROOT, "maps"), { recursive: true });
 for (const room of ROOMS) {
   const layout = layouts[room.id];
-  const evs = events(room, layout, assets);
+  const evs = [...events(room, layout, assets), weatherEvent("snow", 7)];
   const map = {
     id: room.id,
     width: W,

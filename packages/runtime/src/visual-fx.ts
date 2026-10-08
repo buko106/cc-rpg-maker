@@ -1,4 +1,4 @@
-import type { Effect, RGBA } from "@rpg/core";
+import type { Effect, RGBA, WeatherKind } from "@rpg/core";
 import type { AssetId } from "@rpg/schema";
 import type { Overlay } from "./frame-spec.js";
 import { NO_TINT } from "./projection/theme.js";
@@ -24,7 +24,15 @@ export interface PictureFx {
   readonly left: number;
 }
 
+/** 天気：粒の動きは `t`（降り始めてからのフレーム数）だけで決まる。 */
+export interface WeatherFx {
+  readonly kind: Exclude<WeatherKind, "none">;
+  readonly intensity: number;
+  readonly t: number;
+}
+
 export interface VisualFx {
+  readonly weather?: WeatherFx;
   /** 番号 → ピクチャ。 */
   readonly pictures?: Readonly<Record<number, PictureFx>>;
   readonly shake?: { readonly power: number; readonly total: number; readonly left: number };
@@ -51,6 +59,15 @@ export function applyFxEffect(fx: VisualFx, effect: Effect): VisualFx {
     // 色の指定が無い明転は、今の暗転の色のまま戻す（白く暗転した画面を黒から明転させない）。指定の無い暗転は黒
     const color = effect.color ?? (effect.to === 0 ? (fx.fade?.color ?? "black") : "black");
     return { ...fx, fade: { from: fadeNow(fx), to: effect.to, total: effect.durationTicks, left: effect.durationTicks, color } };
+  }
+  if (effect.kind === "setWeather") {
+    if (effect.weather === "none") {
+      const { weather: _gone, ...rest } = fx;
+      return rest;
+    }
+    // 同じ指定の繰り返し（毎フレーム呼ぶ並列イベントなど）では、粒の動きを途切れさせない
+    if (fx.weather?.kind === effect.weather && fx.weather.intensity === effect.intensity) return fx;
+    return { ...fx, weather: { kind: effect.weather, intensity: effect.intensity, t: 0 } };
   }
   if (effect.kind === "showPicture") {
     const to: PictureView = { x: effect.x, y: effect.y, opacity: effect.opacity, scale: effect.scale };
@@ -117,6 +134,7 @@ export function tickFx(fx: VisualFx): VisualFx {
     const left = Math.max(0, fx.tint.left - 1);
     if (left > 0 || fx.tint.color.a > 0) next.tint = { ...fx.tint, left };
   }
+  if (fx.weather) next.weather = { ...fx.weather, t: fx.weather.t + 1 };
   if (fx.pictures) {
     next.pictures = Object.fromEntries(Object.entries(fx.pictures).map(([id, p]) => [id, p.left > 0 ? { ...p, left: p.left - 1 } : p]));
   }
@@ -139,4 +157,11 @@ export function fxOverlay(fx: VisualFx): Overlay {
     ...(fx.flash ? { flash: { color: fx.flash.color, alpha: fx.flash.left / fx.flash.total } } : {}),
     shake,
   };
+}
+
+/** 天気を止める（タイトルに戻ったとき）。 */
+export function clearWeather(fx: VisualFx): VisualFx {
+  if (fx.weather === undefined) return fx;
+  const { weather: _gone, ...rest } = fx;
+  return rest;
 }

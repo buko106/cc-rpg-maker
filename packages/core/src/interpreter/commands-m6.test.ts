@@ -410,6 +410,11 @@ describe("音と画面", () => {
     expect(r.effects[7]).toEqual({ kind: "screenFade", to: 0, durationTicks: 8 });
   });
 
+  it("SetWeather は setWeather の Effect を 1 つ出し、待たない", () => {
+    const r = run([cmd("SetWeather", { weather: "snow", intensity: 7 })]);
+    expect(r.effects).toEqual([{ kind: "setWeather", weather: "snow", intensity: 7 }]);
+  });
+
   it("ShowPicture / MovePicture / ErasePicture emit picture Effects", () => {
     const image = { asset: "fedcba9876543210" };
     const r = run([
