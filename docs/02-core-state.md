@@ -265,7 +265,7 @@ export const snapshotMigrations: readonly { from: number; to: number; migrate(s:
 - **振り向き**（`system.turnInPlace: true`。`game/inputPhase.ts`）：いまの向きと違う方向キーを**押した瞬間**（`input.triggered`）は、移動せずに `player.direction` だけ変える。手数にも数えず、`turns` も足さない（ターン制のイベントは動かない）。キーボードの押し方は数フレーム押されたままになるので、向きを変えたあと `MapState.turnWait`（残りのフレーム数。`TURN_IN_PLACE_FRAMES` = 6 から数える）が 0 になるまでは、押しっぱなしでも歩き出さない（軽く押して離せば向きだけ変わる）。待ち時間のうちに向いた方向をもう一度押せば（`triggered`）、待たずにすぐ歩く。向いている方向への入力は従来どおり歩く。`turnWait` は歩き出す・方向キーを離すと消える（セーブの検証スキーマに省略可の項目として足した）。目の前の `action` イベントに向きを合わせてから決定ボタンを押す、といった操作ができる。
 - **数えるもの**（`game/inputPhase.ts`・`map/paced.ts` の `withTurn`）：方向キーで**歩き出した**（通れずに向きだけ変わったときは数えない）、岩を押した、決定ボタンで**足踏みした**（目の前・足元の `action` イベントが無く、有効なページが `moveRoute.pace: "playerStep"` のイベント、または `SetMoveRoute` のターン制のルートで動かされているイベントがマップに居るときだけ。居なければ何も起こらず、数えない。歩いたときも岩を押したときも同じで、居なければ状態に `turns` を足さない）。氷の上で滑っている間は数えない（滑りは歩きの続き）。数えるのは歩き出した入力フェーズなので、同じフレームの `handleTick` で、ターン制のイベントがもう動き出す。
 - **ターン制のイベントが歩いている間は、プレイヤーは次の手を打てない**（`pacedEventsMoving`。入力フェーズは何もしない）。プレイヤーとイベントの速さが同じなら、みんなが同じフレームに着く。ターン制のイベントは、速さを変えないこと（遅いと、その分プレイヤーも待つ）。
-- **使い道**：デモ「時の番人の回廊」（`fixtures/projects/v1/clock`）。倉庫番風の謎解き、忍び込みの見張り、チェスのようなパズルにも使える。
+- **使い道**：デモ「時の番人の回廊」（`fixtures/projects/v1/clock`）、デモ「からくり迷宮の鬼ごっこ」（`fixtures/projects/v1/onigokko`。1 歩ごとに鬼も 1 歩動く追いかけっこ）。倉庫番風の謎解き、忍び込みの見張り、チェスのようなパズルにも使える。
 
 ## 実装メモ（プラグインの保存領域 `pluginState`）
 - **`GameState.pluginState?: Readonly<Record<string, JsonValue>>`**（`state.ts`）：プラグインが自分の状態を置く領域。キーはプラグインの名前、値は JSON にできる値（`JsonValue`。`undefined` は含めない）。書き込むまで無いので、プラグインを使わないゲームの状態・リプレイのハッシュは変わらない。読み書きは `pluginStateOf(state, name)` / `withPluginState(state, name, value)`（どちらも `@rpg/plugin-api` から再エクスポート。後者は自分以外のプラグインのキーに触れない）。`null` を書けば「持っていない」ことを表せる（キーは残る）。

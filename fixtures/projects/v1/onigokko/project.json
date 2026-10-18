@@ -1,0 +1,182 @@
+{
+  "formatVersion": 1,
+  "meta": {
+    "id": "onigokko",
+    "title": "デモ：からくり迷宮の鬼ごっこ",
+    "createdAt": "2026-10-18T00:00:00Z",
+    "updatedAt": "2026-10-18T00:00:00Z"
+  },
+  "system": {
+    "startMap": "map_hall",
+    "startX": 7,
+    "startY": 8,
+    "initialParty": [
+      "actor_hero"
+    ],
+    "tileSize": 32,
+    "screen": {
+      "width": 480,
+      "height": 352
+    },
+    "bgm": {},
+    "autosave": {
+      "onTransfer": true
+    },
+    "terms": {
+      "newGame": "ニューゲーム"
+    }
+  },
+  "maps": {
+    "map_hall": {
+      "id": "map_hall",
+      "name": "からくり屋敷の玄関",
+      "order": 0
+    },
+    "map_r1": {
+      "id": "map_r1",
+      "name": "一の間 つっこみ鬼",
+      "order": 1
+    },
+    "map_r2": {
+      "id": "map_r2",
+      "name": "二の間 見回りの廊下",
+      "order": 2
+    },
+    "map_r3": {
+      "id": "map_r3",
+      "name": "三の間 岩の戸じまり",
+      "order": 3
+    },
+    "map_r4": {
+      "id": "map_r4",
+      "name": "四の間 狐の鍵",
+      "order": 4
+    }
+  },
+  "tilesets": {
+    "ts_onigokko": {
+      "id": "ts_onigokko",
+      "name": "からくり屋敷",
+      "image": {
+        "asset": "56826433f87ae0bf"
+      },
+      "passage": [15, 15, 15, 0, 0, 0, 0, 0, 15, 15]
+    }
+  },
+  "database": {
+    "actors": {
+      "actor_hero": {
+        "id": "actor_hero",
+        "name": "ハル",
+        "classId": "class_hero",
+        "initialLevel": 1,
+        "walk": {
+          "asset": "bb2e23b45d1f4d4d"
+        },
+        "equips": {}
+      }
+    },
+    "classes": {
+      "class_hero": {
+        "id": "class_hero",
+        "name": "旅人",
+        "skills": [],
+        "params": {
+          "mhp": {
+            "base": 100,
+            "growth": 2
+          },
+          "mmp": {
+            "base": 20,
+            "growth": 2
+          },
+          "atk": {
+            "base": 10,
+            "growth": 2
+          },
+          "def": {
+            "base": 10,
+            "growth": 2
+          },
+          "mat": {
+            "base": 10,
+            "growth": 2
+          },
+          "mdf": {
+            "base": 10,
+            "growth": 2
+          },
+          "agi": {
+            "base": 10,
+            "growth": 2
+          },
+          "luk": {
+            "base": 10,
+            "growth": 2
+          }
+        }
+      }
+    },
+    "skills": {},
+    "items": {},
+    "enemies": {},
+    "troops": {},
+    "states": {},
+    "commonEvents": {}
+  },
+  "assets": {
+    "entries": {
+      "56826433f87ae0bf": {
+        "name": "onigokko_tileset.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 1022,
+        "width": 320,
+        "height": 32
+      },
+      "bb2e23b45d1f4d4d": {
+        "name": "hero.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 660,
+        "width": 96,
+        "height": 128
+      },
+      "4d8edd7431f56781": {
+        "name": "people.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 4809,
+        "width": 288,
+        "height": 256
+      },
+      "d9b6c9af94c8ad3b": {
+        "name": "props.png",
+        "kind": "image",
+        "mime": "image/png",
+        "size": 3960,
+        "width": 288,
+        "height": 256
+      }
+    }
+  },
+  "switches": {
+    "sw_r1_key1": {
+      "name": "一の間の金の鍵"
+    },
+    "sw_r2_key1": {
+      "name": "二の間の金の鍵"
+    },
+    "sw_r3_key1": {
+      "name": "三の間の金の鍵"
+    },
+    "sw_r4_key2": {
+      "name": "四の間の銀の鍵"
+    }
+  },
+  "variables": {
+    "var_caught": {
+      "name": "つかまった回数"
+    }
+  }
+}
