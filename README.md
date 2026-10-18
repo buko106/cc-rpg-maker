@@ -17,7 +17,7 @@
 > 編集データは一覧の「ZIP」で書き出し、「ZIP から読み込む…」で取り込めます（バックアップや、別のブラウザへの持ち運び）。
 > 設計は [`docs/`](./docs/) にあります。
 
-**公開中**： [ランディング](https://www.buko106.tokyo/cc-rpg-maker/) / [エディタ](https://www.buko106.tokyo/cc-rpg-maker/editor/) / [デモ](https://www.buko106.tokyo/cc-rpg-maker/demo/)（村のデモと迷宮のデモから選べます。`main` に入るたびに GitHub Pages へ自動で公開します）
+**公開中**： [ランディング](https://www.buko106.tokyo/cc-rpg-maker/) / [エディタ](https://www.buko106.tokyo/cc-rpg-maker/editor/) / [デモ](https://www.buko106.tokyo/cc-rpg-maker/demo/)（はじまりの村・地下迷宮・バトルタワー・謎解きの館・おばけ屋敷の追いかけっこ・忍び込み・ほこらの冒険・氷の神殿・水門の遺跡・時の番人の回廊・工場のベルトコンベア・からくり迷宮の鬼ごっこ・風鳴りの洞窟・港町の釣り大会の 14 本から選べます。`main` に入るたびに GitHub Pages へ自動で公開します）
 
 ## 作るもの
 
