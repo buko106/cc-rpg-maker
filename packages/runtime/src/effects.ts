@@ -7,8 +7,8 @@ import type { Logger } from "./ports/logger.js";
 export interface EffectSinks {
   audio: AudioOut;
   logger: Logger;
-  /** シェイク・フラッシュ・色調・暗転・ピクチャ（見た目だけの一時状態）。 */
-  visual(effect: Extract<Effect, { kind: "screenShake" | "screenFlash" | "screenTint" | "screenFade" | "showPicture" | "movePicture" | "erasePicture" }>): void;
+  /** シェイク・フラッシュ・色調・暗転・ピクチャ・天気（見た目だけの一時状態）。 */
+  visual(effect: Extract<Effect, { kind: "screenShake" | "screenFlash" | "screenTint" | "screenFade" | "showPicture" | "movePicture" | "erasePicture" | "setWeather" }>): void;
   /** マップの遅延ロードを始める。 */
   loadMap(mapId: MapId): void;
   /** `plugin` Effect（プラグインが受け口を登録していなければ警告になる）。 */
@@ -41,6 +41,7 @@ export function distributeEffect(effect: Effect, sinks: EffectSinks): void {
     case "showPicture":
     case "movePicture":
     case "erasePicture":
+    case "setWeather":
       sinks.visual(effect);
       return;
     case "requestMapData":

@@ -17,6 +17,9 @@ export const hidden = (p) => page({ trigger: "parallel", through: true, priority
 export const entry = (name, a) => ({ name, kind: "image", mime: "image/png", size: a.size, width: a.width, height: a.height });
 export const params = Object.fromEntries(["mhp", "mmp", "atk", "def", "mat", "mdf", "agi", "luk"].map((p) => [p, { base: p === "mhp" ? 100 : p === "mmp" ? 20 : 10, growth: 2 }]));
 export const event = (id, name, { x, y }, pages) => ({ id, name, x, y, pages });
+/** 天気を降らせる並列イベント。同じ指定の繰り返しは粒の動きを変えないので、毎フレーム呼んでよい（ロード後も降り続ける）。マップの (0, 0) に置く。 */
+export const weatherEvent = (weather, intensity) =>
+  event("ev_weather", "天気", { x: 0, y: 0 }, [hidden({ commands: [cmd("SetWeather", { weather, intensity })] })]);
 export const addVar = (id, value, indent = 0) => cmd("ControlVariables", { ids: [id], op: "add", operand: { kind: "constant", value } }, indent);
 export const setVar = (id, value, indent = 0) => cmd("ControlVariables", { ids: [id], op: "set", operand: { kind: "constant", value } }, indent);
 export const ifVar = (id, op, value, indent = 0) => cmd("ConditionalBranch", { condition: { kind: "variable", id, op, value } }, indent);

@@ -215,6 +215,7 @@ export type UiNode =
 
 ## 実装メモ（ピクチャ）
 - `showPicture` / `movePicture` / `erasePicture` の Effect（core）は `distributeEffect` で `visual` シンクに届き、`VisualFx.pictures`（番号 → `PictureFx`：`from` → `to` を `total` フレームで補間。終わっても消去まで保たれる）に入る。セーブ・リプレイの対象外で、ロードすると消え、タイトルシーンになると `clearPictures` で取り除かれる。
+- `setWeather` の Effect は `VisualFx.weather`（種類・強さ・降り始めてからのフレーム数 `t`）に入り、`tickFx` ごとに `t` が進む。同じ種類・強さの指定は `t` を戻さない。ロードやタイトルで止む。粒の位置は `t` と粒の番号だけから決まる（`weather.ts` の `weatherParticles`。乱数も時刻も使わない）。投影はそれを `FrameSpec.particles`（画面座標の塗りつぶし矩形 `{ x, y, w, h, color }`）として出す。レンダラはレイヤの上・色調（overlay）の下に描く。
 - **投影**（`projection/picture.ts` の `projectPictures`）：マップシーンの `FrameSpec.ui` の先頭（タイマー・メッセージより奥）に、番号の小さい順の `image` ノードとして並べる。`image` ノードに `alpha`（不透明度）・`scale`（倍率）・`origin`（`center` で `x` `y` が中心）を足した（省略時は従来どおり）。メニュー・ショップ・戦闘は `ui` を差し替えるので、ピクチャは出ない。
 - **レンダラ**：canvas2d・webgl とも、倍率をかけた大きさで描き、`center` は中心合わせ、`alpha` は canvas2d が `globalAlpha`、webgl が頂点色の a。完全に透明なら描かない。
 - **テスト**：`visual-fx.test.ts`（補間・再移動・消去）、`projection/picture.test.ts`、`effects.test.ts`、両レンダラのテスト、core の `commands-m6.test.ts` / `meta.test.ts`、デモは `commands-smoke`。

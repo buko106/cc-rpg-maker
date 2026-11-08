@@ -197,6 +197,11 @@ export function createCanvas2dRenderer(canvas: HTMLCanvasElement, options: Canva
       else drawSprites(c, layer, ox, oy);
     }
 
+    for (const p of frame.particles ?? []) {
+      c.fillStyle = css(p.color);
+      c.fillRect(p.x, p.y, p.w, p.h);
+    }
+
     // overlay の順序: tint → flash → fade
     const { tint, flash, fade, fadeColor } = frame.overlay;
     const cover = (fill: string): void => {

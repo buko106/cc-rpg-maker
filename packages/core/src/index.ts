@@ -17,7 +17,7 @@ export type { Action, Equips, FieldUse, ItemCategory, InterpreterAction, StepRes
 export { createCtx } from "./ctx.js";
 export type { Ctx } from "./ctx.js";
 export { warn } from "./effects.js";
-export type { Effect, RGBA } from "./effects.js";
+export type { Effect, RGBA, WeatherKind } from "./effects.js";
 export { emptyInput, inputFrame } from "./input.js";
 export type { Button, InputFrame } from "./input.js";
 export { createProjectView } from "./project-view.js";

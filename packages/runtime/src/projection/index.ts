@@ -11,6 +11,7 @@ import { projectShop } from "./shop.js";
 import { projectTitle } from "./title.js";
 import { term } from "./terms.js";
 import { NO_UI, textNode, windowNode } from "./ui.js";
+import { weatherParticles } from "../weather.js";
 import { projectTimer } from "./timer.js";
 import type { UiContext } from "./ui.js";
 import type { UiNode } from "../frame-spec.js";
@@ -62,6 +63,7 @@ export function projectFrame(state: GameState, view: ProjectView, fx: VisualFx =
     camera: { x: Math.round(state.map.camera.x * tileSize), y: Math.round(state.map.camera.y * tileSize) },
     layers,
     overlay,
+    ...(fx.weather === undefined ? {} : { particles: weatherParticles(fx, screen) }),
     ui: [
       ...projectPictures(fx),
       ...projectTimer(state, screen),

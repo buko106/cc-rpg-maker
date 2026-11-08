@@ -105,6 +105,17 @@ describe("buildDrawList: overlay と UI", () => {
     expect(buildDrawList(frame({ overlay: { fade: 0, tint: { r: 0, g: 0, b: 0, a: 0 }, flash: { color: white, alpha: 0 }, shake: { dx: 0, dy: 0 } } }), env)).toEqual([]);
   });
 
+  it("粒（particles）は、レイヤの上・色調の下に、画面座標の単色矩形で出す", () => {
+    const q = buildDrawList(
+      frame({ particles: [{ x: 5, y: 6, w: 2, h: 3, color: { r: 255, g: 0, b: 0, a: 0.5 } }], overlay: { fade: 0, tint: { r: 0, g: 0, b: 255, a: 0.5 }, shake: { dx: 9, dy: 9 } } }),
+      env,
+    );
+    expect(q.map((x) => [x.x, x.y, x.w, x.h, x.r, x.b, x.a])).toEqual([
+      [5, 6, 2, 3, 1, 0, 0.5],
+      [0, 0, 64, 48, 0, 1, 0.5],
+    ]);
+  });
+
   it("暗転の色（fadeColor）が白なら、白で覆う", () => {
     const [q] = buildDrawList(frame({ overlay: { fade: 0.5, fadeColor: white, tint: { r: 0, g: 0, b: 0, a: 0 }, shake: { dx: 0, dy: 0 } } }), env);
     expect([q!.r, q!.g, q!.b, q!.a]).toEqual([1, 1, 1, 0.5]);

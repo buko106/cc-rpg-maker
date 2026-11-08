@@ -13,7 +13,7 @@ import { changeMapTile } from "./commands/changeMapTile.js";
 import { setEventLocation } from "./commands/setEventLocation.js";
 import { changeEquipment, changeExp, changeGold, changeHp, changeItems, changeLevel, changeMp, changeParty, controlSelfSwitch, controlTimer } from "./commands/progress.js";
 import { erasePicture, movePicture, showPicture } from "./commands/picture.js";
-import { fadein, fadeout, flashScreen, shakeScreen, tintScreen } from "./commands/screen.js";
+import { fadein, fadeout, flashScreen, setWeather, shakeScreen, tintScreen } from "./commands/screen.js";
 import { showText } from "./commands/showText.js";
 import { gameOver, loadGame, returnToTitle, saveGame, script } from "./commands/system.js";
 import { transferPlayer } from "./commands/transferPlayer.js";
@@ -37,7 +37,7 @@ export const BUILTIN_COMMANDS = [
   // 移動
   setMoveRoute, moveStep, waitPlayerStep, setEventLocation, changeMapTile,
   // オーディオ・画面
-  changeBgm, playSe, fadeoutBgm, shakeScreen, flashScreen, tintScreen, fadeout, fadein, showPicture, movePicture, erasePicture,
+  changeBgm, playSe, fadeoutBgm, shakeScreen, flashScreen, tintScreen, fadeout, fadein, setWeather, showPicture, movePicture, erasePicture,
   // システム
   saveGame, loadGame, gameOver, returnToTitle, script,
 ];

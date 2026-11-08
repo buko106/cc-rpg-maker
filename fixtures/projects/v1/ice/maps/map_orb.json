@@ -164,6 +164,30 @@
           ]
         }
       ]
+    },
+    "ev_weather": {
+      "id": "ev_weather",
+      "name": "天気",
+      "x": 0,
+      "y": 0,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "parallel",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "SetWeather",
+              "params": {
+                "weather": "snow",
+                "intensity": 7
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
     }
   }
 }

@@ -165,6 +165,15 @@ describe("createCanvas2dRenderer", () => {
     expect(calls.filter((c) => c.startsWith("fillStyle="))).toEqual(["fillStyle=#000", "fillStyle=rgba(1,2,3,0.4)", "fillStyle=rgba(255,255,255,0.5)", "fillStyle=rgba(0,0,0,0.5)"]);
   });
 
+  it("粒（particles）は、レイヤの上・色調の下に、画面座標の矩形で塗る", async () => {
+    const { ctx, calls } = mockContext();
+    const r = createCanvas2dRenderer(mockCanvas(ctx));
+    await r.init({ width: 64, height: 48, assets: assetsOf({}).source });
+    calls.length = 0;
+    r.render(frame({ particles: [{ x: 5, y: 6, w: 2, h: 3, color: { r: 255, g: 0, b: 0, a: 0.5 } }], overlay: { fade: 0, tint: { r: 1, g: 2, b: 3, a: 0.4 }, shake: { dx: 9, dy: 9 } } }));
+    expect(calls.filter((c) => c.startsWith("fillStyle=") || c.startsWith("fillRect(5"))).toEqual(["fillStyle=#000", "fillStyle=rgba(255,0,0,0.5)", "fillRect(5,6,2,3)", "fillStyle=rgba(1,2,3,0.4)"]);
+  });
+
   it("暗転の色（fadeColor）が白なら、白で覆う", async () => {
     const { ctx, calls } = mockContext();
     const r = createCanvas2dRenderer(mockCanvas(ctx));

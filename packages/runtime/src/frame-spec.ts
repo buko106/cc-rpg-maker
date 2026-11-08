@@ -12,7 +12,18 @@ export interface FrameSpec {
   /** 描画順 */
   readonly layers: readonly FrameLayer[];
   readonly overlay: Overlay;
+  /** 画面に降る粒（天気）。画面座標の塗りつぶし矩形で、レイヤの上・色調の下に描く。省略は無し。 */
+  readonly particles?: readonly Particle[];
   readonly ui: readonly UiNode[];
+}
+
+/** 画面座標（ピクセル）の塗りつぶし矩形。`color.a` は不透明度。 */
+export interface Particle {
+  readonly x: number;
+  readonly y: number;
+  readonly w: number;
+  readonly h: number;
+  readonly color: RGBA;
 }
 
 export interface Overlay {

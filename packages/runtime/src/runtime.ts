@@ -18,7 +18,7 @@ import type { SaveRepository, SlotMeta } from "./ports/saves.js";
 import { loadNeedsConfirm, saveNeedsConfirm } from "./save-guard.js";
 import type { SaveOrigin } from "./save-guard.js";
 import type { Scheduler } from "./ports/scheduler.js";
-import { applyFxEffect, clearPictures, NO_FX, tickFx } from "./visual-fx.js";
+import { applyFxEffect, clearPictures, clearWeather, NO_FX, tickFx } from "./visual-fx.js";
 import type { VisualFx } from "./visual-fx.js";
 
 /** 固定タイムステップ（1/60 秒）。 */
@@ -282,7 +282,7 @@ export function createRuntime(deps: RuntimeDeps): Runtime {
       const result = step(current().state, input.poll(), c);
       state = result.state;
       if (state.scene.kind === "title") origin = undefined;
-      fx = tickFx(state.scene.kind === "title" ? clearPictures(fx) : fx);
+      fx = tickFx(state.scene.kind === "title" ? clearWeather(clearPictures(fx)) : fx);
       if (notice !== undefined) notice = notice.steps <= 1 ? undefined : { ...notice, steps: notice.steps - 1 };
       acc -= STEP_MS;
       steps++;
