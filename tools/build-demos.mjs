@@ -109,6 +109,14 @@ export const DEMOS = [
     tags: ["ベルトコンベア", "押せる箱", "レバー", "パズル", "戦闘なし"],
   },
   {
+    slug: "onigokko",
+    project: "fixtures/projects/v1/onigokko",
+    title: "からくり迷宮の鬼ごっこ",
+    image: "site/img/onigokko.png",
+    description: "からくり師の屋敷で、からくり鬼と鬼ごっこ。あなたが 1 歩歩くと鬼も 1 歩動くターン制で、道を探して追ってくる追い鬼、近づくだけで柱に引っかかるつっこみ鬼、決まった道の見回り鬼、鍵を持って逃げるからくり狐が出てきます。足踏みで間合いをずらし、岩で追い鬼を閉じこめて、奥の「金の鈴」へ。",
+    tags: ["ターン制の移動ルート", "追いかける・逃げる", "押せる岩", "パズル", "戦闘なし"],
+  },
+  {
     slug: "dungeon",
     project: "fixtures/projects/v2/dungeon",
     title: "風鳴りの洞窟（不思議のダンジョン）",

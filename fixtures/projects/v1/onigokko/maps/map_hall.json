@@ -1,0 +1,265 @@
+{
+  "id": "map_hall",
+  "width": 15,
+  "height": 11,
+  "tileset": "ts_onigokko",
+  "layers": [
+    {
+      "name": "ground",
+      "tiles": [3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 6, 4, 5, 6, 4, 4, 9, 4, 4, 5, 4, 4, 6, 3, 3, 2, 2, 2, 2, 2, 2, 1, 2, 2, 2, 2, 2, 2, 3, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 3, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3]
+    },
+    {
+      "name": "objects",
+      "tiles": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    }
+  ],
+  "events": {
+    "ev_exit": {
+      "id": "ev_exit",
+      "name": "出口の戸",
+      "x": 7,
+      "y": 1,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "touch",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "TransferPlayer",
+              "params": {
+                "mapId": "map_r1",
+                "x": 7,
+                "y": 8,
+                "dir": "up",
+                "fade": "black"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    },
+    "ev_intro": {
+      "id": "ev_intro",
+      "name": "はじまり",
+      "x": 7,
+      "y": 8,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "autorun",
+          "through": true,
+          "priority": "below",
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "からくり師の 屋敷に 招かれた。\n奥の 間に ある \\C[6]金の鈴\\C[0]を 取ってきたら、ごほうびが もらえるらしい。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ただし 屋敷には からくり鬼が うろついている。\n（まずは からくり師に 話しかけてみよう）",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ControlSelfSwitch",
+              "params": {
+                "key": "A",
+                "value": true
+              },
+              "indent": 0
+            }
+          ]
+        },
+        {
+          "conditions": [
+            {
+              "kind": "selfSwitch",
+              "key": "A",
+              "value": true
+            }
+          ],
+          "trigger": "action",
+          "through": true,
+          "priority": "below",
+          "commands": []
+        }
+      ]
+    },
+    "ev_master": {
+      "id": "ev_master",
+      "name": "からくり師",
+      "x": 7,
+      "y": 4,
+      "pages": [
+        {
+          "conditions": [],
+          "trigger": "action",
+          "through": false,
+          "priority": "same",
+          "graphic": {
+            "asset": "4d8edd7431f56781",
+            "index": 0,
+            "direction": "down"
+          },
+          "commands": [
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "ほっほっ、よう来た。わしの からくり鬼と 鬼ごっこを しようぞ。\n奥の 間の \\C[6]金の鈴\\C[0]まで たどりつけたら、おまえさんの 勝ちじゃ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowChoices",
+              "params": {
+                "choices": [
+                  "鬼の 動き",
+                  "鬼の 種類",
+                  "待ちかたと 岩",
+                  "鍵と 扉",
+                  "やめる"
+                ],
+                "cancel": 4
+              },
+              "indent": 0
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 0
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "わしの 鬼は、おまえさんが 1歩 動くたびに 1歩だけ 動く。\nおまえさんが 止まれば 鬼も 止まる。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "鬼に 触れられたら つかまり、部屋の 入口から やりなおしじゃ。\n自分から 鬼に ぶつかっても つかまるぞ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 1
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]追い鬼\\C[0]は、道を さがして いちばん 近い 道で 追ってくる。\n\\C[2]つっこみ鬼\\C[0]は まっすぐ 近づくだけ。壁や 柱に 引っかかる。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[2]見回り鬼\\C[0]は 決まった 道を 行ったり 来たり。\n\\C[2]からくり狐\\C[0]は 逃げる。隅に 追いつめて ぶつかると 鍵を くれる。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 2
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "その場で 待ちたいときは \\C[6]決定ボタン\\C[0]。\nおまえさんは 動かず、鬼だけが 1歩 動く。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]岩\\C[0]は 押して 動かせる。閉じた \\C[6]扉\\C[0]と 同じく、鬼の 道を ふさぐ。\n道が ふさがると、追い鬼も 近づくだけに なるんじゃ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 3
+              },
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "\\C[6]金の鍵\\C[0]で 金の 扉が、\\C[3]銀の鍵\\C[0]で 銀の 扉が 開く。\n鍵は 部屋を やりなおすと、もとの 場所に 戻る。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "岩を 動かしすぎて 詰んだら、入口の 階段で \\C[6]やりなおし\\C[0]が できる。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 1
+            },
+            {
+              "code": "ChoiceBranch",
+              "params": {
+                "index": 4
+              },
+              "indent": 0
+            },
+            {
+              "code": "EndBranch",
+              "params": {},
+              "indent": 0
+            },
+            {
+              "code": "ShowText",
+              "params": {
+                "text": "つかまった 回数は \\V[var_caught]回 じゃな。\n奥の 戸から 一の間へ 行けるぞ。",
+                "position": "bottom",
+                "background": "window"
+              },
+              "indent": 0
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
