@@ -3,7 +3,9 @@ import { createBrowserInput, createTouchInput, isCoarsePointer, mergeInputSource
 import type { TouchPadMode } from "@rpg/input-browser";
 import { createPluginRegistry, loadPlugins, selectPlugins, toRuntimeExtensions } from "@rpg/plugin-api";
 import type { PluginModule } from "@rpg/plugin-api";
+import { createAsciiRenderer } from "@rpg/render-ascii";
 import { createCanvas2dRenderer } from "@rpg/render-canvas2d";
+import { createDomRenderer } from "@rpg/render-dom";
 import { createWebglRenderer, isWebglAvailable } from "@rpg/render-webgl";
 import { createRuntime } from "@rpg/runtime";
 import type { Logger, Renderer, Runtime } from "@rpg/runtime";
@@ -20,11 +22,13 @@ import { createScreens } from "./screens.js";
  * プレイヤーの設定。フォルダ形式（`projectUrl`：`project/` + `assets/`）か、単一 HTML（`embedded`）のどちらか。
  * `plugins` はビルドに入っているプラグイン。`renderer` は描画方式（既定は `auto`）。
  */
-export type RendererKind = "canvas2d" | "webgl" | "auto";
+export type RendererKind = "canvas2d" | "webgl" | "dom" | "ascii" | "auto";
 
 /** 描画方式を決める。`auto` は WebGL が使えれば WebGL、使えなければ Canvas2D。 */
-export function pickRenderer(kind: RendererKind | undefined, webglAvailable: () => boolean = isWebglAvailable): "canvas2d" | "webgl" {
+export function pickRenderer(kind: RendererKind | undefined, webglAvailable: () => boolean = isWebglAvailable): "canvas2d" | "webgl" | "dom" | "ascii" {
   if (kind === "canvas2d") return "canvas2d";
+  if (kind === "dom") return "dom";
+  if (kind === "ascii") return "ascii";
   if (kind === "webgl") return "webgl";
   return webglAvailable() ? "webgl" : "canvas2d";
 }
@@ -59,6 +63,27 @@ const consoleLogger = (debug: boolean): Logger => ({
 });
 
 /**
+ * dom 描画用の面を `frame`（CSS で大きさが決まる枠）の中に作る。面は論理ピクセルの大きさで、枠の幅に合わせて拡大する。
+ * 枠の外からの入力・フォーカスは枠が受ける。
+ */
+function mountDomSurface(frame: HTMLElement, width: number, height: number): HTMLElement {
+  frame.style.overflow = "hidden";
+  frame.style.position = "relative";
+  const scaler = document.createElement("div");
+  scaler.style.cssText = `position:absolute;left:0;top:0;width:${width}px;height:${height}px;transform-origin:0 0`;
+  const surface = document.createElement("div");
+  scaler.append(surface);
+  frame.append(scaler);
+  const fit = (): void => {
+    const k = frame.clientWidth / width;
+    if (k > 0) scaler.style.transform = `scale(${k})`;
+  };
+  fit();
+  if (typeof ResizeObserver !== "undefined") new ResizeObserver(fit).observe(frame);
+  return surface;
+}
+
+/**
  * `root` にゲームを起動する。読み込み中は進捗を、失敗したらエラー画面を出す（例外も再送出する）。
  * 戻り値の Runtime は開始済みで、ループが回っている。
  */
@@ -66,7 +91,9 @@ export async function bootPlayer(root: HTMLElement, config: PlayerConfig): Promi
   const debug = config.debug ?? false;
   root.replaceChildren();
   root.style.position = "relative";
-  const canvas = document.createElement("canvas");
+  // dom / ascii 描画のときは canvas ではなく div に描く（実験用）
+  const useDom = config.renderer === "dom" || config.renderer === "ascii";
+  const canvas = document.createElement(useDom ? "div" : "canvas") as HTMLCanvasElement;
   canvas.tabIndex = 0;
   canvas.setAttribute("aria-label", "ゲーム画面");
   root.append(canvas);
@@ -120,7 +147,14 @@ export async function bootPlayer(root: HTMLElement, config: PlayerConfig): Promi
     const rendererName = pickRenderer(config.renderer);
     canvas.dataset["renderer"] = rendererName; // 観測用（E2E とデバッグ）
     // `preserveDrawingBuffer` は、描いた内容をあとから読む（スクリーンショット・ピクセル確認）ために debug のときだけ有効にする
-    const renderer: Renderer = rendererName === "webgl" ? createWebglRenderer(canvas, { pixelated: true, preserveDrawingBuffer: debug }) : createCanvas2dRenderer(canvas, { pixelated: true });
+    const renderer: Renderer =
+      rendererName === "dom"
+        ? createDomRenderer(mountDomSurface(canvas, width, height), { pixelated: true })
+        : rendererName === "ascii"
+          ? createAsciiRenderer(mountDomSurface(canvas, width, height))
+          : rendererName === "webgl"
+          ? createWebglRenderer(canvas, { pixelated: true, preserveDrawingBuffer: debug })
+          : createCanvas2dRenderer(canvas, { pixelated: true });
     const runtime = createRuntime({
       scheduler: createRafScheduler(),
       renderer,
